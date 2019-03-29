@@ -1,0 +1,9 @@
+= render 'orders/index_print', :layout => false
+
+.pagination.pagination-inverse
+  - if !@old
+    .btn.next
+      = link_to "Старые", url(:orders, :finished, :old => 1), :class => "btn btn-sm btn-inverse"
+  - else 
+    .btn.next
+      = link_to "Новые", url(:orders, :finished), :class => "btn btn-sm btn-inverse"

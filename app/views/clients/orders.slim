@@ -1,0 +1,50 @@
+div
+  h4 Заказы клиента. #{@client.name}
+
+div class="table non-print"
+  table class="table order-info"
+    tr
+      td
+        p Город: #{@client.place_name}
+        p Имя: #{@client.name}
+        // p Организация: #{@client.org}
+        p Тел: #{@client.tel}
+        p Емайл: #{@client.email}
+
+div class="tabs-content"
+  table class="table table-hover table-condensed" id="list"
+    thead
+      tr
+        th class='header list-menu'
+          div class='dropdown'
+            a href='#' class='list-menu-toggle.dropdown-toggle dropdown-toggle' data-toggle='dropdown'
+              // = tag_icon :magic
+            ul class='list-menu dropdown-menu' role='dropdown'
+              li class='list-menu-wrapper' = link_to 'select_all', '#', :id => 'select-all', :class => 'list-menu-link'
+              li class='list-menu-wrapper list-menu-wrapper-disabled' = link_to 'deselect_all', '#', :id => 'deselect-all', :class => 'list-menu-link list-menu-link-disabled'
+              li class='list-menu-divider divider'
+        th class='header' Id
+        // th class='header' = mat(:order, :name)
+        // th class='header' = mat(:order, :amount)
+        th class='header' Name
+        th class='header' Дата
+        th class='header' Статус
+        th class='header list-row-action-header'
+
+    tbody
+      -@orders.each do |order|
+        tr class='list-row'
+          td class='list-column list-selectable' = check_box_tag 'order_ids[]', :value => order.id, :class => 'list-selectable-checkbox'
+          td class='list-column' = "#{order.id}"
+          // td class='list-column' = order.name
+          td class='list-column' = order.client.name
+          td class='list-column' = to_msk(order.created_at)
+          td class='list-column'
+            span class="label label-#{order.status}" = t :"status.#{order.status}"
+
+          td class='list-column list-row-action'
+            div class='list-row-action-wrapper'
+              - if current_account.is_admin?
+                = link_to tag_icon("files-o"), :rel => :tooltip, :title => "Copy order", :href => url(:orders, :copy, :id => order.id), :class => 'list-row-action-wrapper-link'
+              = link_to tag_icon("tree"), :title => "Show", :href => url(:orders, :show, :id => order.id), :class => 'list-row-action-wrapper-link'
+

@@ -1,0 +1,6 @@
+- @cats.each do |cat|
+  p
+    = link_to cat.name, url(:statistic, :orders, :id => cat.id)
+    ' &nbsp;
+    span.label.label-success.btn-sm
+      = link_to "excel", url(:statistic, :orders, :id => cat.id, :format => :csv)

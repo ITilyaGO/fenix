@@ -1,0 +1,51 @@
+// Tooltip
+// --------------------------------------------------
+
+.tooltip {
+}
+
+/* .tooltip {
+  font-size: ceil(@component-font-size-base * 0.933); // ~14px
+  line-height: 1.286; // 18px
+  
+  &.in {
+    opacity: 1;
+  }
+  &.top {
+    .tooltip-arrow {
+      display: none;
+    }
+  }
+}
+
+.tooltip-inner {
+  background-color: @dekolglue;
+  line-height: 1.286; // 18px
+  padding: 10px;
+  text-align: center;
+  width: 183px;
+  border-radius: @border-radius-large;
+}
+ */
+// Alternate Color
+// --------------------------------------------------
+
+// Light color skin
+.tooltip-light {
+  &.bottom .tooltip-arrow {
+    border-bottom-color: mix(@brand-primary, white, 9%);
+  }
+  &.left .tooltip-arrow {
+    border-left-color: mix(@brand-primary, white, 9%);
+  }
+  &.right .tooltip-arrow {
+    border-right-color: mix(@brand-primary, white, 9%);
+  }
+  &.top .tooltip-arrow {
+    border-top-color: mix(@brand-primary, white, 9%);
+  }
+  .tooltip-inner {
+    background-color: mix(@brand-primary, white, 9%);
+    color: @brand-primary;
+  }
+}

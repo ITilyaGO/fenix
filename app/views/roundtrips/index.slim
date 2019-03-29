@@ -1,0 +1,89 @@
+
+table class="table table-hover table-condensed"
+  thead
+    tr
+      th class='header non-print'
+      th class='header' Город
+      th class='header' Дата
+      th class='header list-row-action-header non-print'
+
+  tbody
+    - @roundtrips.where('start_at >= ?', Date.today).reverse.each do |trip|
+      tr class='list-row #{trip.start_at < Date.today ? "warning" : nil}'
+        td class='list-column list-selectable non-print'
+        td class='list-column' = trip.place_name
+        td class='list-column' = trip.start_at.strftime("%Y-%m-%d")
+        - if current_account.is_admin?
+          td class='list-column list-row-action non-print'
+            div class='list-row-action-wrapper'
+              = link_to tag_icon("trash-o"), :href => url(:roundtrips, :destroy, :id => trip.id), :class => 'list-row-action-wrapper-link'
+
+    - @roundtrips.where('start_at < ?', Date.today).each do |trip|
+      tr class='list-row #{trip.start_at < Date.today ? "warning" : nil}'
+        td class='list-column list-selectable non-print'
+        td class='list-column' = trip.place_name
+        td class='list-column' = trip.start_at.strftime("%Y-%m-%d")
+        - if current_account.is_admin?
+          td class='list-column list-row-action non-print'
+            div class='list-row-action-wrapper'
+              = link_to tag_icon("trash-o"), :href => url(:roundtrips, :destroy, :id => trip.id), :class => 'list-row-action-wrapper-link'
+      
+- if current_account.is_admin?
+  = form_tag url(:roundtrips, :new), :method => :put, :class => 'form-horizontal' do
+    
+    fieldset class='control-group'
+      label class='col-md-3 control-label' Город
+      div class='col-md-5 controls'
+        div class="scrollable-dropdown-menu"
+          = hidden_field_tag :place_id
+          = text_field_tag 'pl', :class => 'form-control ', :id => 'typeahead-place'
+    
+    fieldset class='control-group'
+      = label_tag "Дата", :class => 'col-md-3 control-label'
+      div class='col-md-2 controls'
+        = text_field_tag "start", :autocomplete => "off", :class => "form-control", :value => Date.today.strftime("%Y-%m-%d")
+
+    label class='col-md-6 control-label'
+    = submit_tag "Сохранить", :class => 'btn btn-sm btn-prime btn-wide'
+
+- content_for :js_assets do
+  javascript:
+    (function($) {
+      $(function() {
+
+        $.ajax({
+            type: "POST",
+            data: "authenticity_token=" + $("form:first :input[name^='auth']").val() + "&q=яро",
+            url: "/orders/cities"
+        }).done(function(response) {
+          var substringMatcher = function(strs) {
+            return function findMatches(q, cb) {
+              var matches, substrRegex;
+              matches = [];
+              substrRegex = new RegExp(q, 'i');
+
+              $.each(strs, function(i, str) {
+                if (substrRegex.test(str.name))
+                  matches.push({ value: str.name, id: str.id });
+              });
+
+              cb(matches);
+            };
+          };
+
+          $('#typeahead-place').typeahead({
+            hint: true,
+            highlight: true,
+            minLength: 2
+          },
+          {
+            name: 'cities',
+            displayKey: 'value',
+            source: substringMatcher(response)
+
+          }).on('typeahead:selected', function (obj, data) {
+            $(":input[name*='place']").val(data.id);
+          });
+        });
+      });
+    })(jQuery);

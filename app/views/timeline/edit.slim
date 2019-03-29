@@ -1,0 +1,64 @@
+// ul class="nav nav-tabs"
+//   li = link_to tag_icon(:list, pat(:list)), url(:products, :index)
+//   li = link_to tag_icon(:plus, pat(:new)), url(:products, :new)
+//   li class="active" = link_to tag_icon(:edit, pat(:edit)), url(:products, :edit, :id => @product.id)
+
+div class="tabs-content"
+  = form_for :timeline, url(:timeline, :update, :id => @order.id), :method => :put, :class => 'form-horizontal' do |f|
+    - error = @timeline.errors.include?(:duration)
+    fieldset class='control-group#{error ? ' has-error' : ''}'
+      div class="col-md-12"
+        = f.label :duration, :class => 'control-label'
+        div class='controls'
+          select name="timeline[duration]" class="huge"
+            - options_for_select(Timeline.duration_for_select).each do |o|
+              = o
+        span class='help-inline' = error ? f.error_message_on(:duration, :class => 'text-error') : pat(:example)
+    - error = @timeline.errors.include?(:start_at)
+    fieldset class='control-group#{error ? ' has-error' : ''}'
+      div class="col-md-6"
+        = f.label :start_at, :class => 'control-label'
+        div class='controls'
+          - startstr = @timeline.start_at.blank? ? "" : @timeline.start_at.strftime("%Y-%m-%d")
+          = f.text_field :start_at, :value => startstr, :class => 'form-control input-large input-with-feedback'
+          span class='help-inline' = error ? f.error_message_on(:start_at, :class => 'text-error') : pat(:example)
+      div class="col-md-6"
+        - this_month = Time.now.beginning_of_month + 1.day
+        - next_month = Time.now.end_of_month + 1.day
+        = calendar(:year => next_month.year, :month => next_month.month, :first_day_of_week => 1, :table_class => 'calendar start')
+        = calendar(:year => this_month.year, :month => this_month.month, :first_day_of_week => 1, :table_class => 'calendar start')
+    - error = @timeline.errors.include?(:end_at)
+    fieldset class='control-group#{error ? ' has-error' : ''}'
+      div class="col-md-6"
+        = f.label :end_at, :class => 'control-label'
+        div class='controls'
+          - endstr = @timeline.end_at.blank? ? "" : @timeline.end_at.strftime("%Y-%m-%d")
+          = f.text_field :end_at, :value => endstr, :class => 'form-control input-large input-with-feedback'
+          span class='help-inline' = error ? f.error_message_on(:end_at, :class => 'text-error') : pat(:example)
+      div class="col-md-6"
+        - this_month = Time.now.beginning_of_month + 1.day
+        - next_month = Time.now.end_of_month + 1.day
+        = calendar(:year => next_month.year, :month => next_month.month, :first_day_of_week => 1, :table_class => 'calendar end')
+        = calendar(:year => this_month.year, :month => this_month.month, :first_day_of_week => 1, :table_class => 'calendar end')
+
+    fieldset class='control-group'
+      div class='controls'
+        // = Timeline.duration_for_select.inspect
+        
+    // = select_tag(:duration, :options => Timeline.duration_for_select)
+      // = partial 'products/form', :locals => { :f => f, :cats => @cats }
+    = submit_tag "Сохранить", :class => 'btn btn-sm btn-prime btn-wide'
+
+- content_for :js_assets do
+  javascript:
+    (function($) {
+      $(function() {
+        $(".calendar.start").on("click", ".day", function(e) {
+          $("#timeline_start_at").val($(this).data('date'));
+          $("#timeline_end_at").val($(this).data('date'));
+        });
+        $(".calendar.end").on("click", ".day", function(e) {
+          $("#timeline_end_at").val($(this).data('date'));
+        });
+      });
+    })(jQuery);

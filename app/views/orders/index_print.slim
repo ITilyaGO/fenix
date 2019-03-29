@@ -1,0 +1,113 @@
+// ul class="nav nav-tabs"
+//   li class="active" = link_to tag_icon(:list, pat(:list)), url(:orders, :index)
+//   li = link_to tag_icon(:plus, pat(:new)), url(:orders, :create)
+// 
+
+div class="row non-print"
+  div class="pull-right"
+    div class="pull-right"
+      = link_to 'Печать', 'javascript:print()', :class => 'btn btn-glue'
+div class="clearfix"
+
+div class="tabs-content"
+  table class="table table-hover table-condensed" id="list"
+    thead
+      tr
+        th class='header list-menu non-print'
+          div class='dropdown'
+            a href='#' class='list-menu-toggle.dropdown-toggle dropdown-toggle' data-toggle='dropdown'
+              // = tag_icon :magic
+            ul class='list-menu dropdown-menu' role='dropdown'
+              li class='list-menu-wrapper' = link_to 'select_all', '#', :id => 'select-all', :class => 'list-menu-link'
+              li class='list-menu-wrapper list-menu-wrapper-disabled' = link_to 'deselect_all', '#', :id => 'deselect-all', :class => 'list-menu-link list-menu-link-disabled'
+              li class='list-menu-divider divider'
+        th class='header' Номер
+        // th class='header' = mat(:order, :name)
+        // th class='header' = mat(:order, :amount)
+        th class='header' Заказчик
+        th class='header' Город
+        th class='header' Куда едет
+        th class='header only-print' Тр.ком
+        th class='header' Телефон
+        // th class='header only-print' Сумма
+        th class='header only-print' ИНН (паспорт)
+        th class='header non-print'
+          - @sections.each do |s|
+            // - s_st = order.order_parts.find_by(:section_id => s.id)
+            = content_tag :span, " #{s.name[0..2]} ", :class => ""
+        th class='header non-print'
+        th class='header list-row-action-header non-print'
+
+    tbody
+      -@orders.each do |order|
+        tr class='list-row non-print'
+          td class='list-column list-selectable non-print' = check_box_tag 'order_ids[]', :autocomplete => "off", :value => order.id, :class => 'list-selectable-checkbox'
+          td class='list-column' = "#{order.id}"
+          // td class='list-column' = order.name
+          td class='list-column' = order.client.name
+          td class='list-column' = order.place_name
+          td class='list-column' = order.client.place_name
+          td class='list-column only-print' = order.client.shipping_company
+          // td class='list-column' = to_msk(order.created_at)
+          td class='list-column' = order.client.tel
+          // td class='list-column only-print' = "%0.f" % order.done_total
+          td class='list-column only-print' = order.client.inn
+          td class='list-column non-print' style='display: inline-flex'
+            = partial 'orders/squares', :locals => { :sections => @sections, :order => order }
+            span class="label label-#{order.status}"
+              = t :"status.#{order.status}"
+          td class='list-column non-print'
+            - if order.finished?
+              = link_to "Отправить", :href => url(:orders, :ship, :id => order.id), :class => "btn btn-xs btn-shipped"
+            - if order.draft?
+              = link_to "Подтвердить", :href => url(:orders, :anew, :id => order.id), :class => "btn btn-xs btn-anew"
+          td class='list-column list-row-action non-print'
+            div class='list-row-action-wrapper'
+              = link_to tag_icon(:pencil), :href => url(:orders, :edit, :id => order.id), :class => 'list-row-action-wrapper-link'
+              = link_to tag_icon("file-text"), :href => url(:orders, :nakl, :id => order.id), :class => 'list-row-action-wrapper-link'
+              - if order.finished? && current_account.is_admin?
+                = link_to tag_icon('th-large'), :href => url(:orders, :boxes, :id => order.id), :class => 'list-row-action-wrapper-link'
+                = link_to tag_icon(:usd), :href => url(:orders, :price, :id => order.id), :class => 'list-row-action-wrapper-link'
+              - if order.draft?
+                = link_to tag_icon("trash-o"), :rel => :tooltip, :title => "#{pat(:delete)} order", :class => 'list-row-action-delete-one list-row-action-wrapper-link'
+            div class='modal'
+              div class="modal-dialog"
+                div class='modal-content'
+                  div class="modal-header"
+                    h4 class="modal-title" We gonna delete this item
+                  div class='modal-body'
+                    p Точно удалить?
+                  div class='modal-footer'
+                    = form_tag url(:orders, :destroy, :id => order.id), :method => :delete do
+                      = submit_tag pat(:delete), :class =>'list-row-action-popover-delete-one-btn btn btn-danger btn-wide'
+                      div class='btn btn-default btn-wide cancel' data-dismiss="modal" = pat(:cancel)
+        tr class='list-row' style="display:none;"
+          td colspan=3 class='list-column' style="#{('background: #d0d0d0 !important' if !order.client.comment.blank?)}"
+            = order.client.comment
+          td class='list-column'
+            - order.order_parts.each do |op|
+              p = @sections.detect { |s| s.id == op.section_id }.name
+          td class='list-column'
+            - order.order_parts.each do |op|
+              p
+                - if op.transfer
+                  span На Перекопе
+          td colspan=2 class='list-column'
+            - order.order_parts.each do |op|
+              p = "коробок: #{op.boxes}"
+
+- content_for :js_assets do
+  javascript:
+    (function($) {
+      $(function() {
+
+        $(".list-selectable-checkbox").on("change", function() {
+          $(this).parents(".list-row").toggleClass('non-print');
+          $(this).parents(".list-row").next().toggle();
+          $(this).parents(".list-row").next().toggleClass('only-print');
+        });
+
+
+
+      });
+    })(jQuery);

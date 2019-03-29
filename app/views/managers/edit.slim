@@ -1,0 +1,15 @@
+ul.nav.nav-tabs
+  li = link_to tag_icon(:list, pat(:list)), url(:managers, :index)
+  li = link_to tag_icon(:plus, pat(:new)), url(:managers, :new)
+  li class="active" = link_to tag_icon(:edit, pat(:edit)), url(:managers, :edit, :id => @manager.id)
+
+.tabs-content
+  = form_for :manager, url(:managers, :update, :id => @manager.id), :method => :put, :class => 'form-horizontal' do |f|
+    = partial 'managers/form', :locals => { :f => f }
+
+.row
+  = @manager.regions.order(:name).map{ |r| "#{r.name} (#{r.code})" }.join(', ')
+
+.row
+  .btn.label-info
+    = link_to "Заказы", url(:orders, :by_manager, :id => @manager.id)

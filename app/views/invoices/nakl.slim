@@ -1,0 +1,136 @@
+doctype 5
+html
+  head
+    meta content='text/html; charset=utf-8' http-equiv='Content-Type'
+    meta name='viewport' content='width=device-width,initial-scale=1'
+    title = @title.present? ? "#{@title}" : 'Бланк "Накладная"'
+    / princely compatible styles
+    = stylesheet_link_tag 'invoices'
+
+  body style="font-family: Arial;"
+    form id="torg12_form" method="post" class="blank_table_items" action="" target="_blank" rel="print"
+
+      <table border="0" style="width:100%;border:0px;">
+        <tbody>
+          <tr>
+            <td width="770" style="z-index:100;">
+             
+              table width="100%"
+                tbody
+                  tr
+                    td width="125" align="right" style="padding-right:10px;padding-top:5px;"
+                      div style="width: 100%; font-size: 10pt;"
+                        | Счет для оплаты
+                    td style="border-bottom:1px solid;padding-left:10px;padding-top:5px;"
+                      div id="gruzopoluchatel" style="width: 100%; font-size: 10pt;"
+                        | #{@account}
+                  tr
+                    td width="125" align="right" style="padding-right:10px;padding-top:5px;"
+                      div style="width: 100%; font-size: 10pt;"
+                        | Заказчик
+                    td style="border-bottom:1px solid;padding-left:10px;padding-top:5px;"
+                      div id="gruzopoluchatel" style="width: 100%; font-size: 10pt;"
+                        | #{@order.client.name}
+                  tr
+                    td width="125" align="right" style="padding-right:10px;padding-top:5px;"
+                      div style="width: 100%; font-size: 10pt;"
+                    td style="border-bottom:1px solid;padding-left:10px;padding-top:5px;"
+                      div id="gruzopoluchatel" class="editable" edtype="textarea" style="width: 100%; font-size: 10pt;"
+                        | Тел: #{@order.client.tel}, Email: #{@order.client.email} 
+                  tr
+                    td width="125" align="right" style="padding-right:10px;padding-top:5px;"
+                      div id="postavshik_name" style="width: 100%; font-size: 10pt;"
+                        | Город
+                    td style="border-bottom:1px solid;padding-left:10px;padding-top:5px;"
+                      div id="postavshik" class="editable" edtype="textarea" style="width: 100%; font-size: 10pt;"
+                        = @order.place_name
+            </td>
+          </tr>
+          <tr>
+            <td width="770" align="center">
+              br
+              table width="100%" 
+                tbody
+                  tr
+                    td align="right" width="50%" style=("font-size:1em;font-weight:bold;padding:0 1em;text-transform:uppercase") Накладная
+                    td align="left" 
+                      table border="0" cellpadding="0" cellspacing="0" 
+                        tbody
+                          tr
+                            td align="center" style=("border:1px solid;font-size:0.6em;") width="100" Номер заказа
+                            td align="center" style=("border:1px solid;border-left:0px;font-size:0.6em;") width="100" Дата составления
+                          tr
+                            td style="border:2px solid;" align="center"
+                              div style="font-size: 10pt; font-weight: bold;"
+                                = @order.id
+                            td align="center" style="border:2px solid;border-left:0px;"
+                              div style="font-size:10pt;font-weight:bold;"
+                               = DateTime.now.in_time_zone(4).strftime('%e.%m.%Y')
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <br>
+
+      - items = @order.order_lines
+      table id="items" class="invoice_com_items" border="0" width="100%" cellpadding="0" cellspacing="0"
+        thead
+          tr
+            <td><div id="nomerpp_name">Номер</div></td>
+            <td><div id="tovar_name">Наименование</div></td>
+            <td><div id="kolvo_name"></div></td>
+            <td><div id="kolvo_name">Количество, шт</div></td>
+            <td><div id="price_name">Цена, руб. коп.</div></td>
+            <td><div id="summw_nds_name">Сумма, руб. коп.</div></td>
+
+          tr
+            td
+              div 1
+            td
+              div 2
+            td
+              div 3
+            td
+              div 4
+            td
+              div 5
+            td
+              div 6
+
+        <tbody>
+          - count = 0
+          - items.each_with_index do |item, i|
+            - next if item.ignored || item.done_amount.nil? || item.done_amount <= 0
+            <tr class="item">
+              <td class="ppnum centered" style="width:60px;">
+                - count = count + 1
+                = count
+              </td>
+              <td style="width:350px;">
+                = item.product.displayname
+              </td>
+              <td></td>
+
+              <td class="centered" style="width:80px;">
+                = item.done_amount
+              </td>
+              <td class="righted" style="width:80px;">
+                = to_rub item.price
+              </td>
+              <td class="righted" style="width:100px;">
+                = "%.2f" % (item.price * (item.done_amount || item.amount || 0))
+              </td>
+
+            </tr>
+        </tbody>
+        tfoot
+          tr class="item"
+            td colspan="2" class="sum righted" style="border:0;font-size:1em;"
+              | Всего по накладной: 
+            td class="centered" style="width:42px;"
+              = count
+            td class="righted" style="width:67px;"
+            td class="righted" style="width:67px;"
+            td class="righted" style="font-size:1em;"
+              = to_rub items.map{|e| e.price * (e.done_amount || e.amount || 0) }.inject(:+)

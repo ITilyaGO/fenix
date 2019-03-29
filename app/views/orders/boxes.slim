@@ -1,0 +1,41 @@
+div class="table non-print"
+  table class="table order-info"
+    tr
+      td
+        p Город: #{@order.place_name}
+        p
+          ' Имя:
+          = link_to url(:clients, :edit, :id => @order.client.id) do
+            = !@order.client.name.blank? ? @order.client.name : 'Клиент'
+          |  (#{@order.client.place_name})
+        p Тел: #{@order.client.tel}
+        p Емайл: #{@order.client.email}
+        p Дата: #{to_msk(@order.created_at)}
+        - if !@order.description.blank?
+          = @order.description
+
+div class="clearfix"
+
+div.block
+  h4.non-print
+    | Заказ:
+    span.label class="label-#{@order.status}"
+      = t :"status.#{@order.status}"
+
+= form_tag url(:orders, :boxes, :id => @order.id), :method => :put, :class => 'form-horizontal order' do
+  div class="table-res4ponsive"
+    table class="table"
+      tr
+        th Название
+        th Коробок
+      
+      - @order.order_parts.each do |op|
+        tr class="order-part"
+          td class="col-md-4"
+            = hidden_field_tag "line[#{op.id}][id]", :value => op[:id]
+            = op.section.name
+          td class="col-md-1"
+             = text_field_tag "line[#{op.id}][boxes]", :value => op.boxes, :autocomplete => "off", :class => "form-control input-sm"
+
+  - if current_account.is_admin?
+    = submit_tag "Сохранить", :class => 'btn btn-sm btn-prime', :name => 'save'

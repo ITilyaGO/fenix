@@ -1,0 +1,182 @@
+- @weeks_select = @weeks[0..7]
+- @weeks_select << { :name => "Заказы без срока", :date => nil }
+ul class="nav nav-tabs" id="weeks_tab"
+  - @weeks.each_with_index do |tab, i|
+    li class=""
+      = link_to tag_icon('fa fa-ok', "(#{to_dm(tab[:date])}-#{to_dm(tab[:end])})"), "#cat-#{i}", 'data-toggle' => "tab"
+
+div class="row non-print"
+  div class="pull-right"
+    div class="pull-right"
+      = link_to 'Печать', 'javascript:print()', :class => 'btn btn-glue'
+div class="clearfix"
+
+div class="tab-content" id="for_weeks_tab" style="z-index:1100"
+  - @weeks.each_with_index do |s, i|
+    div class="tab-pane" id="cat-#{i}"
+      
+      div class="tabs-content"
+        h4 Обязательные отправки
+        table class="table table-hover table-condensed" id="list"
+          thead
+            tr
+              th class='header non-print'
+                = check_box_tag 'orders_all', :autocomplete => "off", :value => false, :class => 'list-selectable-checkbox-all'
+              th class='header' Номер
+              // th class='header' = mat(:order, :name)
+              // th class='header' = mat(:order, :amount)
+              th class='header' Заказчик
+              th class='header' Город
+              th class='header' Тр.ком.
+              th class='header' Договор
+              th class='header' Дата
+              th class='header' Статус
+              th class='header'
+                - @sections.each do |s|
+                  = content_tag :span, " #{s.name[0..2]} "
+              th class='header list-row-action-header non-print'
+        
+          tbody
+            - s[:orders].where(:immediate => true).each do |time|
+              - order = time.order
+              tr class='list-row non-print'
+                td class='list-column list-selectable non-print' = check_box_tag 'order_ids[]', :autocomplete => "off", :value => order.id, :class => 'list-selectable-checkbox'
+                td class='list-column' = "#{order.id}"
+                // td class='list-column' = order.name
+                td class='list-column' = order.client.name
+                td class='list-column' = order.place_name
+                td class='list-column' = order.client.shipping_company
+                td class='list-column' = order.client.contract
+                td class='list-column' = to_msk(order.created_at)
+                td class='list-column'
+                  span class="label label-#{order.status} non-print" = t :"status.#{order.status}"
+                  span class="only-print" = t :"status.#{order.status}"
+                td class='list-column text-nowrap'
+                  = partial 'orders/squares', :locals => { :sections => @sections, :order => order }
+                td class='list-column list-row-action non-print'
+                  div class='list-row-action-wrapper'
+                    = link_to 'дн', :href => '#', :class => 'list-row-day-wrapper-link'
+                    = link_to 'edit', :href => url(:orders, :edit, :id => order.id), :class => 'list-row-action-wrapper-link'
+                  div class='modal'
+                    div class="modal-dialog"
+                      div class='modal-content'
+                        div class="modal-header"
+                          h4 class="modal-title" Назначить день недели
+                        div class='modal-body'
+                          p Выберите день #{time.id}
+                          - Enums.weekdays.map do |wd, _|
+                              = [I18n.t("weekday.#{wd}"), wd]
+                        div class='modal-footer'
+                          = form_tag url(:orders, :destroy, :id => time.id), :method => :delete do
+                            = submit_tag pat(:delete), :class =>'list-row-action-popover-delete-one-btn btn btn-danger btn-wide'
+                            div class='btn btn-default btn-wide cancel' data-dismiss="modal" = pat(:cancel)
+        .pull-right
+          | Сумма заказов: #{"%0.f" % Order.where(:id => s[:orders].where(:immediate => true).select(:order_id)).sum(:total)} &#x20B7
+          | &nbsp;/&nbsp;
+          | Сделано на: #{"%0.f" % Order.where(:id => s[:orders].where(:immediate => true).select(:order_id)).sum(:done_total)} &#x20B7
+
+      div class="tabs-content"
+        h4 Необязательные отправки
+        table class="table table-hover table-condensed" id="list"
+          thead
+            tr
+              th class='header non-print'
+                = check_box_tag 'orders_all', :autocomplete => "off", :value => false, :class => 'list-selectable-checkbox-all'
+              th class='header' Номер
+              // th class='header' = mat(:order, :name)
+              // th class='header' = mat(:order, :amount)
+              th class='header' Заказчик
+              th class='header' Город
+              th class='header' Тр.ком.
+              th class='header' Договор
+              th class='header' Дата
+              th class='header' Статус
+              th class='header'
+                - @sections.each do |s|
+                  = content_tag :span, " #{s.name[0..2]} "
+              th class='header list-row-action-header non-print'
+        
+          tbody
+            - s[:orders].where(:immediate => false).each do |time|
+              - order = time.order
+              tr class='list-row non-print'
+                td class='list-column list-selectable non-print' = check_box_tag 'order_ids[]', :autocomplete => "off", :value => order.id, :class => 'list-selectable-checkbox'
+                td class='list-column' = "#{order.id}"
+                // td class='list-column' = order.name
+                td class='list-column' = order.client.name
+                td class='list-column' = order.place_name
+                td class='list-column' = order.client.shipping_company
+                td class='list-column' = order.client.contract
+                td class='list-column' = to_msk(order.created_at)
+                td class='list-column'
+                  span class="label label-#{order.status} non-print" = t :"status.#{order.status}"
+                  span class="only-print" = t :"status.#{order.status}"
+                td class='list-column text-nowrap'
+                  = partial 'orders/squares', :locals => { :sections => @sections, :order => order }
+                td class='list-column list-row-action non-print'
+                  div class='list-row-action-wrapper'
+                    = link_to 'дн', :href => '#', :class => 'list-row-day-wrapper-link'
+                    = link_to 'edit', :href => url(:orders, :edit, :id => order.id), :class => 'list-row-action-wrapper-link'
+        .pull-right
+          | Сумма заказов: #{"%0.f" % Order.where(:id => s[:orders].where(:immediate => false).select(:order_id)).sum(:total)} &#x20B7
+          | &nbsp;/&nbsp;
+          | Сделано на: #{"%0.f" % Order.where(:id => s[:orders].where(:immediate => false).select(:order_id)).sum(:done_total)} &#x20B7
+
+      - if current_account.is_admin?
+        = form_tag url(:timeline, :assign), :method => :put, :class => 'form-horizontal' do
+          = hidden_field_tag 'start', :value => s[:date].strftime("%Y-%m-%d")
+          = hidden_field_tag 'end', :value => s[:end].strftime("%Y-%m-%d")
+          
+          fieldset class='control-group non-print'
+            = label_tag 'Обязательные отправки', :class => 'col-md-3 control-label'
+            div class='col-md-6 controls'
+              // = @o.inspect
+              // = @orders_for_select.inspect
+              select name="immediates[]" class="huge" multiple="multiple" title="Выберите" data-style="btn-info"
+                //- @weeks << { :name => "Заказы без срока", :date => nil }
+                - @weeks_select.each_with_index do |week, i|
+                  //- next if i == 0
+                  optgroup label="#{week[:name]}"
+                    - @orders_for_select.each do |o|
+                      - if o[:date] == week[:date]
+                        = content_tag(:option, o[:name], { :value => o[:value], :selected => false })
+                      // - html_attributes = { :value => sub.id }
+                      // - html_attributes[:selected] ||= option_is_selected?(sub.id, sub.name, @product.category_id)
+
+          fieldset class='control-group non-print'
+            = label_tag 'Необязательные отправки', :class => 'col-md-3 control-label'
+            div class='col-md-6 controls'
+              select name="orders[]" class="huge" multiple="multiple" title="Выберите" data-style="btn-info"
+                - @weeks_select.each_with_index do |week, i|
+                  optgroup label="#{week[:name]}"
+                    - @orders_for_select.each do |o|
+                      - if o[:date] == week[:date]
+                        = content_tag(:option, o[:name], { :value => o[:value], :selected => false })
+                      
+          
+          = submit_tag "Сохранить", :class => 'btn btn-sm btn-prime btn-wide'
+
+- content_for :js_assets do
+  javascript:
+    (function($) {
+      $(function() {
+        $($('#weeks_tab li a')[1]).tab('show');
+        if($($('#for_order_tab .tab-pane')[1]).not('.non-print').length > 0)
+          $('#for_order_tab .tab-pane:first').addClass('last');
+        $('#for_order_tab .tab-pane:not(.non-print):last').addClass('last');
+  
+        $(".list-selectable-checkbox").on("change", function() {
+          $(this).parents(".list-row").toggleClass('non-print');
+        });
+        $(".list-selectable-checkbox-all").on("change", function() {
+          var on = $(this).prop("checked")
+          $(".list-selectable-checkbox").prop("checked", on);
+          $(".tab-pane .list-row").toggleClass('non-print');
+        });
+
+        $('.list-row-day-wrapper-link').on('click', function(ev) {
+          ev.preventDefault();
+          $(this).parent().next().modal();
+        });
+      });
+    })(jQuery);

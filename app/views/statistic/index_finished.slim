@@ -1,0 +1,11 @@
+- @cats.each do |cat|
+  p
+    = cat.name
+    ' &nbsp;[&nbsp;
+    - @months.each_with_index do |m, i|
+      = link_to m, url(:statistic, :finished, :id => cat.id, :gap => 4-i)
+      ' &nbsp;
+      span.label.label-success.btn-sm
+        = link_to "excel", url(:statistic, :finished, :id => cat.id, :format => :csv, :gap => 4-i)
+      ' &nbsp;
+    ' &nbsp;]

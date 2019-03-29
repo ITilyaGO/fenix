@@ -1,0 +1,12 @@
+- gap = 10
+- if @pages > 1
+  div class="row"
+    div class="pagination pagination-inverse"
+      div class="btn previous"
+        = link_to "Первая", :href => @r, :class => "btn btn-sm btn-inverse"
+      ul
+        - ((1..@pages).to_a & (@page-gap..@page+gap).to_a).each do |i|
+          li class="#{@page == i ? "active" : ""}"
+            = link_to i, :href => "%s?page=%s" % [@r, i]
+      div class="btn next"
+        = link_to "Последняя", :href => "%s?page=%s" % [@r, @pages], :class => "btn btn-sm btn-inverse"

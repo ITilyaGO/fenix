@@ -1,0 +1,21 @@
+ul class="nav nav-tabs"
+  li class="active" = link_to tag_icon(:list, 'Список'), url(:managers, :index)
+  li = link_to tag_icon(:plus, 'Создать'), url(:managers, :new)
+
+div class="tabs-content"
+  table class="table table-hover table-condensed" id="list"
+    thead
+      tr
+        th class='header' style='width:50px' = mat(:manager, :id)
+        th class='header' = mat(:manager, :name)
+        th class='header list-row-action-header'
+
+    tbody
+      - @managers.each do |manager|
+        tr class='list-row'
+          td class='list-column' = manager.id
+          td class='list-column' = manager.name
+          td class='list-column list-row-action'
+            div class='list-row-action-wrapper'
+              = link_to tag_icon(:edit), :href => url(:managers, :edit, :id => manager.id), :rel => :tooltip, :title => "#{pat(:edit)} manager", :class => 'list-row-action-wrapper-link'
+              = link_to tag_icon("trash-o"), :rel => :tooltip, :title => "#{pat(:delete)} manager", :class => 'list-row-action-delete-one list-row-action-wrapper-link'

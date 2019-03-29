@@ -1,0 +1,128 @@
+ul class="nav nav-tabs non-print"
+  li = link_to tag_icon(:list, pat(:list)), url(:orders, :index)
+  li class="active" = link_to tag_icon(:edit, "Show order #{@order.id}"), url(:orders, :show, :id => @order.id)
+
+// - @sections.each do |s|
+//   strong = s.name
+//   p = s.categories.inspect
+//   div
+//     - s.categories.each do |c|
+//       span = c.name
+// 
+div class="table non-print"
+  table class="table order-info"
+    tr
+      td
+        p Город: #{@order.place_name}
+        p Имя: #{@order.client.name}
+        // p Организация: #{@order.client.org}
+        p Тел: #{@order.client.tel}
+        p Емайл: #{@order.client.email}
+        p Дата: #{to_msk(@order.created_at)}
+        - if !@order.description.blank?
+          p = @order.description
+
+
+div class="clearfix"
+// div class="row"
+//   div class="pull-right"
+//     div class="pull-right"
+//       = link_to 'Печать', 'javascript:print()', :class => 'btn btn-glue'
+    // - if @order[:status] < 2
+    //   = link_to 'Заказ обработан', url(:orders, :sendemail, :id => Order.iq(@order.id)), :class => 'btn btn-warning'
+div class="clearfix"
+
+
+div class="only-print pull-right" style="margin-right: 20px;"
+  - @sections.each do |tab|
+    - if @order.by_sec?(tab.id)
+      strong = tab.name[0..3]
+      | &nbsp;
+  | &nbsp;
+
+// = partial 'orders/block'
+
+/ fieldset class='control-group'
+/   = label_tag :status, :class => 'col-md-3 control-label'
+/   div class='col-md-6 controls'
+/     = t :"status.#{@order.status}"
+
+h4
+  | Заказ:
+  span class="label label-#{@order.status}"
+    = t :"status.#{@order.status}"
+
+// ul class="nav nav-tabs non-print" id="order_tab"
+//   - @tabs.sort{ |a,b| (a.id == 21 ? 18 : a.id) <=> ( b.id == 21 ? 18 : b.id) }.each do |tab|
+//     - cat_enabled = @order.by_cat?(tab.id) ? "" : 'disabled'
+//     li class="#{cat_enabled}"
+//       = link_to tag_icon('fa fa-ok', "#{tab.name} / #{tab.section.name}"), "#cat-#{tab.id}", 'data-toggle' => "tab"
+// 
+// div class="tab-content" id="for_order_tab"
+div
+  // - @tabs.sort{ |a,b| (a.id == 21 ? 18 : a.id) <=> ( b.id == 21 ? 18 : b.id) }.each_with_index do |tab, i|
+    // div
+    // - tab_visible = @order.by_cat?(tab.id)
+    // div class="tab-pane #{tab_visible ? '' : 'non-print'}" id="cat-#{tab.id}"
+    //   - if i != 1
+    //     div class="table only-print"
+    //       table class="table order-info"
+    //         tr
+    //           td
+    //             p Город: #{@order.client.city}
+    //             p Имя: #{@order.client.name}
+    //           td
+    //             p Организация: #{@order.client.org}
+    //             p Тел: #{@order.client.tel}
+    //           td
+    //             p Дата: #{to_msk(@order.created_at)}
+    //             p Емайл: #{@order.client.email}
+    //         - if !@order.description.blank?
+    //           tr
+    //             td colspan=3
+    //               = @order.description
+    // 
+    //     h4 class="only-print" = tab.name
+  - @tabs.sort{ |a,b| (a.id == 21 ? 18 : a.id) <=> ( b.id == 21 ? 18 : b.id) }.each_with_index do |tab, i|
+    - tab_visible = @order.by_cat?(tab.id)
+    div
+      - if tab_visible
+        div class="table-responsive"
+          h4 = tab.name
+          table class="table"
+            tr
+              th class="only-print" Отметка
+              th Наименование
+              th Количество
+              th class="non-print" Цена
+              th class="non-print" Сумма
+              th class="non-print" Факт
+              th class="non-print" Не делаем
+
+            
+            - @order.by_cat(tab.id).each do |ol|
+              tr
+                = hidden_field_tag "line[#{ol.id}][id]", :value => ol[:id]
+                td class="only-print" &nbsp;
+                td
+                  = ol.product.displayname
+                  - if !ol.description.blank?
+                    div
+                      span Коммент: 
+                      = ol.description
+                td
+                  = ol.amount
+                td class="non-print"
+                  = ol.price
+                  | &nbsp;&#x20B7
+                td class="non-print"
+                  = ol.price*ol.amount
+                  | &nbsp;&#x20B7
+                
+                td
+                  = ol.done_amount
+                td class="vert-align"
+                  = check_box_tag "line[#{ol.id}][ignored]", :checked => ol.ignored, :class => "form-contol form-amount input-xs"
+
+div class="non-print"
+  h4 class="pull-right" Сумма заказа: #{"%0.f" % @order.total} &#x20B7

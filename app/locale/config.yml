@@ -1,0 +1,30 @@
+en:
+  status:
+    draft: Непроверенный
+    anew: Новый
+    current: В работе
+    finished: Собран
+    shipped: Отправлен
+    canceled: Отменен
+  duration:
+    day: Точная дата
+    halfweek: Полнедели
+    week: Неделя
+  state:
+    anew: Новый
+    current: В работе
+    finished: Собран
+  delivery:
+    postage: Отправка
+    roundtrip: Поездкa
+    pickup: Самовывоз
+  weekday:
+    mo: Понедельник
+    tu: Вторник
+    we: Среда
+    th: Четверг
+    fr: Пятница
+  city_type:
+    city: Город
+    other: Другое
+    church: Монастырь

@@ -1,0 +1,126 @@
+@media all{
+  .only-print {
+    display: none;
+  }
+}
+
+@media print {
+  * {
+    font-size: 11px !important;
+    font-family: Helvetica Neue, Helvetica, Arial;
+    font-weight: normal !important;
+    letter-spacing: 0;
+  }
+  
+  html,
+  body{
+      /* width:670px !important; based upon http://stackoverflow.com/questions/320357/  */
+      background:white;
+      margin:0 !important;
+      position:relative;
+      left:0;
+  }
+  
+  .main-wrapper, .main {
+    padding-top: 0px !important;
+  }
+  
+  .main-wrapper-push {
+    padding: 0;
+    margin: 0;
+  }
+  
+  .btn:not(.allow-print) {
+    display: none;
+  }
+  
+  .btn {
+    padding: 0;
+  }
+
+  .non-print {
+    display: none !important;
+  }
+  
+  .only-print {
+    display: block;
+  }
+  
+/*   table { page-break-inside:auto }
+  tr { display:block;page-break-inside:avoid; page-break-after:auto }
+  th { display:table-header-group }
+ */  
+  table, .table-responsive, .table {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0;
+  }
+  
+  table .only-print {
+    display: table-cell;
+  }
+
+  table tr.only-print {
+    display: table-row;
+  }
+  
+  table .list-column p {
+    margin: 0;
+    line-height: 12px;
+  }
+  
+  .order-info, .order-info td {
+    border: 0 !important;
+    padding: 0;
+  }
+  
+  .tab-content {
+    border: 0;
+    padding: 0;
+  }
+  
+  .tab-content .tab-pane {
+    display: block;
+    page-break-after: always;
+  }
+  
+  .tab-content .tab-pane.last {
+    page-break-after: avoid;
+  }
+  
+  table th {
+    border: 1px solid #aaaaaa !important;
+  }
+  
+  table td {
+    border: 1px solid #aaaaaa !important;
+  }
+  
+  footer, .navbar {
+    display: none;
+  }
+  
+  #sidebar-wrapper {
+    display: none;
+  }
+  
+  #page-wrapper {
+    padding-left: 0px !important;
+  }
+  
+  .header:not(th) {
+    display: none;
+  }
+
+  #weeks_tab li:not(.active) {
+    display: none;
+  }
+  
+  #weeks_tab .tab-content .tab-pane {
+    page-break-after: avoid;
+  }
+
+  #for_weeks_tab .tab-pane:not(.active) {
+    display: none;
+  }
+}

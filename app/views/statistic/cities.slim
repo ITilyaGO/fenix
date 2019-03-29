@@ -1,0 +1,4 @@
+- @stat.each do |s|
+  p
+    = link_to s[0][1], url(:statistic, :bycity, :id => s[0][0])
+    |  (Заказов: #{s[1]})

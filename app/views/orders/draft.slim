@@ -1,0 +1,57 @@
+.tabs-content
+  table#list.table.table-hover.table-condensed
+    thead
+      tr
+        th class='header list-menu non-print'
+        th class='header' Номер
+        th class='header' Город
+        th class='header' Заказчик
+        th class='header' Дата
+        th class='header non-print'
+          - @sections.each do |s|
+            // - s_st = order.order_parts.find_by(:section_id => s.id)
+            = content_tag :span, " #{s.name[0..2]} ", :class => ""
+        th class='header non-print'
+        th class='header list-row-action-header non-print'
+    
+    tbody
+      - @orders.each do |order|
+        tr class='list-row'
+          td class='list-column list-selectable non-print' = check_box_tag 'order_ids[]', :autocomplete => "off", :value => order.id, :class => 'list-selectable-checkbox'
+          td class='list-column' = "#{order.id}"
+          // td class='list-column' = order.name
+          td class='list-column' = order.place_name
+          td class='list-column' = order.client.name
+          td class='list-column text-nowrap' = to_msk(order.created_at)
+          td class='list-column text-nowrap non-print'
+            = partial 'orders/squares', :locals => { :sections => @sections, :order => order }
+            // - @sections.each do |s|
+            //   - s_st = order.order_parts.find_by(:section_id => s.id)
+            //   = content_tag :button, !s_st.nil? && s_st.transfer ? "п": "", :class => "btn btn-sm btn-#{s_st.nil? ? 'default' : s_st.state}"
+            //   | &nbsp;
+            // | &nbsp;
+            span class="label label-#{order.status}"
+              = t :"status.#{order.status}"
+          td class='list-column non-print'
+            - if order.finished?
+              = link_to "Отправить", :href => url(:orders, :ship, :id => order.id), :class => "btn btn-xs btn-shipped"
+            - if order.draft?
+              = link_to "Подтвердить", :href => url(:orders, :anew, :id => order.id), :class => "btn btn-xs btn-anew"
+
+          td class='list-column list-row-action non-print'
+            div class='list-row-action-wrapper'
+              - if current_account.is_admin?
+                = link_to tag_icon("paw"), :rel => :tooltip, :title => "Edit order", :href => url(:orders, :correct, :id => order.id), :class => 'list-row-action-wrapper-link'
+              - if order.draft?
+                = link_to tag_icon("trash-o"), :rel => :tooltip, :title => "#{pat(:delete)} order", :class => 'list-row-action-delete-one list-row-action-wrapper-link'
+            div class='modal'
+              div class="modal-dialog"
+                div class='modal-content'
+                  div class="modal-header"
+                    h4 class="modal-title" We gonna delete this item
+                  div class='modal-body'
+                    p Точно удалить?
+                  div class='modal-footer'
+                    = form_tag url(:orders, :destroy, :id => order.id), :method => :delete do
+                      = submit_tag pat(:delete), :class =>'list-row-action-popover-delete-one-btn btn btn-danger btn-wide'
+                      div class='btn btn-default btn-wide cancel' data-dismiss="modal" = pat(:cancel)

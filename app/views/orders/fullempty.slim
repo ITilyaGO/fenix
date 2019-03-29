@@ -1,0 +1,465 @@
+div class="tabs-content"
+= form_for :order, !@id ? url(:orders, :empty) : url(:orders, :save, :id => @id), :class => 'form-horizontal' do |f|
+  div class="table non-print row"
+    div class="col-md-8"
+      fieldset class='control-group'
+        = f.label 'Тип заказа', :class => 'col-md-3 control-label'
+        div class='col-md-3 controls'
+          = f.label 'Для Москвы', :class => 'control-label'
+          = f.radio_button :moscow, :value => :false
+        div class='col-md-3 controls'
+          = f.label 'Отправки', :class => 'control-label'
+          = f.radio_button :moscow, :value => :true, :checked => true
+
+      fieldset class='control-group'
+        = f.label 'Приоритетный', :class => 'col-md-3 control-label'
+        div class='col-md-3 controls'
+          = f.label 'Нет', :class => 'control-label'
+          = f.radio_button :priority, :value => :false, :checked => true
+        div class='col-md-3 controls'
+          = f.label 'Да', :class => 'control-label'
+          = f.radio_button :priority, :value => :true
+
+      fieldset class='control-group'
+        = f.label 'Номер заказа', :class => 'col-md-3 control-label'
+        div class='col-md-3 controls'
+          div class="scrollable-dropdown-menu"
+            = f.text_field :id, :class => 'form-control', :placeholder => "Можно пустой"
+
+      fieldset class='control-group'
+        = f.label 'Дата заказа', :class => 'col-md-3 control-label'
+        div class='col-md-4 controls'
+          div class="scrollable-dropdown-menu"
+            = f.text_field :created_at, :class => 'form-control', :placeholder => "2016-07-23 or Y/m/d"
+
+      fieldset class='control-group'
+        = f.label "Город", :class => 'col-md-3 control-label'
+        div class='col-md-5 controls'
+          div class="scrollable-dropdown-menu"
+            = f.hidden_field :place_id, :value => (@order_place.id if @order_place)
+            = text_field_tag 'pl', :class => 'form-control ', :id => 'typeahead-place', :value => (@order_place.name if @order_place)
+
+      fieldset class='control-group'
+        = f.label "Заказчик", :class => 'col-md-3 control-label'
+        div class='col-md-9 controls'
+          div class="scrollable-dropdown-menu"
+            = f.hidden_field :client_id, :value => (@order_client.id if @order_client)
+            = text_field_tag 'cl', :class => 'form-control ', :id => 'typeahead-client', :value => (@order_client.name if @order_client)
+
+      fieldset class='control-group'
+        = f.label "Позиция", :class => 'col-md-3 control-label'
+        div class='col-md-6 controls'
+          div class="scrollable-dropdown-menu"
+            = text_field_tag 'pr', :class => 'form-control', :value => '', :id => 'typeahead-product'
+        div class='col-md-1 controls'
+          div class='btn btn-sm btn-default' id='add-product' Добавить 
+          // = content_tag 'Добавить', :class => 'btn btn-sm btn-default', :id => 'add-product'
+
+    // div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true"
+    //   div class="modal-dialog modal-sm"
+    //     div class="modal-header"
+    //       button type="button" class="close" data-dismiss="modal" aria-label="Close"
+    //         span aria-hidden="true" &times;
+    //       h4 class="modal-title" id="myModalLabel" Modal title
+    //     div class="modal-content"
+
+    div class="col-md-4"
+      div class='controls' id='products_tree'
+    div class="col-md-4"
+      div class='controls' id='products2_tree'
+
+  div class="modal" tabindex="-1" role="dialog" 
+    div class="modal-dialog"
+      div class='modal-content'
+        div class="modal-header"
+          h4 class="modal-title" Добавляем продукт в заказ
+        div class='modal-body'
+          p class="product"
+          fieldset class='control-group'
+            = label_tag "Количество", :class => 'col-md-3 control-label'
+            div class='col-md-2 controls'
+              = text_field_tag "amount", :autocomplete => "off", :class => "form-control"
+        div class='modal-footer'
+          // = form_tag url(:categories, :destroy, :id => category.id), :method => :delete do
+          //   = submit_tag pat(:delete), :class =>'list-row-action-popover-delete-one-btn btn btn-danger btn-wide'
+          div class='btn btn-default btn-wide cancel' data-dismiss="modal" Добавить
+
+  - @product_names = []
+  - @total = 0 if !@total
+  - line = { :id => 0, :amount => 0, :price => 0, :comment => "" }
+  // - @order_lines << line
+
+  table id='sample_table' style="visibility:hidden"
+    tr data-sum="0" data-price="0"
+      td class="col-md-1"
+        span class="num"
+        = hidden_field_tag 'line[][id]', :value => line[:id]
+      td class="col-md-4"
+        span class="product"
+      td class="col-md-3"
+        = text_field_tag 'line[][comment]', :value => line[:comment], :placeholder => "Комментарий к позиции", :class => "form-control input-sm"
+      td class="col-md-1" class="vert-align"
+        = text_field_tag 'line[][amount]', :value => line[:amount], :class => "form-control form-amount input-sm"
+      td class="col-md-1 price" class="vert-align"
+        = line[:price]
+        | &nbsp;&#x20B7
+      td class="col-md-1" class="form-sum"
+        = line[:price]*line[:amount]
+        | &nbsp;&#x20B7
+      td class="col-md-1" class="vert-align"
+        a class="btn btn-glue btn-xs btn-del" Удалить
+
+  - i = 0
+  - @cats.each do |category|
+    - category.subs_ordered.each do |sub|
+      h4 = sub.name
+      div class="table-responsive"
+        table class="table table-striped order-table"
+          tr data-sum="0"
+            th Номер
+            th Наименование
+            th Коммент
+            th Количество
+            th Цена
+            th Сумма
+            th &nbsp;
+          - sub.all_products.order(:index => :asc).each do |line|
+            - i = i + 1
+            tr data-sum="0" data-price="#{line.price}"
+              td class="col-md-1"
+                span class="num" = i
+                = hidden_field_tag 'line[][id]', :value => line.id
+              td class="col-md-4"
+                span class="product" = line.displayname
+              td class="col-md-3"
+                = text_field_tag 'line[][comment]', :placeholder => "Комментарий к позиции", :class => "form-control input-sm"
+              td class="col-md-1" class="vert-align"
+                = text_field_tag 'line[][amount]', :autocomplete => :off, :class => "form-control form-amount input-sm"
+              td class="col-md-1 price" class="vert-align"
+                = line.price
+                | &nbsp;&#x20B7
+              td class="col-md-1" class="form-sum"
+                = 0
+                | &nbsp;&#x20B7
+              td class="col-md-1" class="vert-align"
+                a class="btn btn-glue btn-xs btn-del" Удалить
+
+  h4 id="total" data-sum="#{@total}" Итого: #{"%0.f" % @total} &#x20B7
+
+  fieldset class='control-group'
+    = f.label "Комментарий к заказу", :class => 'col-md-3 control-label'
+    div class='col-md-6 controls'
+      = f.text_area :description, :class => 'form-control', :value => (@descr if @descr)
+
+
+  div class="form-actions"
+    = f.submit pat(:save), :class => 'btn btn-sm btn-prime'
+
+- content_for :js_assets do
+  = stylesheet_link_tag 'ui.fancytree', 'jstree'
+  = javascript_include_tag 'jquery-ui.min', 'jquery.fancytree-all.min', 'jstree.min'
+  javascript:
+    (function($) {
+      $(function() {
+        var _p, _products;
+
+        // $("#products2_tree").jstree({
+        //   'core' : {
+        //     'data' : {
+        //       "url" : "/products/tree2"
+        //     }
+        //   }
+        // });
+
+        // $("#products_tree").fancytree({
+        //   source: {
+        //     url: "/products/tree"
+        //   },
+        //   activate: function(event, data) {
+        //     //logEvent(event, data);
+        //     //var node = data.node;
+        //     // acces node attributes
+        // 
+        //     //$(".modal .modal-content").text(node.title);
+        //     //$(".modal").modal();
+        //     // if( !$.isEmptyObject(node.data) ){
+        //     // }
+        //   },
+        //   keydown: function(event, data) {
+        //     switch (event.which) {
+        //       case 13:
+        //         if (data.node.children) return false;
+        //         $(".modal .modal-content .product").text(data.node.title);
+        //         $(".modal").modal();
+        //         $(".modal").data('id', data.node.key);
+        //         $(".modal :input").val('');
+        //         $(".modal :input").focus();
+        //         //data.node.toggleSelected();
+        //         return false;
+        //     }
+        //   },
+        // });
+
+        function add_product() {
+          var id = $(".modal").data('id');
+          _p = $.grep(_products, function(e) { return e.id == id; })[0];
+          var tr = $("#sample_table tr:first").clone();
+          tr.data('sum', 0);
+          tr.data('price', _p.price);
+          $(".price", tr).text($(".price", tr).text().replace(/\d+/g, _p.price));
+          $(".product", tr).text(_p.name);
+          $(":input[name*='id']", tr).val(_p.id);
+          var amount = +$(".modal :input").val();
+          $(":input[name*='amount']", tr).val(amount);
+          var n = $(".order-table tbody tr span.num").length;
+          $(".num", tr).text(n + 1);
+          tr.appendTo($(".order-table tbody"));
+
+          var line = tr;
+          var newsum = Math.abs(line.data("price") * amount);
+          var newtotal = $("#total").data("sum") - +line.data("sum") + newsum;
+          $(".form-sum", line).text($(".form-sum", line).text().replace(/\d+/g, newsum));
+          line.data("sum", newsum);
+          $("#total").text($("#total").text().replace(/\d+/g, newtotal));
+          $("#total").data("sum", newtotal);
+
+          $(".modal").modal('hide');
+          // $("#typeahead-product").focus();
+          // var scrollTop = $('#typeahead-product').offset().top;
+          // $(document).scrollTop(0);
+        }
+
+        $(".modal .btn").on("click", function(e) {
+          add_product();
+        });
+
+        $(".modal :input").on("keydown", function(e) {
+          if (e.which == 13) {
+            add_product();
+          }
+          if (e.which == 27 || e.which == 13) {
+            $(".modal").modal('hide');
+            $("#products_tree ul").focus();
+            return false;
+          }
+        });
+
+        $.ajax({
+            type: "POST",
+            data: "authenticity_token=" + $("form:first :input[name^='auth']").val(),
+            url: "/orders/clients"
+        }).done(function(response) {
+          var substringMatcher = function(strs) {
+            return function findMatches(q, cb) {
+              var matches, substrRegex;
+              matches = [];
+              substrRegex = new RegExp(q, 'i');
+
+              $.each(strs, function(i, str) {
+                if (substrRegex.test(str.name) || substrRegex.test(str.org) || substrRegex.test(str.tel))
+                  matches.push(str);
+              });
+
+              cb(matches);
+            };
+          };
+
+          $('#typeahead-client').typeahead({
+            hint: true,
+            highlight: true,
+            minLength: 2
+          },
+          {
+            name: 'clients',
+            displayKey: 'name',
+            source: substringMatcher(response),
+            templates: {
+              suggestion: Handlebars.compile('<p><strong>{{name}}</strong> – {{city}} ({{tel}})</p>')
+              //suggestion: '<p><strong>' + this.id + '</strong>' + this.name + '</p>'
+              //suggestion: $("<div/>", { text: 'Ghbdtn'})
+
+            }
+          }).on('typeahead:selected', function (obj, data) {
+            $(":input[name*='client']").val(data.id);
+          });
+        });
+
+        // var bestPictures = new Bloodhound({
+        //   datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
+        //   queryTokenizer: Bloodhound.tokenizers.whitespace,
+        //   remote: {
+        //     url: '/orders/clients',
+        //     replace: function(url, query) {
+        //       return url + "#" + query;
+        //     },
+        //     ajax : {
+        //       beforeSend: function(jqXhr, settings){
+        //         
+        //         settings.data = $.param({
+        //           q: $('#typeahead-client').val(),
+        //           authenticity_token: $("form:first :input[name^='auth']").val()
+        //         })
+        //       },
+        //       contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+        //       type: "POST"
+        //     }
+        //   }
+        // });
+        // 
+        // bestPictures.initialize();
+        // $('#typeahead-client').typeahead(null, {
+        //   name: 'clients',
+        //   displayKey: 'name',
+        //   source: bestPictures.ttAdapter()
+        // });
+
+        $.ajax({
+            type: "POST",
+            data: "authenticity_token=" + $("form:first :input[name^='auth']").val() + "&q=яро",
+            url: "/orders/cities"
+        }).done(function(response) {
+          var substringMatcher = function(strs) {
+            return function findMatches(q, cb) {
+              var matches, substrRegex;
+              matches = [];
+              substrRegex = new RegExp(q, 'i');
+
+              $.each(strs, function(i, str) {
+                if (substrRegex.test(str.name))
+                  matches.push({ value: str.name, id: str.id });
+              });
+
+              cb(matches);
+            };
+          };
+
+          $('#typeahead-place').typeahead({
+            hint: true,
+            highlight: true,
+            minLength: 2
+          },
+          {
+            name: 'cities',
+            displayKey: 'value',
+            source: substringMatcher(response)
+
+          }).on('typeahead:selected', function (obj, data) {
+            $(":input[name*='place']").val(data.id);
+          });
+        });
+
+        $.ajax({
+            type: "POST",
+            data: "authenticity_token=" + $("form:first :input[name^='auth']").val(),
+            url: "/orders/products"
+        }).done(function(response) {
+          _products = response;
+          var substringMatcher = function(strs) {
+            return function findMatches(q, cb) {
+              var matches, substrRegex;
+              matches = [];
+              q = q.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+              substrRegex = new RegExp(q, 'i');
+
+              $.each(strs, function(i, str) {
+                if (+q === +str.id)
+                  matches.push({ name: str.name, id: str.id, price: str.price });
+                if (substrRegex.test(str.name))
+                  matches.push({ name: str.name, id: str.id, price: str.price });
+              });
+
+              cb(matches);
+            };
+          };
+
+          $('#typeahead-product').typeahead({
+            hint: true,
+            highlight: true,
+            minLength: 2
+          },
+          {
+            name: 'states',
+            displayKey: 'name',
+            source: substringMatcher(response)
+
+          }).on('typeahead:selected', function (obj, data) {
+            _p = data;
+            $("#add-product").click();
+          });
+        });
+
+
+        $("form").on("keypress keydown", "input", function(e) {
+          if (e.which == 13 || e.keyCode == 13) {
+            $(this).change();
+            return false;
+          }
+        });
+        $("form").on("submit", function(e) {
+          $(":input[name=cl]").parents(".control-group").removeClass("has-error");
+          $(":input[name=pl]").parents(".control-group").removeClass("has-error");
+          var valid = true;
+          if ($(":input[name*=client_id]").val().length == 0) {
+            $(":input[name=cl]").parents(".control-group").addClass("has-error");
+            valid = false;
+          }
+          if ($(":input[name*=place_id]").val().length == 0) {
+            $(":input[name=pl]").parents(".control-group").addClass("has-error");
+            valid = false;
+          }
+          return valid;
+        });
+
+        $("#add-product").on("click", function() {
+          var tr = $("#sample_table tr:first").clone();
+          tr.data('sum', 0);
+          tr.data('price', _p.price);
+          $(".price", tr).text($(".price", tr).text().replace(/\d+/g, _p.price));
+          $(".product", tr).text(_p.name);
+          $(":input[name*='id']", tr).val(_p.id);
+          var n = $(".order-table tbody tr span.num").length;
+          $(".num", tr).text(n + 1);
+          tr.appendTo($(".order-table tbody"));
+          $("#typeahead-product").focus();
+          var scrollTop = $('#typeahead-product').offset().top;
+          $(document).scrollTop(0);
+        });
+
+        $(".order-table").on("change", ":input.form-amount", function() {
+          var amount = +$(this).val();
+          var line = $(this).parents("tr");
+          // var datamin = +line.data('min') || 10;
+          // if (isNaN(amount) || amount < datamin) {
+          //     $(this).val('');
+          //     $("#min-alert .modal-content p span").text(datamin)
+          //     $("#min-alert").modal();
+          //     return false;
+          // }
+          var newsum = Math.abs(line.data("price") * amount);
+          var newtotal = $("#total").data("sum") - +line.data("sum") + newsum;
+          // updateCart(newtotal);
+          $(".form-sum", line).text($(".form-sum", line).text().replace(/\d+/g, newsum));
+          line.data("sum", newsum);
+          $("#total").text($("#total").text().replace(/\d+/g, newtotal));
+          $("#total").data("sum", newtotal);
+          //var data = "id=" + $(":input:first", line).val() + "&amount=" + amount + "&authenticity_token=" + $("form:first :input[name^='auth']").val();
+          // $.ajax({ type: "POST", url: "/order/cartupd", data: {} });
+        });
+
+        $(".order-table").on("click", ".btn-del", function() {
+          var line = $(this).parents("tr");
+          line.fadeOut(function() {
+            var newtotal = $("#total").data("sum") - +line.data("sum");
+            line.remove();
+            $(".order-table tbody tr span.num").each(function(i, el) {
+              $(el).text(i + 1);
+            });
+            // updateCart(newtotal, +$("#cart-label").text() - 1);
+            $("#total").text($("#total").text().replace(/\d+/g, newtotal));
+            $("#total").data("sum", newtotal);
+          });
+          //var data = "id=" + $(":input:first", line).val() + "&authenticity_token=" + $("form:first :input[name^='auth']").val();
+          // $.ajax({ type: "POST", url: "/order/cartdel", data: {} });
+        });
+      });
+    })(jQuery);

@@ -1,0 +1,59 @@
+ul class="nav nav-tabs"
+  li class="active" = link_to tag_icon(:list, pat(:list)), url(:products, :index)
+  // li = link_to tag_icon(:plus, pat(:new)), url(:products, :new)
+
+div class="tabs-content"
+  table class="table table-hover table-condensed" id="list"
+    thead
+      tr
+        th class='header list-menu'
+          div class='dropdown'
+            a href='#' class='list-menu-toggle.dropdown-toggle dropdown-toggle' data-toggle='dropdown'
+              = tag_icon :magic
+            ul class='list-menu dropdown-menu' role='dropdown'
+              li class='list-menu-wrapper' = link_to tag_icon(:check, pat(:select_all)), '#', :id => 'select-all', :class => 'list-menu-link'
+              li class='list-menu-wrapper list-menu-wrapper-disabled' = link_to tag_icon('check-empty', pat(:deselect_all)), '#', :id => 'deselect-all', :class => 'list-menu-link list-menu-link-disabled'
+              li class='list-menu-divider divider'
+              li class='list-menu-wrapper list-menu-wrapper-disabled'
+                = link_to tag_icon(:trash, pat(:delete_selected)), '#', :id => 'delete-selected', :class => 'list-menu-link list-menu-link-disabled'
+                div class='list-menu-popover-delete-selected popover right'
+                  div class='arrow'
+                  h3 class='popover-title' = pat(:delete_selected_title)
+                  div class='popover-content'
+                    = form_tag url(:products, :destroy_many), :method => :delete do
+                      = hidden_field_tag :product_ids, :'data-delete-many-ids' => true
+                      = submit_tag  pat(:delete), :class =>'list-menu-popover-delete-selected-btn btn btn-danger btn-small'
+                      div class='btn btn-default btn-small cancel' = pat(:cancel)
+        th class='header' = mat(:product, :id)
+        th class='header' = mat(:product, :name)
+        th class='header' = mat(:product, :price)
+        th class='header' = mat(:product, :category)
+        th class='header list-row-action-header'
+
+    tbody
+      -@products.each do |product|
+        tr class='list-row'
+          td class='list-column list-selectable' = check_box_tag 'product_ids[]', :value => product.id, :class => 'list-selectable-checkbox'
+          td class='list-column' = product.id
+          td class='list-column' = product.name
+          td class='list-column'
+            = product.price
+            | &nbsp;&#x20B7
+          td class='list-column' = product.category.nil? ? "" : product.category.name
+          td class='list-column list-row-action'
+            div class='list-row-action-wrapper'
+              //span class='list-row-action-wrapper-link' 1
+              // = link_to tag_icon(:edit), :href => url(:products, :edit, :id => product.id), :rel => :tooltip, :title => "#{pat(:edit)} product", :class => 'list-row-action-wrapper-link'
+              // = link_to tag_icon(:trash), :rel => :tooltip, :title => "#{pat(:delete)} product", :class => 'list-row-action-delete-one list-row-action-wrapper-link'
+            div class='modal'
+              div class="modal-dialog"
+                div class='modal-content'
+                  div class="modal-header"
+                    h4 class="modal-title" We gonna delete this item
+                  div class='modal-body'
+                    p Are you sure?
+                  div class='modal-footer'
+                    = form_tag url(:products, :destroy, :id => product.id), :method => :delete do
+                      = submit_tag pat(:delete), :class =>'list-row-action-popover-delete-one-btn btn btn-danger btn-wide'
+                      div class='btn btn-default btn-wide cancel' data-dismiss="modal" = pat(:cancel)
+= paginate

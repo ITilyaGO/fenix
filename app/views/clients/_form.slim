@@ -1,0 +1,139 @@
+- error = @client.errors.include?(:name)
+fieldset class='control-group#{error ? ' has-error' : ''}'
+  = f.label :name, :class => 'col-md-3 control-label'
+  div class='col-md-6 controls'
+    = f.text_field :name, :class => 'form-control input-large input-with-feedback', :autofocus => true
+    // span class='help-inline' = error ? f.error_message_on(:name, :class => 'text-error') : pat(:example)
+// fieldset class='control-group#{error ? ' has-error' : ''}'
+//   = f.label :client, :class => 'control-label'
+  // div class='controls'
+  //   select name="client[client_id]" class="huge mbl"
+  //     = content_tag :option, "Нету", :value => ""
+  //     - cats.each do |cat|
+  //       - html_attributes = { :value => cat.id }
+  //       - html_attributes[:selected] ||= option_is_selected?(cat.id, cat.name, @client.client_id)
+  //       = content_tag(:option, cat.name, html_attributes)
+
+// - error = @client.errors.include?(:index)
+// fieldset class='control-group#{error ? ' has-error' : ''}'
+//   = f.label :index, :class => 'control-label'
+//   div class='controls'
+//     = f.text_field :index, :class => 'form-control input-large input-with-feedback'
+//     span class='help-inline' = error ? f.error_message_on(:index, :class => 'text-error') : pat(:example)
+
+
+- error = @client.errors.include?(:email)
+fieldset class='control-group#{error ? ' has-error' : ''}'
+  = f.label :email, :class => 'col-md-3 control-label'
+  div class='col-md-6 controls'
+    = f.text_field :email, :class => 'form-control input-large input-with-feedback'
+    // span class='help-inline' = error ? f.error_message_on(:email, :class => 'text-error') : pat(:example)
+- error = @client.errors.include?(:tel)
+fieldset class='control-group#{error ? ' has-error' : ''}'
+  = f.label :tel, :class => 'col-md-3 control-label'
+  div class='col-md-6 controls'
+    = f.text_field :tel, :class => 'form-control input-large input-with-feedback'
+    // span class='help-inline' = error ? f.error_message_on(:tel, :class => 'text-error') : pat(:example)
+
+- error = @client.errors.include?(:place)
+fieldset class='control-group#{error ? ' has-error' : ''}'
+  = f.label :place, :class => 'col-md-3 control-label'
+  div class='col-md-6 controls'
+    div class="scrollable-dropdown-menu"
+      = f.hidden_field :place_id
+      = text_field_tag 'pl', :class => 'form-control', :value => @client.place_name, :id => 'typeahead-place'
+
+// - error = @client.errors.include?(:city)
+// fieldset class='control-group#{error ? ' has-error' : ''}'
+//   = f.label :city, :class => 'col-md-3 control-label'
+//   div class='col-md-6 controls'
+//     = f.text_field :city, :class => 'form-control input-large input-with-feedback'
+    // span class='help-inline' = error ? f.error_message_on(:city, :class => 'text-error') : pat(:example)
+- unless @client.online_place.nil?
+  fieldset class='control-group#{error ? ' has-error' : ''}'
+    = f.label :shadow_city, :class => 'col-md-3 control-label'
+    div class='col-md-6 controls'
+      = f.text_field :online_place, :class => 'form-control input-large input-with-feedback', :readonly => true
+      // span class='help-inline' = error ? f.error_message_on(:org, :class => 'text-error') : pat(:example)
+- error = @client.errors.include?(:org)
+fieldset class='control-group#{error ? ' has-error' : ''}'
+  = f.label :org, :class => 'col-md-3 control-label'
+  div class='col-md-6 controls'
+    = f.text_field :org, :class => 'form-control input-large input-with-feedback', :readonly => true
+    // span class='help-inline' = error ? f.error_message_on(:org, :class => 'text-error') : pat(:example)
+- error = @client.errors.include?(:inn)
+fieldset class='control-group#{error ? ' has-error' : ''}'
+  = f.label :inn, :class => 'col-md-3 control-label'
+  div class='col-md-6 controls'
+    = f.text_field :inn, :class => 'form-control input-large input-with-feedback'
+    // span class='help-inline' = error ? f.error_message_on(:org, :class => 'text-error') : pat(:example)
+- error = @client.errors.include?(:contract)
+fieldset class='control-group#{error ? ' has-error' : ''}'
+  = f.label :contract, :class => 'col-md-3 control-label'
+  div class='col-md-6 controls'
+    = f.text_field :contract, :class => 'form-control input-large input-with-feedback'
+    // span class='help-inline' = error ? f.error_message_on(:org, :class => 'text-error') : pat(:example)
+- error = @client.errors.include?(:shipping_company)
+fieldset class='control-group#{error ? ' has-error' : ''}'
+  = f.label :shipping_company, :class => 'col-md-3 control-label'
+  div class='col-md-6 controls'
+    = f.text_field :shipping_company, :class => 'form-control input-large input-with-feedback'
+    // span class='help-inline' = error ? f.error_message_on(:org, :class => 'text-error') : pat(:example)
+- error = @client.errors.include?(:comment)
+fieldset class='control-group#{error ? ' has-error' : ''}'
+  = f.label :comment, :class => 'col-md-3 control-label'
+  div class='col-md-6 controls'
+    = f.text_area :comment, :class => 'form-control input-large input-with-feedback'
+    // span class='help-inline' = error ? f.error_message_on(:org, :class => 'text-error') : pat(:example)
+
+div class="form-actions"
+  = f.submit pat(:save), :class => 'btn btn-sm btn-prime'
+  // |&nbsp;
+  // = f.submit pat(:save_and_continue), :class => 'btn btn-sm btn-info', :name => 'save_and_continue'
+  // |&nbsp;
+  // = link_to pat(:cancel), url(:clients, :index), :class => 'btn btn-sm btn-default'
+  
+  
+- content_for :js_assets do
+  javascript:
+    (function($) {
+      $(function() {
+        
+        $.ajax({
+            type: "POST",
+            data: "authenticity_token=" + $("form:first :input[name^='auth']").val(),
+            url: "/orders/cities"
+        }).done(function(response) {
+          var substringMatcher = function(strs) {
+            return function findMatches(q, cb) {
+              var matches, substrRegex;
+              matches = [];
+              q = q.replace(/[еёЕЁ]/, '[её]');
+              substrRegex = new RegExp(q, 'i');
+              
+              $.each(strs, function(i, str) {
+                if (substrRegex.test(str.name))
+                  matches.push({ value: str.name, id: str.id });
+              });
+              
+              cb(matches);
+            };
+          };
+          
+          $('#typeahead-place').typeahead({
+            hint: true,
+            highlight: true,
+            minLength: 2
+          },
+          {
+            name: 'cities',
+            displayKey: 'value',
+            source: substringMatcher(response)
+            
+          }).on('typeahead:selected', function (obj, data) {
+            $(":input[name*='place_id']").val(data.id);
+          });
+        });
+  
+      });
+    })(jQuery);

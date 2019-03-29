@@ -1,0 +1,35 @@
+div class="tabs-content"
+  table class="table table-hover table-condensed" id="list"
+    thead
+      tr
+        th class='header' Id
+        // th class='header' = mat(:order, :name)
+        // th class='header' = mat(:order, :amount)
+        th class='header' Name
+        th class='header' Date
+        th class='header' Status
+        th class='header list-row-action-header'
+  
+    tbody
+      -@orders.each do |order|
+        tr class='list-row'
+          td class='list-column' = "#{order.id}"
+          // td class='list-column' = order.name
+          td class='list-column' = [order.account.name, order.account.org].reject(&:empty?).join(" / ")
+          td class='list-column' = to_msk(order.created_at)
+          td class='list-column'
+            | #{Online::Order.status_name(order.status)}
+
+          td class='list-column list-row-action'
+            - if @imp_ids.include?(order.id)
+              div
+                span class="fa fa-check"
+                //span Импортирован
+            - else
+              div class='list-row-action-wrapper'
+                = link_to 'import', :href => url(:orders, :new, :id => order.id), :class => 'list-row-action-wrapper-link'
+
+= paginate
+
+// - @orders.each do |order|
+// span #{order.id} #{order.status} #{order[:status]}

@@ -1,0 +1,11 @@
+Section.create(:name => "Керамика")
+Section.create(:name => "Майолика")
+Section.create(:name => "Текстиль")
+Section.create(:name => "Стекло")
+Section.create(:name => "Дерево")
+
+Account.create(:email => "u1@ya.ru", :name => "User1", :section_id => 1, :password => "1234", :password_confirmation => "1234", :role => "admin")
+Account.create(:email => "u2@ya.ru", :name => "User2", :section_id => 2, :password => "1234", :password_confirmation => "1234", :role => "user")
+Account.create(:email => "u3@ya.ru", :name => "User3", :section_id => 3, :password => "1234", :password_confirmation => "1234", :role => "user")
+Account.create(:email => "u4@ya.ru", :name => "User4", :section_id => 4, :password => "1234", :password_confirmation => "1234", :role => "user")
+Account.create(:email => "u5@ya.ru", :name => "User5", :section_id => 5, :password => "1234", :password_confirmation => "1234", :role => "user")

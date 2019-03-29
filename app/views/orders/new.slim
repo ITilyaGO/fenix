@@ -1,0 +1,162 @@
+div class="tabs-content"
+  = form_for :order, url(:orders, :create, :id => @online.id), :class => 'form-horizontal' do |f|
+    div class="table non-print"
+      table class="table order-info"
+        tr
+          td
+            - if @online.status == 1
+              div class="pull-right"
+                div class="pull-right"
+                  = link_to 'Подтвердить', "http://yardekol.ru/admin/orders/show/#{@online.id}", :target => '_blank', :class => 'btn btn-glue'
+
+            p Город: #{@online.account.city}
+            p Имя: #{@online.account.name}
+            p Организация: #{@online.account.org}
+            p Тел: #{@online.account.tel}
+            p Емайл: #{@online.account.email}
+            p Дата: #{to_msk(@online.created_at)}
+        - if !@online.description.blank?
+          tr
+            td colspan=3
+              = @online.description
+      
+      fieldset class='control-group'
+        div class='col-md-2'
+          span Тип заказа
+        div class='col-md-2 controls'
+          = f.label 'Для Москвы', :class => 'control-label'
+          = f.radio_button :moscow, :value => :false
+        div class='col-md-2 controls'
+          = f.label 'Отправки', :class => 'control-label'
+          = f.radio_button :moscow, :value => :true, :checked => true
+
+      fieldset.control-group
+        = label_tag 'Доставка', :class => 'col-md-3 control-label'
+        div.col-md-6.controls
+          select.huge name="status"
+            - options_for_select(Order.delivery_for_select).each do |o|
+              = o
+
+      fieldset class='control-group'
+        = f.label 'Номер заказа', :class => 'col-md-3 control-label'
+        div class='col-md-3 controls'
+          div class="scrollable-dropdown-menu"
+            = f.text_field :id, :class => 'form-control', :placeholder => "Можно пустой"
+      
+      fieldset class='control-group'
+        div class='col-md-2'
+          span Приоритетный
+        div class='col-md-2 controls'
+          = f.label 'Нет', :class => 'control-label'
+          = f.radio_button :priority, :value => :false, :checked => true
+        div class='col-md-2 controls'
+          = f.label 'Да', :class => 'control-label'
+          = f.radio_button :priority, :value => :true
+
+      fieldset class='control-group'
+        = f.label 'Город заказа', :class => 'col-md-3 control-label'
+        div class='col-md-5 controls'
+          div class="scrollable-dropdown-menu"
+            - c = @client.nil? ? "" : @client.place_name
+            = f.hidden_field :place_id, :value => @client.nil? ? "" : @client.place_id
+            = text_field_tag 'pl', :class => 'form-control', :value => c, :id => 'typeahead-place'
+
+      - if @client
+        div
+          = "Найден заказчик #{@client.name} - #{@client.place_name}"
+          = f.hidden_field :client_id, :class => 'form-control input-large input-with-feedback', :value => @client.id
+      - else
+        div
+          p Заказчик однозначно не найден в базе, но вот возможные варианты:
+        fieldset class='control-group'
+          div class='col-md-6'
+            span Создать нового клиента на основе вышеприведенных данных (тогда все последующие опции будут игнорированы, кроме следующей)
+          div class='col-md-2 controls'
+            = f.label 'Нет', :class => 'control-label'
+            = f.radio_button :create, :value => :false, :checked => true
+          div class='col-md-2 controls'
+            = f.label 'Да', :class => 'control-label'
+            = f.radio_button :create, :value => :true
+
+        fieldset class='control-group'
+          div class='col-md-6'
+            span Прописать новому клиенту выбранный город
+          div class='col-md-2 controls'
+            = f.label 'Нет', :class => 'control-label'
+            = f.radio_button :sync_city, :value => :false, :checked => true
+          div class='col-md-2 controls'
+            = f.label 'Да', :class => 'control-label'
+            = f.radio_button :sync_city, :value => :true
+
+        - error = @online.errors.include?(:client_id)
+        fieldset class='control-group#{error ? ' has-error' : ''}'
+          = f.label :client, :class => 'col-md-3 control-label'
+          div class='col-md-8 controls'
+            select name="order[client_id]" class="huge mbl span select-block" data-size="15"
+              - @clients.each do |c|
+                - html_attributes = { :value => c.id }
+                = content_tag(:option, "#{c.name} #{c.tel} / #{c.place_name} [#{c.online_id}]", html_attributes)
+
+        fieldset class='control-group'
+          div class='col-md-6'
+            span Прописать выбранному клиенту только Id [#{@online.account.id}]
+          div class='col-md-3 controls'
+            = f.label 'Оставить клиента как есть', :class => 'control-label'
+            = f.radio_button :sync_id, :value => :false
+          div class='col-md-3 controls'
+            = f.label 'Да', :class => 'control-label'
+            = f.radio_button :sync_id, :value => :true, :checked => true
+        
+
+    div class="form-actions"
+      = f.submit pat(:save), :class => 'btn btn-sm btn-prime'
+
+- content_for :js_assets do
+  javascript:
+    (function($) {
+      $(function() {
+        
+        $("form").on("submit", function(e) {
+          if ($(":input[name*=place_id]").val().length == 0) {
+            $(":input[name=pl]").parents(".control-group").addClass("has-error");
+            return false;
+          }
+        });
+        
+        $.ajax({
+            type: "POST",
+            data: "authenticity_token=" + $("form:first :input[name^='auth']").val(),
+            url: "/orders/cities"
+        }).done(function(response) {
+          var substringMatcher = function(strs) {
+            return function findMatches(q, cb) {
+              var matches, substrRegex;
+              matches = [];
+              substrRegex = new RegExp(q, 'i');
+              
+              $.each(strs, function(i, str) {
+                if (substrRegex.test(str.name))
+                  matches.push({ value: str.name, id: str.id });
+              });
+              
+              cb(matches);
+            };
+          };
+          
+          $('#typeahead-place').typeahead({
+            hint: true,
+            highlight: true,
+            minLength: 2
+          },
+          {
+            name: 'cities',
+            displayKey: 'value',
+            source: substringMatcher(response)
+            
+          }).on('typeahead:selected', function (obj, data) {
+            $(":input[name*='place']").val(data.id);
+          });
+        });
+  
+      });
+    })(jQuery);

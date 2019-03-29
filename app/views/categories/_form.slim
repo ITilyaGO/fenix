@@ -1,0 +1,40 @@
+- error = @category.errors.include?(:name)
+fieldset class='control-group#{error ? ' has-error' : ''}'
+  = f.label :name, :class => 'col-md-3 control-label'
+  div class='col-md-6 controls'
+    = f.text_field :name, :class => 'form-control input-large input-with-feedback', :autofocus => true, :readonly => true
+    // span class='help-inline' = error ? f.error_message_on(:name, :class => 'text-error') : pat(:example)
+fieldset class='control-group#{error ? ' has-error' : ''}'
+  = f.label :category, :class => 'col-md-3 control-label'
+  div class='col-md-6 controls'
+    select name="category[category_id]" class="huge mbl" disabled="true"
+      = content_tag :option, "Нету", :value => ""
+      - cats.each do |cat|
+        - html_attributes = { :value => cat.id }
+        - html_attributes[:selected] ||= option_is_selected?(cat.id, cat.name, @category.category_id)
+        = content_tag(:option, cat.name, html_attributes)
+
+- error = @category.errors.include?(:index)
+fieldset class='control-group#{error ? ' has-error' : ''}'
+  = f.label :index, :class => 'col-md-3 control-label'
+  div class='col-md-6 controls'
+    = f.text_field :index, :class => 'form-control input-large input-with-feedback', :readonly => true
+    // span class='help-inline' = error ? f.error_message_on(:index, :class => 'text-error') : pat(:example)
+
+- if sections && @category.category_id.nil?
+  fieldset class='control-group#{error ? ' has-error' : ''}'
+    = f.label :section, :class => 'col-md-3 control-label'
+    div class='col-md-6 controls'
+      select name="category[section_id]" class="huge mbl"
+        = content_tag :option, "Нету", :value => ""
+        - sections.each do |sec|
+          - html_attributes = { :value => sec.id }
+          - html_attributes[:selected] ||= option_is_selected?(sec.id, sec.name, @category.section_id')
+          = content_tag(:option, sec.name, html_attributes)
+
+div class="form-actions"
+  = f.submit pat(:save), :class => 'btn btn-prime'
+  |&nbsp;
+  = f.submit pat(:save_and_continue), :class => 'btn btn-info', :name => 'save_and_continue'
+  |&nbsp;
+  = link_to pat(:cancel), url(:categories, :index), :class => 'btn btn-default'

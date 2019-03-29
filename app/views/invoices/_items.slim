@@ -1,0 +1,144 @@
+<table id="items" class="invoice_com_items" border="0" width="100%" cellpadding="0" cellspacing="0">
+  <thead>
+    <tr>
+      <td rowspan="2"><div id="nomerpp_name" class="editable_sys"  style="background-color: transparent;">Но-<br>мер<br>по по-<br>рядку</div></td>
+      <td colspan="2"><div id="tovar_name" class="editable_sys" edtype="text" style="width: 255px; background-color: transparent;">Товар</div></td>
+      <td colspan="2"><div id="ed_name" class="editable_sys centered" edtype="text">Единица измерения</div></td>
+      <td rowspan="2"><div id="vidupak_name" class="editable_sys"  style="width: 42px; background-color: transparent;">Вид<br>упа-<br>ковки</div></td>
+      <td colspan="2"><div id="kolvo_name" class="editable_sys centered" edtype="text">Количество</div></td>
+      <td rowspan="2"><div id="mbrutto_name" class="editable_sys"  style="width:53px;">Масса<br>брутто</div></td>
+      <td rowspan="2"><div id="mnetto_name" class="editable_sys"  style="background-color: transparent;">Количе-<br>ство<br>(масса<br>нетто)</div></td>
+      <td rowspan="2"><div id="price_name" class="editable_sys"  style="background-color: transparent;">Цена,<br>руб. коп.</div></td>
+      <td rowspan="2"><div id="summwo_nds_name" class="editable_sys" >Сумма без<br>учета НДС,<br>руб. коп.</div></td>
+      <td colspan="2"><div id="nds_name" class="editable_sys">НДС</div></td>
+      <td rowspan="2"><div id="summw_nds_name" class="editable_sys" >Сумма с<br>учетом<br>НДС,<br>руб. коп.</div></td>
+    </tr>
+    <tr>
+      <td><div id="naim_name" class="editable_sys">наименование, характеристика, сорт,<br>артикул товара</div></td>
+      <td><div id="kod_name" class="editable_sys">код</div></td>
+      <td><div id="ednaim_name" class="editable_sys">наиме-<br>нование</div></td>
+      <td><div id="okei_name" class="editable_sys">код по<br>ОКЕИ</div></td>
+      <td><div id="inplace_name" class="editable_sys">в<br>одном<br>месте</div></td>
+      <td><div id="mest_name" class="editable_sys">мест,<br>штук</div></td>
+      <td><div id="stavka_name" class="editable_sys">ставка, %</div></td>
+      <td><div id="total_summ_name" class="editable_sys">сумма,<br>руб. коп.</div></td>
+    </tr>
+    <tr>
+      <td >
+        <div id="1_id" class="editable_sys" edtype="text" style="background-color: transparent;">1</div>
+      </td>
+      <td >
+        <div id="2_id" class="editable_sys" edtype="text" style="background-color: transparent;">2</div>
+      </td>
+      <td >
+        <div id="3_id" class="editable_sys" edtype="text">3</div>
+      </td>
+      <td >
+        <div id="4_id" class="editable_sys" edtype="text">4</div>
+      </td>
+      <td >
+        <div id="5_id" class="editable_sys" edtype="text">5</div>
+      </td>
+      <td >
+        <div id="6_id" class="editable_sys" edtype="text">6</div>
+      </td>
+      <td >
+        <div id="7_id" class="editable_sys" edtype="text">7</div>
+      </td>
+      <td >
+        <div id="8_id" class="editable_sys" edtype="text">8</div>
+      </td>
+      <td >
+        <div id="9_id" class="editable_sys" edtype="text">9</div>
+      </td>
+      <td >
+        <div id="10_id" class="editable_sys" edtype="text">10</div>
+      </td>
+      <td >
+        <div id="11_id" class="editable_sys" edtype="text">11</div>
+      </td>
+      <td >
+        <div id="12_id" class="editable_sys" edtype="text">12</div>
+      </td>
+      <td >
+        <div id="13_id" class="editable_sys" edtype="text">13</div>
+      </td>
+      <td >
+        <div id="14_id" class="editable_sys" edtype="text">14</div>
+      </td>
+      <td >
+        <div id="15_id" class="editable_sys" edtype="text">15</div>
+      </td>
+    </tr>
+  </thead>
+  <tbody>
+    - count = 0
+    - items.each_with_index do |item, i|
+      - break if item.ignored || item.done_amount <= 0
+      <tr class="item">
+        <td class="ppnum centered" style="width:36px;">
+          - count = i + 1
+          = count
+        </td>
+        <td style="width:200px;">
+          = item.product.name
+        </td>
+        <td class="centered" style="width:55px;">
+          
+        </td>
+        <td class="centered" style="width:54px;">
+          | шт
+        </td>
+        <td class="centered" style="width:54px;">
+          | 796
+        </td>
+        <td style="width:42px;">
+          
+        </td>
+        <td class="centered" style="width:42px;">
+          = item.done_amount
+        </td>
+        <td style="width:55px;">
+          
+        </td>
+        <td class="centered" style="width:53px;">
+          | 1
+        </td>
+        <td class="centered" style="width:61px;">
+          | 1
+        </td>
+        <td class="righted" style="width:67px;">
+          = to_rub item.price
+        </td>
+        <td class="righted" style="width:60px;">
+          = "%.2f" % (item.price * (item.done_amount || item.amount || 0))
+        </td>
+        <td class="centered" style="width:60px;">-</td>
+        <td class="centered" style="width:67px;">-</td>
+        <td class="righted" style="width:67px;">
+          = "%.2f" % (item.price * (item.done_amount || item.amount || 0))
+        </td>
+      </tr>
+  </tbody>
+  tfoot
+    tr class="item"
+      td colspan="6" class="sum righted" style="border:0;"
+        | Всего по накладной: 
+      td class="centered" style="width:42px;"
+        = count
+      td style="width:55px;"
+      td class="centered" style="width:53px;"
+        | 1
+      td class="centered" style="width:61px;"
+        | 1
+      td class="righted" style="width:67px;"
+        | x
+      td class="righted" style="width:60px;"
+        - sum = to_rub items.map{|e| e.price * (e.done_amount || e.amount || 0) }.inject(:+)
+        = sum
+      td class="centered" style="width:60px;" -
+      td class="centered" style="width:67px;" -
+      td class="righted" style="width:67px;"
+        = sum
+
+</table>

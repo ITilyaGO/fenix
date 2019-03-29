@@ -1,0 +1,12 @@
+table class="table table-hover table-condensed"
+  tbody
+    - @accounts.each do |a|
+      tr
+        td = check_box_tag "ch"
+        td = a[0]
+        td = a[1]
+        td = a[2]
+        td = a[3]
+        td = a[4]
+        td = a[5]
+        td = a[6]

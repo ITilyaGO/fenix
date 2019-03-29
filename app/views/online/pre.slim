@@ -1,0 +1,11 @@
+//= @a.inspect
+table class="table table-hover table-condensed"
+  tbody
+    - @a.each do |c|
+      tr
+        td
+          | #{c[:name]} #{c[:tel]} #{c[:place].nil? ? '' : c[:place].name}
+        td
+          - c[:accounts].each do |a|
+            div
+              | #{a[:name]} #{a[:tel]} #{a[:city]} #{a[:id]} #{a[:email]}

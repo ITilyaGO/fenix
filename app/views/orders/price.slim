@@ -1,0 +1,135 @@
+ul class="nav nav-tabs non-print"
+  li = link_to tag_icon(:list, pat(:list)), url(:orders, :index)
+  li class="active" = link_to tag_icon(:edit, "Show order #{@order.id}"), url(:orders, :show, :id => @order.id)
+
+div class="table non-print"
+  table class="table order-info"
+    tr
+      td
+        p Город: #{@order.place_name}
+        p
+          ' Имя:
+          = link_to url(:clients, :edit, :id => @order.client.id) do
+            = !@order.client.name.blank? ? @order.client.name : 'Клиент'
+          |  (#{@order.client.place_name})
+        p Тел: #{@order.client.tel}
+        p Емайл: #{@order.client.email}
+        p Дата: #{to_msk(@order.created_at)}
+        - if !@order.description.blank?
+          = @order.description
+
+div class="clearfix"
+
+div class="pull-right col-md-3"
+  span Пересчитать на
+  = text_field_tag "calc_percent", :value => '10', :class => "form-control input-sm", :style => "width: 20%;display: inline;"
+  span %
+  div class="btn btn-sm btn-success" style="margin:1em;" name="calc_button" Пуск
+
+= form_tag url(:orders, :price, :id => @order.id), :method => :put, :class => 'form-horizontal order' do
+  div class="block"
+    h4 class="non-print"
+      | Заказ:
+      span class="label label-#{@order.status}"
+        = t :"status.#{@order.status}"
+    ul class="nav nav-tabs non-print" id="order_tab"
+      - @sections.each do |tab|
+        - cat_enabled = @order.by_sec?(tab.id) ? "" : 'disabled'
+        li class="#{cat_enabled}"
+          = link_to tag_icon('fa fa-ok', "#{tab.name}"), "#cat-#{tab.id}", 'data-toggle' => "tab"
+  
+    div class="tab-content" id="for_order_tab"
+      - @sections.each_with_index do |s, i|
+        - tab_visible = @order.by_sec?(s.id)
+        div class="tab-pane #{tab_visible}" id="cat-#{s.id}"
+          - s.categories.each do |tab|
+            - cat_visible = @order.by_cat?(tab.id)
+            - if cat_visible
+              div class="table-res4ponsive"
+                h4 = tab.name
+                table class="table"
+                  tr
+                    th Наименование
+                    th Количество
+                    th class="non-print" Наша цена
+                    th class="non-print" Цена
+                    th class="non-print" Сумма
+                    th class="non-print" Факт
+                    th class="non-print" Не делаем
+                  
+                  - @order.by_cat(tab.id).each do |ol|
+                    tr class="order-line"
+                      td class="col-md-4"
+                        = hidden_field_tag "line[#{ol.id}][id]", :value => ol[:id]
+                        = ol.product.displayname
+                      td class="col-md-1"
+                        = ol.amount
+                      td class="col-md-1" class="price" data-price="#{ol.product.price}"
+                        = ol.product.price
+                        | &nbsp;&#x20B7
+                      td class="col-md-1" class="non-print"
+                        div class='controls'
+                          = text_field_tag "line[#{ol.id}][price]", :value => ol.price, :autocomplete => "off", :class => "form-control input-sm"
+                      td class="col-md-1" class="non-print"
+                        = ol.price*ol.amount
+                        | &nbsp;&#x20B7
+                      td class="col-md-1" class="non-print"
+                        div class='controls'
+                          = ol.done_amount
+                      td class="col-md-1" class="vert-align non-print"
+                        div class='controls'
+                          = check_box_tag "", :checked => ol.ignored
+  div class="non-print"
+    h4 class="pull-right"
+      | Сумма заказа: #{"%0.f" % @order.total} &#x20B7
+    - if @order.finished? || @order.shipped?
+      div class="clearfix"
+      h4 class="pull-right"
+        | Фактически собрано на: #{"%0.f" % @order.done_total} &#x20B7
+  - if current_account.is_admin?
+    = submit_tag "Сохранить", :class => 'btn btn-sm btn-prime', :name => 'save'
+
+
+- content_for :js_assets do
+  javascript:
+    (function($) {
+      $(function() {
+        $("div[name=calc_button]").on("click", function(e) {
+          var lines = $("tr.order-line");
+          lines.each(function() {
+            var p = $(":input[name*=price]", this);
+            var real = +$(".price", this).data('price');
+            var c = Math.ceil(real + (+$(":input[name=calc_percent]").val()/100*real));
+            p.val(c);
+          });
+        });
+        
+        // Tabs
+        $('#order_tab a').click(function (e) {
+          e.preventDefault();
+          $(this).tab('show');
+        });
+        var first_tab = $('#order_tab li:not(.disabled):first a');
+        first_tab.tab('show');
+        if($($('#for_order_tab .tab-pane')[1]).not('.non-print').length > 0)
+          $('#for_order_tab .tab-pane:first').addClass('last');
+        $('#for_order_tab .tab-pane:not(.non-print):last').addClass('last');
+
+        $(":input[name='save']").on("click", function(e) {
+          var valid = true;
+          var lines = $("tr.order-line");
+          var amounts = $(":input[name*=done_amount]", lines);
+          amounts.parents(".controls").removeClass("has-error");
+          lines.each(function() {
+            var a = $(":input[name*=price]", this);
+            if (+a.val() <= 0) {
+              a.parents(".controls").addClass("has-error");
+              valid = false;
+            }
+          });
+          return valid;
+        });
+
+        
+      });
+    })(jQuery);

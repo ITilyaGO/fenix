@@ -1,0 +1,10 @@
+ul class="nav nav-tabs"
+  li = link_to tag_icon(:list, pat(:list)), url(:regions, :index)
+  li = link_to tag_icon(:plus, pat(:new)), url(:regions, :new)
+  li class="active" = link_to tag_icon(:edit, pat(:edit)), url(:regions, :edit, :id => @region.id)
+
+div class="tabs-content"
+  = form_for :region, url(:regions, :update, :id => @region.id), :method => :put, :class => 'form-horizontal' do |f|
+    = partial 'regions/form', :locals => { :f => f }
+
+= @region.places.order(:name).map(&:name).join(', ')

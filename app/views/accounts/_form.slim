@@ -1,0 +1,48 @@
+- error = @account.errors.include?(:name)
+fieldset class='control-group#{error ? ' has-error' : ''}'
+  = f.label :name, :class => 'col-md-3 control-label'
+  div class='col-md-6 controls'
+    = f.text_field :name, :class => 'form-control input-large input-with-feedback', :autofocus => true
+
+- error = @account.errors.include?(:email)
+fieldset class='control-group#{error ? ' has-error' : ''}'
+  = f.label :email, :class => 'col-md-3 control-label'
+  div class='col-md-6 controls'
+    = f.text_field :email, :class => 'form-control input-large input-with-feedback'
+    // span class='help-inline' = error ? f.error_message_on(:email, :class => 'text-error') : pat(:example)
+- error = @account.errors.include?(:role)
+fieldset class='control-group#{error ? ' has-error' : ''}'
+  = f.label :role, :class => 'col-md-3 control-label'
+  div class='col-md-6 controls'
+    = f.text_field :role, :class => 'form-control input-large input-with-feedback', :value => @account.role.blank? ? 'user' : @account.role, :readonly => @account.is_me?
+    // span class='help-inline' = error ? f.error_message_on(:tel, :class => 'text-error') : pat(:example)
+fieldset class='control-group#{error ? ' has-error' : ''}'
+  = f.label :section, :class => 'col-md-3 control-label'
+  div class='col-md-6 controls'
+    select name="account[section_id]" class="huge mbl"
+      = content_tag(:option, 'Нет', { :value => nil })
+      - sections.each do |s|
+        - html_attributes = { :value => s.id }
+        - html_attributes[:selected] ||= option_is_selected?(s.id, s.name, @account.section_id)
+        = content_tag(:option, s.name, html_attributes)
+
+- error = @account.errors.include?(:password)
+fieldset class='control-group#{error ? ' has-error' : ''}'
+  = f.label :password, :class => 'col-md-3 control-label'
+  div class='col-md-6 controls'
+    = f.text_field :password, :class => 'form-control input-large input-with-feedback'
+    // span class='help-inline' = error ? f.error_message_on(:org, :class => 'text-error') : pat(:example)
+- error = @account.errors.include?(:password_confirmation)
+fieldset class='control-group#{error ? ' has-error' : ''}'
+  = f.label :password_confirmation, :class => 'col-md-3 control-label'
+  div class='col-md-6 controls'
+    = f.text_field :password_confirmation, :class => 'form-control input-large input-with-feedback'
+    // span class='help-inline' = error ? f.error_message_on(:org, :class => 'text-error') : pat(:example)
+
+div class="form-actions"
+  = f.submit pat(:save), :class => 'btn btn-sm btn-prime'
+  // |&nbsp;
+  // = f.submit pat(:save_and_continue), :class => 'btn btn-sm btn-info', :name => 'save_and_continue'
+  // |&nbsp;
+  // = link_to pat(:cancel), url(:accounts, :index), :class => 'btn btn-sm btn-default'
+  

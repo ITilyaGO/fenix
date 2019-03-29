@@ -1,0 +1,64 @@
+ul class="nav nav-tabs"
+  li class="active" = link_to tag_icon(:list, 'Список'), url(:places, :index)
+
+div class="tabs-content"
+  table class="table table-hover table-condensed" id="list"
+    thead
+      tr
+        th.header.list-menu
+          div class='dropdown'
+            a.list-menu-toggle.dropdown-toggle.dropdown-toggle href='#' data-toggle='dropdown'
+              = tag_icon :magic
+            ul class='list-menu dropdown-menu' role='dropdown'
+              li class='list-menu-wrapper' = link_to tag_icon(:check, pat(:'set_to_region')), '#', :id => 'select-all', :class => 'list-menu-assign-link'
+
+              li.list-menu-wrapper
+        th class='header' style='width:50px' = mat(:place, :id)
+        th class='header' = mat(:place, :name)
+        th class='header' = mat(:place, :city_type)
+        th class='header' = mat(:place, :region)
+        th class='header list-row-action-header'
+
+    tbody
+      - @places.each do |place|
+        tr class='list-row'
+          td class='list-column list-selectable' = check_box_tag 'place_ids[]', :value => place.id, :class => 'list-selectable-checkbox'
+          td class='list-column' = place.id
+          td class='list-column' = place.name
+          td class='list-column' = I18n.t("city_type.#{place.city_type}")
+          td class='list-column' = place.region_name
+          td class='list-column list-row-action'
+            div class='list-row-action-wrapper'
+
+.modal
+  .modal-dialog
+    .modal-content
+      = form_tag url(:regions, :assign), :method => :put do
+        .modal-header
+          h4.modal-title Назначаем города
+        .modal-body
+          p В область:
+          = hidden_field_tag :place_ids
+          select name="region_id" class="huge" title="Выберите" data-style="btn-info"
+            - @regions.each do |m|
+              = content_tag(:option, m.name, { :value => m.id, :selected => false })
+        .modal-footer
+          = submit_tag pat(:save), :class =>'list-row-action-popover-delete-one-btn btn btn-success btn-wide'
+          .btn.btn-default.btn-wide.cancel data-dismiss="modal" = pat(:cancel)
+
+- content_for :js_assets do
+  javascript:
+    (function($) {
+      $(function() {
+      
+        $(".list-menu-assign-link").on("click", function(e) {
+          var ps = []
+          $('[name="place_ids[]"]:checked').each(function() {
+            ps.push($(this).val())
+          })
+          $(':input[name=place_ids]').val(ps.join(','))
+          $(".modal").modal()
+        });
+
+      });
+    })(jQuery);

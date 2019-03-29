@@ -1,0 +1,78 @@
+ul class="nav nav-tabs"
+  li class="active" = link_to tag_icon(:list, 'Список'), url(:regions, :index)
+  li = link_to tag_icon(:plus, 'Создать'), url(:regions, :new)
+
+div class="tabs-content"
+  table class="table table-hover table-condensed" id="list"
+    thead
+      tr
+        th.header.list-menu
+          div class='dropdown'
+            a.list-menu-toggle.dropdown-toggle.dropdown-toggle href='#' data-toggle='dropdown'
+              = tag_icon :magic
+            ul class='list-menu dropdown-menu' role='dropdown'
+              li class='list-menu-wrapper' = link_to tag_icon(:check, pat(:manager)), '#', :id => 'select-all', :class => 'list-menu-assign-link'
+
+              li.list-menu-wrapper
+        th class='header' style='width:50px' = mat(:region, :id)
+        th class='header' = mat(:region, :name)
+        th class='header' = mat(:region, :code)
+        th class='header' = mat(:region, :manager)
+        th class='header list-row-action-header'
+
+    tbody
+      - @regions.each do |region|
+        tr class='list-row'
+          td class='list-column list-selectable' = check_box_tag 'region_ids[]', :value => region.id, :class => 'list-selectable-checkbox'
+          td class='list-column' = region.id
+          td class='list-column' = region.name
+          td class='list-column' = region.code
+          td class='list-column' = region.manager_name
+          td class='list-column list-row-action'
+            .list-row-action-wrapper
+              = link_to tag_icon(:edit), :href => url(:regions, :edit, :id => region.id), :rel => :tooltip, :title => "#{pat(:edit)} region", :class => 'list-row-action-wrapper-link'
+              = link_to tag_icon("trash-o"), :rel => :tooltip, :title => "#{pat(:delete)} region", :class => 'list-row-action-delete-one list-row-action-wrapper-link'
+            .modal
+              .modal-dialog
+                .modal-content
+                  .modal-header
+                    h4 class="modal-title" We gonna delete this item
+                  .modal-body
+                    p Точно удалить?
+                  .modal-footer
+                    = form_tag url(:regions, :destroy, :id => region.id), :method => :delete do
+                      = submit_tag pat(:delete), :class =>'list-row-action-popover-delete-one-btn btn btn-danger btn-wide'
+                      .btn.btn-default.btn-wide.cancel data-dismiss="modal" = pat(:cancel)
+
+.modal.to-regions
+  .modal-dialog
+    .modal-content
+      = form_tag url(:managers, :assign), :method => :put do
+        .modal-header
+          h4.modal-title Назначаем регионы
+        .modal-body
+          p На менеджера:
+          = hidden_field_tag :region_ids
+          select name="manager_id" class="huge" title="Выберите" data-style="btn-info"
+            - @managers.each do |m|
+              = content_tag(:option, m.name, { :value => m.id, :selected => false })
+        .modal-footer
+          = submit_tag pat(:save), :class =>'list-row-action-popover-delete-one-btn btn btn-success btn-wide'
+          .btn.btn-default.btn-wide.cancel data-dismiss="modal" = pat(:cancel)
+
+- content_for :js_assets do
+  javascript:
+    (function($) {
+      $(function() {
+      
+        $(".list-menu-assign-link").on("click", function(e) {
+          var ps = []
+          $('[name="region_ids[]"]:checked').each(function() {
+            ps.push($(this).val())
+          })
+          $(':input[name=region_ids]').val(ps.join(','))
+          $(".modal.to-regions").modal()
+        });
+
+      });
+    })(jQuery);

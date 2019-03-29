@@ -1,0 +1,35 @@
+div.non-print
+  div.pull-right
+    = link_to 'Печать', 'javascript:print()', :class => 'btn btn-glue'
+
+p.non-print = link_to "Назад", url(:statistic, :finished)
+
+p Месяц: #{@start_date.strftime("%b %y")}
+p Категория: #{@category.name}
+p Заказов: #{@orders.size}
+
+table.table
+  tr
+    th.non-print Печать
+    th Категория
+    th Наименование
+    th Количество
+  
+  - @pretty_stat.each do |s|
+    tr.list-row
+      td class='list-column list-selectable non-print' = check_box_tag 'stats[]', :checked => true, :autocomplete => "off", :class => 'list-selectable-checkbox'
+      td = s[:category]
+      td = s[:name]
+      td = s[:sum]
+
+- content_for :js_assets do
+  javascript:
+    (function($) {
+      $(function() {
+  
+        $(".list-selectable-checkbox").on("change", function() {
+          $(this).parents(".list-row").toggleClass('non-print');
+        });
+        
+      });
+    })(jQuery);

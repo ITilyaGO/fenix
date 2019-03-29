@@ -1,0 +1,16 @@
+- error = @region.errors.include?(:name)
+fieldset class='control-group#{error ? ' has-error' : ''}'
+  = f.label :name, :class => 'col-md-3 control-label'
+  .col-md-6.controls
+    = f.text_field :name, :class => 'form-control input-large input-with-feedback', :autofocus => true
+
+- error = @region.errors.include?(:code)
+fieldset class='control-group#{error ? ' has-error' : ''}'
+  = f.label :code, :class => 'col-md-3 control-label'
+  .col-md-6.controls
+    = f.text_field :code, :class => 'form-control input-large input-with-feedback'
+
+.form-actions
+  = f.submit pat(:save), :class => 'btn btn-sm btn-prime'
+  | &nbsp;
+  = link_to pat(:cancel), url(:regions, :index), :class => 'btn btn-sm btn-default'

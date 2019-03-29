@@ -1,0 +1,30 @@
+ul class="nav nav-tabs"
+  li = link_to tag_icon(:list, pat(:list)), url(:clients, :index)
+  li = link_to tag_icon(:plus, pat(:new)), url(:clients, :new)
+  li class="active" = link_to tag_icon(:edit, pat(:edit)), url(:clients, :edit, :id => @client.id)
+  li = link_to tag_icon("trash-o", pat(:delete)), :class => 'list-row-action-delete-one'
+  div class='modal'
+    div class="modal-dialog"
+      div class='modal-content'
+        div class="modal-header"
+          h4 class="modal-title" We gonna delete this item
+        div class='modal-body'
+          p Точно удалить?
+        div class='modal-footer'
+          = form_tag url(:clients, :destroy, :id => @client.id), :method => :delete do
+            = submit_tag pat(:delete), :class =>'list-row-action-popover-delete-one-btn btn btn-danger btn-wide'
+            div class='btn btn-default btn-wide cancel' data-dismiss="modal" = pat(:cancel)
+
+div class="tabs-content"
+  = form_for :client, url(:clients, :update, :id => @client.id), :method => :put, :class => 'form-horizontal' do |f|
+    = partial 'clients/form', :locals => { :f => f, :cats => @cats }
+
+  - if @client.online_id
+    div class="btn label-warning"
+      span class="fa fa-star"
+      = link_to 'http://yardekol.ru/admin/accounts/edit/' << @client.online_id.to_s
+        = " Online Id: #{@client.online_id}"
+  
+  div class="btn label-info"
+    = link_to url(:clients, :orders, :id => @client.id)
+      = "Заказы: #{@client.orders.size}"

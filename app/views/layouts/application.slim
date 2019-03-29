@@ -1,0 +1,258 @@
+doctype 5
+html lang='en'
+  head
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+    = javascript_include_tag 'jquery-1.11.1.min', 'html5shiv.min', 'respond.min'
+    <![endif]-->
+    meta content='text/html; charset=utf-8' http-equiv='Content-Type'
+    meta name='viewport' content='width=device-width,initial-scale=1'
+    title = @title.present? ? "#{@title}" : "Unnamed Project"
+    = favicon_tag 'favicon.ico'
+    = stylesheet_link_tag 'bootstrap', 'admin-ui', 'font-awesome.min', 'dashboard'
+
+  body
+    #page-wrapper.open
+      #sidebar-wrapper
+        ul.sidebar
+          li#toggle-sidebar.sidebar-main
+            a
+              | Dashboard
+              span.menu-icon.fa.fa-exchange
+
+          - if allow_route?(:orders_create)
+            li.sidebar-title.separator
+              span Создать заказ
+            li.sidebar-list
+              = link_to url(:online, :orders) do
+                | Заказы с сайта
+                | &nbsp;&nbsp;
+                span class="badge" = Order.online_count
+                span class="menu-icon fa fa-flash"
+            li.sidebar-list
+              = link_to url(:orders, :fullempty) do
+                | Создать заказ
+                span class="menu-icon fa fa-flash"
+
+          li.sidebar-title.separator
+            span Заказы
+          // li class="sidebar-list"
+          //   = link_to url(:orders, :index) do
+          //     | На эту неделю
+          //     span class="menu-icon fa fa-exclamation-circle"
+          - if allow_route?(:orders_draft)
+            li class="sidebar-list"
+              = link_to url(:orders, :draft) do
+                | Непроверенные
+                span class="menu-icon fa fa-exclamation-circle"
+          li.sidebar-list
+            = link_to url(:orders, :index) do
+              | Все
+              | &nbsp;&nbsp;
+              span class="badge" = current_account.new_orders
+              // span class="badge" = current_account.new_orders
+              span class="menu-icon fa fa-folder-o"
+          li.sidebar-list
+            = link_to url(:orders, :finished) do
+              | Готовые
+              span class="menu-icon fa fa-check-square-o"
+          li.sidebar-list
+            = link_to url(:orders, :archive) do
+              | Архив
+              span class="menu-icon fa fa-archive"
+
+          li.sidebar-title.separator
+            span Расписание
+          li.sidebar-list
+            = link_to url(:timeline, :weeks) do
+              | График
+              span class="menu-icon fa fa-tachometer"
+          li.sidebar-list
+            = link_to url(:roundtrips, :index) do
+              | График поездок
+              span class="menu-icon fa fa-car"
+          // li class="sidebar-list"
+          //   a href="#"
+          //     | Settings
+          //     span class="menu-icon fa fa-cogs"
+          li.sidebar-list
+            = link_to url(:statistic, :index) do
+              | Статистика
+              span class="menu-icon fa fa-bar-chart"
+            end
+          - if allow_route?(:online)
+            li.sidebar-list
+              = link_to url(:online, :sync_status) do
+                | Sync
+                span class="menu-icon fa fa-skyatlas"
+
+          - if allow_route?(:editors)
+            li.sidebar-title.separator
+              span Редакторы
+            li.sidebar-list
+              = link_to url(:clients, :index) do
+                | Клиенты
+                span class="menu-icon fa fa-child"
+            li.sidebar-list
+              = link_to url(:products, :index) do
+                | Продукция
+                span class="menu-icon fa fa-archive"
+            li.sidebar-list
+              = link_to url(:places, :index) do
+                | Города
+                span class="menu-icon fa fa-building"
+            li.sidebar-list
+              = link_to url(:regions, :index) do
+                | Регионы
+                span class="menu-icon fa fa-flag"
+            li.sidebar-list
+              = link_to url(:categories, :index) do
+                | Категории
+                span class="menu-icon fa fa-book"
+            - if allow_route?(:accounts)
+              li.sidebar-list
+                = link_to url(:accounts, :index) do
+                  | Юзеры
+                  span class="menu-icon fa fa-user"
+            li.sidebar-list
+              = link_to url(:managers, :index) do
+                | Менеджеры
+                span class="menu-icon fa fa-coffee"
+
+        .sidebar-footer
+          .col-xs-6
+            = link_to "Ярдеколь", "https://yardekol.ru", :target => "_blank"
+          .col-xs-6
+            = link_to "Админка", "https://yardekol.ru/a", :target => "_blank"
+
+      div id="content-wrapper"
+        div class="page-content"
+          div class="row header"
+            div class="col-xs-12"
+              div class="pull-right"
+                span.menu-icon.fa.fa-user style='margin-right:7px;'
+                span = current_account.name
+                div class="btn btn-small item"
+                  = form_for 'logout', url(:sessions, :destroy), :method => :delete do
+                    = submit_tag "выход", :class => "menu-icon btn fa-power-off"
+              / div class="user pull-right"
+              /   div class="mea" style="width: 100px"
+              /     
+              /     div class="page"
+              /       span.menu-icon.fa.fa-user-circle
+              /       span = current_account.name
+                // div class="item"
+                    //i class="fa fa-power-off fa-fw pull-right"
+                // <div class="item dropdown">
+                //   <a href="#" class="dropdown-toggle"><i class="fa fa-user"></i>
+                //     <img src="img/avatar.jpg">
+                //   </a>
+                //   <ul class="dropdown-menu dropdown-menu-right">
+                //     <li class="dropdown-header">
+                //       Joe Bloggs
+                //     </li>
+                //     <li class="divider"></li>
+                //     <li class="link">
+                //       <a href="#">
+                //         Profile
+                //       </a>
+                //     </li>
+                //     <li class="link">
+                //       <a href="#">
+                //         Menu Item
+                //       </a>
+                //     </li>
+                //     <li class="divider"></li>
+                //     <li class="link">
+                //       <a href="#">
+                //         Logout
+                //       </a>
+                //     </li>
+                //   </ul>
+                // </div>
+                // <div class="item dropdown">
+                //  <a href="#" class="dropdown-toggle"><i class="fa fa-bell-o"></i></a>
+                //   <ul class="dropdown-menu dropdown-menu-right">
+                //     <li class="dropdown-header">
+                //       Notifications
+                //     </li>
+                //     <li class="divider"></li>
+                //     <li>
+                //       <a href="#">Server Down!</a>
+                //     </li>
+                //   </ul>
+                // </div>
+              div class="meta"
+                div class="page"
+                  div class=""
+                   | Home
+                   - if @title
+                    = " / #{@title}"
+          
+          = {:error => 'danger', :warning => 'warning', :success => 'success', :notice => 'info'}.map { |type, class_name| flash_tag(type, :class => "alert alert-#{class_name} fade in", :bootstrap => true) }.join.html_safe
+          
+          div class='main-wrapper-push' = yield
+          
+          // <div class="row">
+          //   <div class="col-xs-12">
+          //     <div class="widget">
+          //       <div class="widget-body">Get started!</div>
+          //     </div>
+          //   </div>
+          // </div>
+        
+    // section class='main'
+    //   div class='content'
+    //     div class='main-wrapper-push' = yield
+    //     footer
+    //       div class="bottom-menu bottom-menu-inverse"
+    //         div class="container"
+    //           div class="row"
+    //             // div class="col-md-2 navbar-brand"
+    //             //   a href="#fakelink" class="fui-flat"
+    //             
+    //             div class="col-md-10"
+    //               ul class="bottom-links"
+    //                 li
+    //                   | ПГ ЯрДеколь
+    //                 li
+    //                   | г. Ярославль
+    //                 li
+    //                   = Time.now.year
+    //             div class="col-md-2"
+    //               ul class="bottom-icons"
+    //                 // li
+    //                 //   a href="#fakelink" class="fui-pinterest"
+    //   <aside id="sidebar">
+    //     <div class="plugin_box plugin_categories">
+    //       <h3>Категории</h3>
+    //       <ul>
+    //         <li class="category"><a href="/category/my/">Мои статьи и записи</a></li>
+    //         <li class="category"><a href="/category/docs/">Документация</a></li>
+    //         <li class="category"><a href="/category/tuning/">Туториалы, настройка</a></li>
+    //       </ul>
+    //     </div>
+    //     <div class="plugin_box plugin_latest_posts">
+    //       <h3>Последние записи</h3>
+    //       <ul>
+    //         <li><a href="/post/meetup/">IT квартирники</a></li>
+    //         <li><a href="/post/nginx-https-tls/">Дошли руки настроить https для nginx</a></li>
+    //         <li><a href="/post/ceph/">В работе статья про ceph</a></li>
+    //         <li><a href="/post/rit2013/">Миллион PPS в секунду — связанность и балансировка</a></li>
+    //         <li><a href="/post/one-or-zero/">Quote</a></li>
+    //         <li><a href="/post/dmitrij-smirnov-na-rit-2013/">Дмитрий Смирнов на РИТ++ 2013</a></li>
+    //       </ul>
+    //     </div>
+    //     <div class="plugin_box plugin_pages">
+    //       <h3>Страницы</h3><ul><li><a href="/">Главная</a></li></ul>
+    //     </div>
+    //   	</aside>
+      
+
+
+    - if content_for?(:map_section_asset)
+      = yield_content :map_section_asset
+
+    
+    = javascript_include_tag 'jquery-2.1.1.min', 'jquery.cookie', 'bootstrap.min', 'typeahead', 'handlebars', 'bootstrap-select', :application
+    = yield_content :js_assets

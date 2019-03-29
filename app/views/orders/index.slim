@@ -1,0 +1,104 @@
+// ul class="nav nav-tabs"
+//   li class="active" = link_to tag_icon(:list, pat(:list)), url(:orders, :index)
+//   li = link_to tag_icon(:plus, pat(:new)), url(:orders, :create)
+// 
+div class="tabs-content"
+  table class="table table-hover table-condensed" id="list"
+    thead
+      tr
+        th class='header list-menu non-print'
+          div class='dropdown'
+            a href='#' class='list-menu-toggle.dropdown-toggle dropdown-toggle' data-toggle='dropdown'
+              // = tag_icon :magic
+            ul class='list-menu dropdown-menu' role='dropdown'
+              li class='list-menu-wrapper' = link_to 'select_all', '#', :id => 'select-all', :class => 'list-menu-link'
+              li class='list-menu-wrapper list-menu-wrapper-disabled' = link_to 'deselect_all', '#', :id => 'deselect-all', :class => 'list-menu-link list-menu-link-disabled'
+              li class='list-menu-divider divider'
+        th class='header' Номер
+        // th class='header' = mat(:order, :name)
+        // th class='header' = mat(:order, :amount)
+        th class='header' Город
+        th class='header' Заказчик
+        th class='header' Дата
+        th class='header' Предп.дата
+        th class='header' Менеджер
+        th class='header' Тр.ком
+        th class='header only-print' Сумма
+        th class='header non-print'
+          - @sections.each do |s|
+            // - s_st = order.order_parts.find_by(:section_id => s.id)
+            = content_tag :span, " #{s.name[0..2]} ", :class => ""
+        th class='header non-print'
+        th class='header list-row-action-header non-print'
+    
+    tbody
+      - @orders.each do |order|
+        tr class='list-row non-print #{order.priority ? "warning" : ""}'
+          td class='list-column list-selectable non-print' = check_box_tag 'order_ids[]', :autocomplete => "off", :value => order.id, :class => 'list-selectable-checkbox'
+          td class='list-column'
+            - if !order.draft?
+              = link_to order.id, :href => url(:orders, :edit, :id => order.id)
+            - else
+              = "#{order.id}"
+          // td class='list-column' = order.name
+          td class='list-column' = order.place_name
+          td class='list-column' = order.client.name
+          td class='list-column text-nowrap' = to_msk(order.created_at)
+          td class='list-column text-nowrap'
+            = to_msk_date(order.timeline.start_at) unless order.timeline.nil?
+          td class='list-column' = order.client.place&.region&.manager&.name
+          td class='list-column' = order.client.shipping_company
+          td class='list-column only-print' = "%0.f" % order.done_total
+          td class='list-column text-nowrap non-print'
+            = partial 'orders/squares', :locals => { :sections => @sections, :order => order }
+            // - @sections.each do |s|
+            //   - s_st = order.order_parts.find_by(:section_id => s.id)
+            //   = content_tag :button, !s_st.nil? && s_st.transfer ? "п": "", :class => "btn btn-sm btn-#{s_st.nil? ? 'default' : s_st.state}"
+            //   | &nbsp;
+            // | &nbsp;
+            span class="label label-#{order.status}"
+              = t :"status.#{order.status}"
+          td class='list-column non-print'
+            - if order.finished?
+              = link_to "Отправить", :href => url(:orders, :ship, :id => order.id), :class => "btn btn-xs btn-shipped"
+            - if order.draft?
+              = link_to "Подтвердить", :href => url(:orders, :anew, :id => order.id), :class => "btn btn-xs btn-anew"
+
+            // - per = to_percent(order.all_parts, order.done_parts)
+            // <div class="progress" data-toggle="tooltip" data-placement="top" title="#{per}% сделано">
+            //   <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="#{per}" aria-valuemin="0" aria-valuemax="100" style="width: #{per}%">
+            //     <span class="sr-only">#{per}% Complete</span>
+            //   </div>
+            // </div>
+          
+          td class='list-column list-row-action non-print'
+            div class='list-row-action-wrapper'
+              - if current_account.is_admin?
+                = link_to tag_icon("paw"), :rel => :tooltip, :title => "Edit order", :href => url(:orders, :correct, :id => order.id), :class => 'list-row-action-wrapper-link'
+              - if !order.draft?
+                = link_to 'edit', :href => url(:orders, :edit, :id => order.id), :class => 'list-row-action-wrapper-link'
+              - if order.draft?
+                = link_to tag_icon("trash-o"), :rel => :tooltip, :title => "#{pat(:delete)} order", :class => 'list-row-action-delete-one list-row-action-wrapper-link'
+            div class='modal'
+              div class="modal-dialog"
+                div class='modal-content'
+                  div class="modal-header"
+                    h4 class="modal-title" We gonna delete this item
+                  div class='modal-body'
+                    p Точно удалить?
+                  div class='modal-footer'
+                    = form_tag url(:orders, :destroy, :id => order.id), :method => :delete do
+                      = submit_tag pat(:delete), :class =>'list-row-action-popover-delete-one-btn btn btn-danger btn-wide'
+                      div class='btn btn-default btn-wide cancel' data-dismiss="modal" = pat(:cancel)
+
+- content_for :js_assets do
+  javascript:
+    (function($) {
+      $(function() {
+  
+        $(".list-selectable-checkbox").on("change", function() {
+          $(this).parents(".list-row").toggleClass('non-print');
+        });
+        
+      });
+    })(jQuery);

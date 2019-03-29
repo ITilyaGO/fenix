@@ -1,0 +1,14 @@
+h4 = @city.name
+p Заказов: #{@orders.size}
+
+table class="table"
+  tr
+    th Категория
+    th Наименование
+    th Количество
+  
+  - @pretty_stat.each do |s|
+    tr
+      td = s[:category]
+      td = s[:name]
+      td = s[:sum]

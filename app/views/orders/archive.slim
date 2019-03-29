@@ -1,0 +1,47 @@
+div class="tabs-content"
+  table class="table table-hover table-condensed" id="list"
+    thead
+      tr
+        th class='header list-menu'
+          div class='dropdown'
+            a href='#' class='list-menu-toggle.dropdown-toggle dropdown-toggle' data-toggle='dropdown'
+              // = tag_icon :magic
+            ul class='list-menu dropdown-menu' role='dropdown'
+              li class='list-menu-wrapper' = link_to 'select_all', '#', :id => 'select-all', :class => 'list-menu-link'
+              li class='list-menu-wrapper list-menu-wrapper-disabled' = link_to 'deselect_all', '#', :id => 'deselect-all', :class => 'list-menu-link list-menu-link-disabled'
+              li class='list-menu-divider divider'
+        th class='header' Номер
+        // th class='header' = mat(:order, :name)
+        // th class='header' = mat(:order, :amount)
+        th class='header' Заказчик
+        th class='header' Город
+        th class='header' Дата
+        th class='header' 
+        th class='header list-row-action-header'
+
+    tbody
+      - @orders.each do |order|
+        tr class='list-row'
+          td class='list-column list-selectable' = check_box_tag 'order_ids[]', :value => order.id, :class => 'list-selectable-checkbox'
+          td class='list-column' = "#{order.id}"
+          // td class='list-column' = order.name
+          td class='list-column' = order.client.name
+          td class='list-column' = order.place_name
+          td class='list-column' = to_msk(order.created_at)
+          td class='list-column'
+            = partial 'orders/squares', :locals => { :sections => @sections, :order => order }
+            span class="label label-#{order.status}"
+              = t :"status.#{order.status}"
+            // - per = to_percent(order.all_parts, order.done_parts)
+            // <div class="progress" data-toggle="tooltip" data-placement="top" title="#{per}% сделано">
+            //   <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="#{per}" aria-valuemin="0" aria-valuemax="100" style="width: #{per}%">
+            //     <span class="sr-only">#{per}% Complete</span>
+            //   </div>
+            // </div>
+
+          td class='list-column list-row-action'
+            div class='list-row-action-wrapper'
+              = link_to tag_icon(:pencil), :href => url(:orders, :edit, :id => order.id), :class => 'list-row-action-wrapper-link'
+              = link_to tag_icon("file-text"), :href => url(:orders, :nakl, :id => order.id), :class => 'list-row-action-wrapper-link'
+
+= paginate
