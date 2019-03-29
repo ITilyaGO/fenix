@@ -1,0 +1,10 @@
+.DS_Store
+log/**/*
+tmp/**/*
+vendor/*
+!vendor/gems/cache/
+.sass-cache/*
+db/*.db
+.*.sw*
+config.codekit3
+/Gemfile.lock
