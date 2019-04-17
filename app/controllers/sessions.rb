@@ -4,9 +4,6 @@ Fenix::App.controllers :sessions do
   end
 
   post :create do
-    account = Account.find_by_email(params[:email])
-    set_current_account(account)
-    redirect url(:home, :index)
     if account = Account.authenticate(params[:email], params[:password])
       set_current_account(account)
       redirect url(:home, :index)

@@ -53,7 +53,7 @@ Fenix::App.controllers :statistic do
         CSV.generate(:col_sep => ';') do |csv|
           # csv << %w(id name num)
           @pretty_stat.each do |item|
-            csv << [item[:category], item[:name], item[:sum]]
+            csv << [item[:category].encode('utf-8'), item[:name].encode('utf-8'), item[:sum]]
           end
         end
       end

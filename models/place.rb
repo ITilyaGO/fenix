@@ -15,7 +15,7 @@ class Place < ActiveRecord::Base
       sql = "SELECT region_id FROM places_sync WHERE id = #{place.id};"
       with_region = ActiveRecord::Base.connection.exec_query(sql).first
       dup = place.attributes.merge({:id => place.id})
-      dup.attributes.merge!({:region_id => with_region["region_id"]}) unless with_region.nil?
+      dup.merge!({:region_id => with_region["region_id"]}) unless with_region.nil?
       Place.create(dup)
     end
     Place.record_timestamps = true

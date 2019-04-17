@@ -1,4 +1,4 @@
-scheduler = Rufus::Scheduler.new(:frequency => 10)
+scheduler = Rufus::Scheduler.new(:frequency => 60)
 
 def sqlbackup(from, to)
   sdb = SQLite3::Database.new(from)
@@ -19,11 +19,4 @@ scheduler.cron '5 0 * * *' do
   from = ActiveRecord::Base.configurations[Padrino.env][:database]
   to = "#{Padrino.root}/db/fenix.daily.db"
   sqlbackup(from, to)
-end
-
-scheduler.in '5s' do
-  need = Order.where(:updated_at => 1.hours.ago..Time.now).count > 0
-  from = ActiveRecord::Base.configurations[Padrino.env][:database]
-  to = "#{Padrino.root}/db/fenix.#{Time.now.strftime("%y-%m-%d_%H")}.db"
-  sqlbackup(from, to) if need
 end

@@ -29,7 +29,7 @@ fieldset class='control-group#{error ? ' has-error' : ''}'
         = content_tag :option, "Нету", :value => ""
         - sections.each do |sec|
           - html_attributes = { :value => sec.id }
-          - html_attributes[:selected] ||= option_is_selected?(sec.id, sec.name, @category.section_id')
+          - html_attributes[:selected] ||= option_is_selected?(sec.id, sec.name, @category.section_id)
           = content_tag(:option, sec.name, html_attributes)
 
 div class="form-actions"

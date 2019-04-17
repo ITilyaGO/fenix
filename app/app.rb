@@ -55,8 +55,6 @@ module Fenix
     access_control.roles_for :any do |role|
       role.protect '/'
       role.allow   '/sessions'
-      role.allow   '/orders/torg12/'
-      role.allow   '/orders/pdftorg12/'
     end
 
     access_control.roles_for :admin do |role|

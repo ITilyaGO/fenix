@@ -7,7 +7,7 @@ $: << File.expand_path('../..', __FILE__)
 require 'rubygems' unless defined?(Gem)
 require 'bundler/setup'
 Bundler.require(:default, RACK_ENV)
-require "./config/sqlite.rb"
+require "./db/lib/main.rb"
 require "./config/scheduler.rb"
 
 ##
