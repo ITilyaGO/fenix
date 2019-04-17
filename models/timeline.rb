@@ -1,7 +1,6 @@
 class Timeline < ActiveRecord::Base
   enum duration: [ :day, :halfweek, :week ]
   belongs_to :order
-  has_many :timeline_sections
 
   def self.duration_for_select
     durations.map do |type, _|

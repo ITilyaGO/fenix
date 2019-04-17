@@ -1,6 +1,5 @@
 class Order < ActiveRecord::Base
   enum status: [ :draft, :anew, :current, :finished, :shipped, :canceled ]
-  enum delivery: [ :postage, :roundtrip, :pickup ]
   
   belongs_to :client
   belongs_to :place
@@ -38,12 +37,6 @@ class Order < ActiveRecord::Base
   def self.status_for_select
     statuses.map do |type, _|
       [I18n.t("status.#{type}"), type]
-    end
-  end
-  
-  def self.delivery_for_select
-    deliveries.map do |type, _|
-      [I18n.t("delivery.#{type}"), type]
     end
   end
   

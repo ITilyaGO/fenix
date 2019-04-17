@@ -82,12 +82,6 @@ div class="table only-print"
           select name="status" class="huge"
             - options_for_select(Order.status_for_select).each do |o|
               = o
-      fieldset.control-group
-        = label_tag :delivery, :class => 'col-md-3 control-label'
-        div.col-md-6.controls
-          select.huge name="delivery"
-            - options_for_select(Order.delivery_for_select).each do |o|
-              = o
 
   - if @order_part && @order_part.anew?
     div class="non-print"

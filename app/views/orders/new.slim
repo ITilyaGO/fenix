@@ -30,13 +30,6 @@ div class="tabs-content"
           = f.label 'Отправки', :class => 'control-label'
           = f.radio_button :moscow, :value => :true, :checked => true
 
-      fieldset.control-group
-        = label_tag 'Доставка', :class => 'col-md-3 control-label'
-        div.col-md-6.controls
-          select.huge name="status"
-            - options_for_select(Order.delivery_for_select).each do |o|
-              = o
-
       fieldset class='control-group'
         = f.label 'Номер заказа', :class => 'col-md-3 control-label'
         div class='col-md-3 controls'

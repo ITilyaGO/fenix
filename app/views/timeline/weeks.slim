@@ -11,7 +11,7 @@ div class="row non-print"
       = link_to 'Печать', 'javascript:print()', :class => 'btn btn-glue'
 div class="clearfix"
 
-div class="tab-content" id="for_weeks_tab" style="z-index:1100"
+div class="tab-content" id="for_weeks_tab"
   - @weeks.each_with_index do |s, i|
     div class="tab-pane" id="cat-#{i}"
       
@@ -55,21 +55,7 @@ div class="tab-content" id="for_weeks_tab" style="z-index:1100"
                   = partial 'orders/squares', :locals => { :sections => @sections, :order => order }
                 td class='list-column list-row-action non-print'
                   div class='list-row-action-wrapper'
-                    = link_to 'дн', :href => '#', :class => 'list-row-day-wrapper-link'
                     = link_to 'edit', :href => url(:orders, :edit, :id => order.id), :class => 'list-row-action-wrapper-link'
-                  div class='modal'
-                    div class="modal-dialog"
-                      div class='modal-content'
-                        div class="modal-header"
-                          h4 class="modal-title" Назначить день недели
-                        div class='modal-body'
-                          p Выберите день #{time.id}
-                          - Enums.weekdays.map do |wd, _|
-                              = [I18n.t("weekday.#{wd}"), wd]
-                        div class='modal-footer'
-                          = form_tag url(:orders, :destroy, :id => time.id), :method => :delete do
-                            = submit_tag pat(:delete), :class =>'list-row-action-popover-delete-one-btn btn btn-danger btn-wide'
-                            div class='btn btn-default btn-wide cancel' data-dismiss="modal" = pat(:cancel)
         .pull-right
           | Сумма заказов: #{"%0.f" % Order.where(:id => s[:orders].where(:immediate => true).select(:order_id)).sum(:total)} &#x20B7
           | &nbsp;/&nbsp;
@@ -174,9 +160,5 @@ div class="tab-content" id="for_weeks_tab" style="z-index:1100"
           $(".tab-pane .list-row").toggleClass('non-print');
         });
 
-        $('.list-row-day-wrapper-link').on('click', function(ev) {
-          ev.preventDefault();
-          $(this).parent().next().modal();
-        });
       });
     })(jQuery);

@@ -23,7 +23,6 @@ gem 'activerecord', '~> 4', :require => 'active_record'
 gem 'sqlite3'
 gem 'rufus-scheduler'
 gem 'princely', '< 2'
-gem 'russian_inflect'
 #gem 'simple_enum'
 #gem 'classy_enum'
 
