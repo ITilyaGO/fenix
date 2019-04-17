@@ -231,7 +231,7 @@ div class="tabs-content"
 
         $.ajax({
             type: "POST",
-            data: "authenticity_token=" + $("form:first :input[name^='auth']").val(),
+            data: "authenticity_token=" + encodeURIComponent($("form:first :input[name^='auth']").val()),
             url: "/orders/clients"
         }).done(function(response) {
           var substringMatcher = function(strs) {
@@ -300,7 +300,7 @@ div class="tabs-content"
         
         $.ajax({
             type: "POST",
-            data: "authenticity_token=" + $("form:first :input[name^='auth']").val() + "&q=яро",
+            data: "authenticity_token=" + encodeURIComponent($("form:first :input[name^='auth']").val()) + "&q=яро",
             url: "/orders/cities"
         }).done(function(response) {
           var substringMatcher = function(strs) {
@@ -335,7 +335,7 @@ div class="tabs-content"
 
         $.ajax({
             type: "POST",
-            data: "authenticity_token=" + $("form:first :input[name^='auth']").val(),
+            data: "authenticity_token=" + encodeURIComponent($("form:first :input[name^='auth']").val()),
             url: "/orders/products"
         }).done(function(response) {
           _products = response;

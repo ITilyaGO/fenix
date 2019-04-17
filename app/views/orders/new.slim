@@ -118,7 +118,7 @@ div class="tabs-content"
         
         $.ajax({
             type: "POST",
-            data: "authenticity_token=" + $("form:first :input[name^='auth']").val(),
+            data: "authenticity_token=" + encodeURIComponent($("form:first :input[name^='auth']").val()),
             url: "/orders/cities"
         }).done(function(response) {
           var substringMatcher = function(strs) {

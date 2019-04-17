@@ -1,7 +1,8 @@
 Fenix::App.controllers :places do
   get :index do
     @title = "Places"
-    @places = Place.all
+    sort = params[:sort] || "id"
+    @places = Place.all.order(sort)
     @regions = Region.all
     render 'places/index'
   end

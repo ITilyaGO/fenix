@@ -4,7 +4,6 @@ module Fenix
     register Padrino::Mailer
     register Padrino::Helpers
     register Padrino::Admin::AccessControl
-    enable :sessions
 
     ##
     # Caching support.
@@ -45,6 +44,7 @@ module Fenix
     set :admin_model, 'Account'
     set :login_page,  '/sessions/new'
 
+    enable :sessions
     set :sessions, key: 'fenix.session', secret: '571fc3d7df5SFgkepw6jfi5e976aedbaf7feb410739DJR*c3b571fc3d7df5I', expire_after: 60*60*24
 
     disable :store_location
