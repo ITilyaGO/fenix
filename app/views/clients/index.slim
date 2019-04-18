@@ -93,7 +93,7 @@ div class="tabs-content"
                 
                 settings.data = $.param({
                   q: $('#typeahead-client').val(),
-                  authenticity_token: encodeURIComponent($("form:first :input[name^='auth']").val())
+                  authenticity_token: $("form:first :input[name^='auth']").val()
                 })
               },
               contentType: "application/x-www-form-urlencoded; charset=UTF-8",
