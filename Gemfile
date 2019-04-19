@@ -17,7 +17,7 @@ gem 'pry-padrino'
 gem 'pry-byebug'
 
 # Component requirements
-gem 'bcrypt'
+gem 'bcrypt', github: 'codahale/bcrypt-ruby'
 gem 'slim'
 gem 'activerecord', '~> 4', :require => 'active_record'
 gem 'sqlite3', '< 1.4'
