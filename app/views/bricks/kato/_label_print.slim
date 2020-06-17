@@ -1,0 +1,3 @@
+.label.label-kato.non-print class=('blank' unless town_name)
+  span = town_name&.name || el&.place_name
+.only-print = town_name&.name || el&.place_name

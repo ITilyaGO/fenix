@@ -5,10 +5,17 @@ Fenix::App.controllers :clients do
     @title = "Clients"
     pagesize = PAGESIZE
     @page = !params[:page].nil? ? params[:page].to_i : 1
-    @clients = if !params[:city]
+    kc_clients = CabiePio.folder(:clients, :hometowns)
+    kc_delivery = CabiePio.folder(:clients, :delivery_towns)
+    @kc_clients = kc_clients.flat
+    @kc_delivery = kc_delivery.flat
+    @kc_towns = KatoAPI.batch(@kc_clients.values.uniq + @kc_delivery.values.uniq)
+    city = params[:city]
+    kc_filtered = (kc_clients.flatout[city] || []) + (kc_delivery.flatout[city] || [])
+    @clients = if !city
       Client.includes(:place).order(:updated_at => :desc).offset((@page-1)*pagesize).take(pagesize)
     else
-      Client.includes(:place).order(:updated_at => :desc).where(:place_id => params[:city])
+      Client.includes(:place).order(:updated_at => :desc).where(id: kc_filtered.uniq)
     end
     @pages = (Client.count/pagesize).ceil
     @pages = false if params[:city]
@@ -18,8 +25,11 @@ Fenix::App.controllers :clients do
 
   get :broken do
     @title = "Clients"
-    @clients = Client.where(:place => nil)
+    @kc_clients = CabiePio.folder(:clients, :hometowns).flat
+    @clients = Client.where.not(id: @kc_clients.keys.map(&:to_i))
     @broken = true
+    @kc_delivery = CabiePio.folder(:clients, :delivery_towns).flat
+    @kc_towns = KatoAPI.batch(@kc_clients.values.uniq + @kc_delivery.values.uniq)
     render 'clients/index'
   end
 
@@ -27,6 +37,13 @@ Fenix::App.controllers :clients do
     @title = "Orders"
     @orders = Order.where(:client_id => params[:id]).order(:updated_at => :desc)
     @client = Client.find(params[:id])
+    @kc_orders = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :towns]).flat
+    @kc_delivery = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :delivery_towns]).flat
+    @kc_client_hometown = CabiePio.get([:clients, :hometowns], @client.id).data
+    @kc_client_delivery = CabiePio.get([:clients, :delivery_towns], @client.id).data
+    codes = @kc_orders.values.uniq + @kc_delivery.values.uniq + [@kc_client_hometown, @kc_client_delivery]
+    @kc_towns = KatoAPI.batch(codes)
+
     @r = url(:orders, :index)
     render 'clients/orders'
   end
@@ -41,6 +58,16 @@ Fenix::App.controllers :clients do
     @client = Client.new(params[:client])
     @cats = Client.where(:client_id => nil)
     if @client.save
+      code = params[:cabie][:kato_place]
+      if Kato.valid? code
+        CabiePio.set [:clients, :hometowns], @client.id, code
+      end
+      dcode = params[:cabie][:kato_delivery]
+      dcode = code if dcode.empty?
+      if Kato.valid? dcode
+        CabiePio.set [:clients, :delivery_towns], @client.id, dcode
+      end
+
       @title = pat(:create_title, :model => "client #{@client.id}")
       flash[:success] = pat(:create_success, :model => 'Client')
       params[:save_and_continue] ? redirect(url(:clients, :index)) : redirect(url(:clients, :edit, :id => @client.id))
@@ -55,6 +82,10 @@ Fenix::App.controllers :clients do
     @title = pat(:edit_title, :model => "client #{params[:id]}")
     @client = Client.find(params[:id])
     @cats = Client.where(:client_id => nil)
+    kc_client = CabiePio.get([:clients, :hometowns], @client.id).data
+    @kc_town = KatoAPI.anything(kc_client)
+    kc_delivery = CabiePio.get([:clients, :delivery_towns], @client.id).data
+    @kc_delivery = KatoAPI.anything(kc_delivery)
     if @client
       render 'clients/edit'
     else
@@ -69,6 +100,15 @@ Fenix::App.controllers :clients do
     if @client
       params[:client][:online_place] = nil if !params[:client][:place_id].blank?
       if @client.update_attributes(params[:client])
+        code = params[:cabie][:kato_place]
+        if Kato.valid? code
+          CabiePio.set [:clients, :hometowns], @client.id, code
+        end
+        dcode = params[:cabie][:kato_delivery]
+        dcode = code if dcode.empty?
+        if Kato.valid? dcode
+          CabiePio.set [:clients, :delivery_towns], @client.id, dcode
+        end
         flash[:success] = pat(:update_success, :model => 'Client', :id => "#{params[:id]}")
         params[:save_and_continue] ?
           redirect(url(:clients, :index)) :
@@ -116,16 +156,21 @@ Fenix::App.controllers :clients do
 
   get :export, :provides => :csv do
     clients = Client.includes(:place).order(:name)
+    isos = CabiePio.folder(:clients, :hometowns).flat
+    homes = KatoAPI.batch(isos.values.uniq)
     
     fname = 'clients-' + Time.new.strftime("%d-%m-%Y") + '.csv'
     headers['Content-Disposition'] = "attachment; filename=#{fname}"
     headers['Content-Type'] = "application/vnd.ms-excel"
-    CSV.generate(:col_sep => ';') do |csv|
+    output = ''
+    output = "\xEF\xBB\xBF" if params.include? :win
+    output << CSV.generate(:col_sep => ';') do |csv|
       # csv << %w(id name num)
       clients.each do |item|
         inn = item.inn
         inn.prepend 'ИНН ' if inn&.match? /^[\d\s]+$/
-        csv << [item.id, item.name, item.org, item.tel, item.email, item.place_name, inn]
+        city = homes[isos[item.id.to_s]]&.model&.name
+        csv << [item.id, item.name, item.org, item.tel, item.email, city, inn]
       end
     end
   end

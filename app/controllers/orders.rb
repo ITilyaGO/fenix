@@ -663,4 +663,16 @@ Fenix::App.controllers :orders do
   #   Client.where('lower(name) LIKE ?', params[:q]).select(:id, :name).to_json
   #   # .where(t[:city].matches(q).or(t[:tel].matches(q)).or(t[:email].matches(q))).select(:id, :name).to_json
   # end
+
+
+  put :change_city, :with => :id do
+    order = params[:id]
+    town = params[:code]
+    type = params[:type].to_sym.eql?(:delivery) ? :delivery_towns : :towns
+    return { error: 'non-format' }.to_json unless Kato.valid? town
+    exist = KatoAPI.anything town
+    return { error: 'unknown' }.to_json if exist.blank?
+    CabiePio.set [:orders, type], order, town
+    { name: exist.model.name }.to_json
+  end
 end

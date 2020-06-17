@@ -31,15 +31,14 @@ div class="tabs-content"
         th class='header list-row-action-header'
 
     tbody
-      -@products.each do |product|
+      - @products.each do |product|
         tr class='list-row'
           td class='list-column list-selectable' = check_box_tag 'product_ids[]', :value => product.id, :class => 'list-selectable-checkbox'
           td class='list-column' = product.id
-          td class='list-column' = product.name
+          td class='list-column' = product.displayname
           td class='list-column'
-            = product.price
-            | &nbsp;&#x20B7
-          td class='list-column' = product.category.nil? ? "" : product.category.name
+            == rur product.price
+          td class='list-column' = product.category&.name
           td class='list-column list-row-action'
             div class='list-row-action-wrapper'
               //span class='list-row-action-wrapper-link' 1

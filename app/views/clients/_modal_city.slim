@@ -1,0 +1,14 @@
+.modal.cityless
+  .modal-dialog: .modal-content
+    = form_tag url(:orders, :change_city, :id => ''), :method => :put do
+      .modal-header
+        h4.modal-title Укажите город для этого заказа
+      .modal-body
+        = hidden_field_tag :type
+        = hidden_field_tag :code
+        = text_field_tag :type_code, :class => 'form-control input-large input-with-feedback'
+        p.output
+      .modal-footer
+        .label.btn-default.type-label.pull-left
+        = submit_tag pat(:set), :class =>'btn put btn-primary btn-wide'
+        .btn.btn-default.btn-wide.cancel data-dismiss="modal" = pat(:cancel)

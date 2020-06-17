@@ -41,7 +41,7 @@ fieldset class='control-group#{error ? ' has-error' : ''}'
   div class='col-md-6 controls'
     div class="scrollable-dropdown-menu"
       = f.hidden_field :place_id
-      = text_field_tag 'pl', :class => 'form-control', :value => @client.place_name, :id => 'typeahead-place'
+      = text_field_tag 'pl', :class => 'form-control', :value => @client.place_name, :id => 'typeahead-place', :readonly => true
 
 // - error = @client.errors.include?(:city)
 // fieldset class='control-group#{error ? ' has-error' : ''}'
@@ -55,6 +55,18 @@ fieldset class='control-group#{error ? ' has-error' : ''}'
     div class='col-md-6 controls'
       = f.text_field :online_place, :class => 'form-control input-large input-with-feedback', :readonly => true
       // span class='help-inline' = error ? f.error_message_on(:org, :class => 'text-error') : pat(:example)
+
+fieldset class='control-group control-new'
+  = f.label :place, :class => 'col-md-3 control-label'
+  div class='col-md-6 controls'
+    = hidden_field_tag :'cabie[kato_place]', :value => @kc_town&.code
+    = text_field_tag :type_place, :class => 'form-control input-large input-with-feedback', :value => (@kc_town&.model&.name)
+fieldset class='control-group control-new'
+  = f.label :delivery_place, :class => 'col-md-3 control-label'
+  div class='col-md-6 controls'
+    = hidden_field_tag :'cabie[kato_delivery]', :value => @kc_delivery&.code
+    = text_field_tag :type_delivery, :class => 'form-control input-large input-with-feedback', :value => (@kc_delivery&.model&.name)
+
 - error = @client.errors.include?(:org)
 fieldset class='control-group#{error ? ' has-error' : ''}'
   = f.label :org, :class => 'col-md-3 control-label'

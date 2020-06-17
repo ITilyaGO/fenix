@@ -37,7 +37,14 @@ div class="tabs-content"
         div class='col-md-5 controls'
           div class="scrollable-dropdown-menu"
             = f.hidden_field :place_id, :value => (@order_place.id if @order_place)
-            = text_field_tag 'pl', :class => 'form-control ', :id => 'typeahead-place', :value => (@order_place.name if @order_place)
+            = text_field_tag 'pl', :class => 'form-control ', :disabled => true, :id => 'typeahead-place', :value => (@order_place.name if @order_place)
+
+      fieldset class='control-group control-new'
+        = f.label "Город", :class => 'col-md-3 control-label'
+        div class='col-md-9 controls'
+          div class="scrollable-dropdown-menu"
+            = hidden_field_tag :'cabie[kato_place]'
+            = text_field_tag :kato_type, :class => 'form-control', :required => true
 
       fieldset class='control-group'
         = f.label "Заказчик", :class => 'col-md-3 control-label'

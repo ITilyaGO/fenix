@@ -5,9 +5,20 @@ div class="table non-print"
   table class="table order-info"
     tr
       td
-        p Город: #{@client.place_name}
-        p Имя: #{@client.name}
-        // p Организация: #{@client.org}
+        /p Город: #{@client.place_name}
+        p
+          - town_name = @kc_towns[@kc_client_hometown]
+          - client_delivery = @kc_towns[@kc_client_delivery]
+          div
+            span
+              ' Город клиента
+            = partial 'bricks/kato/label_ent', :locals => { town_name: town_name }
+          div
+            span
+              ' Город доставки
+            = partial 'bricks/kato/label_ent', :locals => { town_name: client_delivery }
+        /p Имя: #{@client.name}
+        p Организация: #{@client.org}
         p Тел: #{@client.tel}
         p Емайл: #{@client.email}
 
@@ -28,23 +39,118 @@ div class="tabs-content"
         // th class='header' = mat(:order, :amount)
         th class='header' Name
         th class='header' Дата
+        th class='header' Город
+        th class='header' Город доставки
         th class='header' Статус
         th class='header list-row-action-header'
 
     tbody
-      -@orders.each do |order|
-        tr class='list-row'
+      - @orders.each do |order|
+        tr class='list-row' data-rowid=order.id
           td class='list-column list-selectable' = check_box_tag 'order_ids[]', :value => order.id, :class => 'list-selectable-checkbox'
           td class='list-column' = "#{order.id}"
           // td class='list-column' = order.name
-          td class='list-column' = order.client.name
+          td class='list-column'
           td class='list-column' = to_msk(order.created_at)
+          td class='list-column column-place'
+            - code = @kc_orders[order.id.to_s]
+            - town_name = @kc_towns[code]
+            = partial 'bricks/kato/label_ent', :locals => { town_name: town_name }
+          td class='list-column column-delivery'
+            - code = @kc_delivery[order.id.to_s] || @kc_client_delivery
+            - town_name = @kc_towns[code]
+            = partial 'bricks/kato/label_ent', :locals => { town_name: town_name }
           td class='list-column'
             span class="label label-#{order.status}" = t :"status.#{order.status}"
 
           td class='list-column list-row-action'
             div class='list-row-action-wrapper'
               - if current_account.is_admin?
+                = link_to tag_icon(:building), :rel => :tooltip, :title => "City", :'data-name' => :cityless, :class => 'list-row-action-wrapper-link list-row-modal'
+                = link_to tag_icon(:truck), :rel => :tooltip, :title => "Delivery", :'data-name' => :cityless, :'data-type' => :delivery, :class => 'list-row-action-wrapper-link list-row-modal'
+
                 = link_to tag_icon("files-o"), :rel => :tooltip, :title => "Copy order", :href => url(:orders, :copy, :id => order.id), :class => 'list-row-action-wrapper-link'
               = link_to tag_icon("tree"), :title => "Show", :href => url(:orders, :show, :id => order.id), :class => 'list-row-action-wrapper-link'
 
+= partial 'clients/modal_city'
+
+- content_for :js_assets do
+  / = javascript_include_tag 'typeahead.min', 'fu'
+  javascript:
+    (function() {
+      // function form_str(f, names) {
+      //   return names.map(function(e) {
+      //     let i = f.querySelector("[name=" + e + "]")
+      //     let v = i.type == 'radio' ? f.querySelector("[name=" + e + "]:checked").value : i.value
+      //     return e + "=" + v
+      //   }).join('&')
+      // }
+
+      // function no_href() {
+      //   b = this
+      //   f = b.closest('form')
+      //   fetch(f.action, {
+      //     method: 'PUT',
+      //     body: form_str(f, ['code', 'type']) + "&authenticity_token=" + encodeURIComponent(document.querySelector("form [name^=auth]").value),
+      //     headers: { "Content-Type": "application/x-www-form-urlencoded" }
+      //   })
+      //   .then(response => response.json())
+      //   .then(function(result) {
+      //     if (result.error) {
+      //       f.querySelector('.output').innerText = result.error
+      //     }
+      //     else {
+      //       $('.modal.cityless').modal('hide')
+      //       // b.closest('.list-row').querySelector('.column-place .label').innerText = result.name
+      //     }
+      //   })
+      //   return false
+      // }
+
+
+      // $('.list-row-modal').on('click', function(ev) {
+      //   ev.preventDefault()
+      //   var modal = $(this).parent().nextAll('.' + $(this).data('name'))
+      //   $("input[name=type]", modal).val($(this).data('type'))
+      //   $(".type-label", modal).html($(this).attr('title'))
+      //   modal.modal()
+      // })
+
+      let update_place = function(id, result) {
+        let row = document.querySelector(`.list-row[data-rowid="${id}"]`)
+        row.querySelector('.column-place .label-kato span').innerText = result.name
+      }
+
+      let update_delivery = function(id, result) {
+        let row = document.querySelector(`.list-row[data-rowid="${id}"]`)
+        row.querySelector('.column-delivery .label-kato span').innerText = result.name
+      }
+
+      let init_buttons = function(panel) {
+        let delivery = $('input[name=type]', panel).val() == 'delivery'
+        panel.querySelectorAll('.btn.put').forEach(function(b) {
+          let upd_fu = delivery ? update_delivery : update_place
+          b.onclick = DekolFu.no_href.bind(b, { id: panel.dataset.id, names: ['code', 'type'] }, upd_fu)
+        })        
+      }
+
+      let init_row = function(prop) {
+        $('.list-row-modal').on('click', function(ev) {
+          ev.preventDefault()
+          let modal = $('.modal.' + $(this).data('name'))
+          let modal_el = modal.get(0)
+          modal_el.dataset.id = this.closest('.list-row').dataset.rowid
+          $('input[name=type]', modal).val($(this).data('type'))
+          $('input[name=type_code]', modal).val('')
+          $(".type-label", modal).text($(this).attr('title'))
+          init_buttons(modal_el)
+          modal.modal()
+        })
+      }
+
+      window.addEventListener('DOMContentLoaded', function(event) {
+        let cityless = document.querySelector('.cityless')
+        DekolFu.init_kato_blood(cityless, 'type_code', 'code')
+        init_row('order')
+      })
+    })()

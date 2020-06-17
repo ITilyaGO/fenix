@@ -52,7 +52,14 @@ div class="tabs-content"
           div class="scrollable-dropdown-menu"
             - c = @client.nil? ? "" : @client.place_name
             = f.hidden_field :place_id, :value => @client.nil? ? "" : @client.place_id
-            = text_field_tag 'pl', :class => 'form-control', :value => c, :id => 'typeahead-place'
+            = text_field_tag 'pl', :class => 'form-control', :disabled => true, :value => c, :id => 'typeahead-place'
+
+      fieldset class='control-group control-new'
+        = f.label "Город заказа", :class => 'col-md-3 control-label'
+        div class='col-md-5 controls'
+          div class="scrollable-dropdown-menu"
+            = hidden_field_tag :'cabie[kato_place]', :value => @kc_online_town
+            = text_field_tag :kato_type, :class => 'form-control', :value => @kc_online_town, :required => true
 
       - if @client
         div
@@ -110,10 +117,10 @@ div class="tabs-content"
       $(function() {
         
         $("form").on("submit", function(e) {
-          if ($(":input[name*=place_id]").val().length == 0) {
-            $(":input[name=pl]").parents(".control-group").addClass("has-error");
-            return false;
-          }
+          // if ($(":input[name*=place_id]").val().length == 0) {
+          //   $(":input[name=pl]").parents(".control-group").addClass("has-error");
+          //   return false;
+          // }
         });
         
         $.ajax({
@@ -151,5 +158,7 @@ div class="tabs-content"
           });
         });
   
+        let order_form = document.querySelector('.main-wrapper-push form')
+        DekolFu.init_kato_blood(order_form, 'kato_type', '"cabie[kato_place]"')
       });
     })(jQuery);
