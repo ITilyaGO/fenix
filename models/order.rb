@@ -1,5 +1,6 @@
 class Order < ActiveRecord::Base
   enum status: [ :draft, :anew, :current, :finished, :shipped, :canceled ]
+  enum delivery: [ :postage, :roundtrip, :pickup, :vernissage ]
   
   belongs_to :client
   belongs_to :place

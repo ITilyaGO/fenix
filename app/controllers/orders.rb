@@ -202,6 +202,7 @@ Fenix::App.controllers :orders do
     # @order = Order.new(params[:order])
     # cats = Category.where(:category => nil)
     # where(:category => nil)@tabs.each do |tab|
+    params[:order][:delivery] = params[:order][:delivery].to_i
     create_new = params[:order]["create"] == "true"
     sync_only_id = params[:order]["sync_id"] == "true"
     sync_city = params[:order]["sync_city"] == "true"
@@ -231,7 +232,8 @@ Fenix::App.controllers :orders do
     order.id = params[:order]["id"] if !params[:order]["id"].blank?
     order.created_at = order.online_at
     order.place_id = params[:order]["place_id"]
-    order.priority = params[:order]["priority"] == "true"
+    order.priority = params[:order][:priority] == "true"
+    order.delivery = params[:order][:delivery].to_i
     online.order_lines.each do |line|
       ol = OrderLine.new(product_id: line.product_id, description: line.description, amount: line.amount, price: line.amount > 0 ? line.sum/line.amount : 0)
       order.order_lines << ol
@@ -253,6 +255,16 @@ Fenix::App.controllers :orders do
     order.all_parts = order.order_parts.size if order.order_parts.any?
 
     order.save
+    delivery_at = params[:cabie][:timeline_at]
+    if timeline_date = Date.parse(delivery_at) rescue nil
+      CabiePio.set [:timeline, :order], timeline_order(order.id, timeline_date), order.id
+      CabiePio.set [:orders, :timeline], order.id, timeline_id(timeline_date)
+    end
+    code = params[:cabie][:kato_place]
+    if Kato.valid? code
+      CabiePio.set [:orders, :towns], order.id, code
+    end
+
     redirect(url(:orders, :draft))
     # if @order.save
     #   @title = pat(:create_title, :model => "order #{@order.id}")
@@ -283,6 +295,7 @@ Fenix::App.controllers :orders do
     # order = order.slice([:account_id])
     # order.delete(:account_id)
     # h.save
+    params[:order][:delivery] = params[:order][:delivery].to_i
     order = Order.new(params[:order])
     order.id = params[:order]["id"] if !params[:order]["id"].blank?
     order.status = :draft
@@ -320,6 +333,15 @@ Fenix::App.controllers :orders do
     order.all_parts = order.order_parts.size if order.order_parts.any?
 
     order.save
+    delivery_at = params[:cabie][:timeline_at]
+    if timeline_date = Date.parse(delivery_at) rescue nil
+      CabiePio.set [:timeline, :order], timeline_order(order.id, timeline_date), order.id
+      CabiePio.set [:orders, :timeline], order.id, timeline_id(timeline_date)
+    end
+    code = params[:cabie][:kato_place]
+    if Kato.valid? code
+      CabiePio.set [:orders, :towns], order.id, code
+    end
     redirect(url(:orders, :draft))
   end
 
@@ -355,7 +377,7 @@ Fenix::App.controllers :orders do
   end
 
   get :correct, :with => :id do
-    @title = "Edit order"
+    @title = "Edit order #{params[:id]}"
     order = Order.find(params[:id])
     @order_lines = order.order_lines
     @total = order.total
@@ -363,12 +385,16 @@ Fenix::App.controllers :orders do
     @order_client = order.client
     @order_place = order.place
     @descr = order.description
+    @form = order
+    @kc_town = CabiePio.get([:orders, :towns], order.id).data
     render 'orders/empty'
   end
 
   post :save, :with => :id do
     order = Order.find(params[:id])
     order.status = :draft
+    order.delivery = params[:order][:delivery].to_i
+    order.priority = params[:order][:priority] == 'true'
     order.description = params[:order][:description]
     order.client_id = params[:order]["client_id"]
     order.place_id = params[:order]["place_id"]
@@ -405,6 +431,10 @@ Fenix::App.controllers :orders do
     order.all_parts = order.order_parts.size if order.order_parts.any?
 
     order.save
+    code = params[:cabie][:kato_place]
+    if Kato.valid? code
+      CabiePio.set [:orders, :towns], order.id, code
+    end
     redirect(url(:orders, :draft))
   end
 

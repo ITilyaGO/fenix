@@ -21,30 +21,38 @@ div class="tabs-content"
               = @online.description
       
       fieldset class='control-group'
-        div class='col-md-2'
-          span Тип заказа
-        div class='col-md-2 controls'
-          = f.label 'Для Москвы', :class => 'control-label'
-          = f.radio_button :moscow, :value => :false
-        div class='col-md-2 controls'
-          = f.label 'Отправки', :class => 'control-label'
-          = f.radio_button :moscow, :value => :true, :checked => true
+        = f.label 'Тип заказа', :class => 'col-md-3 control-label'
+        .col-md-3.controls.custom-control
+          = f.radio_button :delivery, :value => Order.deliveries[:vernissage], :class => 'custom-control-input'
+          label.custom-control-label(for = 'order_delivery_3') = t :'delivery.vernissage'
+        .col-md-3.controls.custom-control
+          = f.radio_button :delivery, :value => Order.deliveries[:postage], :checked => true, :class => 'custom-control-input'
+          label.custom-control-label(for = 'order_delivery_0') = t :'delivery.postage'
+        .clearfix
+        label.col-md-3.control-label
+        .col-md-3.controls.custom-control
+          = f.radio_button :delivery, :value => Order.deliveries[:roundtrip], :class => 'custom-control-input'
+          label.custom-control-label(for = 'order_delivery_1') = t :'delivery.roundtrip'
+        .col-md-3.controls.custom-control
+          = f.radio_button :delivery, :value => Order.deliveries[:pickup], :class => 'custom-control-input'
+          label.custom-control-label(for = 'order_delivery_2') = t :'delivery.pickup'
 
       fieldset class='control-group'
+        = f.label 'Приоритетный', :class => 'col-md-3 control-label'
+        .col-md-3.controls.custom-control
+          = f.radio_button :priority, :value => :false, :checked => true, :class => 'custom-control-input'
+          label.custom-control-label(for = 'order_priority_false') Нет
+        .col-md-3.controls.custom-control
+          = f.radio_button :priority, :value => :true, :class => 'custom-control-input'
+          label.custom-control-label(for = 'order_priority_true') Да
+
+      / fieldset class='control-group'
         = f.label 'Номер заказа', :class => 'col-md-3 control-label'
         div class='col-md-3 controls'
           div class="scrollable-dropdown-menu"
             = f.text_field :id, :class => 'form-control', :placeholder => "Можно пустой"
-      
+
       fieldset class='control-group'
-        div class='col-md-2'
-          span Приоритетный
-        div class='col-md-2 controls'
-          = f.label 'Нет', :class => 'control-label'
-          = f.radio_button :priority, :value => :false, :checked => true
-        div class='col-md-2 controls'
-          = f.label 'Да', :class => 'control-label'
-          = f.radio_button :priority, :value => :true
 
       fieldset class='control-group'
         = f.label 'Город заказа', :class => 'col-md-3 control-label'

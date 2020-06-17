@@ -1,26 +1,34 @@
 div class="tabs-content"
 = form_for :order, !@id ? url(:orders, :empty) : url(:orders, :save, :id => @id), :class => 'form-horizontal' do |f|
-  div class="table non-print row"
+  .row.non-print.flex-c
     div class="col-md-8"
       fieldset class='control-group'
         = f.label 'Тип заказа', :class => 'col-md-3 control-label'
-        div class='col-md-3 controls'
-          = f.label 'Для Москвы', :class => 'control-label'
-          = f.radio_button :moscow, :value => :false
-        div class='col-md-3 controls'
-          = f.label 'Отправки', :class => 'control-label'
-          = f.radio_button :moscow, :value => :true, :checked => true
+        .col-md-3.controls.custom-control
+          = f.radio_button :delivery, :value => Order.deliveries[:vernissage], :class => 'custom-control-input'
+          label.custom-control-label(for = 'order_delivery_3') = t :'delivery.vernissage'
+        .col-md-3.controls.custom-control
+          = f.radio_button :delivery, :value => Order.deliveries[:postage], :checked => true, :class => 'custom-control-input'
+          label.custom-control-label(for = 'order_delivery_0') = t :'delivery.postage'
+        .clearfix
+        label.col-md-3.control-label
+        .col-md-3.controls.custom-control
+          = f.radio_button :delivery, :value => Order.deliveries[:roundtrip], :class => 'custom-control-input'
+          label.custom-control-label(for = 'order_delivery_1') = t :'delivery.roundtrip'
+        .col-md-3.controls.custom-control
+          = f.radio_button :delivery, :value => Order.deliveries[:pickup], :class => 'custom-control-input'
+          label.custom-control-label(for = 'order_delivery_2') = t :'delivery.pickup'
 
       fieldset class='control-group'
         = f.label 'Приоритетный', :class => 'col-md-3 control-label'
-        div class='col-md-3 controls'
-          = f.label 'Нет', :class => 'control-label'
-          = f.radio_button :priority, :value => :false, :checked => true
-        div class='col-md-3 controls'
-          = f.label 'Да', :class => 'control-label'
-          = f.radio_button :priority, :value => :true
+        .col-md-3.controls.custom-control
+          = f.radio_button :priority, :value => :false, :checked => true, :class => 'custom-control-input'
+          label.custom-control-label(for = 'order_priority_false') Нет
+        .col-md-3.controls.custom-control
+          = f.radio_button :priority, :value => :true, :class => 'custom-control-input'
+          label.custom-control-label(for = 'order_priority_true') Да
 
-      fieldset class='control-group'
+      / fieldset class='control-group'
         = f.label 'Номер заказа', :class => 'col-md-3 control-label'
         div class='col-md-3 controls'
           div class="scrollable-dropdown-menu"
@@ -70,10 +78,10 @@ div class="tabs-content"
     //       h4 class="modal-title" id="myModalLabel" Modal title
     //     div class="modal-content"
 
-    div class="col-md-4"
-      div class='controls' id='products_tree'
-    div class="col-md-4"
-      div class='controls' id='products2_tree'
+    / div class="col-md-4"
+    /   div class='controls' id='products_tree'
+    / div class="col-md-4"
+    /   div class='controls' id='products2_tree'
 
   div class="modal" tabindex="-1" role="dialog" 
     div class="modal-dialog"
@@ -97,7 +105,7 @@ div class="tabs-content"
   // - @order_lines << line
 
   table id='sample_table' style="visibility:hidden"
-    tr data-sum="0" data-price="0"
+    tr.list-row data-sum="0" data-price="0"
       td class="col-md-1"
         span class="num"
         = hidden_field_tag 'line[][id]', :value => line[:id]
@@ -410,10 +418,10 @@ div class="tabs-content"
             $(":input[name=cl]").parents(".control-group").addClass("has-error");
             valid = false;
           }
-          if ($(":input[name*=place_id]").val().length == 0) {
-            $(":input[name=pl]").parents(".control-group").addClass("has-error");
-            valid = false;
-          }
+          // if ($(":input[name*=place_id]").val().length == 0) {
+          //   $(":input[name=pl]").parents(".control-group").addClass("has-error");
+          //   valid = false;
+          // }
           return valid;
         });
 
@@ -468,5 +476,7 @@ div class="tabs-content"
           //var data = "id=" + $(":input:first", line).val() + "&authenticity_token=" + $("form:first :input[name^='auth']").val();
           // $.ajax({ type: "POST", url: "/order/cartdel", data: {} });
         });
+        let order_form = document.querySelector('.main-wrapper-push form')
+        DekolFu.init_kato_blood(order_form, 'kato_type', '"cabie[kato_place]"')
       });
     })(jQuery);
