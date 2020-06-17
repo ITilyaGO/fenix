@@ -4,16 +4,23 @@
 
 ul class="nav nav-tabs"
   li class="active" = link_to tag_icon(:list, 'Список'), url(:clients, :index)
-  li
-    = link_to '', '', :id => 'place_link', :style => 'display: none'
-    = text_field_tag 'ci', :class => 'form-control ', :style => 'width:200px', :id => 'typeahead-place', :placeholder => 'город'
   li = link_to tag_icon(:list, 'без города'), url(:clients, :broken)
   li = link_to tag_icon(:plus, 'Создать'), url(:clients, :new)
-  li
-    // = tag_icon(:search, '')
+  li.pull-right = link_to tag_icon(:'file-excel-o', 'экспорт'), url(:clients, :export, :win => '')
+  - if allow_route?(:kyoto)
+    li.pull-right = link_to tag_icon(:file, 'миграция'), url(:kyoto, :table, :id => 4)
+
+  .clearfix
+
+.nav.nav-search
+  .col-md-1
+    = tag_icon(:search, 'поиск')
+  .col-md-5
+    = link_to '', '', :id => 'place_link', :style => 'display: none'
+    = text_field_tag 'ci', :class => 'form-control', :style => 'width:400px', :id => 'typeahead-place', :name => 'typeahead-place', :placeholder => 'город'
+  .col-md-5
     = link_to '', '', :id => 'client_link', :target => '_blank', :style => 'display: none'
-    = text_field_tag 'cl', :class => 'form-control ', :style => 'width:400px', :id => 'typeahead-client', :placeholder => 'клиент'
-  li style='float:right;' = link_to tag_icon(:'file-excel-o', 'экспорт'), url(:clients, :export)
+    = text_field_tag 'cl', :class => 'form-control', :style => 'width:400px', :id => 'typeahead-client', :placeholder => 'клиент'
 
 div class="tabs-content"
   table class="table table-hover table-condensed" id="list"
@@ -37,24 +44,35 @@ div class="tabs-content"
                       = hidden_field_tag :client_ids, :'data-delete-many-ids' => true
                       = submit_tag  pat(:delete), :class =>'list-menu-popover-delete-selected-btn btn btn-danger btn-small'
                       div class='btn btn-default btn-small cancel' = pat(:cancel)
-        th class='header' style='width:50px' = mat(:client, :id)
+        th class='header' = mat(:client, :id)
         th class='header' = mat(:client, :name)
         th class='header' Город
+        th class='header' Город доставки
+        th class='header' Тр.ком
         th class='header'
         th class='header list-row-action-header'
 
     tbody
-      -@clients.each do |client|
+      - @clients.each do |client|
         tr class='list-row'
           td class='list-column list-selectable' = check_box_tag 'client_ids[]', :value => client.id, :class => 'list-selectable-checkbox'
           td class='list-column' = client.id
           td class='list-column' = client.name
-          td class='list-column' = client.place_name
+          td class='list-column'
+            - code = @kc_clients[client.id.to_s]
+            - town_name = @kc_towns[code]&.model
+            = partial 'bricks/kato/label', :locals => { town_name: town_name, el: client }
+          td class='list-column'
+            - code = @kc_delivery[client.id.to_s]
+            - town_name = @kc_towns[code]&.model
+            = partial 'bricks/kato/label', :locals => { town_name: town_name, el: nil }
+          td class='list-column'
+            = partial 'bricks/orders/transport', :locals => { client_id: client.id }
           td class='list-column'
             = link_to :href => url(:clients, :orders, :id => client.id), :class => "btn btn-xs btn-glue"
               | Заказы | 
               = client.orders.size
-            span class="btn btn-xs fa fa-thumbs-o-#{client.orders.size > 0 ? 'up' : 'down'}"
+            / span class="btn btn-xs fa fa-thumbs-o-#{client.orders.size > 0 ? 'up' : 'down'}"
             // span class="btn btn-xs btn-primary" = client.orders.size
           td class='list-column list-row-action'
             div class='list-row-action-wrapper'
@@ -81,23 +99,26 @@ div class="tabs-content"
         var bestPictures = new Bloodhound({
           datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
           queryTokenizer: Bloodhound.tokenizers.whitespace,
-          //sufficient: 10,
-          limit: 30,
+          // sufficient: 10,
+          // limit: 30,
           remote: {
             url: '/orders/clients2',
             replace: function(url, query) {
               return url + "#" + query;
             },
-            ajax : {
-              beforeSend: function(jqXhr, settings){
-                
-                settings.data = $.param({
-                  q: $('#typeahead-client').val(),
-                  authenticity_token: $("form:first :input[name^='auth']").val()
-                })
-              },
-              contentType: "application/x-www-form-urlencoded; charset=UTF-8",
-              type: "POST"
+            transport: function (opts, onSuccess, onError) {
+              var url = opts.url.split("#")[0];
+              var query = opts.url.split("#")[1];
+              $.ajax({
+                  url: url,
+                  data: $.param({
+                    q: query,
+                    authenticity_token: $("form:first :input[name^='auth']").val()
+                  }),
+                  type: "POST",
+                  success: onSuccess,
+                  error: onError
+              })
             }
           }
         });
@@ -109,6 +130,7 @@ div class="tabs-content"
           name: 'clients',
           displayKey: 'name',
           source: bestPictures.ttAdapter(),
+          limit: Number.MAX_VALUE,
           templates: {
             suggestion: Handlebars.compile('<p><strong>[{{id}}]</strong> {{name}} ({{city}})</p>'),
           }
@@ -119,42 +141,48 @@ div class="tabs-content"
         });
         
 
-        $.ajax({
-            type: "POST",
-            data: "authenticity_token=" + encodeURIComponent($("form:first :input[name^='auth']").val()),
-            url: "/orders/cities"
-        }).done(function(response) {
-          var substringMatcher = function(strs) {
-            return function findMatches(q, cb) {
-              var matches, substrRegex;
-              matches = [];
-              q = q.replace(/[еёЕЁ]/, '[её]');
-              substrRegex = new RegExp(q, 'i');
+        // $.ajax({
+        //     type: "POST",
+        //     data: "authenticity_token=" + encodeURIComponent($("form:first :input[name^='auth']").val()),
+        //     url: "/orders/cities"
+        // }).done(function(response) {
+        //   var substringMatcher = function(strs) {
+        //     return function findMatches(q, cb) {
+        //       var matches, substrRegex;
+        //       matches = [];
+        //       q = q.replace(/[еёЕЁ]/, '[её]');
+        //       substrRegex = new RegExp(q, 'i');
               
-              $.each(strs, function(i, str) {
-                if (substrRegex.test(str.name))
-                  matches.push({ value: str.name, id: str.id });
-              });
+        //       $.each(strs, function(i, str) {
+        //         if (substrRegex.test(str.name))
+        //           matches.push({ value: str.name, id: str.id });
+        //       });
               
-              cb(matches);
-            };
-          };
+        //       cb(matches);
+        //     };
+        //   };
           
-          $('#typeahead-place').typeahead({
-            hint: true,
-            highlight: true,
-            minLength: 2
-          },
-          {
-            name: 'cities',
-            displayKey: 'value',
-            source: substringMatcher(response)
+        //   $('#typeahead-place').typeahead({
+        //     hint: true,
+        //     highlight: true,
+        //     minLength: 2
+        //   },
+        //   {
+        //     name: 'cities',
+        //     displayKey: 'value',
+        //     source: substringMatcher(response)
             
-          }).on('typeahead:selected', function (obj, data) {
-            $("#place_link").attr('href', '/clients?city=' + data.id);
-            $("#place_link")[0].click();
-          });
-        });
+        //   }).on('typeahead:selected', function (obj, data) {
+        //     $("#place_link").attr('href', '/clients?city=' + data.id);
+        //     $("#place_link")[0].click();
+        //   });
+        // });
+
+        DekolFu.init_kato_blood(document, 'typeahead-place')
+        $('#typeahead-place').bind('typeahead:select typeahead:autocomplete', function(ev, suggestion) {
+          $("#place_link").attr('href', '/clients?city=' + suggestion.id);
+          $("#place_link")[0].click();
+        })
         
       });
     })(jQuery);

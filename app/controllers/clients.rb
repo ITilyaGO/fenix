@@ -17,6 +17,7 @@ Fenix::App.controllers :clients do
     else
       Client.includes(:place).order(:updated_at => :desc).where(id: kc_filtered.uniq)
     end
+    @transport = CabiePio.all_keys(@clients.map(&:id), folder: [:m, :clients, :transport]).flat
     @pages = (Client.count/pagesize).ceil
     @pages = false if params[:city]
     @r = url(:clients, :index)
@@ -86,6 +87,8 @@ Fenix::App.controllers :clients do
     @kc_town = KatoAPI.anything(kc_client)
     kc_delivery = CabiePio.get([:clients, :delivery_towns], @client.id).data
     @kc_delivery = KatoAPI.anything(kc_delivery)
+    @kc_transport = CabiePio.get([:m, :clients, :transport], @client.id).data
+    
     if @client
       render 'clients/edit'
     else
@@ -109,6 +112,11 @@ Fenix::App.controllers :clients do
         if Kato.valid? dcode
           CabiePio.set [:clients, :delivery_towns], @client.id, dcode
         end
+        tr = params[:cabie][:transport].to_sym
+        if transport_valid? tr
+          CabiePio.set [:m, :clients, :transport], @client.id, tr
+        end
+
         flash[:success] = pat(:update_success, :model => 'Client', :id => "#{params[:id]}")
         params[:save_and_continue] ?
           redirect(url(:clients, :index)) :

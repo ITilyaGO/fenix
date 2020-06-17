@@ -6,9 +6,12 @@ Fenix::App.controllers :orders do
     sort = params[:sort] || "updated_at"
     dir = !params[:sort] && !params[:dir] ? "desc" : params[:dir] || "asc"
     orders_query = Order.where("status > ?", Order.statuses[:draft]).where("status < ?", Order.statuses[:finished])
+    orders_query = orders_query.where(delivery: params[:deli].to_i) if params[:deli]
     @orders = orders_query.includes(:client, :place, :order_parts, :timeline).order(sort => dir)
     @pages = (orders_query.count/pagesize).ceil
     @sections = Section.includes(:categories).all
+    a_managers(@orders.map(&:id), @orders.map(&:client_id))
+    @transport = CabiePio.all_keys(@orders.map(&:client_id).uniq, folder: [:m, :clients, :transport]).flat
     @r = url(:orders, :index)
     render 'orders/index'
   end
@@ -19,6 +22,7 @@ Fenix::App.controllers :orders do
       .includes(:client, :place, :order_parts)
       .where("status = ?", Order.statuses[:draft]).order(:updated_at => :desc)
     @sections = Section.includes(:categories).all
+    a_towns(@orders.map(&:id), @orders.map(&:client_id))
     @r = url(:orders, :index)
     render 'orders/draft'
   end
@@ -41,6 +45,7 @@ Fenix::App.controllers :orders do
       @r = url(:orders, :finished, :old => 1)
     end
     @sections = Section.all
+    a_towns(@orders.map(&:id), @orders.map(&:client_id))
     render 'orders/finished'
   end
 
@@ -193,6 +198,7 @@ Fenix::App.controllers :orders do
     @online = Online::Order.includes(:order_lines).find(params[:id])
     a = @online.account
     @client = Client.find_by(online_id: @online.account_id)
+    @kc_online_town = KyotoCorp::Online.get([:accounts, :places], @online.account_id).data
     if !@client
       ct = Client.arel_table
       pt = Place.arel_table
