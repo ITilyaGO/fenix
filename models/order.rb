@@ -10,6 +10,7 @@ class Order < ActiveRecord::Base
   has_one :timeline
 
   scope :in_work, -> { where.not(:status => statuses[:draft]) }
+  scope :fin, -> { where(:status => statuses[:finished]) }
 
   # def self.status_name(status)
   #   case status
@@ -82,6 +83,11 @@ class Order < ActiveRecord::Base
       .joins(category: :section)
       .where('"categories"."category_id" = %s', id)
       .any?
+  end
+
+  def actualize
+    OrderAssist.calc_complexity_for self
+    OrderAssist.calc_stickers_for self
   end
 
   def self.iq(id)

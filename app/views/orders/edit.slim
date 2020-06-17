@@ -1,4 +1,5 @@
 - cplx = order_cplx(@order.id)
+- sticker = order_sticker(@order.id)
 ul class="nav nav-tabs non-print"
   li = link_to tag_icon(:list, pat(:list)), url(:orders, :index)
   li class="active" = link_to tag_icon(:edit, "Show order #{@order.id}"), url(:orders, :show, :id => @order.id)
@@ -8,6 +9,12 @@ ul class="nav nav-tabs non-print"
   li = link_to '#' do
     ' сложность
     .label.label-info = cplx
+  li = link_to '#' do
+    ' клейка
+    .label.label-darkrose == rur(sticker)
+  li.pull-right: a 
+    = partial 'orders/squares', :locals => { :order => @order }
+
 
 // - @sections.each do |s|
 //   strong = s.name
@@ -20,15 +27,35 @@ div class="table non-print"
   table class="table order-info"
     tr
       td
-        p Город: #{@order.place_name}
+        /p Город: #{@order.place_name}
         p
           ' Имя:
           = link_to url(:clients, :edit, :id => @order.client.id) do
             = !@order.client.name.blank? ? @order.client.name : 'Клиент'
-          |  (#{@order.client.place_name})
+          / |  (#{@order.client.place_name})
+        p
+          - town_name = @kc_towns[@kc_client_hometown]&.model
+          - order_town_name = @kc_towns[@kc_order_town]&.model
+          - delivery = @kc_towns[@kc_order_delivery]&.model || @kc_towns[@kc_client_delivery]&.model
+          div
+            span
+              ' Город заказа
+            = partial 'bricks/kato/label', :locals => { town_name: order_town_name, el: nil }
+          div
+            span
+              ' Город клиента
+            = partial 'bricks/kato/label', :locals => { town_name: town_name, el: nil }
+          div
+            span
+              ' Город доставки
+            = partial 'bricks/kato/label', :locals => { town_name: delivery, el: nil }
+
         p Тел: #{@order.client.tel}
         p Емайл: #{@order.client.email}
         p Дата: #{to_msk(@order.created_at)}
+        - unless @timeline_at.nil?
+          p Дата отправки: #{to_msk(@timeline_date)}
+        p Менеджер: #{@manager&.name}
         - if !@order.description.blank?
           = @order.description
 
@@ -39,46 +66,51 @@ div class="row non-print"
     div class="pull-right"
       = link_to 'Печать', 'javascript:print()', :class => 'btn btn-glue'
       - if current_account.is_admin?
+        '
         = link_to 'Все', :class => 'btn print-all btn-glue'
 
     // - if @order[:status] < 2
     //   = link_to 'Заказ обработан', url(:orders, :sendemail, :id => Order.iq(@order.id)), :class => 'btn btn-warning'
-div class="clearfix"
+.clearfix
 
+.table.only-print
+  table.table.order-info: tr
+    td style="width:20%;"
+      p # #{@order.id}
+      p
+        ' Клейка:
+        == rur(sticker)
+      p = "ϰ #{cplx}"
+    td style="width:30%;"
+      p = order_town_name&.name || "*#{@order.place_name}"
+      p Тр.ком.: #{@order.client.shipping_company}
+      p М: #{@manager&.name}
+    td
+      .flex-c
+        .block style="flex:1;"
+          - @sections.each do |tab|
+            .section-btn
+              = @order.by_sec?(tab.id) ? tab.name[0..3] : nil
 
-div class="only-print pull-right" style="margin-right: 20px;"
-  - @sections.each do |tab|
-    - if @order.by_sec?(tab.id)
-      strong = tab.name[0..3]
-      | &nbsp;
-  | &nbsp;
-
-
-// = partial 'orders/block'
-div class="table only-print"
-  table class="table order-info"
-    tr
-      td
-        p Город: #{@order.place_name}
-        p Имя: #{@order.client.name}
-      td
-        p Дата: #{to_msk(@order.created_at)}
-        p Тел: #{@order.client.tel}
-      td
-        p Тр.ком.: #{@order.client.shipping_company}
-        p Договор: #{@order.client.contract}
+        .block.print-date
+          i.fa.fa-file-o
+          '
+          = to_msk_print(Time.now)
+      p
+      p = @order.client.name
+      p
+        ' Дата:
+        ' #{ @timeline_at ? to_msk(@timeline_date) : "?"}
+        | (#{((@timeline_date || Date.today) - @order.created_at.to_date).to_i.pred}+)
     - if !@order.client.comment.blank?
-      tr
-        td colspan=3
-          = @order.client.comment
+      tr: td colspan=3 = @order.client.comment
     - if !@order.description.blank?
-      tr
-        td colspan=3
-          = @order.description
+      tr: td colspan=3 = @order.description
 
 
 = form_tag url(:orders, :update, :id => @order.id), :method => :put, :class => 'form-horizontal order' do
-  # = hidden_field_tag 'order[id]', :value => @order[:id]
+  / = hidden_field_tag 'order[id]', :value => @order[:id]
+  .block
   
   - if current_account.is_admin?
     div class="non-print"
@@ -87,16 +119,16 @@ div class="table only-print"
         = label_tag :category, :class => 'col-md-3 control-label'
         div class='col-md-6 controls'
           select name="status" class="huge"
-            - options_for_select(Order.status_for_select).each do |o|
+            - options_for_select(Order.status_for_select, :selected => @order.status).each do |o|
               = o
 
   - if @order_part && @order_part.anew?
     div class="non-print"
       h4 Моя часть заказа:
-      p Когда вы взяли заказ в работу, нажмите эту кнопку
-      fieldset class='control-group'
-        = link_to url(:orders, :status, :id => @order.id), :class => 'btn btn-sm btn-current' do
-          | Подтвердить
+      span Когда вы взяли заказ в работу, нажмите кнопку
+      '
+      = link_to url(:orders, :status, :id => @order.id), :class => 'btn btn-sm btn-current' do
+        | Подтвердить
 
   - if @order_part && @order_part.current?
     div class="non-print"
@@ -126,73 +158,87 @@ div class="table only-print"
             //   = submit_tag pat(:delete), :class =>'list-row-action-popover-delete-one-btn btn btn-danger btn-wide'
             div class='btn btn-default btn-wide cancel' data-dismiss="modal" Закрыть
 
-
-  div class="block"
-    h4 class="non-print"
-      | Заказ:
-      span class="label label-#{@order.status}"
-        = t :"status.#{@order.status}"
+  / # - t = sec do
+  / #   - displayed_n = @sections.flat_map(&:categories).map{|c|@order.by_cat(c.id).size}.sum
+  / #   - actual_n = @order.order_lines.count
+  / #   p = "#{displayed_n} | #{actual_n}"
+  / # p = notice_for_time(t)
+  
+  - displayed_n = 0
+  .block
     ul class="nav nav-tabs non-print" id="order_tab"
       - @sections.each do |tab|
-        - cat_enabled = @order.by_sec?(tab.id) ? "" : 'disabled'
-        - my = @my_section.id != tab.id ? "" : "my"
-        li class="#{cat_enabled} #{my}"
+        - cat_enabled = @order.by_sec?(tab.id)
+        - displayed_n += 1 if cat_enabled
+        - my = @my_section.id == tab.id
+        li class=[('disabled' unless cat_enabled), ('my' if my)]
           = link_to tag_icon('fa fa-ok', "#{tab.name}"), "#cat-#{tab.id}", 'data-toggle' => "tab"
+      - if @order.order_parts.size != displayed_n 
+        li
+          a data-toggle='tab' href='#cat-fail'
+            i.fa.fa-exclamation-triangle 
   
     div class="tab-content" id="for_order_tab"
       - @sections.each_with_index do |s, i|
         - tab_visible = @order.by_sec?(s.id)
-        - my = @my_section.id != s.id ? "" : "my"
-        div class="tab-pane #{tab_visible && !my.blank? ? '' : 'non-print'} #{my}" id="cat-#{s.id}"
-          - s.categories.each do |tab|
-            - cat_visible = @order.by_cat?(tab.id)
-            - if cat_visible
-              div class="table-res4ponsive"
-                h4  = tab.name
-                table class="table"
-                  tr
-                    th class="only-print" Отметка
-                    th Наименование
-                    th Коммент
-                    th Количество
-                    th class="non-print" Цена
-                    th class="non-print" Сумма
-                    th class="non-print" Факт
-                    th class="non-print" Не делаем
-                  
-                  - @order.by_cat(tab.id).each do |ol|
-                    tr class="order-line"
-                      = hidden_field_tag "line[#{ol.id}][id]", :value => ol[:id]
-                      td class="only-print" &nbsp;
-                      td class="col-md-4"
-                        = ol.product.displayname
-                      td class="col-md-3"
-                        - if !ol.description.blank?
-                          div
-                            = ol.description
-                      td class="col-md-1"
-                        = ol.amount
-                      td class="col-md-1" class="non-print"
-                        = ol.price
-                        | &nbsp;&#x20B7
-                      td class="col-md-1" class="non-print"
-                        = ol.price*ol.amount
-                        | &nbsp;&#x20B7
-                      td class="col-md-1" class="non-print"
-                        div class='controls'
-                          = (text_field_tag "line[#{ol.id}][done_amount]", :value => ol.done_amount,
-                          :autocomplete => "off", :class => "form-control input-sm")
-                      td class="col-md-1" class="vert-align non-print"
-                        div class='controls'
-                          = hidden_field_tag "line[#{ol.id}][ignored]", :value => 'false'
-                          = check_box_tag "line[#{ol.id}][ignored]", :checked => ol.ignored, :class => ""
+        - my = @my_section.id == s.id
+        - unless tab_visible
+          block.non-print id="cat-#{s.id}"
+        - else
+          .tab-pane id="cat-#{s.id}" class=[('filled' if tab_visible), ('my' if my), ('non-print' unless tab_visible && my)]
+            - s.categories.each do |tab|
+              - cat_visible = @order.by_cat?(tab.id)
+              - if cat_visible
+                div class="table-res4ponsive"
+                  h4.non-print = tab.name
+                  table.table
+                    thead.only-print: tr: td colspan=10 = tab.name
+                    tr
+                      th.only-print Отметка
+                      th Наименование
+                      th Коммент
+                      th Количество
+                      th class="non-print" Цена
+                      th class="non-print" Сумма
+                      th class="non-print" Факт
+                      th class="non-print" Не делаем
+                    
+                    - @order.by_cat(tab.id).each do |ol|
+                      tr class="order-line"
+                        = hidden_field_tag "line[#{ol.id}][id]", :value => ol[:id]
+                        td class="only-print" &nbsp;
+                        td class="col-md-4"
+                          = ol.product.displayname
+                        td class="col-md-3"
+                          - if !ol.description.blank?
+                            div
+                              = ol.description
+                        td class="col-md-1"
+                          = ol.amount
+                        td class="col-md-1" class="non-print"
+                          == rur(ol.price)
+                        td class="col-md-1" class="non-print"
+                          == rur(ol.price*ol.amount)
+                        td class="col-md-1" class="non-print"
+                          div class='controls'
+                            = (text_field_tag "line[#{ol.id}][done_amount]", :value => ol.done_amount,
+                            :autocomplete => "off", :class => "form-control input-sm")
+                        td class="col-md-1" class="vert-align non-print"
+                          div class='controls'
+                            = hidden_field_tag "line[#{ol.id}][ignored]", :value => 'false'
+                            = check_box_tag "line[#{ol.id}][ignored]", :checked => ol.ignored, :class => ""
+      .tab-pane.non-print id="cat-fail"
+        p У этого заказа заглючили секции. Тут будет кнопка для исправления.
+
   div class="non-print"
     h4 class="pull-right"
-      | Сумма заказа: #{"%0.f" % @order.total} &#x20B7
+      ' Сумма заказа:
+      == rur("%0.f" % @order.total)
     - if @order.finished? || @order.shipped?
       div class="clearfix"
       h4 class="pull-right"
-        | Фактически собрано на: #{"%0.f" % @order.done_total} &#x20B7
+        ' Фактически собрано на:
+        == rur("%0.f" % @order.done_total)
   - if !@order.shipped?
     - if current_account.is_admin? or (@order_part and @order_part.current?)
       = submit_tag "Сохранить", :class => 'btn btn-sm btn-prime', :name => 'save'
@@ -317,7 +363,7 @@ div class="table only-print"
         });
         
         $(".btn.print-all").on("click", function() {
-          $("#for_order_tab .tab-pane").toggleClass("non-print tab-pane")
+          $("#for_order_tab .tab-pane.filled").removeClass("non-print")
           print()
         });
       });

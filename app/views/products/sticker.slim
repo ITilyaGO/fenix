@@ -1,0 +1,76 @@
+br
+= form_for :product, url(:products, :sticker), :method => :put, :class => 'form-horizontal' do |f|
+  - @cats.each do |category|
+    /h4 #{category.name}
+    - category.subs_ordered.each do |sub|
+      .row
+        collapser titler="#{category.name}. #{sub.name}"
+
+          h4 = sub.name
+          table class="table"
+            tr
+              th class="only-print" Отметка
+              th Наименование
+              th class="non-print" Цена
+              th class="non-print" Наклейка
+              th class="non-print" &nbsp;
+              th class="non-print" &nbsp;
+              th class="non-print" &nbsp;
+            
+            - sub.all_products.order(:index => :asc).each do |ol|
+              - next if @parents.include? ol.id
+              - sticker = @kc_products[ol.id.to_s].to_f
+              tr class="order-line"
+                = hidden_field_tag "line[#{ol.id}][id]", :value => ol[:id]
+                td class="only-print" &nbsp;
+                td class="col-md-4"
+                  = ol.displayname
+                td class="col-md-1" class="non-print"
+                  / TODO: parent dishes with no price
+                  == rur(ol.price) rescue '?'
+                td class="col-md-1" class="non-print"
+                  - if sticker > 0
+                    == rur(sticker)
+                  - else
+                    .label.label-default нет
+                td.col-md-1
+                  - if sticker > 0
+                    .per
+                      = (100/(ol.price/sticker)).ceil rescue 0
+                      | %
+                td class="col-md-1" class="non-print"
+                  div class='controls'
+                    = (text_field_tag "line[#{ol.id}][sticker]", :value => sticker > 0 ? sticker : '',
+                    :autocomplete => "off", :class => "form-control input-sm")
+                td class="col-md-1" class="vert-align non-print"
+                  div class='controls'
+                    = hidden_field_tag "line[#{ol.id}][ignored]", :value => 'false'
+                    .btn.btn-info.btn-xs Обнулить
+
+          /- sub.all_products.order(:index => :asc).each do |line|
+            .row: div
+              / = line.displayname
+              / sticker_line name=line.displayname product=line.id id=line.id values=@kc_products[line.id.to_s]
+              .sticker-block.sleeping
+                h2 style="flex:1;" = line.name
+                h2.item = line.price
+                input type="text" name="level" size="3"
+                .btn.btn-info.btn-sm
+                .stack
+                  .item
+                    input type="text" name="level" size="3"
+                    input type="hidden" name="ps[]" value="{ id }" if="{ product }"
+                    input type="hidden" name="cs[]" value="{ id }" if="{ category }"
+      hr
+
+  .form-actions = f.submit pat(:save), :class => 'btn btn-prime'
+
+- content_for :js_assets do
+  = javascript_include_tag :riot
+  script type="riot/tag" src="/riot/tags/sticker_line.tag"
+  script type="riot/tag" src="/riot/tags/collapser.tag"
+  javascript:
+    
+    document.addEventListener("DOMContentLoaded", function(event) {
+      riot.mount('collapser, sticker_line')
+    });

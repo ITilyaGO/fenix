@@ -130,4 +130,30 @@ Fenix::App.controllers :products do
     redirect url(:products, :complexity)
   end
 
+  get :sticker do
+    @title = "Product - Sticker price"
+    @cats = Category.where(category: nil).order(:index => :asc)
+    @categories = Category.all.includes(:category)
+    @parents = Product.pluck(:parent_id).compact.uniq
+    @kc_products = CabiePio.folder(:products, :sticker).flat
+    # @kc_categories = CabiePio.folder(:complexity, :category).flat
+    render 'products/sticker'
+  end
+
+  put :sticker do
+    data = params['cplx']
+
+    params[:line].each do |k, line|
+      stick = line['sticker']
+      CabiePio.unset([:products, :sticker], line['id']) if stick == '0'
+      next unless stick.to_i > 0
+      CabiePio.set [:products, :sticker], line['id'], stick.to_f
+    end
+    # $background.in '0s' do
+    OrderJobs.sticker_job
+    # end
+
+    redirect url(:products, :sticker)
+  end
+
 end

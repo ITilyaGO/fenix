@@ -12,9 +12,18 @@ module Fenix::App::OrdersHelper
   #   partial "orders/squares", :locals => { :sections => sections, :order => order }
   # end
 
+  def deli(number)
+    number.to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1 ').reverse
+  end
+
   def to_rub(value)
     ("%.2f" % value).gsub('.', ',')
   end
+
+  def rur(value)
+    "#{'%g' %(value||0)}&nbsp;<span class='r'>₽</span>"
+  end
+
   def order_complexity(order)
     kc_complex = CabiePio.folder(:complexity, :category)
     complexity = 0
@@ -45,4 +54,35 @@ module Fenix::App::OrdersHelper
   def complex_hash
     @complex_hash ||= CabiePio.folder(:complexity, :order).flat
   end
+
+  def order_sticker(id)
+    cabie = CabiePio.get [:sticker, :order], id
+    cabie.data
+  end
+
+  def sticker_price(order)
+    kc_sticker = CabiePio.folder(:products, :sticker).flat.trans(:to_i, :to_f)
+    sticker = 0
+    order.order_lines.each do |line|
+      next if line.ignored || line.amount == 0
+      price = kc_sticker.fetch(line.product_id, 0)
+
+      sticker += price*line.amount
+    end
+    sticker
+  end
+
+  def calc_stickers_for(order)
+    price = sticker_price order
+    CabiePio.set [:sticker, :order], order.id, price
+  end
+
+  def sticker_job(force = false)
+    CabiePio.clear(:sticker, :order) if force
+    orders = Order.all
+    orders.each do |t|
+      calc_stickers_for(t)
+    end
+  end
+
 end

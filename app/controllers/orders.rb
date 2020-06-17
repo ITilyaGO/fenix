@@ -146,6 +146,7 @@ Fenix::App.controllers :orders do
     
 
     if @order
+      @order.actualize
       render 'orders/edit'
     else
       flash[:warning] = pat(:create_error, :model => 'order', :id => "#{params[:id]}")
@@ -263,8 +264,8 @@ Fenix::App.controllers :orders do
       end
     end
     order.all_parts = order.order_parts.size if order.order_parts.any?
-
     order.save
+    order.actualize
     calc_complexity_for order
 
     delivery_at = params[:cabie][:timeline_at]
@@ -343,8 +344,8 @@ Fenix::App.controllers :orders do
       end
     end
     order.all_parts = order.order_parts.size if order.order_parts.any?
-
     order.save
+    order.actualize
     calc_complexity_for order
 
     delivery_at = params[:cabie][:timeline_at]
@@ -456,8 +457,8 @@ Fenix::App.controllers :orders do
       end
     end
     order.all_parts = order.order_parts.size if order.order_parts.any?
-
     order.save
+    order.actualize
     calc_complexity_for order
     
     code = params[:cabie][:kato_place]
@@ -551,6 +552,7 @@ Fenix::App.controllers :orders do
       @order.done_total = amount
     end
     @order.save
+    @order.actualize
     calc_complexity_for @order
 
     if @order.status == :finished

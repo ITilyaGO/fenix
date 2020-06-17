@@ -2,8 +2,14 @@ ul class="nav nav-tabs non-print"
   li = link_to tag_icon(:list, pat(:list)), url(:orders, :index)
   li class="active" = link_to tag_icon(:edit, "Show order #{@order.id}"), url(:orders, :show, :id => @order.id)
   li = link_to '#' do
+    span class="label label-#{@order.status}"
+      = t :"status.#{@order.status}"
+  li = link_to '#' do
     ' сложность
     .label.label-info = order_cplx(@order.id)
+  li = link_to '#' do
+    ' клейка
+    .label.label-darkrose == rur(order_sticker(@order.id))
 
 // - @sections.each do |s|
 //   strong = s.name
@@ -11,12 +17,29 @@ ul class="nav nav-tabs non-print"
 //   div
 //     - s.categories.each do |c|
 //       span = c.name
-// 
+
 div class="table non-print"
   table class="table order-info"
     tr
       td
-        p Город: #{@order.place_name}
+        p
+          - town_name = @kc_towns[@kc_client_hometown]&.model
+          - order_town_name = @kc_towns[@kc_order_town]&.model
+          - delivery = @kc_towns[@kc_order_delivery]&.model || @kc_towns[@kc_client_delivery]&.model
+
+          div
+            span
+              ' Город заказа
+            = partial 'bricks/kato/label', :locals => { town_name: order_town_name, el: nil }
+          div
+            span
+              ' Город клиента
+            = partial 'bricks/kato/label', :locals => { town_name: town_name, el: nil }
+          div
+            span
+              ' Город доставки
+            = partial 'bricks/kato/label', :locals => { town_name: delivery, el: nil }
+
         p Имя: #{@order.client.name}
         // p Организация: #{@order.client.org}
         p Тел: #{@order.client.tel}
@@ -24,7 +47,7 @@ div class="table non-print"
         p Дата: #{to_msk(@order.created_at)}
         - if !@order.description.blank?
           p = @order.description
-
+        p Коробок: #{@order.order_parts.map(&:boxes).sum}
 
 div class="clearfix"
 // div class="row"
@@ -49,11 +72,6 @@ div class="only-print pull-right" style="margin-right: 20px;"
 /   = label_tag :status, :class => 'col-md-3 control-label'
 /   div class='col-md-6 controls'
 /     = t :"status.#{@order.status}"
-
-h4
-  | Заказ:
-  span class="label label-#{@order.status}"
-    = t :"status.#{@order.status}"
 
 // ul class="nav nav-tabs non-print" id="order_tab"
 //   - @tabs.sort{ |a,b| (a.id == 21 ? 18 : a.id) <=> ( b.id == 21 ? 18 : b.id) }.each do |tab|
@@ -127,5 +145,6 @@ div
                 td class="vert-align"
                   = check_box_tag "line[#{ol.id}][ignored]", :checked => ol.ignored, :class => "form-contol form-amount input-xs"
 
-div class="non-print"
-  h4 class="pull-right" Сумма заказа: #{"%0.f" % @order.total} &#x20B7
+  div class="non-print"
+    h4 class="pull-right" Сумма заказа: #{"%0.f" % @order.total} &#x20B7
+  .clearfix
