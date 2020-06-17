@@ -8,6 +8,7 @@ Fenix::App.controllers :managers do
   get :new do
     @title = "New manager"
     @manager = Manager.new
+    @points = []
     render 'managers/new'
   end
 
@@ -30,6 +31,9 @@ Fenix::App.controllers :managers do
     @title = pat(:edit_title, :model => "manager #{params[:id]}")
     @manager = Manager.find(params[:id])
     if @manager
+      @points = CabiePio.get([:m, :managers, :geo_poss], @manager.id).data || []
+      @kc_towns = KatoAPI.batch(@points)
+
       render 'managers/edit'
     else
       flash[:warning] = pat(:create_error, :model => 'manager', :id => "#{params[:id]}")
@@ -42,6 +46,23 @@ Fenix::App.controllers :managers do
     @manager = Manager.find(params[:id])
     if @manager
       if @manager.update_attributes(params[:manager])
+        codes = params[:cabie][:kato_place].lines.map(&:chomp)
+        results = KatoAPI.batch(codes)
+
+        junk = CabiePio.get([:m, :managers, :geo_poss], @manager.id).data || []
+        junk.each do |j|
+          junk_data = CabiePio.get([:towns, :managers], j).data.to_i
+          CabiePio.unset([:towns, :managers], j) if junk_data == @manager.id
+        end
+        points = []
+        results.each do |c, rec|
+          next if rec.blank?
+          CabiePio.set [:towns, :managers], c, @manager.id
+          points << c
+        end
+        CabiePio.set [:m, :managers, :geo_poss], @manager.id, points
+
+
         flash[:success] = pat(:update_success, :model => 'Manager', :id => "#{params[:id]}")
         params[:save_and_continue] ?
           redirect(url(:managers, :index)) :

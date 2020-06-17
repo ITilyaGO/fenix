@@ -8,6 +8,7 @@ div class="tabs-content"
       tr
         th class='header' style='width:50px' = mat(:manager, :id)
         th class='header' = mat(:manager, :name)
+        th.header Текущие заказы
         th class='header list-row-action-header'
 
     tbody
@@ -15,7 +16,21 @@ div class="tabs-content"
         tr class='list-row'
           td class='list-column' = manager.id
           td class='list-column' = manager.name
+          td.list-column
+            = link_to :href => url(:orders, :by_manager, :id => manager.id), :class => "btn btn-xs btn-glue"
+              | Заказы
           td class='list-column list-row-action'
             div class='list-row-action-wrapper'
               = link_to tag_icon(:edit), :href => url(:managers, :edit, :id => manager.id), :rel => :tooltip, :title => "#{pat(:edit)} manager", :class => 'list-row-action-wrapper-link'
               = link_to tag_icon("trash-o"), :rel => :tooltip, :title => "#{pat(:delete)} manager", :class => 'list-row-action-delete-one list-row-action-wrapper-link'
+
+      tr class='list-row'
+        td class='list-column' 0
+        td class='list-column' Без менеджера
+        td.list-column
+          = link_to :href => url(:orders, :no_manager), :class => "btn btn-xs btn-glue"
+            | Заказы без менеджера
+        td class='list-column list-row-action'
+          div class='list-row-action-wrapper'
+            = link_to tag_icon("trash-o"), :class => 'list-row-action-wrapper-link'
+

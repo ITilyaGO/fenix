@@ -25,12 +25,21 @@ Fenix::App.controllers :orders do
 
   get :finished do
     @title = "Собранные заказы"
+    @print_btn = 1
     @orders = Order.all
       .includes(:client, :place, :order_parts)
       .preload(:client => :place)
       .where("status = ?", Order.statuses[:finished]).order(:updated_at => :desc)
     @old = params[:old].present?
-    @orders = @orders.where('updated_at > ?', Date.today - 1.month) if !@old
+    if !@old
+      @orders = @orders.where('updated_at > ?', Date.today - 1.month)
+    else
+      pagesize = PAGESIZE
+      @page = !params[:page].nil? ? params[:page].to_i : 1
+      @pages = (@orders.count/pagesize).ceil
+      @orders = @orders.offset((@page-1)*pagesize).take(pagesize)
+      @r = url(:orders, :finished, :old => 1)
+    end
     @sections = Section.all
     render 'orders/finished'
   end
@@ -44,6 +53,8 @@ Fenix::App.controllers :orders do
     @orders = Order.where("status >= ?", Order.statuses[:shipped]).order(sort => dir).offset((@page-1)*pagesize).take(pagesize)
     @pages = (Order.where("status >= ?", Order.statuses[:shipped]).count/pagesize).ceil
     @sections = Section.includes(:categories).all
+    @kc_orders = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :towns]).flat
+    @kc_towns = KatoAPI.batch(@kc_orders.values.uniq)
     @r = url(:orders, :archive)
     render 'orders/archive'
   end
@@ -56,11 +67,59 @@ Fenix::App.controllers :orders do
     @page = !params[:page].nil? ? params[:page].to_i : 1
     sort = params[:sort] || "updated_at"
     dir = !params[:sort] && !params[:dir] ? "desc" : params[:dir] || "asc"
+
+    @sections = Section.includes(:categories).all
+    @kc_orders = CabiePio.folder(:orders, :towns).flat
+    @kc_delivery = CabiePio.folder(:orders, :delivery_towns).flat
+    @kc_hometowns = CabiePio.folder(:clients, :hometowns).flat
+    @kc_client_delivery = CabiePio.folder(:clients, :delivery_towns).flat
+    codes = @kc_orders.values.uniq + @kc_delivery.values.uniq + @kc_client_delivery.values.uniq + @kc_hometowns.values.uniq
+    @kc_towns = KatoAPI.batch(codes)
+    kc_town_managers = CabiePio.folder(:towns, :managers).flat
+    @kc_managers = codes.map do |code|
+      hier = Kato::Hier.for(code).codes
+      manager = hier.detect{|c| kc_town_managers[c]}
+      [code, kc_town_managers[manager]]
+    end.to_h.compact
+    @managers = Manager.all.pluck(:id, :name).to_h
+    manager_places = @kc_managers.to_a.group_by(&:last).transform_values{|v|v.flat_map(&:first)}[@manager.id.to_s] || []
+    # search_orders = @kc_orders.select{|k,v|manager_places.include? v}.keys.map(&:to_i)
+    search_clients = @kc_hometowns.select{|k,v|manager_places.include? v}.keys.map(&:to_i)
     @orders = Order.includes(:client, :place, :order_parts, :timeline)
-      .where("clients.place_id": places)
+      .where(client_id:search_clients)
       .where("status > ?", Order.statuses[:draft]).where("status < ?", Order.statuses[:finished])
       .order(sort => dir)
+    render 'orders/index'
+  end
+
+  get :no_manager do
+    @title = "Все текущие заказы без менеджера"
+    pagesize = PAGESIZE
+    @page = !params[:page].nil? ? params[:page].to_i : 1
+    sort = params[:sort] || "updated_at"
+    dir = !params[:sort] && !params[:dir] ? "desc" : params[:dir] || "asc"
+
     @sections = Section.includes(:categories).all
+    @kc_orders = CabiePio.folder(:orders, :towns).flat
+    @kc_delivery = CabiePio.folder(:orders, :delivery_towns).flat
+    @kc_hometowns = CabiePio.folder(:clients, :hometowns).flat
+    @kc_client_delivery = CabiePio.folder(:clients, :delivery_towns).flat
+    codes = @kc_orders.values.uniq + @kc_delivery.values.uniq + @kc_client_delivery.values.uniq + @kc_hometowns.values.uniq
+    @kc_towns = KatoAPI.batch(codes)
+    kc_town_managers = CabiePio.folder(:towns, :managers).flat
+    @kc_managers = codes.map do |code|
+      hier = Kato::Hier.for(code).codes
+      manager = hier.detect{|c| kc_town_managers[c]}
+      [code, kc_town_managers[manager]]
+    end.to_h.compact
+    @managers = Manager.all.pluck(:id, :name).to_h
+    manager_places = @kc_managers.to_a.group_by(&:last).transform_values{|v|v.flat_map(&:first)}.values.flatten
+    # search_orders = @kc_orders.select{|k,v|manager_places.include? v}.keys.map(&:to_i)
+    search_clients = @kc_hometowns.select{|k,v|manager_places.include? v}.keys.map(&:to_i)
+    @orders = Order.includes(:client, :place, :order_parts, :timeline)
+      .where.not(client_id:search_clients)
+      .where("status > ?", Order.statuses[:draft]).where("status < ?", Order.statuses[:finished])
+      .order(sort => dir)
     render 'orders/index'
   end
 
@@ -72,6 +131,16 @@ Fenix::App.controllers :orders do
     @order_part = @order.order_parts.find_by(:section_id => @my_section)
     @tabs = Category.where(:category => nil)
 
+    @kc_client_hometown = CabiePio.get([:clients, :hometowns], @order.client.id).data
+    @kc_client_delivery = CabiePio.get([:clients, :delivery_towns], @order.client.id).data
+    @kc_order_town = CabiePio.get([:orders, :towns], @order.id).data
+    @kc_order_delivery = CabiePio.get([:orders, :delivery_towns], @order.id).data
+    @kc_towns = KatoAPI.batch([@kc_client_hometown, @kc_client_delivery, @kc_order_town, @kc_order_delivery].compact)
+
+    kc_town_managers = CabiePio.folder(:towns, :managers).flat
+    hier = Kato::Hier.for(@kc_client_hometown).codes
+    manager = kc_town_managers.fetch(hier.detect{|c| kc_town_managers[c]}, 0)
+    @manager = Manager.find(manager) rescue nil
     if @order
       render 'orders/edit'
     else
@@ -93,12 +162,18 @@ Fenix::App.controllers :orders do
   # end
 
   get :show, :with => :id do
-    @title = pat(:edit_title, :model => "order #{params[:id]}")
+    @title = "Viewing order #{params[:id]}"
     @order = Order.includes(:order_lines).find(params[:id])
     @sections = Section.includes(:categories).all
     @my_section = current_account.section
     @order_part = @order.order_parts.find_by(:section_id => @my_section)
     @tabs = Category.where(:category => nil)
+
+    @kc_client_hometown = CabiePio.get([:clients, :hometowns], @order.client.id).data
+    @kc_client_delivery = CabiePio.get([:clients, :delivery_towns], @order.client.id).data
+    @kc_order_town = CabiePio.get([:orders, :towns], @order.id).data
+    @kc_order_delivery = CabiePio.get([:orders, :delivery_towns], @order.id).data
+    @kc_towns = KatoAPI.batch([@kc_client_hometown, @kc_client_delivery, @kc_order_town, @kc_order_delivery].compact)
 
     if @order
       render 'orders/show'
@@ -586,6 +661,8 @@ Fenix::App.controllers :orders do
     @title = pat(:edit_title, :model => "order #{params[:id]}")
     @order = Order.includes(:order_lines).includes(order_lines: :product).find(params[:id])
     @account = params[:account]
+    iso = CabiePio.get([:orders, :towns], @order.id).data
+    @kc_town = KatoAPI.anything(iso)&.load.model.name || @order.place_name
     output = render 'invoices/nakl', :layout => false
 
     Princely.executable = settings.princebin
