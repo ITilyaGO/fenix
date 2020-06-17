@@ -1,0 +1,31 @@
+= form_for :product, url(:products, :complexity), :method => :put, :class => 'form-horizontal' do |f|
+  - @cats.each do |category|
+    / h4 #{category.name}
+    .row: div: complex name=category.name category="true" id=category.id values=@kc_categories[category.id.to_s]
+  
+  - @cats.each do |category|
+    /h4 #{category.name}
+    / .row: complex name="дефолт" category=category.id
+    - category.subs_ordered.each do |sub|
+      hr
+      .row
+        / h4 #{category.name} > #{sub.name}
+
+        collapser titler="#{category.name}. #{sub.name}"
+          .row: div: complex name="#{category.name} > #{sub.name}" category=sub.id id=sub.id values=@kc_categories[sub.id.to_s]
+
+          - sub.all_products.order(:index => :asc).each do |line|
+            .row: div
+              / = line.displayname
+              complex name=line.displayname product=line.id id=line.id values=@kc_products[line.id.to_s]
+  .form-actions = f.submit pat(:save), :class => 'btn btn-prime'
+  
+- content_for :js_assets do
+  = javascript_include_tag :riot
+  script type="riot/tag" src="/riot/tags/complex.tag"
+  script type="riot/tag" src="/riot/tags/collapser.tag"
+  javascript:
+    
+    document.addEventListener("DOMContentLoaded", function(event) {
+      riot.mount('collapser, complex')
+    });

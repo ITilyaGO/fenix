@@ -1,0 +1,90 @@
+complex class="{ sleeping: !alive() }"
+
+  h2
+    | { name }
+  .btn.btn-info.btn-sm hide="{ Array.isArray(items) }" onclick="{ setit }" set up
+  .stack if="{ Array.isArray(items) }"
+    .item each="{ item, index in items }"
+      .text-center
+        | { item.l }
+      input type="hidden" name="ps[]" value="{ id }" if="{ product }"
+      input type="hidden" name="cs[]" value="{ id }" if="{ category }"
+
+      / input type="hidden" name="cplx[][kind]" value="{ category }"
+      input type="hidden" name="cplx[][id]" value="{ idstring() }"
+      input type="hidden" name="cplx[][level]" value="{ item.l }"
+      input.text-center type="text" name="cplx[][amount]" value="{ item.a }" size="3"
+      .btn.btn-xs.btn-danger.btn-remove data-id="{ item.l }" show="{ show_rem }" onclick="{ rem }" x
+    .item
+      .text-center
+        input type="text" name="level" size="3"
+      .clearfix
+      .text-center
+        .btn.btn-sm.btn-prime onclick="{ it }"
+          | +
+        .btn.btn-sm.btn-prime onclick="{ f_show_rem }" -
+      .clearfix
+      /.text-center
+        .btn.btn-sm.btn-prime onclick="{ f_show_rem }" -
+    /.item
+      .btn.btn-sm.btn-prime onclick="{ f_show_rem }" -
+    .btn.btn-sm.btn-prime.marginal.ninety onclick="{ rem_all }" Удалить
+
+  javascript:
+    var self = this
+    this.product = opts.product
+    this.category = opts.category
+    this.id = opts.id
+    this.items = parse_values()
+    this.show_rem = false
+    this.name = opts.name
+
+    function parse_colon(val) {
+      let ary = val.split(':')
+      return { l:ary[0], a:ary[1] }
+    }
+    function parse_values() {
+      if (opts.values == null)
+        return null;
+      return opts.values.split(' ').map(x => parse_colon(x))
+      // return opts.values.split(' ').map(x => ({l:+x}))
+    }
+
+    this.alive = function(items) {
+      Array.isArray(this.items)
+    }
+
+    this.idstring = function() {
+      return (this.product ? 'p' : 'c') + this.id
+    }
+
+    this.f_show_rem = function() {
+      this.show_rem = !this.show_rem
+    }
+
+    this.setit = function() {
+      this.items = [{l:1, a:1}]
+      this.update()
+    }
+
+    this.it = function(el) {
+      var level = +this.root.querySelector('[name=level]').value
+      this.items.push({ l:level, a:null })
+      this.items = this.items.sort((a,b) => a.l > b.l)
+      this.root.querySelector('[name=level]').value = ''
+      this.update()
+    }
+
+    this.rem = function(el) {
+      // debugger
+      // var id = el.getAttribute('data-id')
+      // var i = this.items.findIndex(x => x.l == id)
+      this.items.splice(el.item.index, 1)
+      this.update()
+    }
+
+    this.rem_all = function() {
+      this.items = null
+      this.update()
+    }
+

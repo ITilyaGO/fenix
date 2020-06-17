@@ -100,5 +100,34 @@ Fenix::App.controllers :products do
     json_cats2.to_json
   end
   
+  get :complexity do
+    @title = "Product - Complex"
+    @cats = Category.where(category: nil).order(:index => :asc)
+    @categories = Category.all.includes(:category)
+    @kc_products = CabiePio.folder(:complexity, :product).flat
+    @kc_categories = CabiePio.folder(:complexity, :category).flat
+    render 'products/complexity'
+  end
+
+  put :complexity do
+    data = params['cplx']
+    products = params['ps'] || []
+    CabiePio.clear(:complexity, :product)
+    products.each do |p|
+      formula = data.select{|l|l['id'] == "p#{p}"}.map{|v|"#{v['level']}:#{v['amount']}"}.join(' ')
+      CabiePio.set [:complexity, :product], p, formula
+    end
+    cats = params['cs'] || []
+    CabiePio.clear(:complexity, :category)
+    cats.each do |c|
+      formula = data.select{|l|l['id'] == "c#{c}"}.map{|v|"#{v['level']}:#{v['amount']}"}.join(' ')
+      CabiePio.set [:complexity, :category], c, formula
+    end
+    $background.in '0s' do
+      OrderJobs.complexity_job
+    end
+
+    redirect url(:products, :complexity)
+  end
 
 end

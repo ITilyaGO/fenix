@@ -265,6 +265,8 @@ Fenix::App.controllers :orders do
     order.all_parts = order.order_parts.size if order.order_parts.any?
 
     order.save
+    calc_complexity_for order
+
     delivery_at = params[:cabie][:timeline_at]
     if timeline_date = Date.parse(delivery_at) rescue nil
       CabiePio.set [:timeline, :order], timeline_order(order.id, timeline_date), order.id
@@ -343,6 +345,8 @@ Fenix::App.controllers :orders do
     order.all_parts = order.order_parts.size if order.order_parts.any?
 
     order.save
+    calc_complexity_for order
+
     delivery_at = params[:cabie][:timeline_at]
     if timeline_date = Date.parse(delivery_at) rescue nil
       CabiePio.set [:timeline, :order], timeline_order(order.id, timeline_date), order.id
@@ -454,6 +458,8 @@ Fenix::App.controllers :orders do
     order.all_parts = order.order_parts.size if order.order_parts.any?
 
     order.save
+    calc_complexity_for order
+    
     code = params[:cabie][:kato_place]
     if Kato.valid? code
       CabiePio.set [:orders, :towns], order.id, code
@@ -545,6 +551,7 @@ Fenix::App.controllers :orders do
       @order.done_total = amount
     end
     @order.save
+    calc_complexity_for @order
 
     if @order.status == :finished
       redirect(url(:orders, :nakl, :id => @order.id))

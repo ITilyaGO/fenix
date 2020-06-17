@@ -1,6 +1,9 @@
 ul class="nav nav-tabs non-print"
   li = link_to tag_icon(:list, pat(:list)), url(:orders, :index)
   li class="active" = link_to tag_icon(:edit, "Show order #{@order.id}"), url(:orders, :show, :id => @order.id)
+  li = link_to '#' do
+    ' сложность
+    .label.label-info = order_cplx(@order.id)
 
 // - @sections.each do |s|
 //   strong = s.name

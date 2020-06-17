@@ -25,3 +25,5 @@ scheduler.cron '5 0 * * *' do
   end
 end if Padrino.env == :production
 end
+
+$background = Rufus::Scheduler.new(:frequency => 60)

@@ -1,6 +1,6 @@
 ul class="nav nav-tabs"
   li class="active" = link_to tag_icon(:list, pat(:list)), url(:products, :index)
-  // li = link_to tag_icon(:plus, pat(:new)), url(:products, :new)
+  li = link_to tag_icon(:'puzzle-piece', pat(:complex)), url(:products, :complexity)
 
 div class="tabs-content"
   table class="table table-hover table-condensed" id="list"

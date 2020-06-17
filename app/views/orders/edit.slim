@@ -1,6 +1,13 @@
+- cplx = order_cplx(@order.id)
 ul class="nav nav-tabs non-print"
   li = link_to tag_icon(:list, pat(:list)), url(:orders, :index)
   li class="active" = link_to tag_icon(:edit, "Show order #{@order.id}"), url(:orders, :show, :id => @order.id)
+  li = link_to '#' do
+    span class="label label-#{@order.status}"
+      = t :"status.#{@order.status}"
+  li = link_to '#' do
+    ' сложность
+    .label.label-info = cplx
 
 // - @sections.each do |s|
 //   strong = s.name
