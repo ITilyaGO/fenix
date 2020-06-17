@@ -1,0 +1,32 @@
+ul.nav.nav-tabs
+  li class="active" = link_to tag_icon(:list, pat(:list)), url(:sections, :index)
+
+.tabs-content
+  table class="table table-hover table-condensed" id="list"
+    thead
+      tr
+        th class='header list-menu'
+        th class='header' = mat(:category, :id)
+        th class='header' = mat(:category, :name)
+        th class='header list-row-action-header'
+
+    tbody
+      - @sections.each do |section|
+        tr class='list-row'
+          td class='list-column list-selectable'
+          td class='list-column' = section.id
+          td class='list-column' = section.name
+          td class='list-column list-row-action'
+            div class='list-row-action-wrapper'
+              = link_to tag_icon(:edit), :href => url(:sections, :edit, :id => section.id), :rel => :tooltip, :title => "#{pat(:edit)} section", :class => 'list-row-action-wrapper-link'
+              = link_to tag_icon(:trash), :rel => :tooltip, :title => "#{pat(:delete)} section", :class => 'list-row-action-delete-one list-row-action-wrapper-link'
+            div class='modal'
+              div class="modal-dialog"
+                div class='modal-content'
+                  div class="modal-header"
+                    h4 class="modal-title" We gonna delete this item
+                  div class='modal-body' Is it ok?
+                  div class='modal-footer'
+                    = form_tag url(:sections, :destroy, :id => section.id), :method => :delete do
+                      = submit_tag pat(:delete), :class =>'list-row-action-popover-delete-one-btn btn btn-danger btn-wide'
+                      div class='btn btn-default btn-wide cancel' data-dismiss="modal" = pat(:cancel)

@@ -1,0 +1,16 @@
+ul.nav.nav-tabs
+  li = link_to tag_icon(:list, pat(:list)), url(:sections, :index)
+
+.tabs-content
+  = form_for :section, url(:sections, :update, :id => @section.id), :method => :put, :class => 'form-horizontal' do |f|
+    - error = @section.errors.include?(:name)
+    fieldset class='control-group#{error ? ' has-error' : ''}'
+      = f.label :name, :class => 'col-md-3 control-label'
+      .col-md-6.controls
+        = f.text_field :name, :class => 'form-control input-large input-with-feedback', :autofocus => true
+    .form-actions
+      = f.submit pat(:save), :class => 'btn btn-prime'
+      |&nbsp;
+      = f.submit pat(:save_and_continue), :class => 'btn btn-info', :name => 'save_and_continue'
+      |&nbsp;
+      = link_to pat(:cancel), url(:sections, :index), :class => 'btn btn-default'
