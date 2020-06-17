@@ -2,5 +2,12 @@
   p
     = link_to cat.name, url(:statistic, :orders, :id => cat.id)
     ' &nbsp;
-    span.label.label-success.btn-sm
-      = link_to "excel", url(:statistic, :orders, :id => cat.id, :format => :csv)
+    a href=url(:statistic, :orders, :id => cat.id, :format => :csv)
+      span.label.label-info
+        span.fa.fa-file.menu-icon style='padding-right:10px;'
+        ' csv
+    ' &nbsp;
+    a href=url(:statistic, :orders, :id => cat.id, :win => '', :format => :csv)
+      span.label.label-success
+        span.fa.fa-file.menu-icon style='padding-right:10px;'
+        ' excel

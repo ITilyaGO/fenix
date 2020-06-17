@@ -1,0 +1,20 @@
+div.non-print
+  div.pull-right
+    = link_to 'Печать', 'javascript:print()', :class => 'btn btn-glue'
+
+p.non-print = link_to "Назад", url(:statistic, :done)
+
+p Год: #{@start_date.strftime("%Y")}
+
+table.table
+  tr
+    th.non-print Печать
+    th Город
+    th Количество
+  
+  - @pretty_stat.each do |s|
+    tr.list-row
+      td class='list-column list-selectable non-print' = check_box_tag 'stats[]', :checked => true, :autocomplete => "off", :class => 'list-selectable-checkbox'
+      td = s[:name]
+      td = s[:sum]
+

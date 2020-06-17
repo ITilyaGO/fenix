@@ -50,7 +50,10 @@ Fenix::App.controllers :statistic do
       when :csv then begin
         fname = 'statistics-' + @category.name + '.csv'
         headers['Content-Disposition'] = "attachment; filename=#{fname}"
-        CSV.generate(:col_sep => ';') do |csv|
+        output = ''
+        output = "\xEF\xBB\xBF" if params.include? :win
+        output << CSV.generate(:col_sep => ';') do |csv|
+          # csv << "\xEF\xBB\xBF" if params[:win]
           # csv << %w(id name num)
           @pretty_stat.each do |item|
             csv << [item[:category].encode('utf-8'), item[:name].encode('utf-8'), item[:sum]]
@@ -87,7 +90,10 @@ Fenix::App.controllers :statistic do
     today = Date.today.next_month -gap
     @start_date = Date.new(today.year, today.month, 1)
     end_date = @start_date.next_month
-    @orders = Order.where(status: Order.statuses[:finished]).where('updated_at >= ?', @start_date).where('updated_at < ?', end_date)
+    ignored = YAML.load_file('./stat_ignore.yml') rescue []
+    @orders = Order.where(status: Order.statuses[:finished])
+      .where('updated_at >= ?', @start_date).where('updated_at < ?', end_date)
+      .where.not(client_id: ignored)
     stat = OrderLine.where(order_id: @orders, ignored: false).where('"categories"."category_id" = %s', id).joins(:product, :product => :category).group(:product_id, "products.'index'", "categories.'index'").order("categories_index", "products_index").sum(:done_amount)
     @pretty_stat = []
     stat.each do |item|
@@ -102,10 +108,55 @@ Fenix::App.controllers :statistic do
       when :csv then begin
         fname = 'statistics-' + @category.name + '-' + @start_date.strftime("%b %y") + '.csv'
         headers['Content-Disposition'] = "attachment; filename=#{fname}"
-        CSV.generate(:col_sep => ';') do |csv|
+        output = ''
+        output = "\xEF\xBB\xBF" if params.include? :win
+        output << CSV.generate(:col_sep => ';') do |csv|
           # csv << %w(id name num)
           @pretty_stat.each do |item|
             csv << [item[:category], item[:name], item[:sum]]
+          end
+        end
+      end
+    end
+  end
+
+  get :done do
+    @title = "Statistics - суммы готовых за год"
+    # @cats = Category.where(:category_id => nil)
+    @years = []
+    start_date = Date.new(Date.today.year, Date.today.month, 1)
+
+    5.times do |i|
+      @years << start_date.prev_year(4-i).strftime("%Y")
+    end
+    render 'statistic/index_done'
+  end
+
+  get :done, :with => :id, :provides => [:html, :csv] do
+    @title = "Statistics - суммы готовых за год"
+    id = params[:id].to_i
+    @start_date = Date.new(id, 1, 1)
+    end_date = @start_date.next_year
+
+    @orders = Order.where(status: Order.statuses[:finished])
+      .where('orders.updated_at >= ?', @start_date).where('orders.updated_at < ?', end_date)
+    @stat = @orders.joins(:place).group(:place_id, "places.name").sum(:done_total)
+
+    @pretty_stat = []
+    @stat.sort_by{|item|-item[1]}.each do |item|
+      @pretty_stat << { :name => item[0][1], :sum => "%0.f" % item[1] }
+    end
+    
+    case content_type
+      when :html then render 'statistic/done'
+      when :csv then begin
+        fname = 'statistics_done-' + @start_date.strftime("%Y") + '.csv'
+        headers['Content-Disposition'] = "attachment; filename=#{fname}"
+        output = ''
+        output = "\xEF\xBB\xBF" if params.include? :win
+        output << CSV.generate(:col_sep => ';') do |csv|
+          @pretty_stat.each do |item|
+            csv << [item[:name], item[:sum]]
           end
         end
       end
