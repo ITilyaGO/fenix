@@ -5,7 +5,7 @@ html lang='en'
     meta name='viewport' content='width=device-width,initial-scale=1'
     title = @title.present? ? "#{@title}" : "Unnamed Project"
     = favicon_tag 'favicon.ico'
-    = stylesheet_link_tag 'bootstrap', 'admin-ui', 'font-awesome.min', 'dashboard'
+    = stylesheet_link_tag 'bootstrap', 'font-awesome.min', 'admin-ui', 'dashboard'
 
   body
     #page-wrapper.open
@@ -13,7 +13,8 @@ html lang='en'
         ul.sidebar
           li#toggle-sidebar.sidebar-main
             a
-              | Dashboard
+              | pio
+              / TODO: fa-arrows-h
               span.menu-icon.fa.fa-exchange
 
           - if allow_route?(:orders_create)
@@ -24,7 +25,7 @@ html lang='en'
                 | Заказы с сайта
                 | &nbsp;&nbsp;
                 span class="badge" = Order.online_count
-                span class="menu-icon fa fa-flash"
+                span class="menu-icon fa fa-cloud-download"
             li.sidebar-list
               = link_to url(:orders, :fullempty) do
                 | Создать заказ
@@ -46,7 +47,22 @@ html lang='en'
               | Все
               | &nbsp;&nbsp;
               span class="badge" = current_account.new_orders
-              // span class="badge" = current_account.new_orders
+              span class="menu-icon fa fa-folder-o"
+          li.sidebar-list
+            = link_to url(:orders, :index, :deli => Order.deliveries[:postage]) do
+              | Отправки
+              span class="menu-icon fa fa-folder-o"
+          li.sidebar-list
+            = link_to url(:orders, :index, :deli => Order.deliveries[:roundtrip]) do
+              | Поездки
+              span class="menu-icon fa fa-folder-o"
+          li.sidebar-list
+            = link_to url(:orders, :index, :deli => Order.deliveries[:vernissage]) do
+              = t :'delivery.vernissage'
+              span class="menu-icon fa fa-folder-o"
+          li.sidebar-list
+            = link_to url(:orders, :index, :deli => Order.deliveries[:pickup]) do
+              = t :'delivery.pickup'
               span class="menu-icon fa fa-folder-o"
           li.sidebar-list
             = link_to url(:orders, :finished) do
@@ -92,7 +108,7 @@ html lang='en'
             li.sidebar-list
               = link_to url(:products, :index) do
                 | Продукция
-                span class="menu-icon fa fa-archive"
+                span class="menu-icon fa fa-coffee"
             li.sidebar-list
               = link_to url(:places, :index) do
                 | Города
@@ -113,7 +129,7 @@ html lang='en'
             li.sidebar-list
               = link_to url(:managers, :index) do
                 | Менеджеры
-                span class="menu-icon fa fa-coffee"
+                span class="menu-icon fa fa-briefcase"
 
         .sidebar-footer
           .col-xs-6
@@ -125,12 +141,22 @@ html lang='en'
         div class="page-content"
           div class="row header"
             div class="col-xs-12"
-              div class="pull-right"
-                span.menu-icon.fa.fa-user style='margin-right:7px;'
-                span = current_account.name
-                div class="btn btn-small item"
+              .pull-right
+                - if @print_btn
+                  .btn.item.btn-print
+                    = link_to 'javascript:print()', :class => 'btn btn-sm btn-glue'
+                      i.fa.fa-print.fa-btn
+                      | печать
+                .btn.item
+                  .fa-stack
+                    i class="fa fa-circle fa-stack-2x"
+                    i class="fa fa-user fa-stack-1x"
+                  span.user = current_account.name
+
+                .btn.item.btn-exit
                   = form_for 'logout', url(:sessions, :destroy), :method => :delete do
-                    = submit_tag "выход", :class => "menu-icon btn fa-power-off"
+                    = submit_tag "выход", :class => "menu-icon btn btn-sm btn-clear"
+
               / div class="user pull-right"
               /   div class="mea" style="width: 100px"
               /     
@@ -181,11 +207,12 @@ html lang='en'
               div class="meta"
                 div class="page"
                   div class=""
-                   | Home
+                   span Home
                    - if @title
-                    = " / #{@title}"
+                    = " — #{@title}"
+
           
-          = {:error => 'danger', :warning => 'warning', :success => 'success', :notice => 'info'}.map { |type, class_name| flash_tag(type, :class => "alert alert-#{class_name} fade in", :bootstrap => true) }.join.html_safe
+          = {:error => 'danger', :warning => 'warning', :success => 'success', :notice => 'info'}.map { |type, class_name| flash_tag(type, :class => "alert alert-#{class_name} alert-top", :bootstrap => true) }.join.html_safe
           
           div class='main-wrapper-push' = yield
           
@@ -250,5 +277,5 @@ html lang='en'
       = yield_content :map_section_asset
 
     
-    = javascript_include_tag 'jquery-2.1.1.min', 'jquery.cookie', 'bootstrap.min', 'typeahead', 'handlebars', 'bootstrap-select', :application
+    = javascript_include_tag 'jquery-2.1.1.min', 'jquery.cookie', 'bootstrap.min', 'typeahead.min', 'handlebars', 'bootstrap-select', :application, :fu
     = yield_content :js_assets
