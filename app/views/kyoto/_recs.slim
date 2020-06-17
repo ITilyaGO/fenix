@@ -1,0 +1,9 @@
+- @stat.each do |line|
+  p = line
+
+- if @data.nil?
+  p No data
+- if @data.respond_to? :each
+  h4 #{@data.size} records
+  - @data.each do |rec|
+    p #{rec.key.inspect} :: #{rec.data}

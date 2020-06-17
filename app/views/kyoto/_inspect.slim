@@ -1,0 +1,11 @@
+- unless @error.empty?
+  - @error.each do |e|
+    p = e
+
+- unless @rec.blank?
+  .label.label-primary = @rec.code
+  p = @rec.kind
+
+  strong 
+  - @rec.model.to_a.each do |prop|
+    p = prop

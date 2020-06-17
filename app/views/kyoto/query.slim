@@ -1,0 +1,77 @@
+h4 Запрос
+
+= form_for :form, url(:kyoto, :query), method: 'patch', :class => 'form-horizontal form-page' do |f|
+  fieldset
+    .col-md-2 = text_field_tag :db, :class => "form-control form-amount input-sm"
+    .col-md-4 = text_field_tag :q, :class => "form-control form-amount input-sm"
+
+  fieldset.control-group
+    .col-md-3.controls.custom-control
+      = f.radio_button :match, :value => 'prefix', :class => 'custom-control-input', checked: true
+      = f.label :match_prefix, class: 'custom-control-label'
+    .col-md-3.controls.custom-control
+      = f.radio_button :match, value: 'regex', :class => 'custom-control-input'
+      = f.label :match_regex, class: 'custom-control-label'
+    .col-md-3.controls.custom-control
+      = f.radio_button :match, :value => 'exact', :class => 'custom-control-input'
+      = f.label :match_exact, class: 'custom-control-label'
+    .col-md-3.controls.custom-control
+      = f.radio_button :match, :value => 'astral', :class => 'custom-control-input'
+      = f.label :match_astral, class: 'custom-control-label'
+
+  .form-actions
+    = f.submit pat(:fetch), :class => 'btn btn-sm patch btn-prime'
+    '
+    = f.submit pat(:clear), :class => 'btn btn-sm patch btn-default', :name => 'clear'
+
+h4 Output
+.output.alert
+  p
+
+javascript:
+  (function() {
+    function encform(form) {
+      return Array.apply(0, form.elements).filter(x => x.name).map(x => 
+        (
+          (obj => 
+            (x.type == "radio" || x.type == "checkbox" || x.type == 'submit') ?
+            (x.checked ? obj : null) :
+            obj
+          )(
+            [x.name, encodeURIComponent(x.value)].join('=')
+          )
+        )
+      ).filter(x => x).join('&')
+    }
+
+    function no_href() {
+      b = this
+      o = document.querySelector('.output p')
+      f = document.querySelector('.form-page')
+      data = encform(f)
+      document.querySelectorAll('[type=submit]').forEach(x => x.checked = false)
+      fetch(f.action, {
+        method: f.method,
+        body: data,
+        headers: { "Content-Type": "application/x-www-form-urlencoded" }
+      })
+      .then(response => response.text())
+      .then(function(result) {
+        o.innerHTML = result
+      })
+      o.innerHTML = 'Loading... ' + f.action
+      return false
+    }
+
+    document.querySelectorAll('.btn.patch').forEach(function(b) {
+      b.onclick = function(e) {
+        if (this.name)
+          this.checked = true
+      }
+    })
+
+    document.querySelectorAll('.form-page').forEach(function(f) {
+      f.onsubmit = no_href
+    })
+    
+  })()

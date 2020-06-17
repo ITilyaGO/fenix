@@ -19,4 +19,9 @@ scheduler.cron '5 0 * * *' do
   from = ActiveRecord::Base.configurations[Padrino.env][:database]
   to = "#{Padrino.root}/db/fenix.daily.db"
   sqlbackup(from, to)
+
+  ALL_CABIES.slice(:pio).keys.each do |c|
+    Cabie.wire(c).backup
+  end
+end if Padrino.env == :production
 end

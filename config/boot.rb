@@ -9,6 +9,7 @@ require 'bundler/setup'
 Bundler.require(:default, RACK_ENV)
 require "./db/lib/main.rb"
 require "./config/scheduler.rb"
+require './config/cabies.rb'
 
 ##
 # ## Enable devel logging

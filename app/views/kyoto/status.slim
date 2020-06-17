@@ -1,0 +1,9 @@
+h3 Layers
+- @layers.each do |l|
+  p = l
+
+h3 Cabies
+- @cabies.values.each do |cb|
+  strong #{cb.config[:name]} (aka #{cb.config[:alias]}): #{cb.mode}
+  p = cb.inspect
+  p = cb.fs auto: 1

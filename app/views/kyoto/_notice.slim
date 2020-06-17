@@ -1,0 +1,13 @@
+h3 = @title
+
+strong Результат
+
+- if @output.respond_to? :each
+  - @output.each do |line|
+    p = line
+- else
+  p = @output
+
+- if @pre.respond_to? :each
+  - @pre.each do |line|
+    pre.text-left = line

@@ -1,0 +1,21 @@
+/ = @datatable
+= form_for :form, url(:kyoto, :migration), :method => :post do |f|
+  table.table.table-hover.table-condensed
+    thead
+      tr
+        - @datatable&.first.count.times do
+          th.header &nbsp;
+        th.header.list-row-action-header
+    
+    tbody
+      - @datatable.each do |row|
+        - modd = !row[1].nil? && !@mg[row[0]].nil? && @mg[row[0]] != row[1]
+        tr.list-row
+          - row.each do |col|
+            td.list-column class=('warning' if modd) = col
+          td.list-column
+            = select_tag :"transport[#{row[0]}]", :options => transport_list << :none, :selected => @mg[row[0]] || row[1] || :none
+
+  .form-actions
+    = f.submit pat(:save), class: 'btn btn-prime'
+

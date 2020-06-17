@@ -1,0 +1,130 @@
+/ h3 Const
+/ p = KCL
+/ p = ALL_CABIES.keys
+
+/ h3 Migration Info
+/ p towns/migrate/known #{CabieMain.length(:towns, :migrate, :known)}
+/ p towns/migrate/unknown #{CabieMain.length(:towns, :migrate, :unknown)}
+/ p towns/migrate/old #{CabieMain.length(:towns, :migrate, :old)}
+/ p accounts #{Account.all.size} - #{Account.all.size - CabieMain.length(:accounts, :places)} without place
+
+
+h3 Сервис
+= form_for '', '', :class => 'form-horizontal' do |f|
+
+p.line
+  span Status
+  '
+  - [:status, :query, :play, :to_schema].each do |btn|
+    a.btn.btn-xs.btn-primary.btn-embossed href=url(:kyoto, btn)
+      = btn
+      '
+      span.fa.fa-external-link
+    '
+
+p.line
+  span Mon
+  '
+  a.btn.patch.btn-xs.btn-default.btn-embossed href=url(:kyoto, :threads) threads
+
+/ p.line
+/   span Clear cab
+/   - ALL_CABIES.keys.each do |db|
+/     '
+/     a.btn.patch.btn-xs.btn-default.btn-embossed href=url(:kyoto, :clear, db: db) = db
+
+p.line
+  span Backup
+  - ALL_CABIES.keys.each do |db|
+    '
+    a.btn.patch.btn-xs.btn-danger.btn-embossed href=url(:kyoto, :backup, db: db) = db
+
+p.line
+  span Pull
+  - ALL_CABIES.keys.each do |db|
+    '
+    a.btn.patch.btn-xs.btn-default.btn-embossed href=url(:kyoto, :recovery_pull, db: db) = db
+
+p.line
+  span Push
+  - ALL_CABIES.keys.each do |db|
+    '
+    a.btn.patch.btn-xs.btn-danger.btn-embossed href=url(:kyoto, :recovery_push, db: db) = db
+
+p.line
+  span Close
+  - ALL_CABIES.keys.each do |db|
+    '
+    a.btn.patch.btn-xs.btn-primary.btn-embossed href=url(:kyoto, :close, db: db) = db
+    '
+    a.btn.patch.btn-xs.btn-info.btn-embossed href=url(:kyoto, :close, db: db, act: 'read') = db
+    '
+    a.btn.patch.btn-xs.btn-danger.btn-embossed href=url(:kyoto, :close, db: db, act: 'write') = db
+
+/ p.line
+/   span Создать amounts
+/   '
+/   a.btn.patch.btn-xs.btn-warning.btn-embossed href=url(:kyoto, :c_am) category
+/   '
+/   a.btn.patch.btn-xs.btn-warning.btn-embossed href=url(:kyoto, :p_am) product
+
+p.line
+  span Migrate
+  '
+  a.btn.patch.btn-xs.btn-warning.btn-embossed href=url(:kyoto, :migrate_towns) towns
+
+
+p.line
+  span Создать client towns
+  '
+  / a.btn.patch.btn-xs.btn-warning.btn-embossed href=url(:kyoto, :p_twn) known
+  / '
+  / a.btn.patch.btn-xs.btn-warning.btn-embossed href=url(:kyoto, :known_from_migrate, :clear => true) -known_from_migrate
+  / '
+  / a.btn.patch.btn-xs.btn-warning.btn-embossed href=url(:kyoto, :known_from_migrate) +known_from_migrate
+  '
+  a.btn.patch.btn-xs.btn-warning.btn-embossed href=url(:kyoto, :account_places_from_migrate) client_places_from_migrate
+  '
+  a.btn.patch.btn-xs.btn-danger.btn-embossed href=url(:kyoto, :account_places_from_migrate, :clear => true) -client_places_from_migrate
+  '
+  a.btn.patch.btn-xs.btn-warning.btn-embossed href=url(:kyoto, :client_delivery_from_migrate) +client_delivery_from_migrate
+
+p.line
+  span Создать order towns
+  '
+  / a.btn.patch.btn-xs.btn-warning.btn-embossed href=url(:kyoto, :p_twn) known
+  / '
+  / a.btn.patch.btn-xs.btn-warning.btn-embossed href=url(:kyoto, :known_from_migrate, :clear => true) -known_from_migrate
+  / '
+  / a.btn.patch.btn-xs.btn-warning.btn-embossed href=url(:kyoto, :known_from_migrate) +known_from_migrate
+  '
+  a.btn.patch.btn-xs.btn-warning.btn-embossed href=url(:kyoto, :order_places_from_migrate) order_places_from_migrate
+  '
+  a.btn.patch.btn-xs.btn-danger.btn-embossed href=url(:kyoto, :order_places_from_migrate, :clear => true) -order_places_from_migrate
+
+h4 Output
+.output.alert
+  p
+
+javascript:
+  (function() {
+    function no_href() {
+      b = this
+      o = document.querySelector('.output p')
+      fetch(b.href, {
+        method: 'PATCH',
+        body: "&authenticity_token=" + encodeURIComponent(document.querySelector("form [name^=auth]").value),
+        headers: { "Content-Type": "application/x-www-form-urlencoded" }
+      })
+      .then(response => response.text())
+      .then(function(result) {
+        o.innerHTML = result
+      })
+      o.innerHTML = 'Loading... ' + b.href
+      return false
+    }
+
+    document.querySelectorAll('.btn.patch').forEach(function(b) {
+      b.onclick = no_href
+    })
+  })()

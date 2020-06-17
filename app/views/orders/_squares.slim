@@ -1,4 +1,4 @@
-- sections.each do |s|
+- @sections.each do |s|
   - s_st = order.order_parts.flatten.detect {|op| op[:section_id] == s[:id]}
   - if !s_st.nil? && s_st.transfer
     = content_tag :button, "П", :class => "btn btn-sm btn-#{s_st.nil? ? 'default' : s_st.state}", :style => "padding: 1px 9px;"

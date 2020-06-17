@@ -18,6 +18,7 @@ div class="tabs-content"
         // th class='header' = mat(:order, :name)
         // th class='header' = mat(:order, :amount)
         th class='header' Город
+        th class='header' Куда едет
         th class='header' Заказчик
         th class='header' Дата
         th class='header' Предп.дата
@@ -25,9 +26,7 @@ div class="tabs-content"
         th class='header' Тр.ком
         th class='header only-print' Сумма
         th class='header non-print'
-          - @sections.each do |s|
-            // - s_st = order.order_parts.find_by(:section_id => s.id)
-            = content_tag :span, " #{s.name[0..2]} ", :class => ""
+          = partial 'bricks/orders/section_titles'
         th class='header non-print'
         th class='header list-row-action-header non-print'
     
@@ -41,16 +40,26 @@ div class="tabs-content"
             - else
               = "#{order.id}"
           // td class='list-column' = order.name
-          td class='list-column' = order.place_name
+          td class='list-column'
+            - code = @kc_orders[order.id.to_s]
+            - town_name = @kc_towns[code]&.model
+            = partial 'bricks/kato/label_print', :locals => { town_name: town_name, el: order }
+          td class='list-column'
+            - code = @kc_delivery[order.id.to_s] || @kc_client_delivery[order.client_id.to_s]
+            - town_name = @kc_towns[code]&.model
+            = partial 'bricks/kato/label_print', :locals => { town_name: town_name, el: order }
           td class='list-column' = order.client.name
           td class='list-column text-nowrap' = to_msk(order.created_at)
           td class='list-column text-nowrap'
-            = to_msk_date(order.timeline.start_at) unless order.timeline.nil?
-          td class='list-column' = order.client.place&.region&.manager&.name
-          td class='list-column' = order.client.shipping_company
+            = to_msk(order.timeline.start_at) unless order.timeline.nil?
+          td class='list-column'
+            - kc_man = @kc_managers[@kc_hometowns[order.client_id.to_s]]
+            = @managers[kc_man.to_i] if kc_man
+          td class='list-column'
+            = partial 'bricks/orders/transport', :locals => { client_id: order.client_id }
           td class='list-column only-print' = "%0.f" % order.done_total
           td class='list-column text-nowrap non-print'
-            = partial 'orders/squares', :locals => { :sections => @sections, :order => order }
+            = partial 'orders/squares', :locals => { :order => order }
             // - @sections.each do |s|
             //   - s_st = order.order_parts.find_by(:section_id => s.id)
             //   = content_tag :button, !s_st.nil? && s_st.transfer ? "п": "", :class => "btn btn-sm btn-#{s_st.nil? ? 'default' : s_st.state}"
@@ -74,9 +83,9 @@ div class="tabs-content"
           td class='list-column list-row-action non-print'
             div class='list-row-action-wrapper'
               - if current_account.is_admin?
-                = link_to tag_icon("paw"), :rel => :tooltip, :title => "Edit order", :href => url(:orders, :correct, :id => order.id), :class => 'list-row-action-wrapper-link'
+                = link_to tag_icon(:paw), :rel => :tooltip, :title => "Edit order", :href => url(:orders, :correct, :id => order.id), :class => 'list-row-action-wrapper-link'
               - if !order.draft?
-                = link_to 'edit', :href => url(:orders, :edit, :id => order.id), :class => 'list-row-action-wrapper-link'
+                = link_to tag_icon(:edit), :href => url(:orders, :edit, :id => order.id), :class => 'list-row-action-wrapper-link'
               - if order.draft?
                 = link_to tag_icon("trash-o"), :rel => :tooltip, :title => "#{pat(:delete)} order", :class => 'list-row-action-delete-one list-row-action-wrapper-link'
             div class='modal'

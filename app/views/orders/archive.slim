@@ -16,7 +16,8 @@ div class="tabs-content"
         th class='header' Заказчик
         th class='header' Город
         th class='header' Дата
-        th class='header' 
+        th class='header'
+          = partial 'bricks/orders/section_titles'
         th class='header list-row-action-header'
 
     tbody
@@ -26,10 +27,13 @@ div class="tabs-content"
           td class='list-column' = "#{order.id}"
           // td class='list-column' = order.name
           td class='list-column' = order.client.name
-          td class='list-column' = order.place_name
+          td class='list-column'
+            - code = @kc_orders[order.id.to_s]
+            - town_name = @kc_towns[code]&.model
+            = partial 'bricks/kato/label_print', :locals => { town_name: town_name, el: order }
           td class='list-column' = to_msk(order.created_at)
           td class='list-column'
-            = partial 'orders/squares', :locals => { :sections => @sections, :order => order }
+            = partial 'orders/squares', :locals => { :order => order }
             span class="label label-#{order.status}"
               = t :"status.#{order.status}"
             // - per = to_percent(order.all_parts, order.done_parts)
@@ -41,7 +45,7 @@ div class="tabs-content"
 
           td class='list-column list-row-action'
             div class='list-row-action-wrapper'
-              = link_to tag_icon(:pencil), :href => url(:orders, :edit, :id => order.id), :class => 'list-row-action-wrapper-link'
-              = link_to tag_icon("file-text"), :href => url(:orders, :nakl, :id => order.id), :class => 'list-row-action-wrapper-link'
+              = link_to tag_icon(:edit), :href => url(:orders, :edit, :id => order.id), :class => 'list-row-action-wrapper-link'
+              = link_to tag_icon("file-text-o"), :href => url(:orders, :nakl, :id => order.id), :class => 'list-row-action-wrapper-link'
 
 = paginate

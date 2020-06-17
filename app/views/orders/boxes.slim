@@ -1,3 +1,9 @@
+ul.nav.nav-tabs
+  li class="active" = link_to tag_icon(:edit, "Show order #{@order.id}"), url(:orders, :show, :id => @order.id)
+  li = link_to '#' do
+    span class="label label-#{@order.status}"
+      = t :"status.#{@order.status}"
+
 div class="table non-print"
   table class="table order-info"
     tr
@@ -15,12 +21,6 @@ div class="table non-print"
           = @order.description
 
 div class="clearfix"
-
-div.block
-  h4.non-print
-    | Заказ:
-    span.label class="label-#{@order.status}"
-      = t :"status.#{@order.status}"
 
 = form_tag url(:orders, :boxes, :id => @order.id), :method => :put, :class => 'form-horizontal order' do
   div class="table-res4ponsive"
