@@ -122,11 +122,15 @@ div class="tabs-content"
       td class="col-md-1" class="form-sum"
         = line[:price]*line[:amount]
         | &nbsp;&#x20B7
-      td class="col-md-1" class="vert-align"
-        a class="btn btn-glue btn-xs btn-del" Удалить
+      td class='col-md-1 list-column list-row-action'
+        .list-row-action-wrapper
+          a.btn-copy.list-row-action-wrapper-link title="#{pat(:copy)}"
+            = tag_icon(:'plus-square-o')
+          a.btn-del.list-row-action-wrapper-link title="#{pat(:delete)}"
+            = tag_icon("trash-o")
     
   div class="table-responsive"
-    table class="table order-table"
+    table class="table table-hover order-table"
       tr data-sum="0"
         th Номер
         th Наименование
@@ -138,7 +142,7 @@ div class="tabs-content"
       - @order_lines.each_with_index do |line, i|
         / HACK: for empty or broken lines
         - next unless line.product
-        tr data-sum="#{line.amount*line.price}" data-price="#{line.price}"
+        tr.list-row data-sum="#{line.amount*line.price}" data-price="#{line.price}"
           td class="col-md-1"
             span class="num" = i + 1
             = hidden_field_tag 'line[][id]', :value => line.product.id
@@ -154,8 +158,12 @@ div class="tabs-content"
           td class="col-md-1" class="form-sum"
             = line.price*line.amount
             | &nbsp;&#x20B7
-          td class="col-md-1" class="vert-align"
-            a class="btn btn-glue btn-xs btn-del" Удалить
+          td class='col-md-1 list-column list-row-action'
+            .list-row-action-wrapper
+              a.btn-copy.list-row-action-wrapper-link title="#{pat(:copy)}"
+                = tag_icon(:'plus-square-o')
+              a.btn-del.list-row-action-wrapper-link title="#{pat(:delete)}"
+                = tag_icon(:'trash-o')
 
   h4 id="total" data-sum="#{@total}" Итого: #{"%0.f" % @total} &#x20B7
 
@@ -197,6 +205,18 @@ div class="tabs-content"
             //$(".modal").modal();
             // if( !$.isEmptyObject(node.data) ){
             // }
+          },
+          click: function(event, data) {
+            if (data.node.children) {
+              data.node.toggleExpanded();
+              return false
+            }
+            $(".modal .modal-content .product").text(data.node.title);
+            $(".modal").modal();
+            $(".modal").data('id', data.node.key);
+            $(".modal :input").val('');
+            $(".modal :input").focus();
+            return false;
           },
           keydown: function(event, data) {
             switch (event.which) {
@@ -393,6 +413,7 @@ div class="tabs-content"
           {
             name: 'states',
             displayKey: 'name',
+            limit: 15,
             source: substringMatcher(response)
             
           }).on('typeahead:selected', function (obj, data) {
@@ -416,10 +437,10 @@ div class="tabs-content"
             $(":input[name=cl]").parents(".control-group").addClass("has-error");
             valid = false;
           }
-          if ($(":input[name*=place_id]").val().length == 0) {
-            $(":input[name=pl]").parents(".control-group").addClass("has-error");
-            valid = false;
-          }
+          // if ($(":input[name*=place_id]").val().length == 0) {
+          //   $(":input[name=pl]").parents(".control-group").addClass("has-error");
+          //   valid = false;
+          // }
           return valid;
         });
         
@@ -474,6 +495,26 @@ div class="tabs-content"
           //var data = "id=" + $(":input:first", line).val() + "&authenticity_token=" + $("form:first :input[name^='auth']").val();
           // $.ajax({ type: "POST", url: "/order/cartdel", data: {} });
         });
+
+        function copy_product(target) {
+          var tr = $("#sample_table tr:first").clone();
+          tr.data('sum', 0);
+          tr.data('price', _p.price);
+          $(".price", tr).text($(".price", tr).text().replace(/\d+/g, _p.price));
+          $(".product", tr).text(_p.name);
+          $(":input[name*='id']", tr).val(_p.id);
+          var n = $(".order-table tbody tr span.num").length;
+          $(".num", tr).text(n + 1);
+          target.after(tr)
+        }
+
+        $(".order-table").on("click", ".btn-copy", function() {
+          var line = $(this).parents("tr");
+          var line_id = $(":input[name*='id']", line).val();
+          _p = $.grep(_products, function(e) { return e.id == +line_id; })[0];
+          copy_product(line)
+        });
+
         let order_form = document.querySelector('.main-wrapper-push form')
         DekolFu.init_kato_blood(order_form, 'kato_type', '"cabie[kato_place]"')
 

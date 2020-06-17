@@ -34,5 +34,7 @@ class Product < ActiveRecord::Base
       Product.create(dup)
     end
     Product.record_timestamps = true
+
+    reset_products_list
   end
 end

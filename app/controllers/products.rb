@@ -93,7 +93,7 @@ Fenix::App.controllers :products do
   end
   
   get :tree, :provides => :json do
-    json_cats.to_json
+    json_products_tree
   end
   
   get :tree2, :provides => :json do

@@ -734,8 +734,7 @@ Fenix::App.controllers :orders do
   end
 
   post :products, :provides => :json do
-    # Product.where(:active => true).joins(:category).select(:id, :name, :price).to_json
-    Product.joins(:category).select(:id, :name, :price).to_json
+    json_products_list
   end
 
   post :cities, :provides => :json do
