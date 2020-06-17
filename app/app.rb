@@ -106,5 +106,17 @@ module Fenix
     #     render 'errors/500'
     #   end
     #
+
+    APP_NAME = 'pio'
+    if File.file? Padrino.root('version')
+      ver, date = File.read(Padrino.root('version')).lines.map(&:chomp)
+    else
+      ver, date = [:DEV, Time.new.to_s]
+    end
+    APP_VERSION = ver
+    APP_MAJOR = ver.split('.').shift(2).join('.') if ver.respond_to? :split
+    APP_MAJOR ||= APP_VERSION
+    APP_DATE = DateTime.parse(date)
+
   end
 end
