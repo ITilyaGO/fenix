@@ -31,13 +31,19 @@ div class="tabs-content"
         th class='header list-row-action-header'
 
     tbody
-      -@categories.each do |category|
+      - @categories.each do |category|
         tr class='list-row'
           td class='list-column list-selectable' = check_box_tag 'category_ids[]', :value => category.id, :class => 'list-selectable-checkbox'
           td class='list-column' = category.id
           td class='list-column' = category.name
-          td class='list-column' = category.category.nil? ? "" : category.category.name
-          td class='list-column' = category.section.nil? ? "" : category.section.name
+          td class='list-column' = category.category&.name
+          td class='list-column'
+            - if ((category.section.nil? && category.category_id.nil?) || (category.category&.section_id.nil? && !category.category_id.nil?))
+              .label.label-danger
+                .fa.fa-exclamation-triangle
+                |  Missing
+            '
+            = category.section&.name
           td class='list-column list-row-action'
             div class='list-row-action-wrapper'
               // span class='list-row-action-wrapper-link' 1
@@ -54,3 +60,9 @@ div class="tabs-content"
                     = form_tag url(:categories, :destroy, :id => category.id), :method => :delete do
                       = submit_tag pat(:delete), :class =>'list-row-action-popover-delete-one-btn btn btn-danger btn-wide'
                       div class='btn btn-default btn-wide cancel' data-dismiss="modal" = pat(:cancel)
+
+.alert.alert-bottom.alert-warning
+  .label.label-small.label-danger
+    .fa.fa-exclamation-triangle
+    |  Missing
+  p Заказанные продукты из этих категорий могут не отображаться в системе
