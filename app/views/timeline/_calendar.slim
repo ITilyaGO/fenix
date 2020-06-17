@@ -1,0 +1,24 @@
+calendar.collapse#multiCollapseExample1: .inner
+  - today_marker = Date.today
+  - grr = Date.today - Date.today.mday + 1
+  / - grr = Date.parse('190301')
+  - grr2 = grr.next_month(3) - 1
+  - cdate = grr
+  / = grr.to_s
+  / = grr2.to_s
+  - while cdate < grr2
+    - if cdate.mday == 1
+      .mtitle = cdate.strftime('%B')
+      - tempweek = Date.today.beginning_of_week
+      - 7.times do
+        .wday = tempweek.strftime('%^A').first
+        - tempweek += 1
+      .week
+      - ((cdate.wday+6)%7).times do
+        .noday
+    - if cdate.wday == 1
+      .week
+    .day class=[calendar_busy?(cdate), (:past if today_marker > cdate)]
+      input type="hidden" name="dayno[]" value=cdate.strftime('%Y-%m-%d')
+      span = cdate.strftime('%d')
+    - cdate += 1

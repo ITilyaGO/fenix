@@ -15,4 +15,4 @@ table width="100%"
                   = num
               td align="center" style="border:2px solid;border-left:0px;"
                 div style="font-size:10pt;font-weight:bold;"
-                 = DateTime.now.in_time_zone(4).strftime('%e.%m.%Y')
+                  = to_inv_date(DateTime.now)

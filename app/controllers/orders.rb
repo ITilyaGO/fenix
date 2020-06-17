@@ -141,6 +141,10 @@ Fenix::App.controllers :orders do
     hier = Kato::Hier.for(@kc_client_hometown).codes
     manager = kc_town_managers.fetch(hier.detect{|c| kc_town_managers[c]}, 0)
     @manager = Manager.find(manager) rescue nil
+    @timeline_at = CabiePio.get([:orders, :timeline], @order.id).data
+    @timeline_date = timeline_unf(@timeline_at) unless @timeline_at.nil?
+    
+
     if @order
       render 'orders/edit'
     else
@@ -195,6 +199,12 @@ Fenix::App.controllers :orders do
       @clients = Client.includes(:place).where(ct[:email].matches(a.email).or(ct[:place_id].matches(place.id))) rescue []
       @clients = Client.all if !@clients.any?
     end
+    start_from = Date.today
+    ky_month_1 = start_from.strftime('%y%m')
+    ky_month_2 = start_from.next_month.strftime('%y%m')
+    @ktm = CabiePio.all([:timeline, :order], [ky_month_1]).flat
+    @ktm = @ktm.merge CabiePio.all([:timeline, :order], [ky_month_2]).flat
+    @ctm = calendar_group(@ktm)
     render 'orders/new'
   end
 
@@ -348,19 +358,27 @@ Fenix::App.controllers :orders do
   get :fullempty do
     @title = "New order"
     @cats = Category.where(category: nil).order(:index => :asc)
+    @parents = Product.pluck(:parent_id).compact.uniq
+    calendar_init
     render 'orders/fullempty'
   end
 
   get :copy, :with => :id do
-    @title = "Copy order"
+    @title = "Copy order #{params[:id]}"
     order = Order.find(params[:id])
     @order_lines = order.order_lines
     @total = order.total
+    @order_client = order.client
+    @kc_town = CabiePio.get([:orders, :towns], order.id).data
+    @kc_timeline = CabiePio.get([:orders, :timeline], order.id).data
+    @form = order
+    @force_timeline = true
+    calendar_init
     render 'orders/empty'
   end
 
   get :addition, :with => :id do
-    @title = "Crreate additional order"
+    @title = "Create additional order for #{params[:id]}"
     order = Order.find(params[:id])
     @order_lines = []
     order.order_lines.each do |ol|
@@ -373,6 +391,11 @@ Fenix::App.controllers :orders do
     @descr = order.description
     order.order_lines = @order_lines
     @total = order.total_price
+    @kc_town = CabiePio.get([:orders, :towns], order.id).data
+    @kc_timeline = CabiePio.get([:orders, :timeline], order.id).data
+    @form = order
+    @force_timeline = true
+    calendar_init
     render 'orders/empty'
   end
 

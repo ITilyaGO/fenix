@@ -26,12 +26,13 @@ Fenix::App.controllers :timeline do
 
   get :weeks do
     @title = "Timeline"
-    # @timelines = Timeline.all.order(:updated_at => :desc)
-    @prev = Date.today.beginning_of_week
+    @print_btn = 1
+    start_from = timeline_unf(params[:start]) rescue Date.today
+    @prev = start_from.beginning_of_week
     @prev_end = @prev.end_of_week
     @prev2 = @prev.prev_week
     @prev2_end = @prev2.end_of_week
-    @next = Date.today.next_week
+    @next = start_from.next_week
     @next_end = @next.end_of_week
     @next2 = @next.next_week
     @next2_end = @next2.end_of_week
@@ -44,93 +45,20 @@ Fenix::App.controllers :timeline do
     @next6 = @next5.next_week
     @next6_end = @next6.end_of_week
     @weeks = []
-    @weeks << { :name => "Пред. неделя", :date => @prev2, :end => @prev2_end, :orders => Timeline.where("duration = ? AND start_at BETWEEN DATE(?) AND DATE(?)", Timeline.durations[:week], @prev2, @prev2.next) }
-    @weeks << { :name => "Эта неделя", :date => @prev, :end => @prev_end, :orders => Timeline.where("duration = ? AND start_at BETWEEN DATE(?) AND DATE(?)", Timeline.durations[:week], @prev, @prev.next) }
-    @weeks << { :name => "Следующая неделя", :date => @next, :end => @next_end, :orders => Timeline.where("duration = ? AND start_at BETWEEN DATE(?) AND DATE(?)", Timeline.durations[:week], @next, @next.next) }
-    @weeks << { :name => "Через одну неделю", :date => @next2, :end => @next2_end, :orders => Timeline.where("duration = ? AND start_at BETWEEN DATE(?) AND DATE(?)", Timeline.durations[:week], @next2, @next2.next) }
-    @weeks << { :name => "", :date => @next3, :end => @next3_end, :orders => Timeline.where("duration = ? AND start_at BETWEEN DATE(?) AND DATE(?)", Timeline.durations[:week], @next3, @next3.next) }
-    @weeks << { :name => "", :date => @next4, :end => @next4_end, :orders => Timeline.where("duration = ? AND start_at BETWEEN DATE(?) AND DATE(?)", Timeline.durations[:week], @next4, @next4.next) }
-    @weeks << { :name => "", :date => @next5, :end => @next5_end, :orders => Timeline.where("duration = ? AND start_at BETWEEN DATE(?) AND DATE(?)", Timeline.durations[:week], @next5, @next5.next) }
-    @weeks << { :name => "", :date => @next6, :end => @next6_end, :orders => Timeline.where("duration = ? AND start_at BETWEEN DATE(?) AND DATE(?)", Timeline.durations[:week], @next6, @next6.next) }
 
-    @timelines1 = Timeline.where(:start_at => @next)
-    @timelines1 = Timeline.where(:start_at => @next2)
-    # @pages = (Order.count/pagesize).ceil
-    # @r = url(:orders, :index)
+    @weeks << { :name => "Пред. неделя", :date => @prev2, :end => @prev2_end }
+    @weeks << { :name => "Эта неделя", :date => @prev, :end => @prev_end }
+    @weeks << { :name => "Следующая неделя", :date => @next, :end => @next_end }
+    @weeks << { :name => "Через одну неделю", :date => @next2, :end => @next2_end }
+    @weeks << { :name => "", :date => @next3, :end => @next3_end }
+    @weeks << { :name => "", :date => @next4, :end => @next4_end }
+    @weeks << { :name => "", :date => @next5, :end => @next5_end }
+    @weeks << { :name => "", :date => @next6, :end => @next6_end }
 
-    @o = Order.all.where("status > ?", Order.statuses[:draft]).where("status < ?", Order.statuses[:shipped])
-    @orders_for_select = []
-    @o.each do |order|
-      client = order.client.name
-      name = [order.id, client, order.place_name, to_dm(order.created_at)].reject(&:blank?).join(" / ")
-      date = !order.timeline.nil? ? order.timeline.start_at : nil
-      @orders_for_select << { :name => name, :date => date, :value => order.id  }
-    end
-
-    @sections = Section.includes(:categories).all
+    calendar_init(start_from)
 
     render 'timeline/weeks'
   end
-
-  # get :new, :with => :id do
-  #   @title = "New order"
-  #   @online = Online::Order.includes(:order_lines).find(params[:id])
-  #   a = @online.account
-  #   @client = Client.find_by(online_id: @online.account_id)
-  #   if !@client
-  #     t = Client.arel_table
-  #     @clients = Client.where(t[:city].matches(a.city).or(t[:tel].matches(a.tel)).or(t[:email].matches(a.email)))
-  #     @clients = Client.all if !@clients.any?
-  #   end
-  #   render 'orders/new'
-  # end
-
-  # post :create do
-  #   # @order = Order.new(params[:order])
-  #   # cats = Category.where(:category => nil)
-  #   # where(:category => nil)@tabs.each do |tab|
-  #
-  #   client = params[:order]["client_id"]
-  #   online = Online::Order.includes(:order_lines).find(params[:id])
-  #   # order = online.attributes.merge({:online_id => online.id, :status => :anew, :client_id => params[:order][:client_id]})
-  #   # h = Order.new
-  #   # h.attributes.merge(order.slice(*h.attributes))
-  #   # order = order.slice([:account_id])
-  #   # order.delete(:account_id)
-  #   # h.save
-  #   order = Order.new({:online_id => online.id, :status => :anew, :client_id => client, :online_at => online.created_at, :description => online.description, :total => online.total})
-  #   online.order_lines.each do |line|
-  #     ol = OrderLine.new(product_id: line.product_id, description: line.description, amount: line.amount, price: line.sum/line.amount)
-  #     order.order_lines << ol
-  #   end
-  #   order.save
-  #
-  #   sections = Section.all
-  #   sections.each do |s|
-  #     include_section = false
-  #     s.categories.each do |c|
-  #       include_section = order.by_cat?(c.id)
-  #       break if include_section
-  #     end
-  #     if include_section
-  #       op = OrderPart.new(section_id: s.id)
-  #       order.order_parts << op
-  #     end
-  #   end
-  #   order.all_parts = order.order_parts.size if order.order_parts.any?
-  #
-  #   order.save
-  #   redirect(url(:orders, :index))
-  #   if @order.save
-  #     @title = pat(:create_title, :model => "order #{@order.id}")
-  #     flash[:success] = pat(:create_success, :model => 'Order')
-  #     params[:save_and_continue] ? redirect(url(:orders, :index)) : redirect(url(:orders, :edit, :id => @order.id))
-  #   else
-  #     @title = pat(:create_title, :model => 'order')
-  #     flash.now[:error] = pat(:create_error, :model => 'order')
-  #     render 'orders/new'
-  #   end
-  # end
 
   get :edit, :with => :id do
     @title = pat(:edit_title, :model => "order #{params[:id]}")
@@ -171,7 +99,6 @@ Fenix::App.controllers :timeline do
   end
 
   put :assign do
-    @title = pat(:update_title, :model => "order #{params[:id]}")
     # @order = Order.find(params[:id])
     s = params[:start]
     e = params[:end]
@@ -200,7 +127,18 @@ Fenix::App.controllers :timeline do
       end
     end rescue nil
     redirect(url(:timeline, :weeks))
+  end
 
+  put :change do
+    id = params[:timeline_id]
+    order_id = id.split('_').last.to_i
+    delivery_at = params[:timeline_at]
+    if timeline_date = Date.parse(delivery_at) rescue nil
+      CabiePio.unset [:timeline, :order], id
+      CabiePio.set [:timeline, :order], timeline_order(order_id, timeline_date), order_id
+      CabiePio.set [:orders, :timeline], order_id, timeline_id(timeline_date)
+    end
+    true
   end
 
   delete :destroy, :with => :id do
@@ -234,4 +172,41 @@ Fenix::App.controllers :timeline do
     redirect url(:orders, :index)
   end
 
+end
+
+Fenix::App.controllers :dr_timeline, :map => 'timeline/driven' do
+  patch :orders do
+    @title = "Timeline"
+    @sdate = timeline_unf(params[:period])
+    start_from = timeline_unf(params[:start]) rescue Date.today
+    start_from = @sdate
+    @prev = start_from.beginning_of_week
+    
+
+    ky_month_1 = start_from.strftime('%y%m')
+    ky_month_2 = start_from.next_month.strftime('%y%m')
+    @ktm = CabiePio.all([:timeline, :order], [ky_month_1]).flat
+    @ktm = @ktm.merge CabiePio.all([:timeline, :order], [ky_month_2]).flat
+    @gtm = timeline_group(@ktm.trans(nil, :to_i))
+
+    @sections = Section.includes(:categories).all
+    @orders = []
+    @week_orders = @gtm.fetch(@sdate, [])
+    @all_ids = @week_orders.map(&:last).map(&:to_i)
+    @orders = Order.find(@all_ids)
+    a_managers(@all_ids, @orders.map(&:client_id).uniq)
+
+    @stickers = CabiePio.all_keys(@all_ids, folder: [:sticker, :order]).flat.trans(:to_i, :to_f)
+    @transport = CabiePio.all_keys(@orders.map(&:client_id).uniq, folder: [:m, :clients, :transport]).flat
+
+    if params[:sort].to_sym == :manager
+      @by_manager = @all_ids.group_by do |oid|
+        fo = @orders.detect{|o| o.id == oid}
+        @kc_managers[@kc_hometowns[fo.client_id.to_s]]
+      end
+      partial 'timeline/orders_for_manager'
+    else
+      partial 'timeline/orders'
+    end
+  end
 end

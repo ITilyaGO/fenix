@@ -2,6 +2,7 @@
 RACK_ENV = ENV['RACK_ENV'] ||= 'development'  unless defined?(RACK_ENV)
 PADRINO_ROOT = File.expand_path('../..', __FILE__) unless defined?(PADRINO_ROOT)
 $: << File.expand_path('../..', __FILE__)
+MY_TZ = 'Moscow'.freeze
 
 # Load our dependencies
 require 'rubygems' unless defined?(Gem)

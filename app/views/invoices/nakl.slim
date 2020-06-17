@@ -43,7 +43,7 @@ html
                         | Город
                     td style="border-bottom:1px solid;padding-left:10px;padding-top:5px;"
                       div id="postavshik" class="editable" edtype="textarea" style="width: 100%; font-size: 10pt;"
-                        = @order.place_name
+                        = @kc_town
             </td>
           </tr>
           <tr>
@@ -65,7 +65,7 @@ html
                                 = @order.id
                             td align="center" style="border:2px solid;border-left:0px;"
                               div style="font-size:10pt;font-weight:bold;"
-                               = DateTime.now.in_time_zone(4).strftime('%e.%m.%Y')
+                                = to_inv_date(DateTime.now)
             </td>
           </tr>
         </tbody>
@@ -133,4 +133,4 @@ html
             td class="righted" style="width:67px;"
             td class="righted" style="width:67px;"
             td class="righted" style="font-size:1em;"
-              = to_rub items.map{|e| e.price * (e.done_amount || e.amount || 0) }.inject(:+)
+              = to_rub @order.done_total

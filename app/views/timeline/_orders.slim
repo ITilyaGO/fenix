@@ -1,0 +1,59 @@
+- if @orders.empty?
+  span.no ничего тут нет
+- else
+  table class="table table-hover table-condensed"
+    thead
+      tr
+        th class='header non-print'
+          = check_box_tag 'orders_all', :autocomplete => "off", :value => false, :class => 'list-selectable-checkbox-all'
+        th class='header' Номер
+        th class='header' Заказчик
+        th class='header' Город
+        th class='header' Тр.ком.
+        th class='header' Договор
+        th class='header' Менеджер
+        th class='header' Дата
+        th class='header' Отправка
+        th class='header' Статус
+        th class='header'
+          = partial 'bricks/orders/section_titles'
+        th class='header list-row-action-header non-print'
+
+    tbody
+      - @week_orders.each do |pair|
+        - order = @orders.detect{|x| x.id == pair.last}
+        tr class='list-row non-print'
+          td class='list-column list-selectable non-print' = check_box_tag 'order_ids[]', :autocomplete => "off", :value => order.id, :class => 'list-selectable-checkbox'
+          td class='list-column' = "#{order.id}"
+          td class='list-column' = order.client.name
+          td class='list-column'
+            - code = @kc_orders[order.id.to_s]
+            - town_name = @kc_towns[code]&.model
+            = partial 'bricks/kato/label_print', :locals => { town_name: town_name, el: order }
+          td class='list-column'
+            = partial 'bricks/orders/transport', :locals => { client_id: order.client_id }
+          td class='list-column' = order.client.contract
+          td class='list-column'
+            - kc_man = @kc_managers[@kc_hometowns[order.client_id.to_s]]
+            = @managers[kc_man.to_i] if kc_man
+          td class='list-column' = to_dm(order.created_at)
+          td class='list-column' = to_dm(timeline_unf(pair.first))
+          td class='list-column'
+            span class="label label-#{order.status} non-print" = t :"status.#{order.status}"
+            span class="only-print" = t :"status.#{order.status}"
+          td class='list-column text-nowrap'
+            = partial 'orders/squares', :locals => { :order => order }
+          td class='list-column list-row-action non-print'
+            div class='list-row-action-wrapper'
+              = hidden_field_tag 'tid[]', :value => pair.first
+              = link_to tag_icon(:calendar), '#', :class => 'list-row-action-wrapper-link medium list-menu-timeline-link'
+              = link_to tag_icon(:edit), :href => url(:orders, :edit, :id => order.id), :class => 'list-row-action-wrapper-link'
+    tfoot
+      tr: td colspan=12
+        .pull-right
+          | Сумма заказов: #{"%0.f" % @orders.map(&:total).sum} &#x20B7
+          | &nbsp;/&nbsp;
+          | Сделано на: #{"%0.f" % @orders.map(&:done_total).sum} &#x20B7
+          | &nbsp;/&nbsp;
+          ' Клейка:
+          == rur @all_ids.sum{|x|@stickers.fetch(x, 0)}

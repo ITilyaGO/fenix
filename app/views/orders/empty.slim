@@ -28,6 +28,18 @@ div class="tabs-content"
           = f.radio_button :priority, :value => :true, :checked => @form.priority, :class => 'custom-control-input'
           label.custom-control-label(for = 'order_priority_true') Да
 
+      - if @force_timeline
+        fieldset class='control-group'
+          = f.label 'Дата отправки', :class => 'col-md-3 control-label'
+          div class='col-md-4 controls'
+            .scrollable-dropdown-menu
+              = text_field_tag :'cabie[timeline_at]', :class => 'form-control', :placeholder => "2016-07-23 or Y/m/d", :value => timeline_form(@kc_timeline), :required => true
+          
+          .btn.btn-sm.btn-default.btn-timeline
+            .fa.fa-calendar.fa-btn
+            | график
+
+        = partial 'timeline/calendar'
 
       fieldset class='control-group'
         = f.label "Город", :class => 'col-md-3 control-label'
@@ -465,5 +477,19 @@ div class="tabs-content"
         let order_form = document.querySelector('.main-wrapper-push form')
         DekolFu.init_kato_blood(order_form, 'kato_type', '"cabie[kato_place]"')
 
+        $("calendar").on("click", ".day", function() {
+          var day = $(this);
+          let inp = $('input[name="cabie[timeline_at]"]')
+          inp.val($('input', day).val())
+          $('calendar').toggle('collapse')
+          
+          //var data = "id=" + $(":input:first", line).val() + "&authenticity_token=" + $("form:first :input[name^='auth']").val();
+          // $.ajax({ type: "POST", url: "/order/cartdel", data: {} });
+        });
+        $(".btn-timeline").on("click", function() {
+          var day = $(this);
+          $('calendar').toggle('collapse')
+          // $.ajax({ type: "POST", url: "/order/cartdel", data: {} });
+        });
       });
     })(jQuery);

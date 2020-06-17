@@ -1,0 +1,42 @@
+h3 schema #{@schema}
+
+p.line
+  - @avail.times do |i|
+    - i += 1
+    '
+    a.btn.patch.btn-xs.btn-warning.btn-embossed href=url(:kyoto_schema, :up, id: i) = "sch #{i}"
+    '
+    a.btn.patch.btn-xs.btn-danger.btn-embossed href=url(:kyoto_schema, :up, id: i, :force => true) = "force #{i}"
+    '
+    a.btn.patch.btn-xs.btn-default.btn-embossed href=url(:kyoto_schema, :preview, id: i) = "preview #{i}"
+    '
+    a.btn.patch.btn-xs.btn-info.btn-embossed href=url(:kyoto_schema, :down, id: i) = "down #{i}"
+    br
+    
+
+h4 Output
+.output.alert
+  p
+
+javascript:
+  (function() {
+    function no_href() {
+      b = this
+      o = document.querySelector('.output p')
+      fetch(b.href, {
+        method: 'PATCH',
+        body: "&authenticity_token=" + encodeURIComponent(document.querySelector("form [name^=auth]").value),
+        headers: { "Content-Type": "application/x-www-form-urlencoded" }
+      })
+      .then(response => response.text())
+      .then(function(result) {
+        o.innerHTML = result
+      })
+      o.innerHTML = 'Loading... ' + b.href
+      return false
+    }
+
+    document.querySelectorAll('.btn.patch').forEach(function(b) {
+      b.onclick = no_href
+    })
+  })()
