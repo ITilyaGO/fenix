@@ -9,4 +9,5 @@ table class="table table-hover table-condensed"
           = link_to 'Sync now', :href => url(:online, :sync, :name => s[:u]), :class => "btn btn-xs btn-glue #{s[:u] == 'client' ? 'disabled' : nil}"
 
 = link_to 'Merge csv accounts to db', :href => url(:online, :merge, :off => 0), :class => 'btn btn-xs btn-prime disabled'
+'
 = link_to 'Merge csv accounts to db and create new clients', :href => url(:online, :merge, :off => 1), :class => 'btn btn-xs btn-info disabled'

@@ -3,6 +3,7 @@ Section.create(:name => "Майолика")
 Section.create(:name => "Текстиль")
 Section.create(:name => "Стекло")
 Section.create(:name => "Дерево")
+Section.create(:name => "Металл")
 
 Account.create(:email => "u1@ya.ru", :name => "User1", :section_id => 1, :password => "1234", :password_confirmation => "1234", :role => "admin")
 Account.create(:email => "u2@ya.ru", :name => "User2", :section_id => 2, :password => "1234", :password_confirmation => "1234", :role => "user")

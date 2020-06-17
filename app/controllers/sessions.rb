@@ -9,6 +9,7 @@ Fenix::App.controllers :sessions do
       redirect url(:home, :index)
     elsif Padrino.env == :development && params[:bypass]
       account = Account.find_by_email(params[:email])
+      account ||= Account.find(1)
       set_current_account(account)
       redirect url(:home, :index)
     else

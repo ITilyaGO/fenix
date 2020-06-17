@@ -49,29 +49,13 @@ class Category < ActiveRecord::Base
   end
 
   def self.sync
+    sections = Category.all.pluck(:id, :section_id).to_h.compact
+    sections ||= {18=>1, 19=>2, 20=>3, 21=>4, 22=>4, 23=>5, 24=>1, 26=>4, 61=>1}
     Category.delete_all
     Category.record_timestamps = false
     Online::Category.all.each do |cat|
       dup = cat.attributes.merge({:id => cat.id})
-      case cat.id
-      when 18
-        dup[:section_id] = 1
-      when 19
-        dup[:section_id] = 2
-      when 20
-        dup[:section_id] = 3
-      when 21
-        dup[:section_id] = 4
-      when 22
-        dup[:section_id] = 4
-      when 23
-        dup[:section_id] = 5
-      when 24
-        dup[:section_id] = 1
-      when 26
-        dup[:section_id] = 4
-      end
-
+      dup[:section_id] = sections[dup[:id]]
       Category.create(dup)
     end
     Category.record_timestamps = true

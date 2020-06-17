@@ -1,8 +1,8 @@
 = form_tag url(:orders, :pdfnakl, :id => @order), :method => :put, :class => 'form-horizontal order' do
   
   fieldset class='control-group'
-      = label_tag "Счет для накладной", :class => 'col-md-3 control-label'
-      div class='col-md-6 controls'
-        = (text_field_tag "account", :class => "form-control input-sm")
+    = label_tag "Счет для накладной", :class => 'col-md-3 control-label'
+    div class='col-md-6 controls'
+      = text_field_tag "account", :class => "form-control input-sm"
 
-  = submit_tag "Отправить", :class => 'btn btn-sm btn-prime', :name => 'save'
+    = submit_tag "Отправить", :class => 'btn btn-sm btn-prime', :name => 'save'

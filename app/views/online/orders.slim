@@ -27,7 +27,7 @@ div class="tabs-content"
                 //span Импортирован
             - else
               div class='list-row-action-wrapper'
-                = link_to 'import', :href => url(:orders, :new, :id => order.id), :class => 'list-row-action-wrapper-link'
+                = link_to tag_icon(:'cloud-download'), :href => url(:orders, :new, :id => order.id), :class => 'list-row-action-wrapper-link'
 
 = paginate
 

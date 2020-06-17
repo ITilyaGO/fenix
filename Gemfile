@@ -13,11 +13,14 @@ gem 'puma'
 
 # Project requirements
 gem 'rake'
-gem 'pry-padrino'
-gem 'pry-byebug'
+
+group :dev do
+  gem 'pry-padrino'
+  gem 'pry-byebug'
+end
 
 # Component requirements
-gem 'bcrypt', github: 'codahale/bcrypt-ruby'
+gem 'bcrypt'
 gem 'slim'
 gem 'activerecord', '~> 4', :require => 'active_record'
 gem 'sqlite3', '< 1.4'
