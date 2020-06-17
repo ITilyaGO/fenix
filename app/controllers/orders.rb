@@ -564,7 +564,8 @@ Fenix::App.controllers :orders do
     @order = Order.includes(:order_lines).includes(order_lines: :product).find(params[:id])
     output = render 'invoices/torg12', :layout => false
 
-    princely = Princely.new({ :path => settings.princebin, :log_file => settings.princelog })
+    Princely.executable = settings.princebin
+    princely = Princely::Pdf.new({ :path => settings.princepath, :log_file => settings.princelog })
     princely.add_style_sheets('./public/stylesheets/invoices.css')
     # princely.make_and_send_pdf "/orders/torg12/#{params[:id]}"
 
@@ -587,7 +588,8 @@ Fenix::App.controllers :orders do
     @account = params[:account]
     output = render 'invoices/nakl', :layout => false
 
-    princely = Princely.new({ :path => settings.princebin, :log_file => settings.princelog })
+    Princely.executable = settings.princebin
+    princely = Princely::Pdf.new({ :path => settings.princepath, :log_file => settings.princelog })
     princely.add_style_sheets('./public/stylesheets/invoices.css')
 
     content_type 'application/pdf'

@@ -22,7 +22,7 @@ gem 'slim'
 gem 'activerecord', '~> 4', :require => 'active_record'
 gem 'sqlite3', '< 1.4'
 gem 'rufus-scheduler'
-gem 'princely', '< 2'
+gem 'princely'
 #gem 'simple_enum'
 #gem 'classy_enum'
 

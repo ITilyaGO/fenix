@@ -49,8 +49,9 @@ module Fenix
 
     disable :store_location
 
-    set :princebin, './vendor/prince/bin/fuckedprince'
-    set :princelog, './log/prince.log'
+    set :princebin, 'fuckedprince'
+    set :princepath, './vendor/prince/bin/fuckedprince'
+    set :princelog, Padrino.root('log', 'prince.log')
 
     access_control.roles_for :any do |role|
       role.protect '/'
