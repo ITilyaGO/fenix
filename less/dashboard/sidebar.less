@@ -42,6 +42,12 @@ ul.sidebar {
     text-indent: 20px;
     overflow-x: hidden;
     overflow-y: auto;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
     li {
         a {
             color: rgb(201, 206, 214);
@@ -53,12 +59,11 @@ ul.sidebar {
     }
     .sidebar-main {
         height: 65px;
-        height: 65px;
         a {
-            font-size: 18px;
+            font-size: 1.2em;
             line-height: 60px;
-            font-size: 18px;
-            line-height: 60px;
+            color: #f9f9f9;
+            text-align: center;
         }
         .menu-icon {
             float: right;
@@ -73,6 +78,7 @@ ul.sidebar {
         height: 35px;
         line-height: 40px;
         text-transform: uppercase;
+        letter-spacing: 0.036em;
     }
     .sidebar-list {
         height: 40px;
@@ -92,9 +98,10 @@ ul.sidebar {
         }
         .menu-icon {
             float: right;
-            padding-right: 29px;
+            padding-right: 26px;
             line-height: 40px;
-            width: 70px;
+            width: 62px;
+            display: inline-table;
         }
     }
 }

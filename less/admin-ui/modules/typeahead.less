@@ -1,5 +1,5 @@
 //
-// Typeahead
+// Typeahead 0.10
 // --------------------------------------------------
 
 .twitter-typeahead {
@@ -37,6 +37,76 @@
       color: #fff;
       background-color: mix(@dekolblue, white, 85%);
       cursor: pointer;
+    }
+  }
+}
+
+//
+// Typeahead
+// --------------------------------------------------
+
+.twitter-typeahead {
+  width: 100%;
+
+  .tt-query,
+  .tt-hint {
+    .form-control();
+  }
+
+  .tt-menu {
+    width: 100%;
+    margin-top: 5px;    
+    border: 2px solid @dekolblue;
+    padding: 5px 0;
+    background-color: @inverse;
+    border-radius: @border-radius-large;
+  }
+
+  .tt-suggestion {
+    padding: 6px 14px;
+    font-size: ceil(@component-font-size-base * 0.933);
+    line-height: 1.429; // ~20px
+    margin: 0;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    
+    &:first-child,
+    &:last-child {
+      padding: 6px 14px;
+    }
+    &.tt-cursor {
+      color: #fff;
+      background-color: mix(@dekolblue, white, 85%);
+      cursor: pointer;
+    }
+
+    &:hover {
+      color: #fff;
+      background-color: mix(@dekolblue, white, 65%);
+      cursor: pointer;
+    }
+
+    .tt-badge {
+      float: right;
+      background: @dekolglue;
+      color: white;
+      padding: 0 15px;
+      border-radius: 3px;
+      text-transform: lowercase;
+      max-width: 250px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .tt-right {
+      float: right;
+      padding: 0 15px;
+      max-width: 250px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
     }
   }
 }

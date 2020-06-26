@@ -14,11 +14,16 @@
   
   html,
   body{
-      /* width:670px !important; based upon http://stackoverflow.com/questions/320357/  */
-      background:white;
-      margin:0 !important;
-      position:relative;
-      left:0;
+    /* width:670px !important; based upon http://stackoverflow.com/questions/320357/  */
+    background:white;
+    margin:0 !important;
+    position:relative;
+    left:0;
+  }
+
+  p {
+    line-height: 1.6;
+    margin: 0 0 .2em;
   }
   
   .main-wrapper, .main {
@@ -53,7 +58,7 @@
   table, .table-responsive, .table {
     margin: 0 !important;
     padding: 0 !important;
-    border: 0;
+    border-width: 1px !important;
   }
   
   table .only-print {
@@ -62,6 +67,10 @@
 
   table tr.only-print {
     display: table-row;
+  }
+
+  table thead.only-print {
+    display: table-header-group;
   }
   
   table .list-column p {
@@ -73,6 +82,11 @@
     border: 0 !important;
     padding: 0;
   }
+
+  .print-date {
+    font-family: monospace;
+    font-size: 10px !important;
+  }
   
   .tab-content {
     border: 0;
@@ -80,21 +94,42 @@
   }
   
   .tab-content .tab-pane {
-    display: block;
-    page-break-after: always;
+    display: none;
+    page-break-before: avoid;
   }
-  
+
+  .tab-content .tab-pane.filled {
+    display: block;
+    page-break-before: avoid;
+  }
+
+  .tab-content .tab-pane:first-child {
+    page-break-before: avoid;
+  }
+
   .tab-content .tab-pane.last {
     page-break-after: avoid;
   }
-  
-  table th {
-    border: 1px solid #aaaaaa !important;
+
+  .section-btn {
+    border-top: 1px solid;
+    min-width: 2em;
+    padding: 0 .2em;
+    display: inline-block;
+    margin-right: .4em;
   }
   
-  table td {
-    border: 1px solid #aaaaaa !important;
+  table thead {
+    position: relative !important;
   }
+
+  // table th {
+  //   border: 1px solid #aaaaaa !important;
+  // }
+  
+  // table td {
+  //   border: 1px solid #aaaaaa !important;
+  // }
   
   footer, .navbar {
     display: none;
