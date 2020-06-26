@@ -18,7 +18,7 @@ ul class="nav nav-tabs"
             div class='btn btn-default btn-wide cancel' data-dismiss="modal" = pat(:cancel)
 
 .text-center.flex-c
-  = partial 'bricks/kc/transport'
+  = partial 'bricks/kc/transport', :locals => { :name => @kc_transport }
 
 .tabs-content
   = form_for :client, url(:clients, :update, :id => @client.id), :method => :put, :class => 'form-horizontal' do |f|

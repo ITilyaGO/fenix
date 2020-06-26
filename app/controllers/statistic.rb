@@ -1,6 +1,4 @@
 Fenix::App.controllers :statistic do
-  require 'csv'
-
   get :index do
     @title = "Statistics"
     render 'statistic/index'

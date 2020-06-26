@@ -1,6 +1,4 @@
 Fenix::App.controllers :clients do
-  require 'csv'
-
   get :index do
     @title = "Clients"
     pagesize = PAGESIZE

@@ -35,6 +35,6 @@ class Product < ActiveRecord::Base
     end
     Product.record_timestamps = true
 
-    reset_products_list
+    OrderAssist.reset_products_list
   end
 end

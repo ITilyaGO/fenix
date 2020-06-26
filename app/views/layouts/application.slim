@@ -13,7 +13,7 @@ html lang='en'
         ul.sidebar
           li#toggle-sidebar.sidebar-main
             a
-              | pio
+              = APP_NAME
               / TODO: fa-arrows-h
               span.menu-icon.fa.fa-exchange
 
@@ -212,7 +212,7 @@ html lang='en'
                     = " — #{@title}"
 
           
-          = {:error => 'danger', :warning => 'warning', :success => 'success', :notice => 'info'}.map { |type, class_name| flash_tag(type, :class => "alert alert-#{class_name} alert-top", :bootstrap => true) }.join.html_safe
+          = {:error => 'danger', :warning => 'warning', :success => 'success', :notice => 'info'}.map { |type, class_name| flash_tag(type, :class => "alert alert-#{class_name} alert-top") }.join.html_safe
           
           div class='main-wrapper-push' = yield
           

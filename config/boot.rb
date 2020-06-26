@@ -46,6 +46,7 @@ end
 # Add your after (RE)load hooks here
 #
 Padrino.after_load do
+  require 'csv'
 end
 
 Padrino.load!

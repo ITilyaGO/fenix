@@ -1,5 +1,4 @@
 Fenix::App.controllers :online do
-  require 'csv'
   CLIENTS_FILE = 'db/clients.csv'
   
   after do
@@ -47,16 +46,16 @@ Fenix::App.controllers :online do
 
   get :sync_status do
     @status = []
-    p = Product.order(:updated_at => :desc).first
+    p = Product.order(:id => :desc).first
     op = Online::Product.find(p.id) rescue nil if p
     @status << { :name => 'Продукты', :synced => !p.nil? && !op.nil? && p.updated_at == op.updated_at, :u => "product" }
-    cat = Category.order(:updated_at => :desc).first 
+    cat = Category.order(:id => :desc).first
     ocat = Online::Category.find(cat.id) rescue nil if cat
     @status << { :name => 'Категории', :synced => !cat.nil? && !ocat.nil? && cat.updated_at == ocat.updated_at, :u => "category" }
-    pl = Place.order(:updated_at => :desc).first
-    opl = Online::Place.find(pl.id) rescue nil if pl
-    @status << { :name => 'Города', :synced => !pl.nil? && !opl.nil? && pl.updated_at == opl.updated_at, :u => "place" }
-    @status << { :name => 'Клиенты', :synced => false, :u => "client" }
+    # pl = Place.order(:updated_at => :desc).first
+    # opl = Online::Place.find(pl.id) rescue nil if pl
+    @status << { :name => 'Города', :synced => false, :u => "place", :d => true }
+    @status << { :name => 'Клиенты', :synced => false, :u => "client", :d => true }
     render "online/sync_status"
   end
   
