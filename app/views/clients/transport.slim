@@ -1,0 +1,27 @@
+.tabs-content.row: .col-md-6.col-md-offset-3
+  = form_for :form, url(:clients, :transport_update), :method => :put, :class => 'form-horizontal' do |f|
+    fieldset.control-group
+      .col-md-9.controls
+        = f.text_field :company, :class => 'form-control large inpt-with-feedback', :placeholder => 'a-z, max: 10'
+      = f.submit 'Добавить', :class => 'btn btn-sm btn-prime'
+      '
+      = f.submit '-', :class => 'btn btn-sm btn-danger', :name => 'clear'
+
+  br
+  table.table.table-hover
+    thead
+      tr
+        th.header
+        th.header = mat(:manager, :name)
+        th.header.list-row-action-header
+
+    tbody
+      - transport_dic.each do |t|
+        tr.list-row
+          td.list-column
+          td.list-column = partial 'bricks/kc/transport', :locals => { name: t }
+          td.list-column.list-row-action
+            div class='list-row-action-wrapper'
+              = link_to tag_icon(nil), :href => '#', :class => 'list-row-action-wrapper-link'
+
+      

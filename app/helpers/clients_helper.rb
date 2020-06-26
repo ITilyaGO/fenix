@@ -19,7 +19,7 @@ module Fenix::App::ClientsHelper
     :ratek => ['ратэк'],
     :rail => ['рейл'],
     :parnas => ['парнас']
-  }
+  }.freeze
 
   def transport_valid?(tr)
     KNOWN_TK.keys.include? tr
@@ -27,6 +27,10 @@ module Fenix::App::ClientsHelper
 
   def transport_list
     KNOWN_TK.keys
+  end
+
+  def transport_dic
+    CabiePio.folder(:m, :dic, :transport).flat.keys.sort_by { |e| transport_list.index(e.to_sym) || 64}
   end
 
   def guess_transport(client, save: false)

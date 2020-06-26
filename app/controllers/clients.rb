@@ -180,4 +180,24 @@ Fenix::App.controllers :clients do
       end
     end
   end
+
+  get :transport  do
+    @title = "Transport list"
+    @transport = CabiePio.folder(:m, :dic, :transport).flat
+
+    render 'clients/transport'
+  end
+
+  put :transport_update do
+    company = params[:form][:company]
+    if company.match? /\A[a-z]{3,10}\z/
+      unless params[:clear]
+        CabiePio.set([:m, :dic, :transport], company, {})
+      else
+        CabiePio.unset([:m, :dic, :transport], company)
+      end
+    end
+
+    redirect url(:clients, :transport)
+  end
 end

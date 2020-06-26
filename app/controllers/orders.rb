@@ -94,6 +94,7 @@ Fenix::App.controllers :orders do
       .where(client_id:search_clients)
       .where("status > ?", Order.statuses[:draft]).where("status < ?", Order.statuses[:finished])
       .order(sort => dir)
+    @transport = CabiePio.all_keys(@orders.map(&:client_id).uniq, folder: [:m, :clients, :transport]).flat
     render 'orders/index'
   end
 
@@ -125,6 +126,7 @@ Fenix::App.controllers :orders do
       .where.not(client_id:search_clients)
       .where("status > ?", Order.statuses[:draft]).where("status < ?", Order.statuses[:finished])
       .order(sort => dir)
+    @transport = CabiePio.all_keys(@orders.map(&:client_id).uniq, folder: [:m, :clients, :transport]).flat
     render 'orders/index'
   end
 

@@ -94,9 +94,9 @@ fieldset class='control-group#{error ? ' has-error' : ''}'
 fieldset class='control-group control-new'
   = f.label :shipping_company, :class => 'col-md-3 control-label'
   div class='col-md-6 controls'
-    select name="cabie[transport]" class="huge"
-      - options_for_select(transport_list << :none, :selected => @kc_transport || :none).each do |o|
-        = o
+    = select_tag :'cabie[transport]', class: 'huge', options: transport_dic.unshift(:none), :selected => @kc_transport || :none
+    = link_to tag_icon(:edit), url(:clients, :transport), class: 'btn btn-sm btn-default'
+br 
 - error = @client.errors.include?(:comment)
 fieldset class='control-group#{error ? ' has-error' : ''}'
   = f.label :comment, :class => 'col-md-3 control-label'
@@ -104,7 +104,7 @@ fieldset class='control-group#{error ? ' has-error' : ''}'
     = f.text_area :comment, :class => 'form-control input-large input-with-feedback', :rows => 4
     // span class='help-inline' = error ? f.error_message_on(:org, :class => 'text-error') : pat(:example)
 
-div class="form-actions"
+.form-actions
   = f.submit pat(:save), :class => 'btn btn-sm btn-prime'
   // |&nbsp;
   // = f.submit pat(:save_and_continue), :class => 'btn btn-sm btn-info', :name => 'save_and_continue'
