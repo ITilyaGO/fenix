@@ -83,6 +83,11 @@
 .btn-bell {
   .button-variant(@btn-default-color, @dekolbell, darken(@dekolbell, 10%), mix(@dekolbell, black, 85%));
 }
+.btn-clear {
+  .button-variant(rgb(118, 130, 166), rgba(231, 232, 227, 0.47), darken(rgba(231, 232, 227, 0.47), 10%), mix(rgba(231, 232, 227, 0.47), black, 85%));
+}
+
+
 .btn-info    {
   .button-variant(@btn-default-color, @brand-info, @btn-info-hover-bg, @btn-info-active-bg);
 }
@@ -147,7 +152,7 @@
   .button-size(10px, 19px, @btn-font-size-lg, @btn-line-height-lg, @border-radius-large);
 }
 .btn-sm {
-  .button-size(9px, 13px, @btn-font-size-sm, @btn-line-height-sm, @border-radius-base);
+  .button-size(8px, 14px, @btn-font-size-sm, @btn-line-height-sm, @border-radius-base);
 }
 .btn-xs {
   padding: 1px 5px;

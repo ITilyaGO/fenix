@@ -3,9 +3,9 @@
 // --------------------------------------------------
 
 .label {  
-  font-size: 72%;
   font-weight: normal;
   padding: .4em .5em .2em;
+  line-height: 1.5;
   
   // Add hover effects, but only for links
   &[href] {
@@ -28,7 +28,7 @@
   .label-variant(@label-default-bg, @label-default-bg-hover, @label-default-text-color);
 }
 .label-draft {
-  .label-variant(darken(@label-info-bg, 90%), darken(@label-info-bg, 85%));
+  .label-variant(#848484, darken(@label-info-bg, 85%));
 }
 .label-anew {
   .label-variant(@label-important-bg, @label-important-bg-hover);
@@ -65,4 +65,8 @@
 
 .label-primary {
   .label-variant(@label-primary-bg, @label-primary-bg-hover);
+}
+
+.label-darkrose {
+  .label-variant(@label-darkrose-bg, @label-darkrose-bg-hover);
 }

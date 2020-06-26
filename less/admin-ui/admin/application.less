@@ -3,7 +3,7 @@ html {
 }
 body {
   height: 100%;
-  letter-spacing: -0.5px;
+  letter-spacing: -.01em;
 }
 .main {
   min-height: 100%;
@@ -249,10 +249,20 @@ footer p {
   height: 100%;
 }
 .list-row-action-wrapper-link {
+  color: #7f8ca3;
   font-size: 1.3em;
   padding: 4px;
   display: inline-block;
   visibility: hidden;
+
+  &.medium {
+    font-size: 1.2em;
+    padding: 0 4px;
+    vertical-align: text-bottom;
+  }
+}
+.list-row-action-wrapper-link {
+
 }
 .list-row-action-wrapper-link:hover {
   text-decoration: none;

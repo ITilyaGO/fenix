@@ -5,8 +5,33 @@
 .table {
   //font-size: floor(@component-font-size-base * 1.067); // 16px
   font-size: 15px;
-  font-weight: bold;
-  
+  // font-weight: bold;
+  border-collapse: separate;
+
+  > thead, > tfoot {
+    position: sticky;
+    background: rgb(225, 227, 234);
+    z-index: 50;
+  }
+
+  > thead {
+    top: 0;
+  }
+  > tfoot {
+    bottom: 0;
+  }
+
+  td.group-caption {
+    padding-top: 1em;
+    padding-left: 1em;
+    font-size: 1.2em;
+    border-top: none;
+
+    &:hover {
+      background-color: #fff;
+    }
+  }
+
   // Cells
   > thead,
   > tbody,
@@ -24,6 +49,17 @@
       }
     }
   }
+  > thead {
+    > tr > th {
+      border-bottom: 3px solid #9fa8ce;
+      padding: 3px 0;
+
+      &:first-child {
+        text-align: center;
+      }
+    }
+  }
+
   [class*="fui-"] {
     vertical-align: baseline;
     font-size: 20px;
