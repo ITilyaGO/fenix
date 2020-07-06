@@ -53,6 +53,10 @@ class Account < ActiveRecord::Base
     # Order.where("status >= ?", Order.statuses[:draft])).where(:)
   end
 
+  def limited_orders?
+    (role == 'user' || role == 'editor') && (2..5).include?(section.id)
+  end
+
   private
 
   def encrypt_password

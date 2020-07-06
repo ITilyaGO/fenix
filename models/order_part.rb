@@ -9,5 +9,9 @@ class OrderPart < ActiveRecord::Base
   # def part_complete
   #   status == :finished
   # end
+
+  def no_boxes?
+    boxes == 0
+  end
   
 end

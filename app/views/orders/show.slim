@@ -47,7 +47,7 @@ div class="table non-print"
         p Дата: #{to_msk(@order.created_at)}
         - if !@order.description.blank?
           p = @order.description
-        p Коробок: #{@order.order_parts.map(&:boxes).sum}
+        p Коробок: #{@order.order_parts.map(&:boxes).compact.sum}
 
 div class="clearfix"
 // div class="row"

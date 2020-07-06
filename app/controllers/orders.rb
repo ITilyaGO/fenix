@@ -8,10 +8,14 @@ Fenix::App.controllers :orders do
     orders_query = Order.where("status > ?", Order.statuses[:draft]).where("status < ?", Order.statuses[:finished])
     orders_query = orders_query.where(delivery: params[:deli].to_i) if params[:deli]
     @orders = orders_query.includes(:client, :place, :order_parts, :timeline).order(sort => dir)
+    if current_account.limited_orders?
+      @filtered_by_user = OrderPart.where(:order_id => orders_query.ids, :section => current_account.section_id).pluck(:order_id)
+    end
     @pages = (orders_query.count/pagesize).ceil
     @sections = Section.includes(:categories).all
     a_managers(@orders.map(&:id), @orders.map(&:client_id))
     @transport = CabiePio.all_keys(@orders.map(&:client_id).uniq, folder: [:m, :clients, :transport]).flat
+    @kc_timelines = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :timeline]).flat.trans(:to_i)
     @r = url(:orders, :index)
     render 'orders/index'
   end
@@ -95,6 +99,7 @@ Fenix::App.controllers :orders do
       .where("status > ?", Order.statuses[:draft]).where("status < ?", Order.statuses[:finished])
       .order(sort => dir)
     @transport = CabiePio.all_keys(@orders.map(&:client_id).uniq, folder: [:m, :clients, :transport]).flat
+    @kc_timelines = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :timeline]).flat.trans(:to_i)
     render 'orders/index'
   end
 
@@ -127,6 +132,7 @@ Fenix::App.controllers :orders do
       .where("status > ?", Order.statuses[:draft]).where("status < ?", Order.statuses[:finished])
       .order(sort => dir)
     @transport = CabiePio.all_keys(@orders.map(&:client_id).uniq, folder: [:m, :clients, :transport]).flat
+    @kc_timelines = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :timeline]).flat.trans(:to_i)
     render 'orders/index'
   end
 
@@ -150,7 +156,8 @@ Fenix::App.controllers :orders do
     @manager = Manager.find(manager) rescue nil
     @timeline_at = CabiePio.get([:orders, :timeline], @order.id).data
     @timeline_date = timeline_unf(@timeline_at) unless @timeline_at.nil?
-    
+
+    calendar_init(Date.today)
 
     if @order
       @order.actualize
@@ -520,10 +527,17 @@ Fenix::App.controllers :orders do
     @order_part = @order.order_parts.find_by(:section_id => current_account.section)
     # @order.status = params[:status]
     @order.priority = params[:priority] == "true"
+    delivery_at = params[:cabie][:timeline_at]
+    if timeline_date = Date.parse(delivery_at) rescue nil
+      CabiePio.set [:timeline, :order], timeline_order(@order.id, timeline_date), @order.id
+      CabiePio.set [:orders, :timeline], @order.id, timeline_id(timeline_date)
+    end
 
     if @order_part and params[:order_part]
       # @order_part.status = params[:order_part]['done'] ? :finished : :current
+      no_boxes = params[:order_part][:no_boxes] == '1'
       @order_part.boxes = params[:order_part][:boxes] || 0
+      @order_part.boxes = 0 if no_boxes
       @order_part.transfer = params[:order_part][:transfer] || false
       @order_part.state = :finished if params[:next_status]
       @order_part.save

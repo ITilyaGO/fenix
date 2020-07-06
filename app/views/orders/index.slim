@@ -21,7 +21,7 @@ div class="tabs-content"
         th class='header' Куда едет
         th class='header' Заказчик
         th class='header' Дата
-        th class='header' Предп.дата
+        th class='header' Отправка
         th class='header' Менеджер
         th class='header' Тр.ком
         th class='header only-print' Сумма
@@ -30,8 +30,10 @@ div class="tabs-content"
         th class='header non-print'
         th class='header list-row-action-header non-print'
     
+    - filter = @filtered_by_user.is_a? Array
     tbody
       - @orders.each do |order|
+        - next if filter && !@filtered_by_user&.include?(order.id)
         tr class='list-row non-print #{order.priority ? "warning" : ""}'
           td class='list-column list-selectable non-print' = check_box_tag 'order_ids[]', :autocomplete => "off", :value => order.id, :class => 'list-selectable-checkbox'
           td class='list-column'
@@ -49,9 +51,10 @@ div class="tabs-content"
             - town_name = @kc_towns[code]&.model
             = partial 'bricks/kato/label_print', :locals => { town_name: town_name, el: order }
           td class='list-column' = order.client.name
-          td class='list-column text-nowrap' = to_msk(order.created_at)
+          td class='list-column text-nowrap' = to_dm(order.created_at)
           td class='list-column text-nowrap'
-            = to_msk(order.timeline.start_at) unless order.timeline.nil?
+            - odate = @kc_timelines[order.id]
+            = to_dm(timeline_unf(odate)) if odate
           td class='list-column'
             - kc_man = @kc_managers[@kc_hometowns[order.client_id.to_s]]
             = @managers[kc_man.to_i] if kc_man
