@@ -90,6 +90,10 @@ class Order < ActiveRecord::Base
     OrderAssist.calc_stickers_for self
   end
 
+  def self.holder(id = 0)
+    Order.new({id: id, status: 5, created_at: Time.now, client: Client.new})
+  end
+
   def self.iq(id)
     a = id ^ 23081
     v = a.to_s

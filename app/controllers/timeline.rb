@@ -193,7 +193,7 @@ Fenix::App.controllers :dr_timeline, :map => 'timeline/driven' do
     @orders = []
     @week_orders = @gtm.fetch(@sdate, [])
     @all_ids = @week_orders.map(&:last).map(&:to_i)
-    @orders = Order.find(@all_ids)
+    @orders = Order.where(id: @all_ids)
     a_managers(@all_ids, @orders.map(&:client_id).uniq)
 
     @stickers = CabiePio.all_keys(@all_ids, folder: [:sticker, :order]).flat.trans(:to_i, :to_f)
@@ -202,6 +202,7 @@ Fenix::App.controllers :dr_timeline, :map => 'timeline/driven' do
     if params[:sort].to_sym == :manager
       @by_manager = @all_ids.group_by do |oid|
         fo = @orders.detect{|o| o.id == oid}
+        next unless fo
         @kc_managers[@kc_hometowns[fo.client_id.to_s]]
       end
       partial 'timeline/orders_for_manager'

@@ -24,7 +24,7 @@
       tbody
         - man_orders = @orders.select{|o| @by_manager[man_id.first].include?(o.id)}
         - man_id.last.each do |order_id|
-          - order = @orders.detect{|x| x.id == order_id}
+          - order = @orders.detect{|x| x.id == order_id} || Order.holder(order_id)
           - odate = @week_orders.detect{|x|x.last == order_id}&.first
           tr class='list-row non-print'
             td class='list-column list-selectable non-print' = check_box_tag 'order_ids[]', :autocomplete => "off", :value => order.id, :class => 'list-selectable-checkbox'

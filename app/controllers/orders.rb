@@ -527,7 +527,7 @@ Fenix::App.controllers :orders do
     @order_part = @order.order_parts.find_by(:section_id => current_account.section)
     # @order.status = params[:status]
     @order.priority = params[:priority] == "true"
-    delivery_at = params[:cabie][:timeline_at]
+    delivery_at = params[:cabie][:timeline_at] rescue nil
     if timeline_date = Date.parse(delivery_at) rescue nil
       CabiePio.set [:timeline, :order], timeline_order(@order.id, timeline_date), @order.id
       CabiePio.set [:orders, :timeline], @order.id, timeline_id(timeline_date)

@@ -21,7 +21,7 @@
 
     tbody
       - @week_orders.each do |pair|
-        - order = @orders.detect{|x| x.id == pair.last}
+        - order = @orders.detect{|x| x.id == pair.last} || Order.holder(pair.last)
         tr class='list-row non-print'
           td class='list-column list-selectable non-print' = check_box_tag 'order_ids[]', :autocomplete => "off", :value => order.id, :class => 'list-selectable-checkbox'
           td class='list-column' = "#{order.id}"
