@@ -1,8 +1,8 @@
 - if @orders.empty?
   span.no ничего тут нет
 - else
-  - @by_manager.each do |man_id|
-    - man_name = (@managers[man_id.first.to_i] rescue nil) || 'Без менеджера'
+  - @by_delivery.each do |del_id, man_orders|
+    - del_name = t :"delivery.#{del_id}"
     .wrapper: table class="table table-hover table-condensed"
       thead
         tr
@@ -21,10 +21,8 @@
           th class='header list-row-action-header non-print'
     
       tbody
-        - man_orders = @orders.select{|o| @by_manager[man_id.first].include?(o.id)}
-        - man_id.last.each do |order_id|
-          - order = @orders.detect{|x| x.id == order_id} || Order.holder(order_id)
-          - odate = @week_orders.detect{|x|x.last == order_id}&.first
+        - man_orders.each do |order|
+          - odate = @week_orders.detect{|x|x.last == order.id}&.first
           tr class='list-row non-print'
             td class='list-column list-selectable non-print' = check_box_tag 'order_ids[]', :autocomplete => "off", :value => order.id, :class => 'list-selectable-checkbox'
             td class='list-column' = "#{order.id}"
@@ -53,7 +51,7 @@
       - price_done = man_orders.map(&:done_total).sum
       tfoot: tr
         td.summary colspan=3
-          .text-left = man_name
+          .text-left = del_name
         td.summary colspan=8
           .item-all.pull-right
             span Сумма заказов
@@ -64,3 +62,4 @@
           .item-sticker.pull-right
             span Клейка
             div == deli(rur man_orders.map(&:id).sum{|x|@stickers.fetch(x, 0)})
+    

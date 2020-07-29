@@ -21,7 +21,8 @@ module Fenix::App::OrdersHelper
   end
 
   def rur(value)
-    "#{'%g' %(value||0)}&nbsp;<span class='r'>₽</span>"
+    # TODO: rebuild font with ruble sign ₽
+    "#{'%0.f' %(value||0)}&nbsp;<span class='r'>&#x20B7</span>"
   end
 
   def order_complexity(order)

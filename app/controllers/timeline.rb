@@ -206,6 +206,9 @@ Fenix::App.controllers :dr_timeline, :map => 'timeline/driven' do
         @kc_managers[@kc_hometowns[fo.client_id.to_s]]
       end
       partial 'timeline/orders_for_manager'
+    elsif params[:sort].to_sym == :delivery
+      @by_delivery = @orders.group_by(&:delivery)
+      partial 'timeline/orders_for_delivery'
     else
       partial 'timeline/orders'
     end

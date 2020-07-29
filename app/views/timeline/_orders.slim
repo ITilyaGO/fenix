@@ -48,12 +48,34 @@
               = hidden_field_tag 'tid[]', :value => pair.first
               = link_to tag_icon(:calendar), '#', :class => 'list-row-action-wrapper-link medium list-menu-timeline-link'
               = link_to tag_icon(:edit), :href => url(:orders, :edit, :id => order.id), :class => 'list-row-action-wrapper-link'
+    
+    - price_total = @orders.map(&:total).sum
+    - price_done = @orders.map(&:done_total).sum
     tfoot
-      tr: td colspan=12
-        .pull-right
-          | Сумма заказов: #{"%0.f" % @orders.map(&:total).sum} &#x20B7
-          | &nbsp;/&nbsp;
-          | Сделано на: #{"%0.f" % @orders.map(&:done_total).sum} &#x20B7
-          | &nbsp;/&nbsp;
-          ' Клейка:
-          == rur @all_ids.sum{|x|@stickers.fetch(x, 0)}
+      tr: td.summary colspan=12
+        .item-orders.pull-left
+          span = t :"delivery.postage"
+          div == deli(rur @orders.select{|x| x.delivery.to_sym == :postage}.map(&:total).sum)
+        .item-orders.pull-left
+          span = t :"delivery.vernissage"
+          div == deli(rur @orders.select{|x| x.delivery.to_sym == :vernissage}.map(&:total).sum)
+        - total_roundtrip = @orders.select{|x| x.delivery.to_sym == :roundtrip}.map(&:total).sum
+        - if total_roundtrip > 0
+          .item-orders.pull-left
+            span = t :"delivery.roundtrip"
+            div == deli(rur total_roundtrip)
+        - total_pickup = @orders.select{|x| x.delivery.to_sym == :pickup}.map(&:total).sum
+        - if total_pickup > 0
+          .item-orders.pull-left
+            span = t :"delivery.pickup"
+            div == deli(rur total_pickup)
+
+        .item-all.pull-right
+          span Сумма заказов
+          div == deli(rur price_total)
+        .item-done.pull-right
+          span Сделано #{((price_done.to_f/price_total)*100).ceil}%
+          div == deli(rur price_done)
+        .item-sticker.pull-right
+          span Клейка
+          div == deli(rur @all_ids.sum{|x|@stickers.fetch(x, 0)})
