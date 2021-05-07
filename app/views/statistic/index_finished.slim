@@ -3,14 +3,14 @@
     = cat.name
     ' &nbsp;[&nbsp;
     - @months.each_with_index do |m, i|
-      = link_to m, url(:statistic, :finished, :id => cat.id, :gap => 4-i)
+      = link_to m, url(:statistic, :finished, :id => cat.id, :gap => STAT_MONTHLY_GAP-1-i)
       ' &nbsp;
-      a href=url(:statistic, :finished, :id => cat.id, :format => :csv, :gap => 4-i)
+      a href=url(:statistic, :finished, :id => cat.id, :format => :csv, :gap => STAT_MONTHLY_GAP-1-i)
         span.label.label-info
           span.fa.fa-file.menu-icon style='padding-right:10px;'
           ' csv
       ' &nbsp;
-      a href=url(:statistic, :finished, :id => cat.id, :win => '', :format => :csv, :gap => 4-i)
+      a href=url(:statistic, :finished, :id => cat.id, :win => '', :format => :csv, :gap => STAT_MONTHLY_GAP-1-i)
         span.label.label-success
           span.fa.fa-file.menu-icon style='padding-right:10px;'
           ' excel

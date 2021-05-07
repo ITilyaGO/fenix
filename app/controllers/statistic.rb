@@ -1,4 +1,7 @@
 Fenix::App.controllers :statistic do
+  STAT_YEARLY_GAP = 3.freeze
+  STAT_MONTHLY_GAP = 5.freeze
+
   get :index do
     @title = "Statistics"
     render 'statistic/index'
@@ -75,8 +78,8 @@ Fenix::App.controllers :statistic do
     @months = []
     start_date = Date.new(Date.today.year, Date.today.month, 1)
 
-    5.times do |i|
-      @months << start_date.prev_month(4-i).strftime("%b %y")
+    STAT_MONTHLY_GAP.times do |i|
+      @months << start_date.prev_month(STAT_MONTHLY_GAP-1-i).strftime("%b %y")
     end
     render 'statistic/index_finished'
   end
@@ -92,7 +95,10 @@ Fenix::App.controllers :statistic do
     @orders = Order.where(status: Order.statuses[:finished])
       .where('updated_at >= ?', @start_date).where('updated_at < ?', end_date)
       .where.not(client_id: ignored)
-    stat = OrderLine.where(order_id: @orders, ignored: false).where('"categories"."category_id" = %s', id).joins(:product, :product => :category).group(:product_id, "products.'index'", "categories.'index'").order("categories_index", "products_index").sum(:done_amount)
+    stat = OrderLine.where(order_id: @orders, ignored: false).where('"categories"."category_id" = %s', id)
+      .joins(:product, :product => :category)
+      .group(:product_id, "products.'index'", "categories.'index'")
+      .order("categories_index", "products_index").sum(:done_amount)
     @pretty_stat = []
     stat.each do |item|
       pid = item[0][0]
@@ -105,6 +111,58 @@ Fenix::App.controllers :statistic do
       when :html then render 'statistic/finished'
       when :csv then begin
         fname = 'statistics-' + @category.name + '-' + @start_date.strftime("%b %y") + '.csv'
+        headers['Content-Disposition'] = "attachment; filename=#{fname}"
+        output = ''
+        output = "\xEF\xBB\xBF" if params.include? :win
+        output << CSV.generate(:col_sep => ';') do |csv|
+          # csv << %w(id name num)
+          @pretty_stat.each do |item|
+            csv << [item[:category], item[:name], item[:sum]]
+          end
+        end
+      end
+    end
+  end
+
+  get :finished_yearly do
+    @title = "Statistics - готовые заказы"
+    @cats = Category.where(:category_id => nil)
+    @years = []
+    start_date = Date.new(Date.today.year, 1, 1)
+
+    STAT_YEARLY_GAP.times do |i|
+      @years << start_date.prev_year(STAT_YEARLY_GAP-1-i).strftime("%Y")
+    end
+    render 'statistic/index_finished_yearly'
+  end
+
+  get :finished_yearly, :with => :id, :provides => [:html, :csv] do
+    @title = "Statistics - готовые заказы"
+    id = params[:id]
+    gap = params[:gap].to_i
+    today = Date.today.year-gap
+    @start_date = Date.new(today, 1, 1)
+    end_date = @start_date.next_year
+    ignored = YAML.load_file('./stat_ignore.yml') rescue []
+    @orders = Order.where(status: Order.statuses[:finished])
+      .where('updated_at >= ?', @start_date).where('updated_at < ?', end_date)
+      .where.not(client_id: ignored)
+    stat = OrderLine.where(order_id: @orders, ignored: false).where('"categories"."category_id" = %s', id)
+      .joins(:product, :product => :category)
+      .group(:product_id, "products.'index'", "categories.'index'")
+      .order("categories_index", "products_index").sum(:done_amount)
+    @pretty_stat = []
+    stat.each do |item|
+      pid = item[0][0]
+      p = Product.find(pid)
+      @pretty_stat << { :id => pid, :category => p.category.name, :name => p.displayname, :sum => item[1] }
+    end
+    @category = Category.find(id)
+    
+    case content_type
+      when :html then render 'statistic/finished_yearly'
+      when :csv then begin
+        fname = 'statistics-' + @category.name + '-' + @start_date.strftime("%Y") + '.csv'
         headers['Content-Disposition'] = "attachment; filename=#{fname}"
         output = ''
         output = "\xEF\xBB\xBF" if params.include? :win

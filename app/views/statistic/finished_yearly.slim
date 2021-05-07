@@ -2,9 +2,9 @@
   .pull-right
     = link_to 'Печать', 'javascript:print()', :class => 'btn btn-glue'
 
-p.non-print = link_to "Назад", url(:statistic, :finished)
+p.non-print = link_to "Назад", url(:statistic, :finished_yearly)
 
-p Месяц: #{@start_date.strftime("%b %y")}
+p Год: #{@start_date.strftime("%Y")}
 p Категория: #{@category.name}
 p Заказов: #{@orders.size}
 
