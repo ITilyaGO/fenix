@@ -41,7 +41,7 @@ class KyotoCorp::Online < KyotoCorp::EasyAccess
 end
 class KyotoCorp::Pio < KyotoCorp::EasyAccess
 end
-class KyotoCorp::KatoAPI < KyotoCorp::EasyAPI
+class KyotoCorp::KAPI < KyotoCorp::EasyAPI
 end
 
 # KyotoCorp::EA.config do |c|
@@ -64,7 +64,7 @@ KyotoCorp::Pio.config do |c|
   c.name = :pio
 end
 
-KyotoCorp::KatoAPI.config do |c|
+KyotoCorp::KAPI.config do |c|
   c.app_name = :pio_kapi
   c.isokato = :kato
   c.index = :index

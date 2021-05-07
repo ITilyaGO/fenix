@@ -70,6 +70,7 @@ module Fenix
       role.project_module :places, '/places'
       role.project_module :editors, '/clients'
       role.project_module :kyoto, '/kyoto'
+      role.project_module :health, '/health'
     end
 
     access_control.roles_for :editor do |role|

@@ -9,6 +9,7 @@ require 'rubygems' unless defined?(Gem)
 require 'bundler/setup'
 Bundler.require(:default, RACK_ENV)
 require "./db/lib/main.rb"
+require "./db/map.rb"
 require "./config/scheduler.rb"
 require './config/cabies.rb'
 
