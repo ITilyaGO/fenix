@@ -835,4 +835,12 @@ Fenix::App.controllers :orders do
     CabiePio.set [:orders, type], order, town
     { name: exist.model.name }.to_json
   end
+
+  put :regroup do
+    order_form = params[:order]
+    order = Order.find(order_form[:id])
+    order.delivery = order_form[:delivery].to_i
+    order.save
+    # true
+  end
 end

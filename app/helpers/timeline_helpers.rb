@@ -30,8 +30,10 @@ module Fenix::App::TimelineHelper
   def calendar_init(start_from = Date.today)
     ky_month_1 = start_from.strftime('%y%m')
     ky_month_2 = start_from.next_month.strftime('%y%m')
+    ky_month_0 = start_from.prev_month.strftime('%y%m')
     @ktm = CabiePio.all([:timeline, :order], [ky_month_1]).flat
     @ktm = @ktm.merge CabiePio.all([:timeline, :order], [ky_month_2]).flat
+    @ktm = @ktm.merge CabiePio.all([:timeline, :order], [ky_month_0]).flat
     @ctm = calendar_group(@ktm)
   end
 

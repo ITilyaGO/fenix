@@ -52,6 +52,49 @@ ul class="nav nav-tabs non-print" id="weeks_tab"
           .btn.btn-success.btn-wide.submit = pat(:save)
           .btn.btn-default.btn-wide.cancel data-dismiss="modal" = pat(:cancel)
 
+.modal#regroup-modal
+  .modal-dialog
+    .modal-content
+      = form_for :order, url(:orders, :regroup), :method => :put do |f|
+        .modal-header
+          h4.modal-title Тип заказа
+        .modal-body
+          = f.hidden_field :id
+          / = f.hidden_field :delivery
+          fieldset class='control-group'
+            label.col-md-3.control-label
+            .col-md-3.controls.custom-control
+              = f.radio_button :delivery, :value => Order.deliveries[:vernissage], :class => 'custom-control-input'
+              label.custom-control-label(for = 'order_delivery_3') = t :'delivery.vernissage'
+            .col-md-3.controls.custom-control
+              = f.radio_button :delivery, :value => Order.deliveries[:postage], :class => 'custom-control-input'
+              label.custom-control-label(for = 'order_delivery_0') = t :'delivery.postage'
+            .clearfix
+            label.col-md-3.control-label
+            .col-md-3.controls.custom-control
+              = f.radio_button :delivery, :value => Order.deliveries[:roundtrip], :class => 'custom-control-input'
+              label.custom-control-label(for = 'order_delivery_1') = t :'delivery.roundtrip'
+            .col-md-3.controls.custom-control
+              = f.radio_button :delivery, :value => Order.deliveries[:pickup], :class => 'custom-control-input'
+              label.custom-control-label(for = 'order_delivery_2') = t :'delivery.pickup'
+
+            / .col-md-3.controls.custom-control
+            /   = radio_button_tag :delivery, :value => Order.deliveries[:vernissage], :class => 'custom-control-input'
+            /   label.custom-control-label(for = 'order_delivery_3') = t :'delivery.vernissage'
+            / .col-md-3.controls.custom-control
+            /   = radio_button_tag :delivery, :value => Order.deliveries[:postage], :class => 'custom-control-input'
+            /   label.custom-control-label(for = 'order_delivery_0') = t :'delivery.postage'
+            / .clearfix
+            / .col-md-3.controls.custom-control
+            /   = radio_button_tag :delivery, :value => Order.deliveries[:roundtrip], :class => 'custom-control-input'
+            /   label.custom-control-label(for = 'order_delivery_1') = t :'delivery.roundtrip'
+            / .col-md-3.controls.custom-control
+            /   = radio_button_tag :delivery, :value => Order.deliveries[:pickup], :class => 'custom-control-input'
+            /   label.custom-control-label(for = 'order_delivery_2') = t :'delivery.pickup'
+        .modal-footer
+          .btn.btn-success.btn-wide.submit = pat(:save)
+          .btn.btn-default.btn-wide.cancel data-dismiss="modal" = pat(:cancel)
+
 .timeline.tab-content#for_weeks_tab
   .flex-c.page-loading.hidden
     .indicator
@@ -60,138 +103,9 @@ ul class="nav nav-tabs non-print" id="weeks_tab"
       br
       span.url
 
-
   .output
     .text Hi
-  /- @weeks.each_with_index do |s, i|
-    div class="tab-pane" id="cat-#{i}"
-      div class="tabs-content"
-        h4 Обязательные отправки #{s[:orders].size}
-        table class="table table-hover table-condensed" id="list"
-          thead
-            tr
-              th class='header non-print'
-                = check_box_tag 'orders_all', :autocomplete => "off", :value => false, :class => 'list-selectable-checkbox-all'
-              th class='header' Номер
-              // th class='header' = mat(:order, :name)
-              // th class='header' = mat(:order, :amount)
-              th class='header' Заказчик
-              th class='header' Город
-              th class='header' Тр.ком.
-              th class='header' Договор
-              th class='header' Дата
-              th class='header' Статус
-              th class='header'
-                - @sections.each do |s|
-                  = content_tag :span, " #{s.name[0..2]} "
-              th class='header list-row-action-header non-print'
-        
-          tbody
-            - s[:orders].where(:immediate => true).each do |time|
-              - order = time.order
-              tr class='list-row non-print'
-                td class='list-column list-selectable non-print' = check_box_tag 'order_ids[]', :autocomplete => "off", :value => order.id, :class => 'list-selectable-checkbox'
-                td class='list-column' = "#{order.id}"
-                // td class='list-column' = order.name
-                td class='list-column' = order.client.name
-                td class='list-column' = order.place_name
-                td class='list-column' = order.client.shipping_company
-                td class='list-column' = order.client.contract
-                td class='list-column' = to_msk(order.created_at)
-                td class='list-column'
-                  span class="label label-#{order.status} non-print" = t :"status.#{order.status}"
-                  span class="only-print" = t :"status.#{order.status}"
-                td class='list-column text-nowrap'
-                  = partial 'orders/squares', :locals => { :sections => @sections, :order => order }
-                td class='list-column list-row-action non-print'
-                  div class='list-row-action-wrapper'
-                    = link_to 'edit', :href => url(:orders, :edit, :id => order.id), :class => 'list-row-action-wrapper-link'
-        .pull-right
-          | Сумма заказов: #{"%0.f" % Order.where(:id => s[:orders].where(:immediate => true).select(:order_id)).sum(:total)} &#x20B7
-          | &nbsp;/&nbsp;
-          | Сделано на: #{"%0.f" % Order.where(:id => s[:orders].where(:immediate => true).select(:order_id)).sum(:done_total)} &#x20B7
-
-      div class="tabs-content"
-        h4 Необязательные отправки
-        table class="table table-hover table-condensed" id="list"
-          thead
-            tr
-              th class='header non-print'
-                = check_box_tag 'orders_all', :autocomplete => "off", :value => false, :class => 'list-selectable-checkbox-all'
-              th class='header' Номер
-              // th class='header' = mat(:order, :name)
-              // th class='header' = mat(:order, :amount)
-              th class='header' Заказчик
-              th class='header' Город
-              th class='header' Тр.ком.
-              th class='header' Договор
-              th class='header' Дата
-              th class='header' Статус
-              th class='header'
-                - @sections.each do |s|
-                  = content_tag :span, " #{s.name[0..2]} "
-              th class='header list-row-action-header non-print'
-        
-          tbody
-            - s[:orders].where(:immediate => false).each do |time|
-              - order = time.order
-              tr class='list-row non-print'
-                td class='list-column list-selectable non-print' = check_box_tag 'order_ids[]', :autocomplete => "off", :value => order.id, :class => 'list-selectable-checkbox'
-                td class='list-column' = "#{order.id}"
-                // td class='list-column' = order.name
-                td class='list-column' = order.client.name
-                td class='list-column' = order.place_name
-                td class='list-column' = order.client.shipping_company
-                td class='list-column' = order.client.contract
-                td class='list-column' = to_msk(order.created_at)
-                td class='list-column'
-                  span class="label label-#{order.status} non-print" = t :"status.#{order.status}"
-                  span class="only-print" = t :"status.#{order.status}"
-                td class='list-column text-nowrap'
-                  = partial 'orders/squares', :locals => { :sections => @sections, :order => order }
-                td class='list-column list-row-action non-print'
-                  div class='list-row-action-wrapper'
-                    = link_to 'дн', :href => '#', :class => 'list-row-day-wrapper-link'
-                    = link_to 'edit', :href => url(:orders, :edit, :id => order.id), :class => 'list-row-action-wrapper-link'
-        .pull-right
-          | Сумма заказов: #{"%0.f" % Order.where(:id => s[:orders].where(:immediate => false).select(:order_id)).sum(:total)} &#x20B7
-          | &nbsp;/&nbsp;
-          | Сделано на: #{"%0.f" % Order.where(:id => s[:orders].where(:immediate => false).select(:order_id)).sum(:done_total)} &#x20B7
-
-      - if current_account.is_admin?
-        = form_tag url(:timeline, :assign), :method => :put, :class => 'form-horizontal' do
-          = hidden_field_tag 'start', :value => s[:date].strftime("%Y-%m-%d")
-          = hidden_field_tag 'end', :value => s[:end].strftime("%Y-%m-%d")
-          
-          fieldset class='control-group non-print'
-            = label_tag 'Обязательные отправки', :class => 'col-md-3 control-label'
-            div class='col-md-6 controls'
-              // = @o.inspect
-              // = @orders_for_select.inspect
-              select name="immediates[]" class="huge" multiple="multiple" title="Выберите" data-style="btn-info"
-                //- @weeks << { :name => "Заказы без срока", :date => nil }
-                - @weeks_select.each_with_index do |week, i|
-                  //- next if i == 0
-                  optgroup label="#{week[:name]}"
-                    - @orders_for_select.each do |o|
-                      - if o[:date] == week[:date]
-                        = content_tag(:option, o[:name], { :value => o[:value], :selected => false })
-                      // - html_attributes = { :value => sub.id }
-                      // - html_attributes[:selected] ||= option_is_selected?(sub.id, sub.name, @product.category_id)
-
-          fieldset class='control-group non-print'
-            = label_tag 'Необязательные отправки', :class => 'col-md-3 control-label'
-            div class='col-md-6 controls'
-              select name="orders[]" class="huge" multiple="multiple" title="Выберите" data-style="btn-info"
-                - @weeks_select.each_with_index do |week, i|
-                  optgroup label="#{week[:name]}"
-                    - @orders_for_select.each do |o|
-                      - if o[:date] == week[:date]
-                        = content_tag(:option, o[:name], { :value => o[:value], :selected => false })
-                      
-          
-          = submit_tag "Сохранить", :class => 'btn btn-sm btn-prime btn-wide'
-
+  
 = form_for '', url(:dr_timeline, :orders), :class => 'form-page' do |f|
 
 - content_for :js_assets do
@@ -258,11 +172,13 @@ ul class="nav nav-tabs non-print" id="weeks_tab"
 
           $(".list-selectable-checkbox-all").on("change", function() {
             var on = $(this).prop("checked")
-            $(".list-selectable-checkbox").prop("checked", on);
+            $(".list-selectable-checkbox", $(this).parents("table")).prop("checked", on);
             $(".table .list-row").toggleClass('non-print');
+            $(this).parents("table").toggleClass('non-print');
           });
           $(".list-selectable-checkbox").on("change", function() {
             $(this).parents(".list-row").toggleClass('non-print');
+            $(this).parents("table").removeClass('non-print');
           });
           $(".list-menu-timeline-link").on("click", function(e) {
             var ps = []
@@ -273,7 +189,12 @@ ul class="nav nav-tabs non-print" id="weeks_tab"
             $('calendar').toggle('collapse')
             $("#calendar-modal").modal()
             $('input[name="timeline_id"]').val(this.previousSibling.value)
-          });
+          })
+          $(".list-menu-regroup-link").on("click", function(e) {
+            $("#regroup-modal").modal()
+            var id = $('input:first', $(this).parents("tr")).val()
+            $('input[name="order[id]"]').val(id)
+          })
           o.classList.toggle('fade')
           palo.classList.toggle('hidden')
         })
@@ -316,6 +237,19 @@ ul class="nav nav-tabs non-print" id="weeks_tab"
         .then(response => response.text())
         .then(function(result) {})
         $('#calendar-modal').modal('hide')
+        no_href()
+      })
+
+      $('#regroup-modal .submit').on('click', function (e) {
+        f = document.querySelector('#regroup-modal form')
+        fetch(f.action, {
+          method: 'put',
+          body: $(f).serialize(),
+          headers: { "Content-Type": "application/x-www-form-urlencoded" }
+        })
+        .then(response => response.text())
+        .then(function(result) {})
+        $('#regroup-modal').modal('hide')
         no_href()
       })
 

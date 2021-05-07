@@ -1,7 +1,7 @@
 - if @orders.empty?
   span.no ничего тут нет
 - else
-  table class="table table-hover table-condensed"
+  table class="table table-hover table-condensed non-print"
     thead
       tr
         th class='header non-print'
@@ -9,19 +9,22 @@
         th class='header' Номер
         th class='header' Заказчик
         th class='header' Город
-        th class='header' Тр.ком.
-        th class='header' Договор
-        th class='header' Менеджер
+        th class='header non-print' Тр.ком.
+        th class='header non-print' Договор
+        th class='header non-print' Менеджер
         th class='header' Дата
         th class='header' Отправка
         th class='header' Статус
-        th class='header'
+        th class='header non-print'
           = partial 'bricks/orders/section_titles'
+        th.only-print width="40%"
         th class='header list-row-action-header non-print'
 
     tbody
       - @week_orders.each do |pair|
         - order = @orders.detect{|x| x.id == pair.last} || Order.holder(pair.last)
+        / - odate = @week_orders.detect{|x|x.last == order.id}&.first
+        - odate = pair.first
         tr class='list-row non-print'
           td class='list-column list-selectable non-print' = check_box_tag 'order_ids[]', :autocomplete => "off", :value => order.id, :class => 'list-selectable-checkbox'
           td class='list-column' = "#{order.id}"
@@ -30,22 +33,23 @@
             - code = @kc_orders[order.id.to_s]
             - town_name = @kc_towns[code]&.model
             = partial 'bricks/kato/label_print', :locals => { town_name: town_name, el: order }
-          td class='list-column'
+          td class='list-column non-print'
             = partial 'bricks/orders/transport', :locals => { client_id: order.client_id }
-          td class='list-column' = order.client.contract
-          td class='list-column'
+          td class='list-column non-print' = order.client.contract
+          td class='list-column non-print'
             - kc_man = @kc_managers[@kc_hometowns[order.client_id.to_s]]
             = @managers[kc_man.to_i] if kc_man
           td class='list-column' = to_dm(order.created_at)
-          td class='list-column' = to_dm(timeline_unf(pair.first))
+          td class='list-column' = to_dm(timeline_unf(odate))
           td class='list-column'
             span class="label label-#{order.status} non-print" = t :"status.#{order.status}"
             span class="only-print" = t :"status.#{order.status}"
-          td class='list-column text-nowrap'
+          td class='list-column non-print text-nowrap'
             = partial 'orders/squares', :locals => { :order => order }
+          td.only-print
           td class='list-column list-row-action non-print'
             div class='list-row-action-wrapper'
-              = hidden_field_tag 'tid[]', :value => pair.first
+              = hidden_field_tag 'tid[]', :value => odate
               = link_to tag_icon(:calendar), '#', :class => 'list-row-action-wrapper-link medium list-menu-timeline-link'
               = link_to tag_icon(:edit), :href => url(:orders, :edit, :id => order.id), :class => 'list-row-action-wrapper-link'
     
