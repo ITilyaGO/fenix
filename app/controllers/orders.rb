@@ -195,6 +195,7 @@ Fenix::App.controllers :orders do
     @kc_towns = KatoAPI.batch([@kc_client_hometown, @kc_client_delivery, @kc_order_town, @kc_order_delivery].compact)
 
     if @order
+      @order.actualize
       render 'orders/show'
     else
       flash[:warning] = pat(:create_error, :model => 'order', :id => "#{params[:id]}")
@@ -207,13 +208,21 @@ Fenix::App.controllers :orders do
     @online = Online::Order.includes(:order_lines).find(params[:id])
     a = @online.account
     @client = Client.find_by(online_id: @online.account_id)
-    @kc_online_town = KyotoCorp::Online.get([:accounts, :places], @online.account_id).data
+    if @client
+      @kc_town = CabiePio.get([:clients, :hometowns], @client.id).data
+      @kc_client_hometown = KatoAPI.anything(@kc_town)
+    else
+      @kc_town = @online.account.city[1..-1]
+      @kc_client_hometown = KatoAPI.anything(@kc_town)
+    end
+    # @kc_online_town = KyotoCorp::Online.get([:accounts, :places], @online.account_id).data
     if !@client
-      ct = Client.arel_table
-      pt = Place.arel_table
-      place = Place.where(pt[:name].matches(a.city)).first
-      @clients = Client.includes(:place).where(ct[:email].matches(a.email).or(ct[:place_id].matches(place.id))) rescue []
-      @clients = Client.all if !@clients.any?
+      @sel_client = Client.find_by(email: a.email) || Client.find_by(name: a.name)
+      # ct = Client.arel_table
+      # pt = Place.arel_table
+      # place = Place.where(pt[:name].matches(a.city)).first
+      # @clients = Client.includes(:place).where(ct[:email].matches(a.email).or(ct[:place_id].matches(place.id))) rescue []
+      # @clients = Client.all if !@clients.any?
     end
     start_from = Date.today
     ky_month_1 = start_from.strftime('%y%m')
@@ -241,11 +250,15 @@ Fenix::App.controllers :orders do
       sync_client.save
     end
     if create_new
-      city = sync_city ? Place.find(params[:order]["place_id"]) : Place.where(:name => online.account.city).first
-      dup = {:online_id => online.account.id, :name => online.account.name, :tel => online.account.tel, :place => city, :email => online.account.email, :org => online.account.org}
-      dup[:online_place] = online.account.city if city.nil?
+      dup = {:online_id => online.account.id, :name => online.account.name, :tel => online.account.tel, :email => online.account.email, :org => online.account.org}
+      # dup[:online_place] = online.account.city if city.nil?
       new_client = Client.create(dup)
       client = new_client.id
+
+      code = params[:cabie][:kato_place]
+      if Kato.valid? code
+        CabiePio.set [:clients, :hometowns], client, code
+      end
     end
 
     # order = online.attributes.merge({:online_id => online.id, :status => :anew, :client_id => params[:order][:client_id]})
@@ -684,6 +697,9 @@ Fenix::App.controllers :orders do
         flash[:error] = pat(:delete_error, :model => 'order')
       end
       Timeline.destroy_all(:order_id => order.id)
+      tl = CabiePio.get [:orders, :timeline], order.id
+      CabiePio.unset [:timeline, :order], timeline_order(order.id, timeline_unf(tl.data))
+      CabiePio.unset [:orders, :timeline], order.id
       redirect url(:orders, :draft)
     else
       flash[:warning] = pat(:delete_warning, :model => 'order', :id => "#{params[:id]}")
@@ -692,6 +708,7 @@ Fenix::App.controllers :orders do
   end
 
   delete :destroy_many do
+    halt 403
     @title = "Orders"
     unless params[:order_ids]
       flash[:error] = pat(:destroy_many_error, :model => 'order')

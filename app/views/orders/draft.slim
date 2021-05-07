@@ -17,7 +17,8 @@
       - @orders.each do |order|
         tr class='list-row'
           td class='list-column list-selectable non-print' = check_box_tag 'order_ids[]', :autocomplete => "off", :value => order.id, :class => 'list-selectable-checkbox'
-          td class='list-column' = "#{order.id}"
+          td class='list-column'
+            = link_to order.id, :href => url(:orders, :edit, :id => order.id)
           // td class='list-column' = order.name
           td class='list-column'
             - code = @kc_orders[order.id.to_s]

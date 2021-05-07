@@ -1,25 +1,23 @@
-div class="tabs-content"
+.tabs-content.online-order
   = form_for :order, url(:orders, :create, :id => @online.id), :class => 'form-horizontal' do |f|
-    div class="table non-print"
-      table class="table order-info"
-        tr
-          td
-            - if @online.status == 1
-              div class="pull-right"
-                div class="pull-right"
-                  = link_to 'Подтвердить', "http://yardekol.ru/admin/orders/show/#{@online.id}", :target => '_blank', :class => 'btn btn-glue'
-
-            p Город: #{@online.account.city}
-            p Имя: #{@online.account.name}
-            p Организация: #{@online.account.org}
-            p Тел: #{@online.account.tel}
-            p Емайл: #{@online.account.email}
-            p Дата: #{to_msk(@online.created_at)}
-        - if !@online.description.blank?
-          tr
-            td colspan=3
-              = @online.description
-      
+    .client-text
+      .col-md-3.flex-v.text-center
+        h3 == deli(rur @online.total)
+        br
+        - if @online.status == 1
+          = link_to 'Подтвердить', "http://yardekol.ru/admin/orders/show/#{@online.id}", :target => '_blank', :class => 'btn btn-sm btn-glue'
+      .col-md-4
+        p Город: #{@online.account.city}
+        p Имя: #{@online.account.name}
+        p Организация: #{@online.account.org}
+        p Тел: #{@online.account.tel}
+        p Емайл: #{@online.account.email}
+        p Дата: #{to_msk(@online.created_at)}
+      - if !@online.description.blank?
+        .col-md-4.order-comment = @online.description
+    .clearfix
+    hr
+    .table.order-info
       fieldset class='control-group'
         = f.label 'Тип заказа', :class => 'col-md-3 control-label'
         .col-md-3.controls.custom-control
@@ -64,7 +62,7 @@ div class="tabs-content"
 
       = partial 'timeline/calendar'
 
-      fieldset class='control-group'
+      /fieldset class='control-group'
         = f.label 'Город заказа', :class => 'col-md-3 control-label'
         div class='col-md-5 controls'
           div class="scrollable-dropdown-menu"
@@ -72,31 +70,37 @@ div class="tabs-content"
             = f.hidden_field :place_id, :value => @client.nil? ? "" : @client.place_id
             = text_field_tag 'pl', :class => 'form-control', :disabled => true, :value => c, :id => 'typeahead-place'
 
-      fieldset class='control-group control-new'
+      fieldset.control-group
         = f.label "Город заказа", :class => 'col-md-3 control-label'
         div class='col-md-5 controls'
           div class="scrollable-dropdown-menu"
-            = hidden_field_tag :'cabie[kato_place]', :value => @kc_online_town
-            = text_field_tag :kato_type, :class => 'form-control', :value => @kc_online_town, :required => true
+            = hidden_field_tag :'cabie[kato_place]', :value => @kc_town
+            = text_field_tag :kato_type, :class => 'form-control', :value => @kc_client_hometown&.model, :required => true
 
-      - if @client
-        div
-          = "Найден заказчик #{@client.name} - #{@client.place_name}"
-          = f.hidden_field :client_id, :class => 'form-control input-large input-with-feedback', :value => @client.id
-      - else
-        div
-          p Заказчик однозначно не найден в базе, но вот возможные варианты:
-        fieldset class='control-group'
-          div class='col-md-6'
-            span Создать нового клиента на основе вышеприведенных данных (тогда все последующие опции будут игнорированы, кроме следующей)
-          div class='col-md-2 controls'
-            = f.label 'Нет', :class => 'control-label'
-            = f.radio_button :create, :value => :false, :checked => true
-          div class='col-md-2 controls'
+
+    .clients-box.flex-c
+      .single.col-md-3
+        .text-center.flex-c style='flex-flow:column;height:100%;'
+          .item
+            .fa-stack
+              i.fa.fa-circle.fa-stack-2x
+              i.fa.fa-child.fa-stack-1x
+          .col-md
+            .name = @client ? @client.name : @online.account.name
+            .city = @kc_client_hometown&.model
+          - if @client
+            .controls.custom-control.picker
+              = f.radio_button :create, :value => :exist, :checked => true, :class => 'custom-control-input'
+              label.custom-control-label(for = 'order_create_exist') найден
+          - else
+            .controls.custom-control.picker
+              = f.radio_button :create, :value => :true, :checked => true, :class => 'custom-control-input'
+              label.custom-control-label(for = 'order_create_true') новый клиент
+          /div class='col-md-2 controls'
             = f.label 'Да', :class => 'control-label'
             = f.radio_button :create, :value => :true
 
-        fieldset class='control-group'
+        / fieldset class='control-group'
           div class='col-md-6'
             span Прописать новому клиенту выбранный город
           div class='col-md-2 controls'
@@ -106,8 +110,12 @@ div class="tabs-content"
             = f.label 'Да', :class => 'control-label'
             = f.radio_button :sync_city, :value => :true
 
-        - error = @online.errors.include?(:client_id)
-        fieldset class='control-group#{error ? ' has-error' : ''}'
+      .multi.col-md-9
+        .controls.custom-control.picker
+          = f.radio_button :create, :value => :false, :class => 'custom-control-input'
+          label.custom-control-label(for = 'order_create_false') выбрать
+        / - error = @online.errors.include?(:client_id)
+        / fieldset class='control-group#{error ? ' has-error' : ''}'
           = f.label :client, :class => 'col-md-3 control-label'
           div class='col-md-8 controls'
             select name="order[client_id]" class="huge mbl span select-block" data-size="15"
@@ -115,19 +123,24 @@ div class="tabs-content"
                 - html_attributes = { :value => c.id }
                 = content_tag(:option, "#{c.name} #{c.tel} / #{c.place_name} [#{c.online_id}]", html_attributes)
 
-        fieldset class='control-group'
-          div class='col-md-6'
-            span Прописать выбранному клиенту только Id [#{@online.account.id}]
-          div class='col-md-3 controls'
-            = f.label 'Оставить клиента как есть', :class => 'control-label'
-            = f.radio_button :sync_id, :value => :false
-          div class='col-md-3 controls'
-            = f.label 'Да', :class => 'control-label'
-            = f.radio_button :sync_id, :value => :true, :checked => true
-        
+        fieldset.control-group
+          / = f.label "Заказчик", :class => 'col-md-3 control-label'
+          .col-md-10.col-md-offset-1.controls
+            div class="scrollable-dropdown-menu"
+              = f.hidden_field :client_id, :value => (@client.id if @client) || (@sel_client.id if @sel_client) || 1
+              = text_field_tag 'cl', :class => 'form-control ', :id => 'typeahead-client',
+                :placeholder => 'имя клиента / емайл / тел', :value => (@sel_client.name if @sel_client)
 
-    div class="form-actions"
-      = f.submit pat(:save), :class => 'btn btn-sm btn-prime'
+        fieldset class='control-group'
+          .col-md-6.col-md-offset-6.controls.custom-control
+            = f.radio_button :sync_id, :value => :false, :checked => true, :class => 'custom-control-input'
+            label.custom-control-label(for = 'order_sync_id_false') Оставить клиента как есть
+          .col-md-6.col-md-offset-6.controls.custom-control
+            = f.radio_button :sync_id, :value => :true, :class => 'custom-control-input'
+            label.custom-control-label(for = 'order_sync_id_true') Обновить связь клиентов
+    
+    .text-center
+      = f.submit pat(:'создать_заказ'), :class => 'btn btn-sm btn-prime'
 
 - content_for :js_assets do
   javascript:
@@ -140,6 +153,48 @@ div class="tabs-content"
           //   return false;
           // }
         });
+
+        var bloodhound_clients = new Bloodhound({
+          datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
+          queryTokenizer: Bloodhound.tokenizers.whitespace,
+          // sufficient: 10,
+          // limit: 30,
+          remote: {
+            url: '/orders/clients2',
+            replace: function(url, query) {
+              return url + "#" + query;
+            },
+            transport: function (opts, onSuccess, onError) {
+              var url = opts.url.split("#")[0];
+              var query = opts.url.split("#")[1];
+              $.ajax({
+                  url: url,
+                  data: $.param({
+                    q: query,
+                    authenticity_token: $("form:first :input[name^='auth']").val()
+                  }),
+                  type: "POST",
+                  success: onSuccess,
+                  error: onError
+              })
+            }
+          }
+        });
+        bloodhound_clients.initialize();
+        $('#typeahead-client').typeahead({
+          minLength: 3
+        }, {
+          name: 'clients',
+          displayKey: 'name',
+          source: bloodhound_clients.ttAdapter(),
+          limit: Number.MAX_VALUE,
+          templates: {
+            suggestion: Handlebars.compile('<p><strong>[{{id}}]</strong> {{name}} ({{city}})</p>'),
+          }
+        }).on('typeahead:selected', function (e, suggestion) {
+          document.querySelector("form input[name*=client_id]").value = suggestion.id
+        });
+
         
         $.ajax({
             type: "POST",
