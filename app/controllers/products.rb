@@ -156,4 +156,26 @@ Fenix::App.controllers :products do
     redirect url(:products, :sticker)
   end
 
+  get :export, :provides => :csv do
+    parents = Product.pluck(:parent_id).compact.uniq
+    fname = 'products-' + Time.new.strftime("%d-%m-%Y") + '.csv'
+    headers['Content-Disposition'] = "attachment; filename=#{fname}"
+    headers['Content-Type'] = "application/vnd.ms-excel"
+    output = ''
+    output = "\xEF\xBB\xBF" if params.include? :win
+    output << CSV.generate(:col_sep => ';') do |csv|
+      # csv << %w(id name num)
+      cats = Category.where(category: nil).order(:index => :asc)
+      cats.each do |category|
+        category.subs_ordered.each do |sub|
+          sub.all_products.order(:index => :asc).each do |product|
+            next unless product.active
+            next if parents.include?(product.id)
+            csv << [product.displayname, product.price]
+          end
+        end
+      end
+    end
+  end
+
 end

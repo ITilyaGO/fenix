@@ -2,6 +2,7 @@ ul class="nav nav-tabs"
   li class="active" = link_to tag_icon(:list, pat(:list)), url(:products, :index)
   li = link_to tag_icon(:'puzzle-piece', pat(:complex)), url(:products, :complexity)
   li = link_to tag_icon(:ticket, pat(:sticker)), url(:products, :sticker)
+  li.pull-right = link_to tag_icon(:'file-excel-o', 'экспорт'), url(:products, :export, :win => '')
 
 div class="tabs-content"
   table class="table table-hover table-condensed" id="list"
