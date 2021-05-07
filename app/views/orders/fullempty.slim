@@ -71,7 +71,9 @@ div class="tabs-content"
         div class='col-md-9 controls'
           div class="scrollable-dropdown-menu"
             = f.hidden_field :client_id, :value => (@order_client.id if @order_client)
-            = text_field_tag 'cl', :class => 'form-control ', :id => 'typeahead-client', :value => (@order_client.name if @order_client)
+            = text_field_tag 'cl', :class => 'form-control ', :id => 'typeahead-client',
+              :value => (@order_client.name if @order_client),
+              :required => true
 
       fieldset class='control-group'
         = f.label "Позиция", :class => 'col-md-3 control-label'
@@ -299,44 +301,85 @@ div class="tabs-content"
           }
         });
 
-        $.ajax({
-            type: "POST",
-            data: "authenticity_token=" + encodeURIComponent($("form:first :input[name^='auth']").val()),
-            url: "/orders/clients"
-        }).done(function(response) {
-          var substringMatcher = function(strs) {
-            return function findMatches(q, cb) {
-              var matches, substrRegex;
-              matches = [];
-              substrRegex = new RegExp(q, 'i');
+        // $.ajax({
+        //     type: "POST",
+        //     data: "authenticity_token=" + encodeURIComponent($("form:first :input[name^='auth']").val()),
+        //     url: "/orders/clients"
+        // }).done(function(response) {
+        //   var substringMatcher = function(strs) {
+        //     return function findMatches(q, cb) {
+        //       var matches, substrRegex;
+        //       matches = [];
+        //       substrRegex = new RegExp(q, 'i');
 
-              $.each(strs, function(i, str) {
-                if (substrRegex.test(str.name) || substrRegex.test(str.org) || substrRegex.test(str.tel))
-                  matches.push(str);
-              });
+        //       $.each(strs, function(i, str) {
+        //         if (substrRegex.test(str.name) || substrRegex.test(str.org) || substrRegex.test(str.tel))
+        //           matches.push(str);
+        //       });
 
-              cb(matches);
-            };
-          };
+        //       cb(matches);
+        //     };
+        //   };
 
-          $('#typeahead-client').typeahead({
-            hint: true,
-            highlight: true,
-            minLength: 2
-          },
-          {
-            name: 'clients',
-            displayKey: 'name',
-            source: substringMatcher(response),
-            templates: {
-              suggestion: Handlebars.compile('<p><strong>{{name}}</strong> – {{city}} ({{tel}})</p>')
-              //suggestion: '<p><strong>' + this.id + '</strong>' + this.name + '</p>'
-              //suggestion: $("<div/>", { text: 'Ghbdtn'})
+        //   $('#typeahead-client').typeahead({
+        //     hint: true,
+        //     highlight: true,
+        //     minLength: 2
+        //   },
+        //   {
+        //     name: 'clients',
+        //     displayKey: 'name',
+        //     source: substringMatcher(response),
+        //     templates: {
+        //       suggestion: Handlebars.compile('<p><strong>{{name}}</strong> – {{city}} ({{tel}})</p>')
+        //       //suggestion: '<p><strong>' + this.id + '</strong>' + this.name + '</p>'
+        //       //suggestion: $("<div/>", { text: 'Ghbdtn'})
 
+        //     }
+        //   }).on('typeahead:selected', function (obj, data) {
+        //     $(":input[name*='client']").val(data.id);
+        //   });
+        // });
+
+        var bloodhound_clients = new Bloodhound({
+          datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
+          queryTokenizer: Bloodhound.tokenizers.whitespace,
+          // sufficient: 10,
+          // limit: 30,
+          remote: {
+            url: '/orders/clients2',
+            replace: function(url, query) {
+              return url + "#" + query;
+            },
+            transport: function (opts, onSuccess, onError) {
+              var url = opts.url.split("#")[0];
+              var query = opts.url.split("#")[1];
+              $.ajax({
+                  url: url,
+                  data: $.param({
+                    q: query,
+                    authenticity_token: $("form:first :input[name^='auth']").val()
+                  }),
+                  type: "POST",
+                  success: onSuccess,
+                  error: onError
+              })
             }
-          }).on('typeahead:selected', function (obj, data) {
-            $(":input[name*='client']").val(data.id);
-          });
+          }
+        });
+        bloodhound_clients.initialize();
+        $('#typeahead-client').typeahead({
+          minLength: 3
+        }, {
+          name: 'clients',
+          displayKey: 'name',
+          source: bloodhound_clients.ttAdapter(),
+          limit: Number.MAX_VALUE,
+          templates: {
+            suggestion: Handlebars.compile('<p><strong>[{{id}}]</strong> {{name}} ({{city}})</p>'),
+          }
+        }).on('typeahead:selected', function (e, suggestion) {
+          document.querySelector("form input[name*=client_id]").value = suggestion.id
         });
 
         // var bestPictures = new Bloodhound({
@@ -368,40 +411,40 @@ div class="tabs-content"
         //   source: bestPictures.ttAdapter()
         // });
 
-        $.ajax({
-            type: "POST",
-            data: "authenticity_token=" + encodeURIComponent($("form:first :input[name^='auth']").val()) + "&q=яро",
-            url: "/orders/cities"
-        }).done(function(response) {
-          var substringMatcher = function(strs) {
-            return function findMatches(q, cb) {
-              var matches, substrRegex;
-              matches = [];
-              substrRegex = new RegExp(q, 'i');
+        // $.ajax({
+        //     type: "POST",
+        //     data: "authenticity_token=" + encodeURIComponent($("form:first :input[name^='auth']").val()) + "&q=яро",
+        //     url: "/orders/cities"
+        // }).done(function(response) {
+        //   var substringMatcher = function(strs) {
+        //     return function findMatches(q, cb) {
+        //       var matches, substrRegex;
+        //       matches = [];
+        //       substrRegex = new RegExp(q, 'i');
 
-              $.each(strs, function(i, str) {
-                if (substrRegex.test(str.name))
-                  matches.push({ value: str.name, id: str.id });
-              });
+        //       $.each(strs, function(i, str) {
+        //         if (substrRegex.test(str.name))
+        //           matches.push({ value: str.name, id: str.id });
+        //       });
 
-              cb(matches);
-            };
-          };
+        //       cb(matches);
+        //     };
+        //   };
 
-          $('#typeahead-place').typeahead({
-            hint: true,
-            highlight: true,
-            minLength: 2
-          },
-          {
-            name: 'cities',
-            displayKey: 'value',
-            source: substringMatcher(response)
+        //   $('#typeahead-place').typeahead({
+        //     hint: true,
+        //     highlight: true,
+        //     minLength: 2
+        //   },
+        //   {
+        //     name: 'cities',
+        //     displayKey: 'value',
+        //     source: substringMatcher(response)
 
-          }).on('typeahead:selected', function (obj, data) {
-            $(":input[name*='place']").val(data.id);
-          });
-        });
+        //   }).on('typeahead:selected', function (obj, data) {
+        //     $(":input[name*='place']").val(data.id);
+        //   });
+        // });
 
         $.ajax({
             type: "POST",
