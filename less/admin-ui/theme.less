@@ -510,6 +510,9 @@ complex, sticker_line, .sticker-block {
   .flex-c();
   flex-direction: column;
 }
+.flexie {
+  flex: auto;
+}
 .fa-btn {
   margin-right: .5em;
   font-size: 1.3em;
@@ -733,6 +736,166 @@ calendar {
         background: rgba(130, 191, 159, 0.5);
       }
     }
+  }
+}
+
+#stickers_cal.nav-tabs {
+  border-width: 2px;
+  border-color: #e1e4e7;
+  border-style: solid;
+  border-radius: 6px;
+  margin: 1em;
+  display: flex;
+  position: relative;
+  height: 80vh;
+  overflow-y: scroll;
+
+  .head {
+    width: 100%;
+    color: #8d89a6;
+    text-align: center;
+  }
+
+  .wrapper {
+    flex-flow: wrap;
+    display: flex;
+    margin-top: 2em;
+  }
+
+  .btns .scroll {
+    height: 5em;
+    font-size: 0.6em;
+  }
+
+  .btn-abs .graphic {
+    align-items: center;
+    height: 100%;
+    margin: 0;
+    color: rgba(46, 21, 8, 0.5);
+  }
+
+  .graphic {
+    padding-top: 1em;
+    margin: 0 1em;
+    display: flex;
+    flex: 0 0 100%;
+
+    .day {
+      margin: 0 1em;
+    }
+
+    .wday {
+      display: block;
+      font-size: 0.8em;
+      background: rgba(179, 173, 169, 0.2);
+      border-radius: 6px;
+      align-self: center;
+      min-width: 5em;
+      margin: 3px 10px;
+      padding: 6px 10px;
+      text-align: center;
+
+      &.small {
+        padding: 0;
+      }
+      &.today {
+        border: 2px solid rgba(168, 172, 147, 0.75);
+      }
+    }
+    
+    .price {
+      color: #8d89a6;
+      text-align: center;
+    }
+  }
+}
+
+
+#stickers_cal.nav-tabs {
+  .side-wr {
+    overflow: scroll;
+    margin: 2em;
+    min-width: 20vw;
+    background: rgba(179, 173, 169, 0.2);
+    border-radius: 6px;
+
+    .bottom {
+      flex: 1;
+      display: flex;
+      flex-direction: column-reverse;
+    }
+  }
+
+  .side-list {
+    margin: 1em 2em;
+    display: flex;
+    flex: 1;
+
+    > .title {
+      color: #8d89a6;
+    }
+
+    .day {
+      margin: 0 1em;
+    }
+
+    .order {
+      display: block;
+      font-size: 0.8em;
+      background: rgba(179, 173, 169, 0.2);
+      border-radius: 6px;
+      align-self: center;
+      min-width: 10em;
+      width: 100%;
+      margin: 3px 10px;
+      padding: 6px 10px;
+      text-align: center;
+      position: relative;
+
+      .price {
+        text-align: right;
+      }
+    }
+  }
+}
+
+.td-sticker-input {
+  .label-success {
+    font-size: 90%;
+    background-color: rgba(92, 184, 92, 0.78);
+  }
+  
+  .input-group-addon {
+    background-color: transparent;
+  }
+}
+
+.progress.for-stickers {
+  height: 8px;
+  margin-top: 1em;
+  margin-bottom: 0;
+  background-color: rgba(190, 197, 249, 0.33);
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+  width: 100px;
+  border-radius: 4px;
+
+  .progress-bar {
+    background-color: #b9afdb;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+  }
+
+  &.mini {
+    height: 4px;
+    margin-top: 0.5em;
+  }
+
+  &.short {
+    margin-top: 0;
+    width: 50px;
   }
 }
 
