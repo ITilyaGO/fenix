@@ -1,5 +1,8 @@
 source 'https://rubygems.org'
 
+# Workaround for Ruby 2.7
+gem 'bigdecimal', '~> 1.3.5'
+
 # Distribute your app as a gem
 # gemspec
 
