@@ -820,19 +820,25 @@ Fenix::App.controllers :orders do
   end
 
   post :clients2, :provides => :json do
-    q = params[:q].gsub(/[^\wА-ЯЁа-яё -]/, '')[0..15]
+    q = params[:q].gsub(/[^\wА-ЯЁа-яё -0-9A-Za-z\.@]/, '')[0..32]
 
     # Client.joins(:place).where('umlike(?, lower("clients"."name"))', q)
     # .where('umlike(?, lower("clients"."name")) OR umlike(?, lower("places"."name"))', q, q)
     # cts = Place.where('umlike(?, lower(name))', q).pluck(:id)
-    res = []
-    res << Client.joins(:place)
-      .where('umlike(?, lower("clients"."name"))', q)
-      .select("clients.id, clients.name, places.name as city").first(10)
-    res << Client.joins(:place)
-      .where('umlike(?, lower("places"."name"))', q)
-      .select("clients.id, clients.name, places.name as city").first(20)
-    res.flat_map(&:flatten).to_json
+
+    res = Client.where('umlike(?, lower(name))', q)
+    res = Client.where('lower(email) LIKE ?', "%#{q}%") if q.include?('@')
+    res = Client.where('tel LIKE ?', "%#{q}%") if q.index(/\A[0-9]+\Z/)
+    # res << Client.joins(:place)
+    #   .where('umlike(?, lower("places"."name"))', q)
+    #   .select("clients.id, clients.name, places.name as city").first(20)
+    res = res.select("clients.id, clients.name, clients.id as city").first(15)
+    kc_clients = CabiePio.all_keys(res.map(&:id), folder: [:clients, :hometowns]).flat.trans(:to_i)
+    kc_towns = KatoAPI.batch(kc_clients.values.uniq)
+    res.each do |item|
+      item.city = kc_towns[kc_clients[item.city]]&.model&.name
+    end
+    res.to_json
   end
 
   post :clients, :provides => :json do
