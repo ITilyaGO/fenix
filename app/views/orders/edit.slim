@@ -12,6 +12,9 @@ ul class="nav nav-tabs non-print"
   li = link_to '#' do
     ' клейка
     .label.label-darkrose == rur(sticker)
+  li
+    .progress.for-stickers title="#{@sticker_progress}%"
+      .progress-bar role="progressbar" style="width:#{@sticker_progress.to_i}%"
   li.pull-right: a 
     = partial 'orders/squares', :locals => { :order => @order }
 
@@ -221,35 +224,51 @@ ul class="nav nav-tabs non-print"
                       th Наименование
                       th Коммент
                       th Количество
-                      th class="non-print" Цена
-                      th class="non-print" Сумма
-                      th class="non-print" Факт
-                      th class="non-print" Не делаем
+                      th.non-print Цена
+                      th.non-print Сумма
+                      th.non-print Наклеено
+                      th.non-print Факт
+                      th.non-print Не&nbsp;делаем
                     
                     - @order.by_cat(tab.id).each do |ol|
                       tr class="order-line"
                         = hidden_field_tag "line[#{ol.id}][id]", :value => ol[:id]
-                        td class="only-print" &nbsp;
-                        td class="col-md-4"
+                        td.only-print &nbsp;
+                        td.col-md-4
                           = ol.product.displayname
-                        td class="col-md-3"
+                        td.col-md-3
                           - if !ol.description.blank?
-                            div
-                              = ol.description
-                        td class="col-md-1"
+                            div = ol.description
+                        td.col-md-1
                           = ol.amount
-                        td class="col-md-1" class="non-print"
+                        td.col-md-1.non-print
                           == rur(ol.price)
-                        td class="col-md-1" class="non-print"
+                        td.col-md-1.non-print
                           == rur(ol.price*ol.amount)
-                        td class="col-md-1" class="non-print"
-                          div class='controls'
+                        td.col-md-1.non-print.td-sticker-input
+                          - if @kc_products[ol.product_id] && !ol.ignored
+                            - ols = @olstickers.fetch(ol.id, nil)
+                            .input-group-sm class=('input-group' if ols)
+                              - if allow_route?(:orders_stickers)
+                                = (text_field_tag "line_s[#{ol.id}][sticker]", :value => ols&.fetch(:v),
+                                  :autocomplete => "off", :class => "form-control input-sm")
+                              - else
+                                = ols&.fetch(:v)
+                              - if ols
+                                .input-group-addon
+                                  .label.label-success = to_dm timeline_unf(ols[:t])
+                        td.col-md-1.non-print: .controls
+                          - if allow_route?(:orders_infact)
                             = (text_field_tag "line[#{ol.id}][done_amount]", :value => ol.done_amount,
                             :autocomplete => "off", :class => "form-control input-sm")
-                        td class="col-md-1" class="vert-align non-print"
-                          div class='controls'
+                          - else
+                            .text-center = ol.done_amount
+                        td.col-md-1.vert-align.non-print: .controls
+                          - if allow_route?(:orders_infact)
                             = hidden_field_tag "line[#{ol.id}][ignored]", :value => 'false'
-                            = check_box_tag "line[#{ol.id}][ignored]", :checked => ol.ignored, :class => ""
+                            = check_box_tag "line[#{ol.id}][ignored]", :checked => ol.ignored
+                          - else
+                            = check_box_tag '', :checked => ol.ignored, :disabled => true
       .tab-pane.non-print id="cat-fail"
         p У этого заказа заглючили секции. Тут будет кнопка для исправления.
 
@@ -268,12 +287,13 @@ ul class="nav nav-tabs non-print"
       = submit_tag "Сохранить", :class => 'btn btn-sm btn-prime', :name => 'save'
   - elsif current_account.is_admin? && !@order.draft?
     = submit_tag "Сохранить", :class => 'btn btn-sm btn-prime', :name => 'save_finish'
-  - if @order_part and @order_part.current?
-    |&nbsp;
-    = submit_tag "Собрать", :class => 'btn btn-sm btn-finished', :name => 'next_status'
-  - if current_account.is_admin? && !@order.shipped? && !@order.draft?
-    |&nbsp;
-    = submit_tag "Собрать все части", :class => 'btn btn-sm btn-finished', :name => 'next_status_all'
+  - unless role_is?(:stickerman)
+    - if @order_part and @order_part.current?
+      |&nbsp;
+      = submit_tag "Собрать", :class => 'btn btn-sm btn-finished', :name => 'next_status'
+    - if current_account.is_admin? && !@order.shipped? && !@order.draft?
+      |&nbsp;
+      = submit_tag "Собрать все части", :class => 'btn btn-sm btn-finished', :name => 'next_status_all'
 
   - if current_account.is_admin? && !@order.draft?
     div class="row non-print" style="margin-top: 30px;"

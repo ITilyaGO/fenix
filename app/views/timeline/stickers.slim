@@ -1,0 +1,79 @@
+- today = Date.today
+
+#stickers_cal.nav.nav-tabs
+  .flex-v.btns.non-print
+    = link_to url(:timeline, :stickers, start: timeline_id(@sdate.weeks_ago(4))) do
+      .btn.scroll.btn-sm.btn-default: i.fa.fa-arrow-left
+  .wrapper
+    .head = [@sdate.weeks_ago(2).strftime("%Y"), @sdate.weeks_ago(-4).strftime("%Y")].uniq.join('-')
+
+    - @weeks.each_with_index do |tab, i|
+      .flex-c.graphic
+        - wsum = 0
+        - 7.times do |gap|
+          - cdate = tab[:date] + gap
+          .day class=[('today' if cdate == today)] title=cdate data-id=timeline_id(cdate)
+            .wday
+              == gap < 5 ? to_dm(cdate) : '&nbsp;'
+              .only-print = to_dm(cdate) unless gap < 5
+          
+            - wids = @gweek.fetch(cdate, []).map(&:last)
+            - dsum = wids.sum{|x|@stickers.fetch(x, 0)}
+            - wsum += dsum
+            .price
+              - if dsum > 0
+                == deli(rur dsum)
+              - else
+                | &nbsp;
+        .summary
+          .wday: .price
+            == deli(rur wsum) if wsum > 0
+
+  .flex-v.btns.non-print
+    = link_to url(:timeline, :stickers, start: timeline_id(@sdate.weeks_ago(-4))) do
+      .btn.scroll.btn-sm.btn-default: i.fa.fa-arrow-right
+
+  .side-wr.flex.non-print.hidden
+    = form_for '', url(:dr_timeline, :stickers_info), :class => 'form-page' do |f|
+    .bottom
+      .btn.btn-xs.btn-default: i.fa.fa-arrow-down
+    .side-list.flex-v
+
+- content_for :js_assets do
+  javascript:
+    (function() {
+      document.querySelector('.side-wr .bottom .btn').addEventListener('click', function () {
+        document.querySelector('.side-wr').classList.add('hidden')
+      })
+
+      function filters(day_el) {
+        return 'date=' + day_el.getAttribute('data-id')
+      }
+
+      function no_href() {
+        b = this
+        o = document.querySelector('.side-list')
+        f = document.querySelector('.form-page')
+        palo = document.querySelector('.page-loading')
+        wr = document.querySelector('.side-wr')
+        loint = document.querySelector('.indicator .url')
+        fetch(f.action, {
+          method: 'PATCH',
+          body: filters(b) + "&authenticity_token=" + encodeURIComponent(document.querySelector("form [name^=auth]").value),
+          headers: { "Content-Type": "application/x-www-form-urlencoded" }
+        })
+        .then(response => response.text())
+        .then(function(result) {
+          o.innerHTML = result
+          o.classList.toggle('fade')
+        })
+        o.classList.toggle('fade')
+        wr.classList.remove('hidden')
+        // palo.classList.toggle('hidden')
+        return true
+      }
+
+      document.querySelectorAll('#stickers_cal .day').forEach(function(b) {
+        b.onclick = no_href
+      })
+    })()

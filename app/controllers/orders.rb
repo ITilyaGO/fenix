@@ -16,6 +16,7 @@ Fenix::App.controllers :orders do
     a_managers(@orders.map(&:id), @orders.map(&:client_id))
     @transport = CabiePio.all_keys(@orders.map(&:client_id).uniq, folder: [:m, :clients, :transport]).flat
     @kc_timelines = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :timeline]).flat.trans(:to_i)
+    @kc_stickers = CabiePio.all_keys(@orders.map(&:id), folder: [:sticker, :order_progress]).flat.trans(:to_i, :to_f)
     @r = url(:orders, :index)
     render 'orders/index'
   end
@@ -100,6 +101,7 @@ Fenix::App.controllers :orders do
       .order(sort => dir)
     @transport = CabiePio.all_keys(@orders.map(&:client_id).uniq, folder: [:m, :clients, :transport]).flat
     @kc_timelines = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :timeline]).flat.trans(:to_i)
+    @kc_stickers = CabiePio.all_keys(@orders.map(&:id), folder: [:sticker, :order_progress]).flat.trans(:to_i, :to_f)
     render 'orders/index'
   end
 
@@ -133,6 +135,7 @@ Fenix::App.controllers :orders do
       .order(sort => dir)
     @transport = CabiePio.all_keys(@orders.map(&:client_id).uniq, folder: [:m, :clients, :transport]).flat
     @kc_timelines = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :timeline]).flat.trans(:to_i)
+    @kc_stickers = CabiePio.all_keys(@orders.map(&:id), folder: [:sticker, :order_progress]).flat.trans(:to_i, :to_f)
     render 'orders/index'
   end
 
@@ -150,6 +153,11 @@ Fenix::App.controllers :orders do
     @kc_order_delivery = CabiePio.get([:orders, :delivery_towns], @order.id).data
     @kc_towns = KatoAPI.batch([@kc_client_hometown, @kc_client_delivery, @kc_order_town, @kc_order_delivery].compact)
 
+    @olstickers = CabiePio.all_keys(@order.order_lines.map(&:id), folder: [:m, :order_lines, :sticker]).flat.trans(:to_i)
+    kc_amt = CabiePio.get([:orders, :stickers_amount], @order.id).data.to_i
+    @sticker_progress = sticker_order_progress(@order.id)
+    @kc_products = CabiePio.folder(:products, :sticker).flat.trans(:to_i)
+
     kc_town_managers = CabiePio.folder(:towns, :managers).flat
     hier = Kato::Hier.for(@kc_client_hometown).codes
     manager = kc_town_managers.fetch(hier.detect{|c| kc_town_managers[c]}, 0)
@@ -166,6 +174,14 @@ Fenix::App.controllers :orders do
       flash[:warning] = pat(:create_error, :model => 'order', :id => "#{params[:id]}")
       halt 404
     end
+  end
+
+  get :stickers, :with => :id do
+    halt 404
+  end
+
+  get :infact, :with => :id do
+    halt 404
   end
 
   # get :edit, :with => :id do
@@ -563,18 +579,50 @@ Fenix::App.controllers :orders do
       end
     end
 
-    # @d1 = params[:line].first
-    # render 'home/index'
     params[:line].each do |line|
       l = line.second
       # l = line.inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
       # break if l[:id].blank?
-      i = l['id']
-      break if !i
-      ol = @order.order_lines.find(i)
-      l['done_amount'] = l['done_amount'].to_i rescue 0
+      next if l['id'].nil?
+      ol = @order.order_lines.find(l['id'])
+      if l['done_amount']
+        if l['done_amount'].size < 1
+          l.delete('done_amount')
+          ol.done_amount = nil
+        else
+          l['done_amount'] = l['done_amount'].to_i rescue 0
+        end
+      end
       ol.update_attributes(l)
     end
+    sticker_sum = 0
+    saved_stickers = CabiePio.all_keys(@order.order_lines.map(&:id), folder: [:m, :order_lines, :sticker])
+      .flat.trans(:to_i).transform_values{|v|v[:v]}
+    kc_products = CabiePio.folder(:products, :sticker).flat.trans(:to_i, :to_f)
+    amt = 0
+    @order.order_lines.each do |ol|
+      sq = kc_products.fetch(ol.product_id, 0)
+      next if sq == 0 || ol.ignored 
+      amt += sq*(ol.done_amount || 0 > 0 ? ol.done_amount : ol.amount)
+    end
+    prev_amt = CabiePio.get([:orders, :stickers_amount], @order.id).data.to_i
+    save_stickers_amount(@order.id, amt) if amt != prev_amt
+
+    params[:line_s].each do |line_id, line_v|
+      next unless line_id
+      ol = @order.order_lines.find(line_id)
+      next if ol.ignored
+      ols = line_v['sticker'].to_i rescue 0
+      sticker_sum += ols*kc_products.fetch(ol.product_id, 0)
+      next if saved_stickers[ol.id] == ols
+      save_sticker_line(ol.id, ols) if ols > 0
+    end if params[:line_s]
+    operc = to_perc(amt, sticker_sum)
+    if operc > 0
+      save_sticker_history(@order.id, operc)
+      save_sticker_progress(@order.id, operc)
+    end
+    
     @order.done_parts = @order.order_parts.where("state = ?", OrderPart.states[:finished]).size
     if @order.done_parts == @order.all_parts
       # don't need to use params here

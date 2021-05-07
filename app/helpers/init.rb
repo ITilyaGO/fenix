@@ -6,5 +6,6 @@ module Fenix
     helpers ClientsHelper
     helpers OrdersHelper
     helpers TimelineHelper
+    helpers StickerHelper
   end
 end

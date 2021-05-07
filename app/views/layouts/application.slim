@@ -80,6 +80,10 @@ html lang='en'
               | График
               span class="menu-icon fa fa-tachometer"
           li.sidebar-list
+            = link_to url(:timeline, :stickers) do
+              | График клейки
+              span class="menu-icon fa fa-ticket"
+          li.sidebar-list
             = link_to url(:roundtrips, :index) do
               | График поездок
               span class="menu-icon fa fa-car"
@@ -87,11 +91,11 @@ html lang='en'
           //   a href="#"
           //     | Settings
           //     span class="menu-icon fa fa-cogs"
-          li.sidebar-list
-            = link_to url(:statistic, :index) do
-              | Статистика
-              span class="menu-icon fa fa-bar-chart"
-            end
+          - if allow_route?(:online)
+            li.sidebar-list
+              = link_to url(:statistic, :index) do
+                | Статистика
+                span class="menu-icon fa fa-bar-chart"
           - if allow_route?(:online)
             li.sidebar-list
               = link_to url(:online, :sync_status) do

@@ -60,6 +60,31 @@ Fenix::App.controllers :timeline do
     render 'timeline/weeks'
   end
 
+  get :stickers do
+    @title = "Stickers timeline"
+    @print_btn = 1
+    start_from = timeline_unf(params[:start]) rescue Date.today
+    bow = start_from.beginning_of_week
+    @weeks = []
+    6.times do |i|
+      @weeks << { :date => bow.weeks_ago(2-i) }
+    end
+    
+    ky_month_1 = start_from.strftime('%y%m')
+    ky_month_2 = start_from.next_month.strftime('%y%m')
+    ky_month_0 = start_from.prev_month.strftime('%y%m')
+    @ktm = CabiePio.all([:timeline, :order], [ky_month_1]).flat
+    @ktm = @ktm.merge CabiePio.all([:timeline, :order], [ky_month_0]).flat
+    @ktm = @ktm.merge CabiePio.all([:timeline, :order], [ky_month_2]).flat
+    @all_ids = @ktm.trans(nil, :to_i).map(&:last)
+
+    @stickers = CabiePio.all_keys(@all_ids, folder: [:sticker, :order]).flat.trans(:to_i, :to_f)
+    @gweek = calendar_group(@ktm.trans(nil, :to_i))
+    @sdate = start_from
+    
+    render 'timeline/stickers'
+  end
+
   get :edit, :with => :id do
     @title = pat(:edit_title, :model => "order #{params[:id]}")
     @order = Order.find(params[:id])
@@ -198,6 +223,7 @@ Fenix::App.controllers :dr_timeline, :map => 'timeline/driven' do
 
     @stickers = CabiePio.all_keys(@all_ids, folder: [:sticker, :order]).flat.trans(:to_i, :to_f)
     @transport = CabiePio.all_keys(@orders.map(&:client_id).uniq, folder: [:m, :clients, :transport]).flat
+    @kc_stickers = CabiePio.all_keys(@all_ids, folder: [:sticker, :order_progress]).flat.trans(:to_i, :to_f)
 
     if params[:sort].to_sym == :manager
       @by_manager = @orders.map(&:id).group_by do |oid|
@@ -212,5 +238,18 @@ Fenix::App.controllers :dr_timeline, :map => 'timeline/driven' do
     else
       partial 'timeline/orders'
     end
+  end
+
+  patch :stickers_info do
+    @cdate = timeline_unf(params[:date]) rescue Date.today
+
+    ky_day = @cdate.strftime('%y%m%d')
+    @tml = CabiePio.all([:timeline, :order], [ky_day]).flat
+
+    @all_ids = @tml.map(&:last).map(&:to_i)
+    @orders = Order.where(id: @all_ids).order(:client_id)
+    @stickers = CabiePio.all_keys(@all_ids, folder: [:sticker, :order_progress]).flat.trans(:to_i, :to_f)
+
+    partial 'timeline/stickers_side'
   end
 end

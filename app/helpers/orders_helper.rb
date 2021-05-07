@@ -25,6 +25,10 @@ module Fenix::App::OrdersHelper
     "#{'%0.f' %(value||0)}&nbsp;<span class='r'>&#x20B7</span>"
   end
 
+  def to_perc(whole, part)
+    100/(whole/part) rescue 0
+  end
+
   def order_complexity(order)
     kc_complex = CabiePio.folder(:complexity, :category)
     complexity = 0

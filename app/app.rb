@@ -64,6 +64,8 @@ module Fenix
       role.project_module :orders, '/orders'
       role.project_module :orders_create, '/orders/fullempty'
       role.project_module :orders_draft, '/orders/draft'
+      role.project_module :orders_infact, '/orders/infact'
+      role.project_module :orders_stickers, '/orders/stickers'
       role.project_module :categories, '/categories'
       role.project_module :products, '/products'
       role.project_module :sections, '/sections'
@@ -85,9 +87,15 @@ module Fenix
 
     access_control.roles_for :user do |role|
       role.project_module :orders, '/orders'
+      role.project_module :orders_infact, '/orders/infact'
       role.project_module :categories, '/categories'
       role.project_module :products, '/products'
       role.project_module :places, '/places'
+    end
+
+    access_control.roles_for :stickerman do |role|
+      role.project_module :orders, '/orders'
+      role.project_module :orders_stickers, '/orders/stickers'
     end
 
     ##

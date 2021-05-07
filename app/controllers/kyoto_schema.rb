@@ -1,7 +1,7 @@
 Fenix::App.controllers :kyoto_schema, :map => 'kyoto/schema' do
   get :index do
     @schema = wonderbox(:schema)
-    @avail = 4
+    @avail = 5
     render 'kyoto/schema'
   end
 
@@ -19,6 +19,8 @@ Fenix::App.controllers :kyoto_schema, :map => 'kyoto/schema' do
         timeline_up(force:force)
       when 4
         transport_up(force:force)
+      when 5
+        sticker_history_005_up
       end
       
       wonderbox_set(:schema, n)

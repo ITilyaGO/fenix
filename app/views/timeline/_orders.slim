@@ -18,6 +18,7 @@
         th class='header non-print'
           = partial 'bricks/orders/section_titles'
         th.only-print width="40%"
+        th.non-print
         th class='header list-row-action-header non-print'
 
     tbody
@@ -47,6 +48,10 @@
           td class='list-column non-print text-nowrap'
             = partial 'orders/squares', :locals => { :order => order }
           td.only-print
+          td.non-print.list-column
+            - progress = @kc_stickers.fetch(order.id, 0)
+            .progress.short.for-stickers title="#{progress}%"
+              .progress-bar role="progressbar" style="width:#{progress.to_i}%"
           td class='list-column list-row-action non-print'
             div class='list-row-action-wrapper'
               = hidden_field_tag 'tid[]', :value => odate
