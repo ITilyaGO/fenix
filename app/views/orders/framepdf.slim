@@ -1,0 +1,31 @@
+iframe[
+  style="width:100%;height:76vh;border:0;"
+  src=@pdfurl
+  name="framedpdf" id="framedpdf"]
+
+.text-center
+  .btn.item.btn-print
+    = link_to '#', :class => 'btn btn-sm btn-glue'
+      i.fa.fa-print.fa-btn
+      | печать
+
+  .btn.item.btn-print
+    = link_to @pdfurl, :class => 'btn btn-sm btn-default', :target => '_blank'
+      i.fa.fa-file-pdf-o.fa-btn
+      | pdf
+/object data="#{url(:orders, :pdfnakl, :id => @order, :format => :pdf)}#view=FitV&toolbar=0" width="100%" height="500px" type="application/pdf"
+  param name="view" value="FitV"
+
+
+javascript:
+  (function() {
+    function frame_print() {
+      window.frames['framedpdf'].focus()
+      window.frames['framedpdf'].print()
+    }
+
+    document.querySelector(".btn-print > a").onclick = function() {
+      frame_print()
+    }
+
+  })()

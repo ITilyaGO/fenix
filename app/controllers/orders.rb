@@ -577,8 +577,8 @@ Fenix::App.controllers :orders do
     @order.actualize
     calc_complexity_for @order
 
-    if @order.status == :finished
-      redirect(url(:orders, :nakl, :id => @order.id))
+    if @order.finished?
+      redirect(url(:orders, :invoice, :id => @order.id))
     else
       redirect(url(:orders, :index))
     end
@@ -736,12 +736,18 @@ Fenix::App.controllers :orders do
     # render :pdf, :template => "invoices/torg12", :layout => false
   end
 
+  get :invoice, :with => :id do
+    @order = params[:id]
+    @pdfurl = url(:orders, :pdfnakl, :id => @order, :format => :pdf)
+    render 'orders/framepdf'
+  end
+
   get :nakl, :with => :id do
     @order = params[:id]
     render 'orders/gennakl'
   end
 
-  put :pdfnakl, :with => :id do
+  get :pdfnakl, :with => :id, :provides => :pdf do
     @title = pat(:edit_title, :model => "order #{params[:id]}")
     @order = Order.includes(:order_lines).includes(order_lines: :product).find(params[:id])
     @account = params[:account]

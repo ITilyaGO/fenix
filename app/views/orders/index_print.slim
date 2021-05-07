@@ -62,7 +62,7 @@ div class="tabs-content"
           td class='list-column list-row-action non-print'
             div class='list-row-action-wrapper'
               = link_to tag_icon(:edit), :href => url(:orders, :edit, :id => order.id), :class => 'list-row-action-wrapper-link'
-              = link_to tag_icon("file-text-o"), :href => url(:orders, :nakl, :id => order.id), :class => 'list-row-action-wrapper-link'
+              = link_to tag_icon("file-text-o"), :href => url(:orders, :invoice, :id => order.id), :class => 'list-row-action-wrapper-link'
               - if order.finished? && current_account.is_admin?
                 = link_to tag_icon(:cube), :href => url(:orders, :boxes, :id => order.id), :class => 'list-row-action-wrapper-link'
                 = link_to tag_icon(:usd), :href => url(:orders, :price, :id => order.id), :class => 'list-row-action-wrapper-link'
