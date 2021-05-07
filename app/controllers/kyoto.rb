@@ -35,13 +35,16 @@ Fenix::App.controllers :kyoto do
     key = params[:q]
     smartkey = key.split(/\//).map(&:to_sym)
     match = params[:form][:match].to_sym
-    is_clear = params[:clear] 
+    is_clear = params[:clear]
+    is_unset = params[:unset]
     cabie = ALL_CABIES[db]
 
     @data = []
     time = sec do
       if is_clear
-        cabie.clear(smartkey)
+        @data << cabie.clear(smartkey)
+      elsif is_unset
+        @data << cabie.unset(cabie.key_make(key))
       elsif match == :astral
         @data << cabie.astral(key)
       else
@@ -274,13 +277,53 @@ Fenix::App.controllers :kyoto do
   end
 
   patch :backup, :with => :db do
-    set :allow_disabled_csrf, true
-
     @title = 'Isokato backup'
     db = params[:db].to_sym
     @output = [db]
     time = sec do
       @output << Cabie.wire(db).backup.realpath
+    end
+    @output << notice_for_time(time)
+
+    partial 'kyoto/notice'
+  end
+
+  patch :restore, :with => :db do
+    @title = 'Isokato restore'
+    db = params[:db].to_sym
+    @output = [db]
+    time = sec do
+      wire = Cabie.wire(db)
+      from = wire.fs_prev(ext: Kyoto::BB_EXT)
+      @output << wire.restore_db(from)
+      @output << from
+    end
+    @output << notice_for_time(time)
+
+    partial 'kyoto/notice'
+  end
+
+  patch :sn_backup, :with => :db do
+    @title = 'Isokato backup'
+    db = params[:db].to_sym
+    @output = [db]
+    time = sec do
+      @output << Cabie.wire(db).dump
+    end
+    @output << notice_for_time(time)
+
+    partial 'kyoto/notice'
+  end
+
+  patch :sn_restore, :with => :db do
+    @title = 'Isokato restore'
+    db = params[:db].to_sym
+    @output = [db]
+    time = sec do
+      wire = Cabie.wire(db)
+      from = wire.fs_prev(ext: Kyoto::SS_EXT)
+      @output << wire.restore(from)
+      @output << from
     end
     @output << notice_for_time(time)
 

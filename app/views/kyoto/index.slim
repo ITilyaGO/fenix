@@ -37,7 +37,25 @@ p.line
   span Backup
   - ALL_CABIES.keys.each do |db|
     '
-    a.btn.patch.btn-xs.btn-danger.btn-embossed href=url(:kyoto, :backup, db: db) = db
+    a.btn.patch.btn-xs.btn-success.btn-embossed href=url(:kyoto, :backup, db: db) = db
+
+p.line
+  span Restore
+  - ALL_CABIES.keys.each do |db|
+    '
+    a.btn.patch.btn-xs.btn-danger.btn-embossed href=url(:kyoto, :restore, db: db) = db
+
+p.line
+  span Snapshot Backup
+  - ALL_CABIES.keys.each do |db|
+    '
+    a.btn.patch.btn-xs.btn-success.btn-embossed href=url(:kyoto, :sn_backup, db: db) = db
+
+p.line
+  span Snapshot Restore
+  - ALL_CABIES.keys.each do |db|
+    '
+    a.btn.patch.btn-xs.btn-danger.btn-embossed href=url(:kyoto, :sn_restore, db: db) = db
 
 p.line
   span Pull

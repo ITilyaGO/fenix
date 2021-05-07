@@ -22,7 +22,9 @@ h4 Запрос
   .form-actions
     = f.submit pat(:fetch), :class => 'btn btn-sm patch btn-prime'
     '
-    = f.submit pat(:clear), :class => 'btn btn-sm patch btn-default', :name => 'clear'
+    = f.submit pat(:clear), :class => 'btn btn-sm patch btn-default', :name => 'clear', :disabled => true
+    '
+    = f.submit pat(:unset), :class => 'btn btn-sm patch btn-default', :name => 'unset', :disabled => true
 
 h4 Output
 .output.alert
