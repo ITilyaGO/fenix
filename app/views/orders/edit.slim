@@ -23,45 +23,54 @@ ul class="nav nav-tabs non-print"
 //     - s.categories.each do |c|
 //       span = c.name
 // 
-div class="table non-print"
-  table class="table order-info"
-    tr
-      td
-        /p Город: #{@order.place_name}
-        p
-          ' Имя:
-          = link_to url(:clients, :edit, :id => @order.client.id) do
-            = !@order.client.name.blank? ? @order.client.name : 'Клиент'
-          / |  (#{@order.client.place_name})
-        p
-          - town_name = @kc_towns[@kc_client_hometown]&.model
-          - order_town_name = @kc_towns[@kc_order_town]&.model
-          - delivery = @kc_towns[@kc_order_delivery]&.model || @kc_towns[@kc_client_delivery]&.model
-          div
-            span
-              ' Город заказа
-            = partial 'bricks/kato/label', :locals => { town_name: order_town_name, el: nil }
-          div
-            span
-              ' Город клиента
-            = partial 'bricks/kato/label', :locals => { town_name: town_name, el: nil }
-          div
-            span
-              ' Город доставки
-            = partial 'bricks/kato/label', :locals => { town_name: delivery, el: nil }
 
-        p Тел: #{@order.client.tel}
-        p Емайл: #{@order.client.email}
-        p Дата: #{to_msk(@order.created_at)}
-        - unless @timeline_at.nil?
-          p Дата отправки: #{to_msk(@timeline_date)}
-        p Менеджер: #{@manager&.name}
-        - if !@order.description.blank?
-          = @order.description
+.table.non-print
+  .col-md-3.flex-v.text-center
+    h3 == deli(rur @order.total)
+    - if @order.finished? || @order.shipped?
+      h5 == deli(rur @order.done_total)
+    br
+    .btns
+      = link_to 'Печать', 'javascript:print()', :class => 'btn btn-sm btn-glue'
+      - if current_account.is_admin?
+        '
+        = link_to 'Все', :class => 'btn btn-sm print-all btn-glue'
+  .order-info.col-md-5
+    p
+      ' Имя:
+      = link_to url(:clients, :edit, :id => @order.client.id) do
+        = !@order.client.name.blank? ? @order.client.name : 'Клиент'
+      / |  (#{@order.client.place_name})
+    p
+      - town_name = @kc_towns[@kc_client_hometown]&.model
+      - order_town_name = @kc_towns[@kc_order_town]&.model
+      - delivery = @kc_towns[@kc_order_delivery]&.model || @kc_towns[@kc_client_delivery]&.model
+      div
+        span
+          ' Город заказа
+        = partial 'bricks/kato/label', :locals => { town_name: order_town_name, el: nil }
+      div
+        span
+          ' Город клиента
+        = partial 'bricks/kato/label', :locals => { town_name: town_name, el: nil }
+      div
+        span
+          ' Город доставки
+        = partial 'bricks/kato/label', :locals => { town_name: delivery, el: nil }
 
+    p Тел: #{@order.client.tel}
+    p Емайл: #{@order.client.email}
+    p Дата: #{to_msk(@order.created_at)}
+    - unless @timeline_at.nil?
+      p Дата отправки: #{to_msk(@timeline_date)}
+    p Менеджер: #{@manager&.name}
 
-div class="clearfix"
-div class="row non-print"
+  - if !@order.description.blank?
+    .col-md-4.order-comment
+      = @order.description
+.clearfix
+
+/div class="row non-print"
   div class="pull-right"
     div class="pull-right"
       = link_to 'Печать', 'javascript:print()', :class => 'btn btn-glue'
@@ -71,7 +80,6 @@ div class="row non-print"
 
     // - if @order[:status] < 2
     //   = link_to 'Заказ обработан', url(:orders, :sendemail, :id => Order.iq(@order.id)), :class => 'btn btn-warning'
-.clearfix
 
 .table.only-print
   table.table.order-info: tr
@@ -112,7 +120,7 @@ div class="row non-print"
   / = hidden_field_tag 'order[id]', :value => @order[:id]
   .block
   
-  - if current_account.is_admin?
+  - if !@order.draft? && current_account.is_admin?
     .non-print
       h4 Настройки
       fieldset.control-group
@@ -133,7 +141,7 @@ div class="row non-print"
 
       = partial 'timeline/calendar'
 
-  - if @order_part && @order_part.anew?
+  - if !@order.draft? && @order_part && @order_part.anew?
     div class="non-print"
       h4 Моя часть заказа:
       span Когда вы взяли заказ в работу, нажмите кнопку
@@ -141,7 +149,7 @@ div class="row non-print"
       = link_to url(:orders, :status, :id => @order.id), :class => 'btn btn-sm btn-current' do
         | Подтвердить
 
-  - if @order_part && @order_part.current?
+  - if !@order.draft? && @order_part && @order_part.current?
     div class="non-print"
       h4 Моя часть заказа:
       fieldset class='control-group'
@@ -245,7 +253,7 @@ div class="row non-print"
       .tab-pane.non-print id="cat-fail"
         p У этого заказа заглючили секции. Тут будет кнопка для исправления.
 
-  div class="non-print"
+  /div class="non-print"
     h4 class="pull-right"
       ' Сумма заказа:
       == rur("%0.f" % @order.total)
@@ -254,53 +262,28 @@ div class="row non-print"
       h4 class="pull-right"
         ' Фактически собрано на:
         == rur("%0.f" % @order.done_total)
-  - if !@order.shipped?
+
+  - if !@order.draft? && !@order.shipped?
     - if current_account.is_admin? or (@order_part and @order_part.current?)
       = submit_tag "Сохранить", :class => 'btn btn-sm btn-prime', :name => 'save'
-  - elsif current_account.is_admin?
+  - elsif current_account.is_admin? && !@order.draft?
     = submit_tag "Сохранить", :class => 'btn btn-sm btn-prime', :name => 'save_finish'
   - if @order_part and @order_part.current?
     |&nbsp;
     = submit_tag "Собрать", :class => 'btn btn-sm btn-finished', :name => 'next_status'
-  - if current_account.is_admin? && !@order.shipped?
+  - if current_account.is_admin? && !@order.shipped? && !@order.draft?
     |&nbsp;
     = submit_tag "Собрать все части", :class => 'btn btn-sm btn-finished', :name => 'next_status_all'
 
-  - if current_account.is_admin?
+  - if current_account.is_admin? && !@order.draft?
     div class="row non-print" style="margin-top: 30px;"
       = link_to "Создать дополнение к заказу ", url(:orders, :addition, :id => @order.id)
       span data-toggle="tooltip" data-placement="right" title="Создает новый заказ с разницей от текущего,\
       проверьте заполненность значений фактически сделанной продукции"
         = tag_icon "question-circle"
 
-// div class="tabs-content non-print"
-// 
-//   div class="table-responsive"
-//     table class="table table-striped"
-//       tr
-//         th Наименование
-//         th Количество
-//         th Цена
-//         th Сумма
-//         th &nbsp;
-// 
-//       - @order.order_lines.each do |ol|
-//         tr
-//           td
-//             = ol.product.name
-//             - if !ol.description.empty?
-//               div
-//                 strong Коммент: 
-//                 = ol.description
-//           td
-//             = ol.amount
-//           td
-//             = ol.sum/ol.amount
-//             | &nbsp;&#x20B7
-//           td
-//             = ol.sum
-//             | &nbsp;&#x20B7
-//           td
+  .clearfix
+
 
 - content_for :js_assets do
   javascript:

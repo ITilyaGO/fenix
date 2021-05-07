@@ -1,3 +1,6 @@
+- cplx = order_cplx(@order.id)
+- sticker = order_sticker(@order.id)
+
 ul class="nav nav-tabs non-print"
   li = link_to tag_icon(:list, pat(:list)), url(:orders, :index)
   li class="active" = link_to tag_icon(:edit, "Show order #{@order.id}"), url(:orders, :show, :id => @order.id)
@@ -48,6 +51,40 @@ div class="table non-print"
         - if !@order.description.blank?
           p = @order.description
         p Коробок: #{@order.order_parts.map(&:boxes).compact.sum}
+
+.table.only-print
+  table.table.order-info: tr
+    td style="width:20%;"
+      p # #{@order.id}
+      p
+        ' Клейка:
+        == rur(sticker)
+      p = "ϰ #{cplx}"
+    td style="width:30%;"
+      p = order_town_name&.name || "*#{@order.place_name}"
+      p Тр.ком.: #{@order.client.shipping_company}
+      p М: #{@manager&.name}
+    td
+      .flex-c
+        .block style="flex:1;"
+          - @sections.each do |tab|
+            .section-btn
+              = @order.by_sec?(tab.id) ? tab.name[0..3] : nil
+
+        .block.print-date
+          i.fa.fa-file-o
+          '
+          = to_msk_print(Time.now)
+      p
+      p = @order.client.name
+      p
+        ' Дата:
+        ' #{ @timeline_at ? to_msk(@timeline_date) : "?"}
+        | (#{((@timeline_date || Date.today) - @order.created_at.to_date).to_i.pred}+)
+    - if !@order.client.comment.blank?
+      tr: td colspan=3 = @order.client.comment
+    - if !@order.description.blank?
+      tr: td colspan=3 = @order.description
 
 div class="clearfix"
 // div class="row"

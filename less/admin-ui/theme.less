@@ -270,6 +270,15 @@ footer {
     }
   }
 }
+
+.order-comment {
+  background: rgb(254, 252, 221);
+  border-top: 20px solid rgba(147, 122, 182, 0.1);
+  border-radius: 4px;
+  min-height: 200px;
+  padding: 10px 20px;
+}
+
 .order-table > tbody > tr > td {
     vertical-align: middle;
 }
@@ -496,6 +505,10 @@ complex, sticker_line, .sticker-block {
 .flex-c {
   display: flex;
   justify-content: center;
+}
+.flex-v {
+  .flex-c();
+  flex-direction: column;
 }
 .fa-btn {
   margin-right: .5em;
@@ -753,5 +766,35 @@ calendar {
     font-size: 1.2em;
     vertical-align: text-bottom;
   }
+}
+
+newlabel {
+  padding: .6em .75em .4em;
+  line-height: 1.5;
+  text-transform: uppercase;
+  font-size: .65em;
+  letter-spacing: 0.02em;
+  border-radius: .35em;
+}
+newlabel {
+  padding: .3em .75em;
+  line-height: 1.5;
+  text-transform: lowercase;
+  font-size: .8em;
+  letter-spacing: 0.02em;
+  border-radius: .35em;
+}
+newlabel-kato {
+  border-left: 4px solid rgba(246, 60, 95, 0.89);
+}
+newlabel-id {
+  background-color: rgba(25, 136, 164, 0.17);
+  display: block;
+  padding: .4em .5em .2em;
+  letter-spacing: .05em;
+}
+newbadge {
+  border-radius: 3em;
+  padding: 3px 8px;
 }
 
