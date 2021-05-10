@@ -79,6 +79,7 @@ Fenix::App.controllers :timeline do
     @all_ids = @ktm.trans(nil, :to_i).map(&:last)
 
     @stickers = CabiePio.all_keys(@all_ids, folder: [:sticker, :order]).flat.trans(:to_i, :to_f)
+    @glass_stickers = CabiePio.all_keys(@all_ids, folder: [:sticker, :order_glass]).flat.trans(:to_i, :to_f)
     @gweek = calendar_group(@ktm.trans(nil, :to_i))
     @sdate = start_from
     

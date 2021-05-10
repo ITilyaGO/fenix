@@ -12,7 +12,7 @@ ul class="nav nav-tabs non-print"
     .label.label-info = order_cplx(@order.id)
   li = link_to '#' do
     ' клейка
-    .label.label-darkrose == rur(order_sticker(@order.id))
+    .label.label-darkrose == rur(sticker.sum)
 
 // - @sections.each do |s|
 //   strong = s.name
@@ -58,7 +58,7 @@ div class="table non-print"
       p # #{@order.id}
       p
         ' Клейка:
-        == rur(sticker)
+        == rur(sticker.sum)
       p = "ϰ #{cplx}"
     td style="width:30%;"
       p = order_town_name&.name || "*#{@order.place_name}"

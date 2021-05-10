@@ -10,6 +10,7 @@
     - @weeks.each_with_index do |tab, i|
       .flex-c.graphic
         - wsum = 0
+        - wglsum = 0
         - 7.times do |gap|
           - cdate = tab[:date] + gap
           .day class=[('today' if cdate == today)] title=cdate data-id=timeline_id(cdate)
@@ -19,15 +20,25 @@
           
             - wids = @gweek.fetch(cdate, []).map(&:last)
             - dsum = wids.sum{|x|@stickers.fetch(x, 0)}
+            - glsum = wids.sum{|x|@glass_stickers.fetch(x, 0)}
             - wsum += dsum
+            - wglsum += glsum
             .price
               - if dsum > 0
-                == deli(rur dsum)
+                == deli(rur dsum-glsum)
               - else
                 | &nbsp;
+              - if glsum > 0
+                br
+                small == deli(rur glsum)
         .summary
-          .wday: .price
+          .wday
             == deli(rur wsum) if wsum > 0
+            .price
+              - if wglsum > 0
+                == deli(rur wsum-wglsum)
+                br
+                small == deli(rur wglsum)
 
   .flex-v.btns.non-print
     = link_to url(:timeline, :stickers, start: timeline_id(@sdate.weeks_ago(-4))) do

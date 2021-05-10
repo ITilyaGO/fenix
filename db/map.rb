@@ -9,6 +9,7 @@ module Cabie::Structure
     [:p, :products, :sticker] => nil,
     [:p, :timeline, :order] => nil,
     [:p, :sticker, :order] => nil,
+    [:p, :sticker, :order_glass] => nil,
     [:p, :sticker, :order_progress] => nil,
     [:p, :complexity, :product] => nil,
     [:p, :complexity, :category] => nil,
@@ -32,7 +33,7 @@ module Cabie::Structure
         :orders => [:towns, :delivery_towns, :timeline, :stickers_amount],
         :products => [:sticker],
         :timeline => [:order],
-        :sticker => [:order, :order_progress],
+        :sticker => [:order, :order_glass, :order_progress],
         :complexity => [:product, :category, :order],
         :towns => [:managers, :migrate]
       ],

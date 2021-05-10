@@ -11,7 +11,10 @@ ul class="nav nav-tabs non-print"
     .label.label-info = cplx
   li = link_to '#' do
     ' клейка
-    .label.label-darkrose == rur(sticker)
+    .label.label-darkrose == rur(sticker.first)
+    - if sticker.last > 0
+      ' &nbsp;
+      .label.label-purple == rur(sticker.last)
   li
     .progress.for-stickers title="#{@sticker_progress}%"
       .progress-bar role="progressbar" style="width:#{@sticker_progress.to_i}%"
@@ -86,33 +89,42 @@ ul class="nav nav-tabs non-print"
 
 .table.only-print
   table.table.order-info: tr
-    td style="width:20%;"
+    td style="width:10%;"
       p # #{@order.id}
       p
-        ' Клейка:
-        == rur(sticker)
-      p = "ϰ #{cplx}"
-    td style="width:30%;"
+        '
+        == rur(sticker.sum)
+      /p = "ϰ #{cplx}"
+    td style="width:20%;"
       p = order_town_name&.name || "*#{@order.place_name}"
-      p Тр.ком.: #{@order.client.shipping_company}
       p М: #{@manager&.name}
     td
       .flex-c
-        .block style="flex:1;"
-          - @sections.each do |tab|
+        .block.flexie
+          = @order.client.name
+          
+        .block
+          - @sections[0...4].each do |tab|
             .section-btn
               = @order.by_sec?(tab.id) ? tab.name[0..3] : nil
-
-        .block.print-date
+        / .block.print-date
           i.fa.fa-file-o
           '
           = to_msk_print(Time.now)
       p
-      p = @order.client.name
-      p
-        ' Дата:
-        ' #{ @timeline_at ? to_msk(@timeline_date) : "?"}
-        | (#{((@timeline_date || Date.today) - @order.created_at.to_date).to_i.pred}+)
+      /p = @order.client.name
+      .flex-c
+        .block.flexie
+          ' Дата:
+          ' #{ @timeline_at ? to_msk(@timeline_date) : "?"}
+          | (#{((@timeline_date || Date.today) - @order.created_at.to_date).to_i.pred}+)
+        .block
+          ' Счет:
+          - 15.times do
+            ' &nbsp;
+          ' ТК:
+          | #{@order.client.shipping_company}
+
     - if !@order.client.comment.blank?
       tr: td colspan=3 = @order.client.comment
     - if !@order.description.blank?
@@ -220,7 +232,7 @@ ul class="nav nav-tabs non-print"
                   table.table
                     thead.only-print: tr: td colspan=10 = tab.name
                     tr
-                      th.only-print Отметка
+                      th.only-print width='10%' Собрано
                       th Наименование
                       th Коммент
                       th Количество
@@ -229,6 +241,8 @@ ul class="nav nav-tabs non-print"
                       th.non-print Наклеено
                       th.non-print Факт
                       th.non-print Не&nbsp;делаем
+                      th.only-print width='5%' Деколи
+                      th.only-print width='5%' Тираж
                     
                     - @order.by_cat(tab.id).each do |ol|
                       tr class="order-line"
@@ -269,6 +283,8 @@ ul class="nav nav-tabs non-print"
                             = check_box_tag "line[#{ol.id}][ignored]", :checked => ol.ignored
                           - else
                             = check_box_tag '', :checked => ol.ignored, :disabled => true
+                        td.only-print
+                        td.only-print
       .tab-pane.non-print id="cat-fail"
         p У этого заказа заглючили секции. Тут будет кнопка для исправления.
 

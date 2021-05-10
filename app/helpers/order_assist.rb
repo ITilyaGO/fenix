@@ -10,6 +10,7 @@ class OrderAssist
 
   def self.calc_stickers_for(order)
     price = sticker_price order
-    CabiePio.set [:sticker, :order], order.id, price
+    CabiePio.set [:sticker, :order], order.id, price.first
+    CabiePio.set [:sticker, :order_glass], order.id, price.last
   end
 end
