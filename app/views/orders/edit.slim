@@ -93,7 +93,7 @@ ul class="nav nav-tabs non-print"
       p # #{@order.id}
       p
         '
-        == rur(sticker.sum)
+        = sticker.sum
       /p = "ϰ #{cplx}"
     td style="width:20%;"
       p = order_town_name&.name || "*#{@order.place_name}"
@@ -124,6 +124,9 @@ ul class="nav nav-tabs non-print"
             ' &nbsp;
           ' ТК:
           | #{@order.client.shipping_company}
+          - if @order.client.shipping_company.nil? || @order.client.shipping_company.empty?
+            - 15.times do
+              ' &nbsp;
 
     - if !@order.client.comment.blank?
       tr: td colspan=3 = @order.client.comment
@@ -230,7 +233,14 @@ ul class="nav nav-tabs non-print"
                 div class="table-res4ponsive"
                   h4.non-print = tab.name
                   table.table
-                    thead.only-print: tr: td colspan=10 = tab.name
+                    thead.only-print
+                      tr
+                        td = tab.name
+                        td colspan=5
+                          - if tab.id == 18
+                            = sticker.first
+                          - if tab.id == 21
+                            = sticker.last
                     tr
                       th.only-print width='10%' Собрано
                       th Наименование
