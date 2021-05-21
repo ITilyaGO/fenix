@@ -88,7 +88,7 @@ div class="tabs-content"
           
           td class='list-column list-row-action non-print'
             div class='list-row-action-wrapper'
-              - if current_account.is_admin?
+              - if (order.draft? || order.anew?) && current_account.is_admin?
                 = link_to tag_icon(:paw), :rel => :tooltip, :title => "Edit order", :href => url(:orders, :correct, :id => order.id), :class => 'list-row-action-wrapper-link'
               - if !order.draft?
                 = link_to tag_icon(:edit), :href => url(:orders, :edit, :id => order.id), :class => 'list-row-action-wrapper-link'
