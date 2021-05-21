@@ -428,7 +428,8 @@ footer {
   }
 }
 
-collapser {
+collapser, sumcollapser, idcollapser {
+  display: block;
   .head {
     cursor: pointer;
     user-select: none;
@@ -512,6 +513,10 @@ complex, sticker_line, .sticker-block {
 }
 .flexie {
   flex: auto;
+}
+.flex-wrap {
+  display: flex;
+  flex-wrap: wrap;
 }
 .fa-btn {
   margin-right: .5em;
@@ -680,6 +685,31 @@ calendar {
 
 }
 
+// stock
+.stock-page {
+  .header-control.w {
+    text-align: center;
+    flex-direction: column;
+    .flex-c();
+    .wd {
+      text-transform: uppercase;
+      font-size: .8em;
+    }
+  }
+  .block {
+    border: 1px solid rgba(0, 0, 139, 0.25);
+    border-radius: 8px;
+    padding: 0 1em;
+    margin: .5em .8em;
+    flex-basis: 12%;
+
+    &.cat {
+      background: rgba(0, 0, 139, 0.25);
+      color: white;
+      border-color: white;
+    }
+  }
+}
 
 // timeline calendar tab
 #weeks_tab.nav-tabs {

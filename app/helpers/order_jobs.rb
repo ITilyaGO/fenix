@@ -24,4 +24,17 @@ class OrderJobs
     end
     wonderbox_set(:sticker_job, !all)
   end
+
+  def self.stock_job(force: false, all: false)
+    # CabiePio.clear(:stock, :product) if force
+    # CabiePio.clear(:stock, :common, :a) if force
+    CabiePio.clear(:need, :order) if force
+    CabiePio.clear(:need, :product) if force
+    # CabiePio.clear(:stock, :order, :n) if force
+
+    orders = Order.where("status = ?", Order.statuses[:current])
+    orders.each do |t|
+      bal_need_order_start(t)
+    end
+  end
 end

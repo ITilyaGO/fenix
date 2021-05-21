@@ -153,6 +153,7 @@ Fenix::App.controllers :orders do
     @kc_order_delivery = CabiePio.get([:orders, :delivery_towns], @order.id).data
     @kc_towns = KatoAPI.batch([@kc_client_hometown, @kc_client_delivery, @kc_order_town, @kc_order_delivery].compact)
 
+    @stock_out = CabiePio.get([:stock, :order, :done], @order.id).data
     @olstickers = CabiePio.all_keys(@order.order_lines.map(&:id), folder: [:m, :order_lines, :sticker]).flat.trans(:to_i)
     kc_amt = CabiePio.get([:orders, :stickers_amount], @order.id).data.to_i
     @sticker_progress = sticker_order_progress(@order.id)
@@ -504,6 +505,8 @@ Fenix::App.controllers :orders do
     order.save
     order.actualize
     calc_complexity_for order
+
+    bal_need_order_rep(order)
     
     code = params[:cabie][:kato_place]
     if Kato.valid? code
@@ -546,6 +549,8 @@ Fenix::App.controllers :orders do
       @order_part.save
       @order.status = :current
       @order.save
+
+      bal_need_order_start @order
     end
     redirect(url(:orders, :edit, :id => @order.id))
   end
@@ -623,6 +628,7 @@ Fenix::App.controllers :orders do
       save_sticker_progress(@order.id, operc)
     end
     
+    status_before = @order.current?
     @order.done_parts = @order.order_parts.where("state = ?", OrderPart.states[:finished]).size
     if @order.done_parts == @order.all_parts
       # don't need to use params here
@@ -637,6 +643,9 @@ Fenix::App.controllers :orders do
     @order.save
     @order.actualize
     calc_complexity_for @order
+
+    bal_need_order_mid(@order) if @order.current?
+    bal_need_order_fin(@order) if status_before && @order.finished?
 
     if @order.finished?
       redirect(url(:orders, :invoice, :id => @order.id))

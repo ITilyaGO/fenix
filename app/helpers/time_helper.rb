@@ -9,6 +9,10 @@ Fenix::App.helpers do
     time.in_time_zone(MY_TZ).strftime('%e %b %Y')
   end
 
+  def to_msk_short(time)
+    time.in_time_zone(MY_TZ).strftime('%e %b')
+  end
+
   def to_msk_print(time)
     time.in_time_zone(MY_TZ).strftime('%Y-%m-%e, %H:%M')
   end

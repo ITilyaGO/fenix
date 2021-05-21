@@ -41,6 +41,10 @@ ul class="nav nav-tabs non-print"
       - if current_account.is_admin?
         '
         = link_to 'Все', :class => 'btn btn-sm print-all btn-glue'
+    - if @stock_out
+      br
+      p Списан со склада
+      /p = to_msk_full (Time.parse(@stock_out) rescue Time.now)
   .order-info.col-md-5
     p
       ' Имя:
@@ -317,7 +321,7 @@ ul class="nav nav-tabs non-print"
     - if @order_part and @order_part.current?
       |&nbsp;
       = submit_tag "Собрать", :class => 'btn btn-sm btn-finished', :name => 'next_status'
-    - if current_account.is_admin? && !@order.shipped? && !@order.draft?
+    - if current_account.is_admin? && @order.current?
       |&nbsp;
       = submit_tag "Собрать все части", :class => 'btn btn-sm btn-finished', :name => 'next_status_all'
 

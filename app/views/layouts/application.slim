@@ -102,6 +102,14 @@ html lang='en'
                 | Sync
                 span class="menu-icon fa fa-skyatlas"
 
+          - if allow_route?(:online)
+            li.sidebar-title.separator
+              span Склад
+            li.sidebar-list
+              = link_to url(:products, :stock) do
+                | Продукция
+                span class="menu-icon fa fa-inbox"
+
           - if allow_route?(:editors)
             li.sidebar-title.separator
               span Редакторы

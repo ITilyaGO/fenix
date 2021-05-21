@@ -178,4 +178,60 @@ Fenix::App.controllers :products do
     end
   end
 
+
+  get :stock do
+    # OrderJobs.stock_job(force: true)
+    @title = "Product - Stock"
+    @day = Date.parse(params[:day]) rescue Date.today
+    @holders = {}
+    products_hash.keys.each do |sk|
+      @holders[sk] ||= {}
+    end
+    7.times do |i|
+      dt = (@day-i).strftime('%y%m%d')
+      all_ids = products_hash.keys.map{|p|product_daystock(p, @day-i)}
+      stockday = CabiePio.all_keys(all_ids, folder: [:stock, :common, :a]).flat
+      stockday.each do |sk, sv|
+        p = sk.split('_').first.to_i
+        @holders[p] ||= {}
+        @holders[p][@day-i] = sv.to_i
+      end
+    end
+    
+    @cats = Category.where(category: nil).order(:index => :asc)
+    @categories = Category.all.includes(:category)
+    @parents = Product.pluck(:parent_id).compact.uniq
+    @kc_products = CabiePio.folder(:stock, :product).flat.trans(:to_i, :to_i)
+    @kc_needs = CabiePio.folder(:need, :product).flat.trans(:to_i, :to_i)
+    catgroup = products_hash.keys.group_by{|k|products_hash[k]}
+    @catstock = catgroup.map{|k,v|[k, v.map{|p|@kc_products.fetch(p, 0)}.sum{|x|x<0?x:0}]}.to_h
+    @catneed = catgroup.map{|k,v|[k, v.map{|p|@kc_needs.fetch(p, 0)}.sum{|x|x>0?x:0}]}.to_h
+    render 'products/stock'
+  end
+
+  put :stock do
+    params[:lines].each do |k, line|
+      line.each do |date, stock_in|
+
+        # stock_in = line['in']
+        # stock_out = line['out']
+        id = k
+        day = Time.parse date
+        next if stock_in.size == 0
+        # stock_in = date.last
+        # id = k
+
+        prev_day = CabiePio.get([:stock, :common, :a], product_daystock(id, day)).data.to_i
+        CabiePio.set [:stock, :common, :a], product_daystock(id, day), stock_in.to_i if stock_in.size > 0
+        # CabiePio.set [:stock, :common, :n], product_daystock(id), stock_out.to_i if stock_out.size > 0
+
+        # diff = stock_in.to_i - stock_out.to_i
+        # if diff != 0
+        sum = CabiePio.get [:stock, :product], id
+        CabiePio.set [:stock, :product], id, sum.data.to_i + stock_in.to_i - prev_day
+      end
+    end
+
+    redirect url(:products, :stock)
+  end
 end

@@ -116,6 +116,89 @@ module Fenix::App::ProductsHelper
   #   cabie.data
   # end
 
+  def product_order(product, oline, order)
+    "#{product}_#{oline}_#{order}"
+  end
+
+  def product_daystock(product, day = Date.today)
+    "#{product}_#{timeline_id(day)}"
+  end
+
+  # def bal_stock_order_both(order)
+  #   order.order_lines.each do |line|
+  #     prev = CabiePio.get([:need, :order], product_order(line.product_id, line.id, order.id)).data.to_i || 0
+  #     next if line.ignored
+  #     CabiePio.set [:need, :order], product_order(line.product_id, line.id, order.id), line.amount
+  #     # CabiePio.set [:stock, :order, :a], product_order(line.product_id, order.id), line.done_amount
+
+  #     psum = CabiePio.get([:stock, :product], line.product_id).data.to_i || 0
+  #     CabiePio.set [:stock, :product], line.product_id, psum+(line.done_amount||0)-(line.amount||0)
+  #   end
+  # end
+
+  def bal_need_order_start(order)
+    order.order_lines.each do |line|
+      next if line.ignored
+      CabiePio.set [:need, :order], product_order(line.product_id, line.id, order.id), line.amount
+      psum = CabiePio.get([:need, :product], line.product_id).data.to_i || 0
+      CabiePio.set [:need, :product], line.product_id, psum+(line.amount||0)
+    end
+  end
+
+  def bal_need_order_mid(order)
+    order.order_lines.each do |line|
+      # next if line.done_nil? amount
+      item = product_order(line.product_id, line.id, order.id)
+      prev = CabiePio.get([:need, :order], item).data.to_i || 0
+      real_done = line.ignored ? 0 : line.done_amount.to_i
+      processing = false
+      if line.ignored
+        CabiePio.unset [:need, :order], item
+        processing = true
+      elsif real_done > 0
+        CabiePio.set [:need, :order], item, real_done
+        processing = true
+      end
+      next unless processing
+      # CabiePio.set [:need, :order], product_order(line.product_id, order.id), real_done
+
+      psum = CabiePio.get([:need, :product], line.product_id).data.to_i || 0
+      CabiePio.set [:need, :product], line.product_id, psum-prev+real_done
+    end
+  end
+
+  def bal_need_order_fin(order)
+    order.order_lines.each do |line|
+      prev = CabiePio.get([:need, :order], product_order(line.product_id, line.id, order.id)).data.to_i || 0
+      real_done = line.ignored ? 0 : line.done_amount||line.amount
+      CabiePio.unset [:need, :order], product_order(line.product_id, line.id, order.id)
+      # CabiePio.set [:need, :order], product_order(line.product_id, order.id), real_done
+
+      psum = CabiePio.get([:need, :product], line.product_id).data.to_i || 0
+      CabiePio.set [:need, :product], line.product_id, psum-prev
+
+      ssum = CabiePio.get([:stock, :product], line.product_id).data.to_i || 0
+      CabiePio.set [:stock, :product], line.product_id, ssum-real_done
+    end
+    bal_need_order_rep(order)
+
+    CabiePio.set [:stock, :order, :done], order.id, Time.now
+  end
+
+  def bal_need_order_rep(order)
+    old_need = CabiePio.query("p/need/order>.*_#{order.id}", type: :regex).flat
+    old_need.each do |k, v|
+      p = k.split('_').first
+
+      psum = CabiePio.get([:need, :product], p).data.to_i || 0
+      CabiePio.set [:need, :product], p, psum-v.to_i
+
+      CabiePio.unset [:need, :order], k
+    end
+
+    # bal_need_order_start(order)
+  end
+
   def products_hash
     @products_hash ||= Product.all.pluck(:id, :category_id).map{|a|[a.first, a.last.to_i]}.to_h
   end

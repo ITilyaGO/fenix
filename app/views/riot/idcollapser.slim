@@ -1,0 +1,34 @@
+idcollapser
+  .block.head.flex-v onclick="{ toggle }"
+    .title
+      .fa.fa-plus-circle hide="{ open }"
+      / .fa.fa-arrow-circle-down show="{ open }"
+      .fa.fa-circle show="{ open }"
+      /.title hide="{ false }"
+      .label.label-default
+        | { need == 0 ? 'нет' : need }
+      
+      .label.label-danger if='{stock[0] == '-'}'
+        | { stock }
+
+      ' &nbsp;
+    .title
+      | { opts.titler }
+    / .btn.btn-prime hide="{ open }" открыть
+    / .btn.btn-prime show="{ open }" скрыть
+    / .fa.fa-arrow-circle-right
+  .content-panel show="{ open }"
+    yield
+
+  javascript:
+
+    this.open = opts.open || false
+    this.bal = +opts.stock - +opts.need
+    this.stock = opts.stock
+    this.need = opts.need
+
+    this.toggle = function() {
+      document.querySelector(opts.for).classList.toggle('hidden')
+
+      this.open = !this.open;
+    }
