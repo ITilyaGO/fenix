@@ -12,6 +12,8 @@ require "./db/lib/main.rb"
 require "./db/map.rb"
 require "./config/scheduler.rb"
 require './config/cabies.rb'
+require './supermodels/doppel.rb'
+Dir["./supermodels/**/*.rb"].each {|file| require file }
 
 ##
 # ## Enable devel logging
@@ -51,3 +53,4 @@ Padrino.after_load do
 end
 
 Padrino.load!
+ENV['TMPDIR'] = Padrino.root('tmp')

@@ -17,6 +17,11 @@ at_exit do
   end
 end
 
+module Cabie::Structure
+  send(:remove_const, :KNOWN_PFXR) if const_defined?(:KNOWN_PFXR)
+  KNOWN_PFXR = [PFXR, PFXR_PLAIN, 'i'].freeze
+end
+
 # # TODO: figure out
 # # Define structure of cabinetes
 

@@ -25,8 +25,8 @@ module Fenix::App::OrdersHelper
     "#{'%0.f' %(value||0)}&nbsp;<span class='r'>&#x20B7</span>"
   end
 
-  def to_perc(whole, part)
-    100/(whole/part) rescue 0
+  def pic_path(img)
+    "#{Padrino.root}/public/images/orders/#{img}"
   end
 
   def order_complexity(order)

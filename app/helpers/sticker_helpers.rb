@@ -31,16 +31,23 @@ module Fenix::App::StickerHelper
     CabiePio.get([:sticker, :order_progress], order_id).data.to_f
   end  
 
-  def save_sticker_line(ol_id, sticker)
-    CabiePio.set [:m, :order_lines, :sticker], ol_id, { t: timeline_id, v: sticker}
-    olsize = CabiePio.length [:m, :order_lines, :sticker], ol_id
-    CabiePio.set [:m, :order_lines, :sticker], "#{ol_id}_#{olsize+1}", { t: timeline_id, v: sticker}
+  def save_sticker_line(ol_id, sticker, day)
+    # CabiePio.set [:m, :order_lines, :sticker], ol_id, { t: timeline_id(day), v: sticker}
+    # olsize = CabiePio.length [:m, :order_lines, :sticker], ol_id
+    CabiePio.set [:m, :order_lines, :sticker], "#{ol_id}_#{timeline_id(day)}", { t: timeline_id(day), v: sticker}
+
+    sall = CabiePio.all([:m, :order_lines, :sticker], ["#{ol_id}_"]).flat
+    pall = sall.sum{|k,v|v[:v]}
+    last_day = sall.values.map{|e|e[:t]}.last
+    CabiePio.set [:m, :order_lines, :sticker_sum], ol_id, { t: last_day, v: pall}
   end
 
   def save_sticker_history(order, perc, date = Date.today)
     data = CabiePio.get([:m, :sticker, :order_history], order).data || {}
     data[timeline_id(date)] = perc.round(1)
     CabiePio.set [:m, :sticker, :order_history], order, data
+
+    CabiePio.set [:i, :orders, :sticker_date], "#{timeline_id(date)}_#{order}", 1
   end
 
   def save_sticker_progress(order, perc)
@@ -79,4 +86,27 @@ module Fenix::App::StickerHelper
   #   return :busy if cplx_sum >= wonderbox(:complexity, :level)
   #   :unbusy if cplx_sum < wonderbox(:complexity, :level)
   # end
+
+  def calc_sticker_sum(ol)
+    kc_products = CabiePio.all_keys(ol.map{|e|e.product_id}, folder: [:products, :sticker]).flat.trans(:to_i, :to_f)
+    all = 0
+    ol.each do |line|
+      sall = CabiePio.all([:m, :order_lines, :sticker], ["#{line.id}_"]).flat
+      next if sall.empty?
+      pall = sall.sum{|k,v|v[:v]*kc_products.fetch(line.product_id, 0)}
+      all += pall
+    end
+    all
+  end
+
+  def calc_sticker_sum_for_day(ol, day)
+    kc_products = CabiePio.all_keys(ol.map{|e|e.product_id}, folder: [:products, :sticker]).flat.trans(:to_i, :to_f)
+    all = 0
+    ol.each do |line|
+      st = CabiePio.get([:m, :order_lines, :sticker], "#{line.id}_#{timeline_id(day)}").data[:v] rescue 0
+      dayprice = st*kc_products.fetch(line.product_id, 0)
+      all += dayprice
+    end
+    all
+  end
 end

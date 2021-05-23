@@ -67,8 +67,8 @@ br
 
 - content_for :js_assets do
   = javascript_include_tag :riot
-  script type="riot/tag" src="/riot/tags/sticker_line.tag"
-  script type="riot/tag" src="/riot/tags/collapser.tag"
+  rscript type="riot/tag" src="/riot/tags/sticker_line.tag"
+  rscript type="riot/tag" src="/riot/tags/collapser.tag"
   javascript:
     
     document.addEventListener("DOMContentLoaded", function(event) {

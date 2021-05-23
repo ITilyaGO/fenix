@@ -1,0 +1,21 @@
+fcollapser
+  .head onclick="{ toggle }"
+    .fa.fa-plus-circle hide="{ open }"
+    / .fa.fa-arrow-circle-down show="{ open }"
+    .fa.fa-circle show="{ open }"
+    .title hide="{ false }"
+      | { opts.titler }
+    / .btn.btn-prime hide="{ open }" открыть
+    / .btn.btn-prime show="{ open }" скрыть
+    / .fa.fa-arrow-circle-right
+  .content-panel show="{ open }"
+    yield
+
+  javascript:
+
+    this.open = opts.open || false
+
+    this.toggle = function() {
+      this.open = !this.open;
+      rcontrol.trigger('PICLIST_LOAD')
+    }

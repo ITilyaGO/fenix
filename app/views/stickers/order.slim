@@ -1,24 +1,26 @@
 - cplx = order_cplx(@order.id)
 - sticker = order_sticker(@order.id)
 
+/- @order.order_lines.each do |ol|
+  .alert
+     = CabiePio.all([:m, :order_lines, :sticker], [ol.id]).flat
+     br
+     = CabiePio.all([:m, :order_lines, :sticker_sum], [ol.id]).flat
+/ = calc_sticker_sum(@order.order_lines)
+/ br
+/ = CabiePio.get([:orders, :stickers_amount], @order.id).data.to_i
+/ br
+/ = calc_sticker_sum_for_day(@order.order_lines, @day)
 ul class="nav nav-tabs non-print"
   li = link_to tag_icon(:list, pat(:list)), url(:orders, :index)
-  li class="active" = link_to tag_icon(:edit, "Show order #{@order.id}"), url(:orders, :show, :id => @order.id)
+  li = link_to tag_icon(:edit), url(:orders, :edit, :id => @order.id)
+  li.active = link_to tag_icon(:ticket, "Stickers #{@order.id}"), url(:stickers, :order, :id => @order.id)
   li = link_to '#' do
     span class="label label-#{@order.status}"
       = t :"status.#{@order.status}"
   li = link_to '#' do
     ' сложность
     .label.label-info = cplx
-  li = link_to url(:stickers, :order, id: @order.id) do
-    ' клейка
-    .label.label-darkrose == deli (rur sticker.first)
-    - if sticker.last > 0
-      ' &nbsp;
-      .label.label-purple == deli (rur sticker.last)
-  li
-    .progress.for-stickers title="#{@sticker_progress}%"
-      .progress-bar role="progressbar" style="width:#{@sticker_progress.to_i}%"
   li.pull-right: a 
     = partial 'orders/squares', :locals => { :order => @order }
 
@@ -42,10 +44,6 @@ ul class="nav nav-tabs non-print"
       - if current_account.is_admin?
         '
         = link_to 'Все', :class => 'btn btn-sm print-all btn-glue'
-    - if @stock_out
-      br
-      p Списан со склада
-      /p = to_msk_full (Time.parse(@stock_out) rescue Time.now)
   .order-info.col-md-5
     p
       ' Имя:
@@ -83,7 +81,7 @@ ul class="nav nav-tabs non-print"
       br
   
 
-    .order-paper: fcollapser titler="файлы: #{@ps.count}"
+    /.order-paper: fcollapser titler="файлы: #{@ps.count}"
       .row: div
         /- KSM::OrderImage.all(@order.id).each do |p|
         /= KSM::OrderImage.count
@@ -102,8 +100,7 @@ ul class="nav nav-tabs non-print"
             
               .btn.btn-xs.btn-prime.btn-embossed.btn-file.fileinput-new
                 .fileinput-new Загрузить
-                / accept='.pdf,.png,image/*'
-                input type="file" name="files[]" accept='*/*' multiple="true"
+                input type="file" name="files[]" accept='.pdf,.png,image/*' multiple="true"
               '
               button.btn type="submit" class="btn-xs btn-prime btn-embossed fileinput-exists"
                 .fa.fa-upload
@@ -113,135 +110,67 @@ ul class="nav nav-tabs non-print"
         /piced value=@picorder product=@product.id
 .clearfix
 
-/div class="row non-print"
-  div class="pull-right"
-    div class="pull-right"
-      = link_to 'Печать', 'javascript:print()', :class => 'btn btn-glue'
-      - if current_account.is_admin?
-        '
-        = link_to 'Все', :class => 'btn print-all btn-glue'
+hr
+.sticker-line
+  .lbls
+    .label.label-darkrose == deli(rur sticker.first)
+    - if sticker.last > 0
+      ' &nbsp;
+      .label.label-purple == deli (rur sticker.last)
+  .progress.for-stickers.ninety title="#{@sticker_progress}%"
+    .progress-bar role="progressbar" style="width:#{@sticker_progress&.ceil}%"
+br
 
-    // - if @order[:status] < 2
-    //   = link_to 'Заказ обработан', url(:orders, :sendemail, :id => Order.iq(@order.id)), :class => 'btn btn-warning'
-
-.table.only-print
-  table.table.order-info: tr
-    td style="width:10%;"
-      p # #{@order.id}
-      p
-        '
-        = sticker.sum
-      /p = "ϰ #{cplx}"
-    td style="width:20%;"
-      p = order_town_name&.name || "*#{@order.place_name}"
-      p М: #{@manager&.name}
-    td
-      .flex-c
-        .block.flexie
-          = @order.client.name
-          
-        .block
-          - @sections[0...4].each do |tab|
-            .section-btn
-              = @order.by_sec?(tab.id) ? tab.name[0..3] : nil
-        / .block.print-date
-          i.fa.fa-file-o
-          '
-          = to_msk_print(Time.now)
-      p
-      /p = @order.client.name
-      .flex-c
-        .block.flexie
-          ' Дата:
-          ' #{ @timeline_at ? to_msk(@timeline_date) : "?"}
-          | (#{((@timeline_date || Date.today) - @order.created_at.to_date).to_i.pred}+)
-        .block
-          ' Счет:
-          - 15.times do
-            ' &nbsp;
-          ' ТК:
-          | #{@order.client.shipping_company}
-          - if @order.client.shipping_company.nil? || @order.client.shipping_company.empty?
-            - 15.times do
-              ' &nbsp;
-
-    - if !@order.client.comment.blank?
-      tr: td colspan=3 = @order.client.comment
-    - if !@order.description.blank?
-      tr: td colspan=3 = @order.description
+= form_tag url(:stickers, :update, :id => @order.id), :method => :put, :class => 'form-horizontal order' do
 
 
-= form_tag url(:orders, :update, :id => @order.id), :method => :put, :class => 'form-horizontal order' do
-  / = hidden_field_tag 'order[id]', :value => @order[:id]
-  .block
-  
-  - if !@order.draft? && current_account.is_admin?
-    .non-print
-      h4 Настройки
-      fieldset.control-group
-        = label_tag :category, :class => 'col-md-3 control-label'
-        div class='col-md-6 controls'
-          select name="status" class="huge"
-            - options_for_select(Order.status_for_select, :selected => @order.status).each do |o|
-              = o
-      fieldset.control-group
-        = label_tag 'Дата отправки', :class => 'col-md-3 control-label'
-        div class='col-md-3 controls'
-          .scrollable-dropdown-menu
-            = text_field_tag :'cabie[timeline_at]', :class => 'form-control', :placeholder => "2016-07-23 or Y/m/d"
-        
-        .btn.btn-sm.btn-default.btn-timeline
-          .fa.fa-calendar.fa-btn
-          | график
-
-      = partial 'timeline/calendar'
-
-  - if !@order.draft? && @order_part && @order_part.anew?
-    div class="non-print"
-      h4 Моя часть заказа:
-      span Когда вы взяли заказ в работу, нажмите кнопку
-      '
-      = link_to url(:orders, :status, :id => @order.id), :class => 'btn btn-sm btn-current' do
-        | Подтвердить
-
-  - if !@order.draft? && @order_part && @order_part.current?
-    div class="non-print"
-      h4 Моя часть заказа:
-      fieldset class='control-group'
-        = label_tag "Коробок", :class => 'col-md-3 control-label'
-        .col-xs-1.controls
-          = text_field_tag :"order_part[boxes]", :size => 3, :autocomplete => "off", :value => @order_part.boxes, :class => "form-control"
-        .col-xs-1
-        .col-md-3.controls.custom-control
-          = check_box_tag :"order_part[no_boxes]", :id => 'no_boxes', :checked => @order_part.no_boxes?, :class => 'custom-control-input'
-          label.custom-control-label(for = 'no_boxes') Нет коробок
-      / - if [4,5].include? @my_section.id
-        fieldset class='control-group'
-          = label_tag "Отправлено на Перекоп", :class => 'col-md-3 control-label'
-          div class='col-md-6 controls'
-            = hidden_field_tag "order_part[transfer]", :value => 'false'
-            = check_box_tag "order_part[transfer]", :checked => @order_part.transfer, :class => ""
+  fieldset.control-group.stickers_tab
+    /.col-md-3
+      = label_tag 'Дата клейки', :class => 'control-label'
+      .controls
+      
+        = text_field_tag :'cabie[timeline_at]', :class => 'form-control', :placeholder => ""
     
-    .modal tabindex="-1" role="dialog"
-      div class="modal-dialog"
-        div class='modal-content'
-          div class="modal-header"
-            h4 class="modal-title" Вы некорректно заполнили заказ
-          div class='modal-body'
-            p
-              ' Нужно указать количество фактически сделанной продукции (по позициям) и общее количество коробок.
-              | Поля с ошибками выделены красненьким.
-          div class='modal-footer'
-            // = form_tag url(:categories, :destroy, :id => category.id), :method => :delete do
-            //   = submit_tag pat(:delete), :class =>'list-row-action-popover-delete-one-btn btn btn-danger btn-wide'
-            div class='btn btn-default btn-wide cancel' data-dismiss="modal" Закрыть
+    /li
+    
+    #stickers_tab.col-auto.flex-c
 
-  / # - t = sec do
-  / #   - displayed_n = @sections.flat_map(&:categories).map{|c|@order.by_cat(c.id).size}.sum
-  / #   - actual_n = @order.order_lines.count
-  / #   p = "#{displayed_n} | #{actual_n}"
-  / # p = notice_for_time(t)
-  
+      /.col-md-3
+      /.btn.btn-sm.btn-default.btn-timeline
+        .fa.fa-calendar.fa-btn
+      / = submit_tag tag_icon(:times), :class => 'btn btn-sm btn-danger', :name => 'delete'
+      .btns
+      a title="Удалить день": .btn.btn-sm.btn-danger.btn-timeline: .fa.fa-times
+      a = text_field_tag :day, :class => 'form-control', :placeholder => "Дата клейки", :value => @day
+      /li
+      a: .btn-sm.btn-timeline: .fa.fa-calendar.fa-btn
+      ul.nav.nav-tabs
+        li.spacer
+          | &nbsp;
+        / li scroll
+        / li
+        /   .text scroll
+        /   .fa.fa-arrow-right
+        - today = Date.today
+        - much = @add_days.uniq.size > 2 ? 4 : 7
+        - much.times{|i|@add_days << today.prev_day(i)}
+        - @add_days.uniq.sort.each_with_index do |tab, i|
+          - history = @history[timeline_id(tab)]
+          li class=[('active' if tab == @day), ('history' unless history.nil?)] title=history&.round(1)
+            = link_to url(:stickers, :order, id: @order.id, date: timeline_id(tab)), class: 'flex-v text-center'
+              .t = to_dm(tab)
+              strong = shortday(tab)
+            - if history
+              .progress.for-stickers.mini.ninety
+                .progress-bar role="progressbar" style="width:#{history&.ceil}%"
+        li.spacer
+          | &nbsp;
+
+      / = hidden_tag :day, value=timeline_id(tab[:date])
+      .col = submit_tag "Сохранить клейку", :class => 'btn btn-sm btn-finished', :name => 'save'
+      
+    = partial 'timeline/calendar', locals: { start: @day.prev_month(2).end_of_week, busy: true }
+    
   - displayed_n = 0
   .block
     ul class="nav nav-tabs non-print" id="order_tab"
@@ -270,34 +199,25 @@ ul class="nav nav-tabs non-print"
                 div class="table-res4ponsive"
                   h4.non-print = tab.name
                   table.table
-                    thead.only-print
-                      tr
-                        td = tab.name
-                        td colspan=5
-                          - if tab.id == 18
-                            = sticker.first
-                          - if tab.id == 21
-                            = sticker.last
+                    thead.only-print: tr: td colspan=10 = tab.name
                     tr
-                      th.only-print width='10%' Собрано
+                      th.only-print Отметка
                       th Наименование
                       th Коммент
                       th Количество
                       th.non-print Цена
                       th.non-print Сумма
                       th.non-print Наклеено
-                      th.non-print Факт
-                      th.non-print Не&nbsp;делаем
-                      th.only-print width='5%' Деколи
-                      th.only-print width='5%' Тираж
+                      th.non-print.text-center Факт
                     
                     - @order.by_cat(tab.id).each do |ol|
                       tr class="order-line"
                         = hidden_field_tag "line[#{ol.id}][id]", :value => ol[:id]
                         td.only-print &nbsp;
                         td.col-md-4
+                          /sup = ol[:id]
                           = ol.product.displayname
-                        td.col-md-3
+                        td
                           - if !ol.description.blank?
                             div = ol.description
                         td.col-md-1
@@ -307,33 +227,35 @@ ul class="nav nav-tabs non-print"
                         td.col-md-1.non-print
                           == rur(ol.price*ol.amount)
                         td.col-md-1.non-print.td-sticker-input
+                          - ols = @olstickers.fetch(ol.id, nil)
+                          - olh = @olsum.fetch(ol.id, nil)
                           - if @kc_products[ol.product_id] && !ol.ignored
-                            - ols = @olstickers.fetch(ol.id, nil)
-                            /.input-group-sm class=('input-group' if ols)
-                            - if allow_route?(:orders_stickers)
-                              /= (text_field_tag "line_s[#{ol.id}][sticker]", :value => ols&.fetch(:v),
-                                :autocomplete => "off", :class => "form-control input-sm")
-                            - else
-                              = ols&.fetch(:v)
-                            - if ols
-                              /.input-group-addon
-                              = ols&.fetch(:v)
-                              '  
-                              .label.label-success = to_dm timeline_unf(ols[:t])
-                        td.col-md-1.non-print: .controls
-                          - if allow_route?(:orders_infact)
+                            .input-group-sm class=('input-group' if ols || olh)
+                              - if allow_route?(:orders_stickers)
+                                = (text_field_tag "stickers[#{ol.id}]", :value => ols&.fetch(:v),
+                                  :autocomplete => "off", :class => "form-control input-sm")
+                              - else
+                                = ols&.fetch(:v)
+                              - if olh
+                                .input-group-addon
+                                  .label.label-success = olh&.fetch(:v)
+                          - elsif ol.ignored
+                            - if olh
+                              .label.label-success = olh&.fetch(:v)
+                        td.col-md-1.non-print: .controls.text-center
+                          - if false
                             = (text_field_tag "line[#{ol.id}][done_amount]", :value => ol.done_amount,
                             :autocomplete => "off", :class => "form-control input-sm")
                           - else
-                            .text-center = ol.done_amount
-                        td.col-md-1.vert-align.non-print: .controls
-                          - if allow_route?(:orders_infact)
+                            = ol.done_amount
+                            - if ol.ignored
+                              .fa.fa-times
+                        /td.col-md-1.vert-align.non-print: .controls
+                          - if false
                             = hidden_field_tag "line[#{ol.id}][ignored]", :value => 'false'
                             = check_box_tag "line[#{ol.id}][ignored]", :checked => ol.ignored
                           - else
                             = check_box_tag '', :checked => ol.ignored, :disabled => true
-                        td.only-print
-                        td.only-print
       .tab-pane.non-print id="cat-fail"
         p У этого заказа заглючили секции. Тут будет кнопка для исправления.
 
@@ -347,32 +269,9 @@ ul class="nav nav-tabs non-print"
         ' Фактически собрано на:
         == rur("%0.f" % @order.done_total)
 
-  - if !@order.draft? && !@order.shipped?
-    - if current_account.is_admin? or (@order_part and @order_part.current?)
-      = submit_tag "Сохранить", :class => 'btn btn-sm btn-prime', :name => 'save'
-  - elsif current_account.is_admin? && !@order.draft?
-    = submit_tag "Сохранить", :class => 'btn btn-sm btn-prime', :name => 'save_finish'
-  - unless role_is?(:stickerman)
-    - if @order_part and @order_part.current?
-      |&nbsp;
-      = submit_tag "Собрать", :class => 'btn btn-sm btn-finished', :name => 'next_status'
-    - if current_account.is_admin? && @order.current?
-      |&nbsp;
-      = submit_tag "Собрать все части", :class => 'btn btn-sm btn-finished', :name => 'next_status_all'
 
-  - if current_account.is_admin? && !@order.draft?
-    div class="row non-print" style="margin-top: 30px;"
-      = link_to "Создать дополнение к заказу ", url(:orders, :addition, :id => @order.id)
-      span data-toggle="tooltip" data-placement="right" title="Создает новый заказ с разницей от текущего,\
-      проверьте заполненность значений фактически сделанной продукции"
-        = tag_icon "question-circle"
 
-  .clearfix
-
-picmod
-.modal-backdrop.hide
-
-- content_for :js_assets do
+/- content_for :js_assets do
   = javascript_include_tag :riot, :fileinput
   / rscript type="riot/tag" src="/riot/tags/sticker_line.tag"
   rscript type="riot/tag" src="/riot/tags/fcollapser.tag"
@@ -383,7 +282,9 @@ picmod
       riot.mount('fcollapser, piclist, picmod')
     });
 
+- content_for :js_assets do
   javascript:
+
     (function($) {
       $(function() {
         var validateForm = function() {
@@ -443,9 +344,10 @@ picmod
 
         $("calendar").on("click", ".day", function() {
           var day = $(this);
-          let inp = $('input[name="cabie[timeline_at]"]')
+          let inp = $('input[name=day]')
           inp.val($('input', day).val())
           $('calendar').toggle('collapse')
+          window.location.href = '?date=' + inp.val()
           
           //var data = "id=" + $(":input:first", line).val() + "&authenticity_token=" + $("form:first :input[name^='auth']").val();
           // $.ajax({ type: "POST", url: "/order/cartdel", data: {} });
@@ -476,5 +378,14 @@ picmod
           $("#for_order_tab .tab-pane.filled").removeClass("non-print")
           print()
         });
+
+        // /document.addEventListener("DOMContentLoaded", function(event) {
+        // var ax = document.querySelector('#stickers_tab').getBoundingClientRect().width
+        // document.querySelector('#stickers_tab ul').scrollBy(ax, 0)
+        var al = document.querySelector('#stickers_tab ul .active')
+        if (al && al.nextElementSibling) al = al.nextElementSibling
+        if (al) al.scrollIntoView(false)
+        // })
+        
       });
     })(jQuery);

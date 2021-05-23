@@ -1,0 +1,57 @@
+picmod
+  .modal class='{ open_class }' onclick='{close_drop}'
+    .modal-dialog2.modal-gal.modal-dialog-centered
+      .modal-content
+        /.modal-close.close
+          button.btn.btn-milk type="button" onclick="{close}"
+            .fa.fa-times
+
+        .captain
+          | { title }
+        .modal-body.text-center
+          img src='{ src }' style='height:90vh;'
+          
+
+  javascript:
+    this.title = opts.title
+    self.src = opts.src
+
+    this.preventer = function(e) {
+      e.preventDefault()
+    }
+
+    close_drop(a) {
+      if (a.target !== a.currentTarget) return;
+      self.close()
+    }
+
+    close() {
+      document.querySelector('.modal-backdrop').classList.add('hide')
+      document.body.classList.remove('modal-open')
+      self.open_class = ''
+      // $('body').css('overflow', 'auto')
+      document.removeEventListener('touchmove', self.preventer)
+
+
+      rcontrol.trigger("PICMODAL_CLOSED")
+      // self.unmount()
+    }
+
+    open(data) {
+      self.title = data.title
+      self.src = data.src
+
+      document.body.classList.add('modal-open')
+      document.querySelector('.modal-backdrop').classList.remove('hide')
+      self.open_class = 'show in'
+      document.addEventListener('touchmove', self.preventer)
+    }
+
+    rcontrol.on("PICMODAL_OPEN", function(data) {
+      self.open(data)
+      self.update()
+    })
+
+    rcontrol.on("PICMODAL_CLOSE", function(data) {
+      self.close()
+    })

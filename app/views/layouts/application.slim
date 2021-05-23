@@ -69,6 +69,10 @@ html lang='en'
               | Готовые
               span class="menu-icon fa fa-check-square-o"
           li.sidebar-list
+            = link_to url(:stickers, :orders) do
+              | Наклеенные
+              span class="menu-icon fa fa-ticket"
+          li.sidebar-list
             = link_to url(:orders, :archive) do
               | Архив
               span class="menu-icon fa fa-archive"

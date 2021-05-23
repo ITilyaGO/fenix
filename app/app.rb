@@ -66,6 +66,7 @@ module Fenix
       role.project_module :orders_draft, '/orders/draft'
       role.project_module :orders_infact, '/orders/infact'
       role.project_module :orders_stickers, '/orders/stickers'
+      role.project_module :picupload, '/picupload'
       role.project_module :categories, '/categories'
       role.project_module :products, '/products'
       role.project_module :sections, '/sections'

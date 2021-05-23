@@ -1,5 +1,7 @@
 module Fenix
   class App
+    IDSEP = '_'.freeze
+
     helpers KatoHelpers
     helpers KyotoHelpers
     helpers ProductsHelper

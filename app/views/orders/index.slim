@@ -70,7 +70,7 @@ div class="tabs-content"
             // | &nbsp;
             span class="label label-#{order.status}"
               = t :"status.#{order.status}"
-          td class='list-column non-print'
+          td.list-column.non-print
             - progress = @kc_stickers.fetch(order.id, 0)
             .progress.short.for-stickers title="#{progress}%"
               .progress-bar role="progressbar" style="width:#{progress.to_i}%"
@@ -88,6 +88,8 @@ div class="tabs-content"
           
           td class='list-column list-row-action non-print'
             div class='list-row-action-wrapper'
+              - if allow_route?(:orders_stickers)
+                = link_to tag_icon(:ticket), :rel => :tooltip, :title => "Stickers", :href => url(:stickers, :order, :id => order.id), :class => 'list-row-action-wrapper-link'
               - if (order.draft? || order.anew?) && current_account.is_admin?
                 = link_to tag_icon(:paw), :rel => :tooltip, :title => "Edit order", :href => url(:orders, :correct, :id => order.id), :class => 'list-row-action-wrapper-link'
               - if !order.draft?

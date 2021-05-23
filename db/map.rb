@@ -27,11 +27,14 @@ module Cabie::Structure
     [:p, :towns, :migrate, :old] => nil,
     [:m, :clients, :transport] => nil,
     [:m, :order_lines, :sticker] => nil,
+    [:m, :order_lines, :sticker_sum] => nil,
+    [:m, :order_image, :cde] => nil,
     [:m, :sticker, :order_history] => nil,
     [:m, :towns, :migrate, :debug] => nil,
     [:m, :dic, :transport] => nil,
     [:m, :managers, :geo_poss] => nil,
-    [:m, :wonderbox] => nil
+    [:m, :wonderbox] => nil,
+    [:i, :orders, :sticker_date] => nil
   }.freeze
   MAPTREE = {
     :root => [
@@ -49,10 +52,14 @@ module Cabie::Structure
       m: [
         :clients => [:transport],
         :order_lines => [:sticker],
+        :order_image => [],
         :sticker => [:order_history],
         :dic => [:transport],
         :managers => [:geo_poss],
         :wonderbox => []
+      ],
+      i: [
+        :orders => [:sticker_date]
       ]
     ]
   }.freeze

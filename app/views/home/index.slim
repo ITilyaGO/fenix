@@ -1,16 +1,60 @@
-.main-wrapper-push style="display: flex;flex-direction: column; justify-content: center; align-items: center;  height: 84vh;"
-  h1 style="color: #92a1c2;"
-    ' pio
-    sup style="color: gray;top:0;" 
-      = Fenix::App::APP_MAJOR
-  br
-  span style="background: #576172;color: cornsilk;border-radius: 4px;width: 300px;opacity: 0.7; display: flex;flex-direction: row;justify-content: center;align-items: center;"
+.main-wrapper-push style="display: flex;flex-direction: column; justify-content: space-between; align-items: center;  height: 84vh;"
+  .block
+  .block
+    h1.text-center style="color: #92a1c2;"
+      ' pio
+      sup style="color: gray;top:0;" 
+        = Fenix::App::APP_MAJOR
+    span style="background: #576172;color: cornsilk;border-radius: 4px;width: 300px;opacity: 0.7; display: flex;flex-direction: row;justify-content: center;align-items: center;"
 
-    span.fa.fa-chevron-right style="font-size: 1.5em;padding: 0 4px 0 0;"
-    span.fa.fa-chevron-left style="font-size: 1.5em;padding: 0 1.5em 0 0;"
+      span.fa.fa-chevron-right style="font-size: 1.5em;padding: 0 4px 0 0;"
+      span.fa.fa-chevron-left style="font-size: 1.5em;padding: 0 1.5em 0 0;"
 
-    div style="font-size: 1em;border-left: 2px dashed rgb(195, 202, 204);padding: 1em 1.5em;"
-      span style="display: block;"
-        ' version
-        = Fenix::App::APP_VERSION
-      span style="font-size: .8em;" = Fenix::App::APP_DATE.strftime "%-d %b %Y"
+      div style="font-size: 1em;border-left: 2px dashed rgb(195, 202, 204);padding: 1em 1.5em;"
+        span style="display: block;"
+          ' version
+          = Fenix::App::APP_VERSION
+        span style="font-size: .8em;" = Fenix::App::APP_DATE.strftime "%-d %b %Y"
+
+  .block.browsers.flex-c style="color: rgb(162, 181, 198);"
+    - ua = user_browser
+
+    .it
+      .text-center Лучше всего работает в
+      .flex-c
+        .item.flex-v class=('active' if ua[:br] == :safari)
+          .fa.fa-safari style='width:32px;height:32px;'
+          .l Safari
+        .item.flex-v class=('active' if ua[:br] == :ff)
+          .fa.fa-firefox style='width:32px;height:32px;'
+          .l Firefox
+        .item.flex-v class=('active' if ua[:br] == :chrome && ua[:v] >= 91)
+          .fa.fa-chrome style='width:31px;height:32px;'
+          .l
+            ' Chrome
+            .badge 91+
+
+    - if ua[:br] == :chrome && ua[:v] < 91
+      .it style="margin-left: 6em;"
+        .text-center Ваш браузер слишком старый
+        .flex-c
+          .item.flex-v class=('active' if ua[:br] == :chrome && ua[:v] < 91)
+            .fa.fa-chrome style='width:31px;height:32px;'
+            .l
+              ' Chrome
+              .badge = ua[:v]
+
+
+    - if ua[:br] == :unknown
+      .it style="margin-left: 6em;"
+        .text-center Мы не смогли опознать ваш браузер
+        .flex-c
+          .item.flex-v
+            .fa.fa-laptop.globe style='font-size:32px;width:31px;height:32px;'
+      / .it.text-center Мы не смогли опознать ваш браузер
+
+  /- if ua[:br] == :chrome && ua[:v] < 91
+    .text-center
+      ' Ваш браузер слишком старый
+      / -
+      /| Chrome #{ua[:v]}

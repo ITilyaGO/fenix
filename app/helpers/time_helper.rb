@@ -28,6 +28,16 @@ Fenix::App.helpers do
   def to_percent(all, done)
     all > 0 ? "%0.f" % ((done.to_f/all.to_f)*100).round : 0
   end
+
+  def to_perc(all, done)
+    all > 0 ? ((done.to_f/all.to_f)*100) : 0
+  end
+
+  def shortday(day)
+    today = Date.today
+    tom = { today => 'сегодня', today-1 => 'вчера' }
+    today == day || today-1 == day ? tom[day] :  Date::DAYNAMESRU[day.wday-1]
+  end
 end
 
 class Date

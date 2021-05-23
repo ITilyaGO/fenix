@@ -18,7 +18,9 @@ calendar.collapse#multiCollapseExample1: .inner
         .noday
     - if cdate.wday == 1
       .week
-    .day class=[calendar_busy?(cdate), (:past if today_marker > cdate)]
+    
+    - busy ||= false
+    .day class=[(calendar_busy?(cdate) unless busy), (:past if today_marker > cdate)]
       input type="hidden" name="dayno[]" value=cdate.strftime('%Y-%m-%d')
       span = cdate.strftime('%d')
     - cdate += 1

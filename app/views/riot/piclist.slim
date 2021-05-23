@@ -1,0 +1,53 @@
+piclist
+  .flex-c.flex-wrap: .image each="{ pic, i in images }"
+    img if="{ ext[i] }" src="{ pic_path(pic) }" style="width:100px" onclick="{ open_mod }"
+    / img if='{ ext[i] && !loaded }' style="width:100px" onclick="{ open_mod }"
+    .file.flex-v if="{ !ext[i] }" style="width:100px;height:100px;"
+      .text-center
+        .fa.fa-file
+        .title: a href="{ file_path(pic) }" { pic }
+    
+    = form_tag url(:picupload, :remove), if: '{admin}' do
+      input type="hidden" name="id" value="{ order }"
+      input type="hidden" name="image" value="{ pic }"
+      = submit_tag 'delete', :class => 'btn btn-danger btn-xs btn-embossed btn-del', :show => "{ show_rem }"
+
+  .btn.btn-xs.btn-warning if='{ admin }' onclick="{ () => this.show_rem = !this.show_rem }" Удалить
+
+  css:
+    .file, .file a {
+      color: rgb(150, 148, 145);
+    }
+    .file a {
+      font-size: .8em;
+    }
+    .btn-del {
+      position: absolute;
+      bottom: 50%;
+      left: 30%;
+    }
+
+  javascript:
+    self.order = opts.order
+    self.images = opts.images.length > 1 ? opts.images.split(' ') : []
+    self.ext = opts.ext.length > 1 ? opts.ext.split(' ').map(function(i) { return i == 'true' }) : []
+    this.show_rem = false
+    self.loaded = false
+    self.admin = opts.admin == '1'
+
+    pic_path(p) {
+      return self.loaded ? ('/images/orders/' + p) : ''
+    }
+
+    file_path(p) {
+      return '/images/orders/' + p
+    }
+
+    open_mod(me) {
+      rcontrol.trigger("PICMODAL_OPEN", { src: self.pic_path(me.item.pic) })
+    }
+
+    rcontrol.one('PICLIST_LOAD', function() {
+      self.loaded = true
+      self.update()
+    })
