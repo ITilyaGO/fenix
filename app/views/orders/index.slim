@@ -2,7 +2,51 @@
 //   li class="active" = link_to tag_icon(:list, pat(:list)), url(:orders, :index)
 //   li = link_to tag_icon(:plus, pat(:new)), url(:orders, :create)
 // 
-div class="tabs-content"
+
+- if @r == url(:orders, :index) && current_account.is_admin?
+  - price_total = @orders.map(&:total).sum
+  - price_done = @orders.map(&:done_total).sum
+  - all_ids = @orders.map(&:id)
+  - @sec_sums = sum_by_sections(all_ids)
+
+  - @stickers = CabiePio.all_keys(all_ids, folder: [:sticker, :order]).flat.trans(:to_i, :to_f)
+  - @kc_stickers = CabiePio.all_keys(all_ids, folder: [:sticker, :order_progress]).flat.trans(:to_i, :to_f)
+  - @kc_sumstickers = @stickers.map{|k,v|[k, v*@kc_stickers.fetch(k,0)/100]}.to_h
+  .timeline: .summary
+    - by_deli = sum_by_delivery(@orders)
+    - [:postage, :vernissage, :roundtrip, :pickup].each do |ds|
+      - if by_deli[ds] > 0
+        .item-orders.pull-left
+          span = t :"delivery.#{ds.to_s}"
+          .rpr == deli(rur by_deli[ds])
+
+    .pull-left
+    - sections = Section.all
+    - sections.each do |s|
+      - sec_sum = @sec_sums.fetch(s.id, 0)
+      - if sec_sum > 0
+        .item-all.pull-left
+          span = s.name
+          .rpr == deli(rur sec_sum)
+
+    .item-all.pull-right
+      span Сумма заказов
+      .rpr == deli(rur price_total)
+    .item-done.pull-right
+      span Отправлено #{((price_done.to_f/price_total)*100).ceil}%
+      .rpr == deli(rur price_done)
+
+    - stickers_done = @kc_sumstickers.values.sum
+    - stickers_total = @stickers.values.sum
+    .item-sticker.pull-right
+      span Клейка
+      .rpr == deli(rur stickers_total)
+    .item-sticker.pull-right
+      span Сделано #{((stickers_done.to_f/stickers_total)*100).ceil}%
+      .rpr == deli(rur stickers_done)
+
+
+.tabs-content
   table class="table table-hover table-condensed" id="list"
     thead
       tr
@@ -28,7 +72,7 @@ div class="tabs-content"
         th class='header non-print'
           = partial 'bricks/orders/section_titles'
         th class='header non-print'
-        th class='header list-row-action-header non-print'
+        th class='header list-row-action-header non-print' Всего: #{@orders.size}
     
     - filter = @filtered_by_user.is_a? Array
     tbody

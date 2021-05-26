@@ -216,7 +216,6 @@ Fenix::App.controllers :dr_timeline, :map => 'timeline/driven' do
     @gtm = timeline_group(@ktm.trans(nil, :to_i))
 
     @sections = Section.includes(:categories).all
-    @orders = []
     @week_orders = @gtm.fetch(@sdate, [])
     @all_ids = @week_orders.map(&:last).map(&:to_i)
     @orders = Order.where(id: @all_ids).order(:client_id)
@@ -225,6 +224,8 @@ Fenix::App.controllers :dr_timeline, :map => 'timeline/driven' do
     @stickers = CabiePio.all_keys(@all_ids, folder: [:sticker, :order]).flat.trans(:to_i, :to_f)
     @transport = CabiePio.all_keys(@orders.map(&:client_id).uniq, folder: [:m, :clients, :transport]).flat
     @kc_stickers = CabiePio.all_keys(@all_ids, folder: [:sticker, :order_progress]).flat.trans(:to_i, :to_f)
+    @kc_sumstickers = @stickers.map{|k,v|[k, v*@kc_stickers.fetch(k,0)/100]}.to_h
+    @sec_sums = sum_by_sections(@all_ids)
 
     if params[:sort].to_sym == :manager
       @by_manager = @orders.map(&:id).group_by do |oid|

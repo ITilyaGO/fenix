@@ -1,0 +1,9 @@
+subclick onclick='{clicker}'
+  yield
+
+  javascript:
+    clicker() {
+      self.root.parentElement.querySelectorAll('idcollapser .head').forEach(function(el) {
+        el.click()
+      })
+    }

@@ -61,30 +61,35 @@
     - price_total = @orders.map(&:total).sum
     - price_done = @orders.map(&:done_total).sum
     tfoot
-      tr: td.summary colspan=12
-        .item-orders.pull-left
-          span = t :"delivery.postage"
-          div == deli(rur @orders.select{|x| x.delivery.to_sym == :postage}.map(&:total).sum)
-        .item-orders.pull-left
-          span = t :"delivery.vernissage"
-          div == deli(rur @orders.select{|x| x.delivery.to_sym == :vernissage}.map(&:total).sum)
-        - total_roundtrip = @orders.select{|x| x.delivery.to_sym == :roundtrip}.map(&:total).sum
-        - if total_roundtrip > 0
-          .item-orders.pull-left
-            span = t :"delivery.roundtrip"
-            div == deli(rur total_roundtrip)
-        - total_pickup = @orders.select{|x| x.delivery.to_sym == :pickup}.map(&:total).sum
-        - if total_pickup > 0
-          .item-orders.pull-left
-            span = t :"delivery.pickup"
-            div == deli(rur total_pickup)
+      tr: td.summary colspan=13
+        - by_deli = sum_by_delivery(@orders)
+        - [:postage, :vernissage, :roundtrip, :pickup].each do |ds|
+          - if by_deli[ds] > 0
+            .item-orders.pull-left
+              span = t :"delivery.#{ds.to_s}"
+              .rpr == deli(rur by_deli[ds])
+        .pull-left
+        - sections = Section.all
+        - sections.each do |s|
+          - sec_sum = @sec_sums.fetch(s.id, 0)
+          - if sec_sum > 0
+            .item-all.pull-left
+              span = s.name
+              .rpr == deli(rur sec_sum)
 
         .item-all.pull-right
           span Сумма заказов
-          div == deli(rur price_total)
+          .rpr == deli(rur price_total)
         .item-done.pull-right
-          span Сделано #{((price_done.to_f/price_total)*100).ceil}%
-          div == deli(rur price_done)
+          span Отправлено #{((price_done.to_f/price_total)*100).ceil}%
+          .rpr == deli(rur price_done)
+
+        - stickers_done = @kc_sumstickers.values.sum
+        - stickers_total = @stickers.values.sum
         .item-sticker.pull-right
           span Клейка
-          div == deli(rur @all_ids.sum{|x|@stickers.fetch(x, 0)})
+          .rpr == deli(rur @all_ids.sum{|x|@stickers.fetch(x, 0)})
+        .item-sticker.pull-right
+          span Сделано #{((stickers_done.to_f/stickers_total)*100).ceil}%
+          .rpr == deli(rur stickers_done)
+

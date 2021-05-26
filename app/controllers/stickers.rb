@@ -12,7 +12,7 @@ Fenix::App.controllers :stickers do
     last1_stickers = CabiePio.all([:i, :orders, :sticker_date], [timeline_id[0...4]]).flat.keys
     last2_stickers = CabiePio.all([:i, :orders, :sticker_date], [prev_m]).flat.keys
     last_stickers = (last1_stickers + last2_stickers)
-      .sort.map{|k|k.split(Fenix::App::IDSEP).last.to_i}.reverse
+      .sort.map{|k|k.split(Fenix::App::IDSEP).last.to_i}.reverse.shift(150)
     # @orders = orders_query.includes(:client, :place, :order_parts, :timeline).order(sort => dir)
     if current_account.limited_orders?
       @filtered_by_user = OrderPart.where(:order_id => orders_query.ids, :section => current_account.section_id).pluck(:order_id)
@@ -24,7 +24,7 @@ Fenix::App.controllers :stickers do
     @transport = CabiePio.all_keys(@orders.map(&:client_id).uniq, folder: [:m, :clients, :transport]).flat
     @kc_timelines = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :timeline]).flat.trans(:to_i)
     @kc_stickers = CabiePio.all_keys(@orders.map(&:id), folder: [:sticker, :order_progress]).flat.trans(:to_i, :to_f)
-    @r = url(:orders, :index)
+    @r = url(:stickers, :orders)
     render 'orders/index'
   end
 

@@ -5,7 +5,7 @@ br
   - @cats.each do |category|
     
     .flex-wrap
-      .block.cat: p #{category.name}    
+      .block.cat.hand riot-tag='subclick': p #{category.name}    
 
       - category.subs_ordered.sort_by{|x|-@catneed.fetch(x.id, 0)}.each do |sub|
         - catstock = @catstock.fetch(sub.id, 0)
@@ -121,8 +121,9 @@ br
   = javascript_include_tag :riot
   / script type="riot/tag" src="/riot/tags/sticker_line.tag"
   rscript type="riot/tag" src="/riot/tags/idcollapser.tag"
+  rscript type="riot/tag" src="/riot/tags/subclick.tag"
   javascript:
     
     document.addEventListener("DOMContentLoaded", function(event) {
-      riot.mount('idcollapser')
+      riot.mount('idcollapser, subclick')
     });

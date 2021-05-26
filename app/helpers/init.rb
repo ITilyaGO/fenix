@@ -9,5 +9,6 @@ module Fenix
     helpers OrdersHelper
     helpers TimelineHelper
     helpers StickerHelper
+    helpers StatHelper
   end
 end
