@@ -30,11 +30,13 @@ class OrderJobs
     # CabiePio.clear(:stock, :common, :a) if force
     CabiePio.clear(:need, :order) if force
     CabiePio.clear(:need, :product) if force
-    # CabiePio.clear(:stock, :order, :n) if force
+    CabiePio.clear(:need, :archetype) if force
+    CabiePio.clear(:stock, :archetype) if force
+    # CabiePio.clear(:stock, :order, :done) if force
 
     orders = Order.where("status = ?", Order.statuses[:current])
     orders.each do |t|
-      bal_need_order_start(t)
+      #bal_need_order_start(t)
     end
   end
 end

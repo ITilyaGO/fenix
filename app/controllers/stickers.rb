@@ -85,7 +85,7 @@ Fenix::App.controllers :stickers do
     # kc_products = CabiePio.folder(:products, :sticker).flat.trans(:to_i, :to_f)
 
     sticker_sum = 0
-    saved_stickers = CabiePio.all_keys(@order.order_lines.map(&:id), folder: [:m, :order_lines, :sticker])
+    saved_stickers = CabiePio.all_keys(@order.order_lines.map(&:id), folder: [:m, :order_lines, :sticker_sum])
       .flat.trans(:to_i).transform_values{|v|v[:v]}
     kc_products = CabiePio.folder(:products, :sticker).flat.trans(:to_i, :to_f)
     amt = 0
@@ -113,6 +113,10 @@ Fenix::App.controllers :stickers do
       save_sticker_history(@order.id, opercd, day)
       save_sticker_progress(@order.id, operc)
     end
+    now_stickers = CabiePio.all_keys(@order.order_lines.map(&:id), folder: [:m, :order_lines, :sticker_sum])
+      .flat.trans(:to_i).transform_values{|v|v[:v]}
+    dilines = now_stickers.map{|k,v|[k,v-saved_stickers.fetch(k,0)]}.to_h
+    arbal_unstock_order(@order, dilines, now_stickers)
 
     redirect(url(:orders, :index))
   end

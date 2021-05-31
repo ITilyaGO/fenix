@@ -110,8 +110,12 @@ html lang='en'
             li.sidebar-title.separator
               span Склад
             li.sidebar-list
-              = link_to url(:products, :stock) do
+              = link_to url(:archetypes, :stock) do
                 | Продукция
+                span class="menu-icon fa fa-inbox"
+            li.sidebar-list
+              = link_to url(:archetypes, :index) do
+                | Связи
                 span class="menu-icon fa fa-inbox"
 
           - if allow_route?(:editors)

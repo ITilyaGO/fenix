@@ -10,5 +10,6 @@ module Fenix
     helpers TimelineHelper
     helpers StickerHelper
     helpers StatHelper
+    helpers ArchetypeHelper
   end
 end

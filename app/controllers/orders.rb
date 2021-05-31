@@ -169,6 +169,10 @@ Fenix::App.controllers :orders do
     calendar_init(Date.today)
     @ps = KSM::OrderImage.all_for(@order.id)
 
+    arches = CabiePio.folder(:product, :archetype).flat.trans(:to_i)
+    parchs = @order.order_lines.map{|l|archetype_order(arches[l.product_id], l.id, @order.id)}
+    @rese = CabiePio.all_keys(parchs, folder: [:need, :order]).flat.map{|k,v|[k.split('_')[1].to_i, v.to_i]}.to_h
+
     if @order
       @order.actualize
       render 'orders/edit'
@@ -478,13 +482,23 @@ Fenix::App.controllers :orders do
 
     # order = order.attributes.merge({ :status => :anew, :online_at => order.created_at })
     # order = Order.new({:online_id => online.id, :status => :anew, :client_id => client, :online_at => online.created_at, :description => online.description, :total => online.total})
-    order.order_lines.destroy_all
+    exst = params[:line].map{|l|l[:ol].to_i}
+    order.order_lines.each do |ol|
+      ol.destroy unless exst.include? ol.id
+    end
     params[:line].each do |line|
       p = Product.find(line['id']) rescue nil
       next if !p
-      ol = OrderLine.new({ :product_id => p.id, :amount => line['amount'], :price => p.price, :description => line['comment'] })
-      order.total += p.price*ol.amount
-      order.order_lines << ol
+      if col = order.order_lines.detect{|l|l.id == line[:ol].to_i}
+        col.amount = line[:amount]
+        col.description = line[:comment]
+        order.total += p.price*col.amount
+        col.save
+      else
+        ol = OrderLine.new({ :product_id => p.id, :amount => line['amount'], :price => p.price, :description => line['comment'] })
+        order.total += p.price*ol.amount
+        order.order_lines << ol
+      end
       # ol.update_attributes(l)
     end
     order.save
@@ -497,9 +511,12 @@ Fenix::App.controllers :orders do
         include_section = order.by_cat?(c.id)
         break if include_section
       end
+      found = order.order_parts.detect{|op|op.section_id == s.id}
       if include_section
         op = OrderPart.new(:section_id => s.id, :state => :anew)
-        order.order_parts << op
+        order.order_parts << op unless found
+      elsif found
+        found.destroy
       end
     end
     order.all_parts = order.order_parts.size if order.order_parts.any?
@@ -507,7 +524,8 @@ Fenix::App.controllers :orders do
     order.actualize
     calc_complexity_for order
 
-    bal_need_order_rep(order)
+    # arbal_need_order_rep(order)
+    arbal_need_order_edit order
     
     code = params[:cabie][:kato_place]
     if Kato.valid? code
@@ -551,7 +569,7 @@ Fenix::App.controllers :orders do
       @order.status = :current
       @order.save
 
-      bal_need_order_start @order
+      arbal_need_order_start @order
     end
     redirect(url(:orders, :edit, :id => @order.id))
   end
@@ -569,6 +587,7 @@ Fenix::App.controllers :orders do
     end
 
     if @order_part and params[:order_part]
+      part_before = @order_part.current?
       # @order_part.status = params[:order_part]['done'] ? :finished : :current
       no_boxes = params[:order_part][:no_boxes] == '1'
       @order_part.boxes = params[:order_part][:boxes] || 0
@@ -614,20 +633,20 @@ Fenix::App.controllers :orders do
     prev_amt = CabiePio.get([:orders, :stickers_amount], @order.id).data.to_i
     save_stickers_amount(@order.id, amt) if amt != prev_amt
 
-    params[:line_s].each do |line_id, line_v|
-      next unless line_id
-      ol = @order.order_lines.find(line_id)
-      next if ol.ignored
-      ols = line_v['sticker'].to_i rescue 0
-      sticker_sum += ols*kc_products.fetch(ol.product_id, 0)
-      next if saved_stickers[ol.id] == ols
-      save_sticker_line(ol.id, ols) if ols > 0
-    end if params[:line_s]
-    operc = to_perc(amt, sticker_sum)
-    if operc > 0
-      save_sticker_history(@order.id, operc)
-      save_sticker_progress(@order.id, operc)
-    end
+    # params[:line_s].each do |line_id, line_v|
+    #   next unless line_id
+    #   ol = @order.order_lines.find(line_id)
+    #   next if ol.ignored
+    #   ols = line_v['sticker'].to_i rescue 0
+    #   sticker_sum += ols*kc_products.fetch(ol.product_id, 0)
+    #   next if saved_stickers[ol.id] == ols
+    #   save_sticker_line(ol.id, ols) if ols > 0
+    # end if params[:line_s]
+    # operc = to_perc(amt, sticker_sum)
+    # if operc > 0
+    #   save_sticker_history(@order.id, operc)
+    #   save_sticker_progress(@order.id, operc)
+    # end
     
     status_before = @order.current?
     @order.done_parts = @order.order_parts.where("state = ?", OrderPart.states[:finished]).size
@@ -645,8 +664,12 @@ Fenix::App.controllers :orders do
     @order.actualize
     calc_complexity_for @order
 
-    bal_need_order_mid(@order) if @order.current?
-    bal_need_order_fin(@order) if status_before && @order.finished?
+    # arbal_need_order_mid(@order) if @order.current?
+    
+    if part_before && @order_part.finished?
+      arbal_need_order_fin(@order)
+      arbal_need_order_done(@order)
+    end
 
     if @order.finished?
       redirect(url(:orders, :invoice, :id => @order.id))

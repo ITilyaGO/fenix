@@ -1,0 +1,53 @@
+ul.nav.nav-tabs
+  li = link_to tag_icon(:list, pat(:products)), url(:archetypes, :products)
+  li = link_to tag_icon(:list, pat(:list)), url(:archetypes, :index)
+
+  // li = link_to tag_icon(:plus, pat(:new)), url(:archetypes, :new)
+  // li class="active" = link_to tag_icon(:edit, pat(:edit)), url(:archetypes, :edit, :id => @archetype.id)
+
+.tabs-content
+  = form_for :supermodel, url(:archetypes, :assign, :id => @product.id), :method => :put, :class => 'form-horizontal' do |f|
+    label = @product.displayname
+    ' -
+    label = @product.category.name
+
+    hr
+    fieldset.control-group
+      = f.label :q, :class => 'control-label'
+      .controls
+        = f.number_field :q, :class => 'form-control input-large input-with-feedback', value: @multi, placeholder: 1
+    /fieldset.control-group
+      = f.label :name, :class => 'control-label'
+      .controls
+        = f.text_field :name, :class => 'form-control input-large input-with-feedback', :autofocus => true
+    fieldset.control-group
+      = f.label :product, :class => 'control-label'
+      .controls
+        select name="archetype" class="huge mbl"
+          = content_tag(:option, 'Не назначен', { value: '', selected:@archetype.nil? })
+          - @cats.each do |cat|
+            optgroup label="#{cat.name}"
+              - cat.subcategories.each do |sub|
+                - @grouped[sub.id]&.each do |a|
+                  - next if a.group?
+                  - html_attributes = { :value => a.id }
+                  - html_attributes[:selected] ||= option_is_selected?(a.id, a.name, @archetype)
+                  = content_tag(:option, a.name, html_attributes)
+
+    fieldset.control-group
+      = f.label :group, :class => 'control-label'
+      .controls
+        select name="garchetype" class="huge mbl"
+          = content_tag(:option, 'Не назначен', { value: '', selected:@archetype.nil? })
+          - @cats.each do |cat|
+            optgroup label="#{cat.name}"
+              - cat.subcategories.each do |sub|
+                - @grouped[sub.id]&.each do |a|
+                  - next unless a.group?
+                  - html_attributes = { :value => a.id }
+                  - html_attributes[:selected] ||= option_is_selected?(a.id, a.name, @archetype)
+                  = content_tag(:option, a.name, html_attributes)
+
+
+    .form-actions
+      = f.submit pat(:save), :class => 'btn btn-prime'

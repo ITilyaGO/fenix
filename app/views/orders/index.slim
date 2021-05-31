@@ -5,7 +5,6 @@
 
 - if @r == url(:orders, :index) && current_account.is_admin?
   - price_total = @orders.map(&:total).sum
-  - price_done = @orders.map(&:done_total).sum
   - all_ids = @orders.map(&:id)
   - @sec_sums = sum_by_sections(all_ids)
 
@@ -32,9 +31,6 @@
     .item-all.pull-right
       span Сумма заказов
       .rpr == deli(rur price_total)
-    .item-done.pull-right
-      span Отправлено #{((price_done.to_f/price_total)*100).ceil}%
-      .rpr == deli(rur price_done)
 
     - stickers_done = @kc_sumstickers.values.sum
     - stickers_total = @stickers.values.sum
@@ -134,7 +130,7 @@
             div class='list-row-action-wrapper'
               - if allow_route?(:orders_stickers)
                 = link_to tag_icon(:ticket), :rel => :tooltip, :title => "Stickers", :href => url(:stickers, :order, :id => order.id), :class => 'list-row-action-wrapper-link'
-              - if (order.draft? || order.anew?) && current_account.is_admin?
+              - if current_account.is_admin?
                 = link_to tag_icon(:paw), :rel => :tooltip, :title => "Edit order", :href => url(:orders, :correct, :id => order.id), :class => 'list-row-action-wrapper-link'
               - if !order.draft?
                 = link_to tag_icon(:edit), :href => url(:orders, :edit, :id => order.id), :class => 'list-row-action-wrapper-link'

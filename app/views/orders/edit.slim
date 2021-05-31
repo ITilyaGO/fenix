@@ -302,6 +302,9 @@ ul class="nav nav-tabs non-print"
                             div = ol.description
                         td.col-md-1
                           = ol.amount
+                          - rsv = @rese.fetch(ol.id, 0)
+                          - if rsv > 0
+                            .non-print.label.label-info = rsv
                         td.col-md-1.non-print
                           == rur(ol.price)
                         td.col-md-1.non-print

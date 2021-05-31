@@ -110,6 +110,7 @@ div class="tabs-content"
       td class="col-md-1"
         span class="num"
         = hidden_field_tag 'line[][id]', :value => line[:id]
+        = hidden_field_tag 'line[][ol]', :value => ''
       td class="col-md-4"
         span class="product"
       td class="col-md-3"
@@ -146,6 +147,7 @@ div class="tabs-content"
           td class="col-md-1"
             span class="num" = i + 1
             = hidden_field_tag 'line[][id]', :value => line.product.id
+            = hidden_field_tag 'line[][ol]', :value => line.id
           td class="col-md-4"
             span class="product" = line.product.displayname
           td class="col-md-3"

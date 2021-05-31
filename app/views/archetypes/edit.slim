@@ -1,0 +1,10 @@
+ul.nav.nav-tabs
+  li = link_to tag_icon(:list, pat(:products)), url(:archetypes, :products)
+  li = link_to tag_icon(:list, pat(:list)), url(:archetypes, :index)
+
+  // li = link_to tag_icon(:plus, pat(:new)), url(:archetypes, :new)
+  // li class="active" = link_to tag_icon(:edit, pat(:edit)), url(:archetypes, :edit, :id => @archetype.id)
+
+.tabs-content
+  = form_for :archetype, url(:archetypes, :update, :id => @archetype.id), :method => :put, :class => 'form-horizontal' do |f|
+    = partial 'archetypes/form', :locals => { :f => f, cats: @cats }

@@ -1,0 +1,133 @@
+.pull-right
+  = link_to :'весь склад', url(:archetypes, :stock, all: 1)
+br
+= form_for :product, url(:archetypes, :stock), :method => :put, :class => 'form-horizontal stock-page' do |f|
+  - @cats.each do |category|
+    
+    .flex-wrap
+      .block.cat.hand riot-tag='subclick': p #{category.name}    
+
+      - category.subs_ordered.sort_by{|x|-@catneed.fetch(x.id, 0)}.each do |sub|
+        - catstock = @catstock.fetch(sub.id, 0)
+        - catneed = @catneed.fetch(sub.id, 0)
+        - next if catstock >= 0 && catneed == 0 && !params[:all]
+        / .block
+        idcollapser titler="#{sub.name}" stock=deli(catstock) need=deli(catneed) for="#c#{sub.id}"
+
+        .col-md-12.hidden id="c#{sub.id}"
+            //.row.hide
+
+            h4 = sub.name
+            table class="table"
+              thead: tr
+                th class="only-print" Отметка
+                th Наименование
+                th Склад
+                th class="non-print" Резерв
+                th class="non-print" Остаток
+                / th class="non-print" Добавить
+                / th class="non-print" Вычесть
+                - 7.times do |i|
+                  - day = @day - 6 + i
+                  th.col: .header-control.w
+                    a.tiny-text href=url(:archetypes, :stock, all: params[:all], day: day)
+                      = to_dm day
+                    .wd = Date::DAYNAMESRU[day.wday-1]
+                th class="non-print" &nbsp;
+              
+              - @ar_grouped[sub.id]&.each do |p|
+                /- next if @parents.include? p.id
+                - stock = @kc_stocks.fetch(p.id, 0)
+                - need = @kc_needs.fetch(p.id, 0)
+                - next if need == 0 && stock == 0 && !params[:all]
+                tr class="order-line"
+                  / = hidden_field_tag "line[#{p.id}][id]", :value => p.id
+                  td class="only-print" &nbsp;
+                  td class="col-md-4"
+                    = p.name
+                  td class="col-md-1" 
+                    / TODO: parent dishes with no price
+                    / == rur(p.price) rescue '?'
+                    - if stock != 0
+                      .label class=[('label-danger' if stock < 0), ('label-success' if stock > 0)]
+                        == deli stock
+                    - else
+                      .label.label-default нет
+                  td
+                    - if need != 0
+                      .label class=[('label-danger' if need < 0), ('label-info' if need > 0)]
+                        == deli need
+                    - else
+                      .label.label-default нет
+                  td
+                    - defz = stock - need
+                    - if defz < 0
+                      .label.label-danger == deli defz.abs
+                    - elsif defz == 0
+                      .label.label-default нет
+                    - else
+                      .label.label-success == deli defz
+                  /td.col-md-1
+                    /- if sticker > 0
+                      .per
+                        = (100/(p.price/sticker)).ceil rescue 0
+                        | %
+                    / = (text_field_tag "line[#{p.id}][in]", :autocomplete => "off",
+                    / :class => "form-control input-sm bg-lightgreen")
+                    /input name='l[]'
+                  /td class="col-md-41" class="non-print"
+                    .inline.controls
+                      /input name='l2[]'
+                      / = (text_field_tag "line[#{p.id}][out]", :autocomplete => "off",
+                      / :class => "form-control input-sm bg-lightred")
+                    .flex-c
+                  - 5.times do |i|
+                    td class="col-md-41"
+                      - day = @day - 6 + i
+                      - if @holders[p.id].fetch(day, nil)
+                        .text-center: .label.label-default = @holders[p.id][day]
+
+                        / .col = text_field_tag "lines[#{p.id}][#{day}]", class: 'form-control input-large',
+                          placeholder: @holders[p.id][day]
+                  - 2.times do |i|
+                    td class="col-md-1"
+                      - day = @day - 1 + i
+                      .col = text_field_tag "lines[#{p.id}][#{day}]", class: 'form-control input-large',
+                        placeholder: @holders[p.id].fetch(day, nil)
+
+                      /- 7.times do |di|
+                        = (text_field_tag "line[#{p.id}][#{di}out]", :autocomplete => "off",
+                        :class => "form-control input-sm bg-lightred")
+                  td.col-md-1.vert-align.non-print
+                    .controls
+                      /= hidden_field_tag "line[#{p.id}][ignored]", :value => 'false'
+                      / .btn.btn-info.btn-xs Обнулить
+
+            /- sub.all_products.order(:index => :asc).each do |line|
+              .row: div
+                / = line.displayname
+                / sticker_line name=line.displayname product=line.id id=line.id values=@kc_products[line.id.to_s]
+                .sticker-block.sleeping
+                  h2 style="flex:1;" = line.name
+                  h2.item = line.price
+                  input type="text" name="level" size="3"
+                  .btn.btn-info.btn-sm
+                  .stack
+                    .item
+                      input type="text" name="level" size="3"
+                      input type="hidden" name="ps[]" value="{ id }" if="{ product }"
+                      input type="hidden" name="cs[]" value="{ id }" if="{ category }"
+        /hr
+
+  .form-actions = f.submit pat(:save), :class => 'btn btn-prime'
+
+- content_for :js_assets do
+  = javascript_include_tag :riot
+  / script type="riot/tag" src="/riot/tags/sticker_line.tag"
+  rscript type="riot/tag" src="/riot/tags/idcollapser.tag"
+  rscript type="riot/tag" src="/riot/tags/subclick.tag"
+  javascript:
+    
+    document.addEventListener("DOMContentLoaded", function(event) {
+      riot.mount('idcollapser, subclick')
+    });

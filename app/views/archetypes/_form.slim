@@ -1,0 +1,22 @@
+fieldset.control-group
+  = f.label :name, :class => 'control-label'
+  .controls
+    = f.text_field :name, :class => 'form-control input-large input-with-feedback', :autofocus => true
+fieldset.control-group
+  .controls.custom-control
+    = f.check_box :group, id: 'a_group', :checked => true, :class => 'custom-control-input'
+    label.custom-control-label(for = 'a_group') Группа
+fieldset.control-group
+  = f.label :category, :class => 'control-label'
+  .controls
+    select name="ksm_archetype[category_id]" class="huge mbl"
+      - cats.each do |cat|
+        optgroup label="#{cat.name}"
+          - cat.subcategories.each do |sub|
+            - html_attributes = { :value => sub.id }
+            - html_attributes[:selected] ||= option_is_selected?(sub.id, sub.name, @archetype.category_id)
+            = content_tag(:option, sub.name, html_attributes)
+            // option value="#{sub.id}" = sub.name
+
+.form-actions
+  = f.submit pat(:save), :class => 'btn btn-prime'
