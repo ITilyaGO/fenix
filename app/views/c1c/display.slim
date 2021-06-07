@@ -1,0 +1,19 @@
+h4.text-center edict
+
+.col-md-2
+.col-md-8: table.table.table-form.table-hover
+  - @edict&.each do |line, v|
+    tr
+      td.col-md-4
+        .label.label-default = line
+      td &nbsp;
+      td = v
+
+  tr: td colspan=3 &nbsp;
+  tr
+    td.col-md-4
+      .label.label-default w1c:number
+    td &nbsp;
+    td = @num
+
+.clearfix

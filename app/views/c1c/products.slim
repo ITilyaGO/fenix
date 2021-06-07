@@ -1,0 +1,20 @@
+h4 = "#{@category.at_path('Description')} (#{@items.size})"
+table.table.table-hover
+  tr
+    th
+    th Наименование
+    th
+  
+  - @items.sort_by{|a|a.at_path('НаименованиеПолное')}.each do |item|
+
+    tr
+      td.col-md-3
+        .label.label-default = link_to item.id, url(:c1c, :desc_product, id: item.id)
+      /= hidden_field_tag "line[#{ol.id}][id]", :value => ol[:id]
+      td
+        = item.at_path('НаименованиеПолное')
+      td
+        - if pl = @plinks.fetch(item.id, nil)
+          / .btn.btn-xs.btn-success
+          .fa.fa-coffee style='color:#58d68d;font-size:1.1em;'
+

@@ -6,6 +6,7 @@ module Cabie::Structure
     [:p, :orders, :delivery_towns] => nil,
     [:p, :orders, :timeline] => nil,
     [:p, :orders, :stickers_amount] => nil,
+    [:p, :product, :k1c] => nil,
     [:p, :product, :archetype] => nil,
     [:p, :product, :archetype_multi] => nil,
     [:p, :products, :sticker] => nil,
@@ -46,7 +47,7 @@ module Cabie::Structure
       p: [
         :clients => [:hometowns, :delivery_towns],
         :orders => [:towns, :delivery_towns, :timeline, :stickers_amount],
-        :product => [:archetype, :archetype_multi],
+        :product => [:k1c, :archetype, :archetype_multi],
         :products => [:sticker],
         :timeline => [:order],
         :sticker => [:order, :order_glass, :order_progress],

@@ -91,20 +91,22 @@ html lang='en'
             = link_to url(:roundtrips, :index) do
               | График поездок
               span class="menu-icon fa fa-car"
-          // li class="sidebar-list"
-          //   a href="#"
-          //     | Settings
-          //     span class="menu-icon fa fa-cogs"
+
           - if allow_route?(:online)
+            li.sidebar-title.separator
+              span Разное
             li.sidebar-list
               = link_to url(:statistic, :index) do
                 | Статистика
                 span class="menu-icon fa fa-bar-chart"
-          - if allow_route?(:online)
             li.sidebar-list
               = link_to url(:online, :sync_status) do
                 | Sync
                 span class="menu-icon fa fa-skyatlas"
+            li.sidebar-list
+              = link_to url(:c1c, :pr) do
+                | 1c
+                span class="menu-icon fa fa-wheelchair"
 
           - if allow_route?(:online)
             li.sidebar-title.separator

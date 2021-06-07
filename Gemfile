@@ -29,6 +29,8 @@ gem 'activerecord', '~> 4', :require => 'active_record'
 gem 'sqlite3', '< 1.4'
 gem 'rufus-scheduler'
 gem 'princely'
+gem 'libxml-ruby'
+gem 'nokogiri'
 #gem 'simple_enum'
 #gem 'classy_enum'
 

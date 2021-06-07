@@ -11,5 +11,6 @@ module Fenix
     helpers StickerHelper
     helpers StatHelper
     helpers ArchetypeHelper
+    helpers C1CHelper
   end
 end

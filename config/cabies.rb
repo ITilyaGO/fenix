@@ -8,6 +8,8 @@ Cabie.room :kato, alias: 'isokato', path: 'db/cabs', marshal: true, log: true
 Cabie.room :index, alias: 'isokato_index', path: 'db/cabs', log: true
 Cabie.open :kato, :write
 Cabie.open :index, :write
+Cabie.room :k1c, alias: 'k1c', path: 'db/cabs', marshal: false, log: true
+Cabie.open :k1c, :write
 
 ALL_CABIES = Cabie::CabieLayer.layz(Cabie.species.keys)
 KatoAPI.startup db: CabieKato, index: CabieIndex

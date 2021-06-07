@@ -1,0 +1,18 @@
+.alert.alert-warning
+  p Не связаны продукты
+h4.text-center 
+
+.col-md-2
+.col-md-8: table.table.table-form.table-hover
+  - @lines.each do |line|
+    tr
+      td.col-md-4
+        .label.label-default = line.id
+      td &nbsp;
+      td = line.displayname
+.clearfix
+
+.text-center
+  a.btn.btn-default href=url(:c1c, :create, id:params[:id], force: true)
+    .fa.fa-save
+    

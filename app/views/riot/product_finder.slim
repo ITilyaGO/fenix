@@ -1,0 +1,131 @@
+product_finder.row
+  .row: .container class='{ hidden: !is_active }'
+    .col-12.control-group
+      input.form-control type="text" placeholder="Поиск товаров" onkeyup='{ finditem }' onchange='{ finditem }'
+  .row if='{ row_chosen }'
+    .text-center
+      input type="submit" class='btn btn-prime' value='Связать'  
+
+  .row if='{ fspots.length > 0 }': .glass.col-md-offset-3
+    
+    .linerow.hand.col-md-8 each='{ f in fspots }' product='{f}' onclick='{ row_select }' class='{ selected: f.id == row_chosen }'
+      .col-md-11
+        | { f.name }
+      .col-md-3.link-col if='{f.link}'
+        .btn.btn-xs.btn-warning
+          .fa.fa-tags
+          span 1C
+
+  input type="hidden" name='product' value="{ row_chosen }"
+
+  css:
+    .glass {
+      max-height: 50vh;
+      height: auto;
+      overflow: scroll;
+    }
+    .linerow {
+      display: flex;
+    }
+    .selected {
+      border-radius: 6px;
+      border: 2px solid #dabb3d;
+    }
+    .link-col .fa {
+      font-size: 1.3em;
+      line-height: 1.5;
+    }
+    .link-col span {
+      margin-left: .3em;
+    }
+
+  javascript:
+    this.is_active = true
+    self.token = document.querySelector("form [name^='auth']").value
+    self.term = document.querySelector("form.search [name*='name']").value
+
+    rcontrol.on('SEARCH_CLOSE', function(string) {
+      self.fspots = []
+      self.update()
+    })
+
+    rcontrol.on('SEARCH_THIS', function(string) {
+      self.fspots = self.index.search(string)
+      self.update()
+    })
+
+    row_select(a) {
+      self.row_chosen = a.item.f.id
+    }
+
+    results_may_vary() {
+      return self.fspots && self.fspots.length > 0
+    }
+
+    loadlist() {
+      var data = {
+        authenticity_token: self.token
+      }
+
+      fetch('/c1c/products.json', {
+        method: "POST",
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(data).toString()
+      })
+      .then(function(response) { return response.json() })
+      .then(function(data) {
+        self.products = self.cache = data
+        self.init_products()
+        rcontrol.trigger('SEARCH_READY', data)
+        rcontrol.trigger('SEARCH_THIS', self.term.split(/\s+/)[0])
+      })
+    }
+
+    self.on('mount', function() {
+      self.loadlist()
+    })
+
+    init_products() {
+      self.index = new FlexSearch({
+        tokenize: "full",
+        split: /\s+/,
+        depth: 2,
+        doc: {
+          id: "id",
+          field: [
+            "name",
+            "keyword"
+          ]
+        }
+      })
+      self.index.add(self.products)
+    }
+
+    //this.is_active = self.is_ready = false
+
+    rcontrol.on('SEARCH_OPEN', function() {
+      self.is_active = !self.is_active
+      self.update()
+
+      if (!self.is_active) rcontrol.trigger('SEARCH_CLOSE')
+    })
+
+    rcontrol.on('SEARCH_READY', function() {
+      self.is_ready = true
+    })
+
+
+    self.on('mount', function() {
+    })
+
+
+    finditem(a) {
+      if (!self.is_ready) return true
+      if (a.target.value.length > 3) {
+        rcontrol.trigger('SEARCH_THIS', a.target.value)
+      }
+        // debounce1((function() {
+        //   self.fspots = self.index.search(a.target.value)
+        // }).bind(self), 1)
+      return true
+    }

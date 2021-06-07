@@ -1,0 +1,21 @@
+p = @items.size
+
+table.table.table-hover
+  tr
+    th
+    th Наименование
+    th
+  
+  - @items.sort_by{|a|a.at_path('Description')}.each do |item|
+    tr
+      td.col-md-3
+        .label.label-default = link_to item.id, url(:c1c, :list_cat, id: item.id)
+      td
+        = item.at_path('Description')
+      td
+        - p = KSM1C::Cat.find(item.parent)
+        - p2 = KSM1C::Cat.find(p.parent)
+        - p3 = KSM1C::Cat.find(p2.parent)
+        - p4 = KSM1C::Cat.find(p3.parent)
+        = p2.at_path('Description')
+        .label.label-default = link_to p2.id, url(:c1c, :list_cat, id: p2.id)

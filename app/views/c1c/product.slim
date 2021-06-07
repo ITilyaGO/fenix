@@ -1,0 +1,48 @@
+h4.text-center
+  = @product.at_path('НаименованиеПолное')
+  - if @pioprod
+    /|  –
+    /.fa.fa-long-arrow-right
+    .btn.btn-sm.btn-success
+      .fa.fa-coffee
+      '
+      span = @pioprod.displayname
+
+.col-md-2
+
+
+.col-md-8: table.table.table-form.table-hover
+  - @product.noko.children[0].children.each do |line|
+    - next if line.text?
+    tr
+      td.col-md-4
+        .label.label-default = line.name
+      td &nbsp;
+      td
+        - text = line.children.first&.content
+        - if Xmlp.uuid? text
+          - get = KSM1C::Cat.find(text).at_path('Description')
+          .label.label-milk = link_to get, url(:c1c, :desc_product, id: text)
+        - else
+          = text
+.clearfix
+
+br
+pre.hide
+  | &#9;&#9;
+  = @product.xml
+
+
+= form_for @product, url(:c1c, :link, :id => @product.id), :method => :put, :class => 'form-horizontal search' do |f|
+  = f.hidden_field :name, value: @product.at_path('НаименованиеПолное')
+  /= partial 'archetypes/form', :locals => { :f => f, cats: @cats }
+  product_finder
+
+- content_for :js_assets do
+  = javascript_include_tag :riot, :flexsearch_min
+  rscript type="riot/tag" src="/riot/tags/product_finder.tag"
+  
+  javascript:
+    document.addEventListener("DOMContentLoaded", function(event) {
+      riot.mount('product_finder')
+    });
