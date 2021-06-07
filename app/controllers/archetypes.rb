@@ -127,12 +127,12 @@ Fenix::App.controllers :archetypes do
       all_ids = ar_hash.map{|p|archetype_daystock(p, @day-i)}
       stockday = CabiePio.all_keys(all_ids, folder: [:stock, :common, :a]).flat
       stockday.each do |sk, sv|
-        p = sk.split('_').first.to_i
+        p = sk.split('_').first
         @holders[p] ||= {}
         @holders[p][@day-i] = sv.to_i
       end
     end
-    
+        
     @cats = Category.where(category: nil).order(:index => :asc)
     @categories = Category.all.includes(:category)
     @ar_grouped = ksm_arch.group_by{|a|a.category_id.to_i}
