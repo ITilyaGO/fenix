@@ -2,7 +2,22 @@ class Xmlp
   UIDZERO = '00000000-0000-0000-0000-000000000000'.freeze
 
   class << self
-    def create_from_file
+    def create_from_file(fname)
+      doc = File.open(fname) { |f| Nokogiri::XML(f) }
+      doc.xpath("//V8Exch:Data")[0].children.each do |i|
+        next if i.text?
+        kind = i.name
+        next unless kind == 'CatalogObject.Номенклатура'
+        ref = i.xpath('Ref').children.first.content
+        xml = i
+        parent = i.xpath('Parent').children.first.content if i.xpath('Parent').any?
+        cat1 = KSM1C::Cat.new(id: ref)
+        cat1.fill(id: ref, kind: kind, ref: ref, xml: xml.to_s, parent: parent)
+        cat1.save
+      end
+    end
+
+    def create_all_from_file
       fname = "blossom.xml"
       fname = "forpio.xml"
       doc = File.open(fname) { |f| Nokogiri::XML(f) }

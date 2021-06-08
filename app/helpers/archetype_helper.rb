@@ -115,11 +115,36 @@ module Fenix::App::ArchetypeHelper
     end
   end
 
-  def arbal_need_order_fin(order)
+  def arbal_need_order_st_fin(order)
     arches = CabiePio.folder(:product, :archetype).flat.trans(:to_i)
+    stickers = CabiePio.all_keys(order.order_lines.map(&:product_id), folder: [:products, :sticker]).flat.trans(:to_i).keys
     order.order_lines.each do |line|
       parch = arches.fetch(line.product_id, nil)
       next unless parch
+      next unless stickers.include? line.product_id
+      prev = CabiePio.get([:need, :order], archetype_order(parch, line.id, order.id)).data.to_i || 0
+      CabiePio.unset [:need, :order], archetype_order(parch, line.id, order.id)
+
+      psum = CabiePio.get([:need, :archetype], parch).data.to_i || 0
+      CabiePio.set [:need, :archetype], parch, psum-prev
+    end
+  end
+
+  def arbal_need_order_fin(order)
+    arches = CabiePio.folder(:product, :archetype).flat.trans(:to_i)
+    stickers = CabiePio.all_keys(order.order_lines.map(&:product_id), folder: [:products, :sticker]).flat.trans(:to_i).keys
+    order.order_lines.each do |line|
+      parch = arches.fetch(line.product_id, nil)
+      next unless parch
+
+      unless stickers.include? line.product_id
+        real_done = line.ignored ? 0 : line.done_amount||line.amount
+        if real_done > 0
+          ssum = CabiePio.get([:stock, :archetype], parch).data.to_i || 0
+          CabiePio.set [:stock, :archetype], parch, ssum-real_done
+        end
+      end
+
       prev = CabiePio.get([:need, :order], archetype_order(parch, line.id, order.id)).data.to_i || 0
       CabiePio.unset [:need, :order], archetype_order(parch, line.id, order.id)
 

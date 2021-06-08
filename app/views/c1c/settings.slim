@@ -1,0 +1,18 @@
+.col-md-4.col-md-offset-4
+  .h4.text-center Обновление от 1С
+  = form_tag url(:c1c, :xml_up), :method => :post, :enctype => "multipart/form-data" do
+    .fileinput.fileinput-new data-provides="fileinput"
+      .text-center
+      
+        .btn.btn-xs.btn-prime.btn-embossed.btn-file.fileinput-new
+          .fileinput-new Загрузить
+          / accept='.pdf,.png,image/*'
+          input type="file" name="file" accept='application/xml'
+        '
+        button.btn type="submit" class="btn-xs btn-prime btn-embossed fileinput-exists"
+          .fa.fa-upload
+          | Upload
+.clearfix
+
+- content_for :js_assets do
+  = javascript_include_tag :fileinput

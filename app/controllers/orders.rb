@@ -586,8 +586,10 @@ Fenix::App.controllers :orders do
       CabiePio.set [:orders, :timeline], @order.id, timeline_id(timeline_date)
     end
 
+    order_part_st = @order.order_parts.find_by(:section_id => 1)
+    part_before = order_part_st.current?
+
     if @order_part and params[:order_part]
-      part_before = @order_part.current?
       # @order_part.status = params[:order_part]['done'] ? :finished : :current
       no_boxes = params[:order_part][:no_boxes] == '1'
       @order_part.boxes = params[:order_part][:boxes] || 0
@@ -666,7 +668,10 @@ Fenix::App.controllers :orders do
 
     # arbal_need_order_mid(@order) if @order.current?
     
-    if part_before && @order_part.finished?
+    if part_before && order_part_st.finished?
+      arbal_need_order_st_fin(@order)
+    end
+    if status_before && @order.finished?
       arbal_need_order_fin(@order)
       arbal_need_order_done(@order)
     end

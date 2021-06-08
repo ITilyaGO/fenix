@@ -222,7 +222,7 @@ ul class="nav nav-tabs non-print"
             = hidden_field_tag "order_part[transfer]", :value => 'false'
             = check_box_tag "order_part[transfer]", :checked => @order_part.transfer, :class => ""
     
-    .modal tabindex="-1" role="dialog"
+    .modal.incorrect tabindex="-1" role="dialog"
       div class="modal-dialog"
         div class='modal-content'
           div class="modal-header"
@@ -440,7 +440,7 @@ picmod
             boxes.parents(".control-group").addClass("has-error");
             valid = false;
           }
-          if (!valid) $(".modal").modal();
+          if (!valid) $(".modal.incorrect").modal();
           return valid;
         });
 

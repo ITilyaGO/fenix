@@ -1,5 +1,8 @@
 .pull-right
-  = link_to :'весь склад', url(:archetypes, :stock, all: 1)
+  - if params[:all]
+    = link_to :'скрыть склад', url(:archetypes, :stock), class: 'btn btn-sm btn-glue'
+  - else
+    = link_to :'весь склад', url(:archetypes, :stock, all: 1), class: 'btn btn-sm btn-glue'
 br
 = form_for :product, url(:archetypes, :stock), :method => :put, :class => 'form-horizontal stock-page' do |f|
   - @cats.each do |category|

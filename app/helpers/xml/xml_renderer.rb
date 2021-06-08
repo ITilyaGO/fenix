@@ -5,21 +5,43 @@ class Xmle
   extend Fenix::App::C1CHelper
 
   class << self
-    def create_doc_xml(root)
+    def lib_create_doc_xml(root)
       doc = LibXML::XML::Document.new
       doc.encoding = LibXML::XML::Encoding::UTF_8
       doc.root = LibXML::XML::Node.new(root)
-      # doc.root.attributes << 
       LibXML::XML::Attr.new(doc.root, 'xmlns:V8Exch', 'http://www.1c.ru/V8/1CV8DtUD/')
       LibXML::XML::Attr.new(doc.root, 'xmlns:v8', 'http://v8.1c.ru/data')
       LibXML::XML::Attr.new(doc.root, 'xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance')
       doc
     end
 
-    def create_node(name, value=nil, type=nil)
+    def lib_create_node(name, value=nil, type=nil)
       node = LibXML::XML::Node.new(name)
       node.content = value.to_s unless value.nil?
       LibXML::XML::Attr.new(node, 'type', type) unless type.nil?
+      node
+    end
+
+    def create_doc_xml(root)
+      doc = Ox::Document.new
+      instruct = Ox::Instruct.new(:xml)
+      instruct[:version] = '1.0'
+      instruct[:encoding] = 'UTF-8'
+      doc << instruct
+
+      top = Ox::Element.new(root)
+      top['xmlns:V8Exch'] = 'http://www.1c.ru/V8/1CV8DtUD/'
+      top['xmlns:v8'] = 'http://v8.1c.ru/data'
+      top['xmlns:xsi'] = 'http://www.w3.org/2001/XMLSchema-instance'
+      doc << top
+
+      doc
+    end
+
+    def create_node(name, value=nil, type=nil)
+      node = Ox::Element.new(name)
+      node << value.to_s unless value.nil?
+      # LibXML::XML::Attr.new(node, 'type', type) unless type.nil?
       node
     end
 
@@ -43,7 +65,7 @@ class Xmle
       edict << create_node('СтруктурнаяЕдиница', wonderbox(:edict, :bank))
       edict << create_node('ВалютаДокумента', wonderbox(:edict, :currency))
       edict << create_node('ДоговорКонтрагента', UIDZERO)
-      edict << create_node('Комментарий')
+      edict << create_node('Комментарий', order.id)
       edict << create_node('Контрагент', UIDZERO)
       edict << create_node('КратностьВзаиморасчетов', 0)
       edict << create_node('КурсВзаиморасчетов', 0)
@@ -75,7 +97,9 @@ class Xmle
       edict << create_node('Услуги')
 
       wonderbox_set(:w1c, { number: n })
-      doc.to_s
+      
+      # doc.to_s
+      Ox.dump doc
     end
 
   end

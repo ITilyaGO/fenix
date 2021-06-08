@@ -3,6 +3,19 @@ Fenix::App.controllers :c1c do
     render ''
   end
 
+  get :settings do
+    render 'c1c/settings'
+  end
+
+  post :xml_up do
+    file = params[:file]
+    tempfile = file[:tempfile]
+    Xmlp.create_from_file tempfile.path
+    tempfile.unlink
+
+    redirect url(:c1c, :pr)
+  end
+
   get :pref do
     n = {
       org: 'b0aa583a-ac9f-11e9-8725-74d435d737ac',
