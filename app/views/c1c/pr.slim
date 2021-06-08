@@ -14,8 +14,8 @@ table.table.table-hover
         = item.at_path('Description')
       td
         - p = KSM1C::Cat.find(item.parent)
-        - p2 = KSM1C::Cat.find(p.parent)
-        - p3 = KSM1C::Cat.find(p2.parent)
-        - p4 = KSM1C::Cat.find(p3.parent)
-        = p2.at_path('Description')
-        .label.label-default = link_to p2.id, url(:c1c, :list_cat, id: p2.id)
+        / - p2 = KSM1C::Cat.find(p.parent)
+        / - p3 = KSM1C::Cat.find(p2.parent)
+        / - p4 = KSM1C::Cat.find(p3.parent)
+        = p.at_path('Description')
+        .label.label-default = link_to p.id, url(:c1c, :pr, root: p.id)

@@ -63,18 +63,20 @@ Fenix::App.controllers :c1c do
   end
 
   get :pr do
+    root = params[:root]
     a = KSM1C::Cat.all
     @items = []
     ps = ['8fce56f0-8a9d-11e0-aea0-001bfc7ad411', '7c3ea1c7-9058-11ea-af7f-cc52af44fb28',
       'd8c3f498-6684-11e0-99f5-001e5848397d', 'd8c3f492-6684-11e0-99f5-001e5848397d'
     ]
+    ps = [root] if root
     a.each do |item|
       next if item.kind != 'CatalogObject.Номенклатура'
       next if item.at_path('IsFolder') != 'true'
       p1 = KSM1C::Cat.find(item.parent)
       p2 = KSM1C::Cat.find(p1.parent)
       p3 = KSM1C::Cat.find(p2.parent)
-      next unless ps.include?(p3.id) || ps.include?(p2.id)
+      next unless ps.include?(p3.id) || ps.include?(p2.id) || ps.include?(p1.id)
       # next if item.kind != 'CatalogObject.НоменклатурнаяГруппа'
       @items << item
     end

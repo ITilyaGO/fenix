@@ -5,7 +5,7 @@ table.table.table-hover
     th Наименование
     th
   
-  - @items.sort_by{|a|a.at_path('НаименованиеПолное')}.each do |item|
+  - @items.sort_by{|a|a.at_path('НаименованиеПолное') || ''}.each do |item|
 
     tr
       td.col-md-3
