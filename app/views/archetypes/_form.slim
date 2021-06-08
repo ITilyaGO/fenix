@@ -4,7 +4,7 @@ fieldset.control-group
     = f.text_field :name, :class => 'form-control input-large input-with-feedback', :autofocus => true
 fieldset.control-group
   .controls.custom-control
-    = f.check_box :group, id: 'a_group', :checked => true, :class => 'custom-control-input'
+    = f.check_box :group, id: 'a_group', :checked => @archetype.group?, :class => 'custom-control-input'
     label.custom-control-label(for = 'a_group') Группа
 fieldset.control-group
   = f.label :category, :class => 'control-label'
