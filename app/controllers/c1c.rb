@@ -56,7 +56,7 @@ Fenix::App.controllers :c1c do
     parents = Product.pluck(:parent_id).compact.uniq
     prs = Product.joins(:category).eager_load(:parent).select(:id, :name, :price)
       .reject{|a| parents.include? a[:id]}
-      .map{|a| {id: a[:id], price: a[:price], name: a.displayname, link: links.keys.include?(a.id) }}
+      .map{|a| {id: a.id, c: a.category.name, name: a.displayname, link: links.keys.include?(a.id) }}
     prs.to_json
   end
 

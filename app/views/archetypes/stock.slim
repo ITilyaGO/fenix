@@ -38,7 +38,7 @@ br
                     .wd = Date::DAYNAMESRU[day.wday-1]
                 th class="non-print" &nbsp;
               
-              - @ar_grouped[sub.id]&.each do |p|
+              - @ar_grouped[sub.id]&.sort_by{|p|p.name}&.sort_by{|a| @kc_index.fetch(a.id, 0) }&.each do |p|
                 /- next if @parents.include? p.id
                 - stock = @kc_stocks.fetch(p.id, 0)
                 - need = @kc_needs.fetch(p.id, 0)

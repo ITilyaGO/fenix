@@ -90,6 +90,6 @@
           span Клейка
           .rpr == deli(rur @all_ids.sum{|x|@stickers.fetch(x, 0)})
         .item-sticker.pull-right
-          span Сделано #{((stickers_done.to_f/stickers_total)*100).ceil}%
+          span Сделано #{((stickers_done.to_f/stickers_total)*100).ceil rescue 0}%
           .rpr == deli(rur stickers_done)
 

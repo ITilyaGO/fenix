@@ -587,7 +587,7 @@ Fenix::App.controllers :orders do
     end
 
     order_part_st = @order.order_parts.find_by(:section_id => 1)
-    part_before = order_part_st.current?
+    part_before = order_part_st&.current?
 
     if @order_part and params[:order_part]
       # @order_part.status = params[:order_part]['done'] ? :finished : :current
@@ -652,7 +652,7 @@ Fenix::App.controllers :orders do
     
     status_before = @order.current?
     @order.done_parts = @order.order_parts.where("state = ?", OrderPart.states[:finished]).size
-    if @order.done_parts == @order.all_parts
+    if @order.done_parts == @order.all_parts || params[:next_status_all_force]
       # don't need to use params here
       @order.status = :finished if !params[:save_finish]
       amount = 0.0

@@ -13,6 +13,12 @@ ul class="nav nav-tabs non-print" id="weeks_tab"
     | график
 
   - today = Date.today
+  li
+    graphic.collapse
+      - 7.times do
+        .day
+    = link_to tag_icon('arrow-left'), url(:timeline, :weeks, start: timeline_id(@prev.prev_month.beginning_of_week))
+    
   - @weeks.each_with_index do |tab, i|
     li
       graphic.collapse
@@ -25,8 +31,16 @@ ul class="nav nav-tabs non-print" id="weeks_tab"
       input type="hidden" name="weekno[]" value=timeline_id(tab[:date])
       = link_to tag_icon('fa fa-ok', "#{to_dm(tab[:date])}"), "#cat-#{i}", 'data-toggle' => "tab"
 
+  - if @next < today
+    li
+      graphic.collapse
+        - 7.times do
+          .day
+      = link_to tag_icon('arrow-right'), url(:timeline, :weeks, start: timeline_id(@prev.next_month.beginning_of_week))
 
 .filters.non-print
+  .filter-item style='line-height:2.2;'
+    = link_to 'по месяцам', url(:timeline, :months), class: 'btn btn-xs btn-default'
   .filter-item.filter-control.custom-radio
     input type="radio" class="filter-control-input" id="customControlValidation1" name="radio-filter" value='delivery'
     label class="filter-control-label" for="customControlValidation1" по типу

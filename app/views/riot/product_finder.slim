@@ -11,6 +11,9 @@ product_finder.row
     .linerow.hand.col-md-8 each='{ f in fspots }' product='{f}' onclick='{ row_select }' class='{ selected: f.id == row_chosen }'
       .col-md-11
         | { f.name }
+        ' &nbsp;
+        .opa
+          | { f.c }
       .col-md-3.link-col if='{f.link}'
         .btn.btn-xs.btn-warning
           .fa.fa-tags
@@ -19,6 +22,10 @@ product_finder.row
   input type="hidden" name='product' value="{ row_chosen }"
 
   css:
+    .opa {
+      opacity: .5;
+      display: inline;
+    }
     .glass {
       max-height: 50vh;
       height: auto;

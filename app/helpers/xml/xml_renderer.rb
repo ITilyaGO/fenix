@@ -80,18 +80,23 @@ class Xmle
 
       edict << (prods = create_node('Товары'))
       
-      order.order_lines.each do |item|
-        next if item.ignored
-        p = CabiePio.get([:product, :k1c], item.product_id).data
-        # next unless p
-        a = item.done_amount || item.amount
-        prods << row = create_node('Row')
-        row << create_node('Номенклатура', p || UIDZERO)
-        row << create_node('Цена', item.price)
-        row << create_node('Сумма', (item.price*a).round(2))
-        row << create_node('СтавкаНДС', 'БезНДС')
-        row << create_node('СуммаНДС', 0)
-        row << create_node('Количество', a)
+      scs = Section.all
+      scs.each do |s|
+        s.categories.each do |tab|
+          order.by_cat(tab.id).each do |item|
+            next if item.ignored
+            p = CabiePio.get([:product, :k1c], item.product_id).data
+            # next unless p
+            a = item.done_amount || item.amount
+            prods << row = create_node('Row')
+            row << create_node('Номенклатура', p || UIDZERO)
+            row << create_node('Цена', item.price)
+            row << create_node('Сумма', (item.price*a).round(2))
+            row << create_node('СтавкаНДС', 'БезНДС')
+            row << create_node('СуммаНДС', 0)
+            row << create_node('Количество', a)
+          end
+        end
       end
       edict << create_node('ВозвратнаяТара')
       edict << create_node('Услуги')

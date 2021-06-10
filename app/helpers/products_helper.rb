@@ -70,7 +70,7 @@ module Fenix::App::ProductsHelper
   def json_subs(node)
     nodes = node.subcategories.order(:index => :asc)
     nodes.map do |node|
-      next if !node.products.any?
+      next if !node.all_products.any?
       { :title => node.name, :key => node.id, :lazy => true, :children => json_prods(node).compact }
     end
   end

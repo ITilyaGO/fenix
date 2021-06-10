@@ -142,6 +142,10 @@ Fenix::App.controllers :archetypes do
     catgroup = products_hash.keys.group_by{|k|products_hash[k]}
     @catstock = catgroup.map{|k,v|[k, v.map{|p|@kc_stocks.fetch(arp[p], 0)}.sum{|x|x<0?x:0}]}.to_h
     @catneed = catgroup.map{|k,v|[k, v.map{|p|@kc_needs.fetch(arp[p], 0)}.sum{|x|x>0?x:0}]}.to_h
+    @kc_archs = arp
+
+    @products = Product.all
+    @kc_index = arp.map{|p, a| [a, @products.detect{|i|i.id == p}&.index || 0]}.to_h
     render 'archetypes/stock'
   end
 

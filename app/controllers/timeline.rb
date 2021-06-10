@@ -60,6 +60,37 @@ Fenix::App.controllers :timeline do
     render 'timeline/weeks'
   end
 
+  get :months do
+    @title = "Month summary"
+    start_from = timeline_unf(params[:start]) rescue Date.today
+    @start = start_from
+    @months = []
+    4.times do |i|
+      @months << start_from.prev_month(4-i)
+    end
+    @months << start_from
+    2.times do |i|
+      @months << start_from.next_month(i+1)
+    end
+
+    ky_month = start_from.strftime('%y%m')
+    @ktm = CabiePio.all([:timeline, :order], [ky_month]).flat.trans(nil, :to_i)
+
+    @sections = Section.includes(:categories).all
+    @all_ids = @ktm.values
+    @orders = Order.where(id: @all_ids).order(:client_id)
+    @unorders = Order.where(id: @all_ids).where("status < ?", Order.statuses[:finished]).order(:client_id)
+    a_managers(@all_ids, @unorders.map(&:client_id).uniq)
+
+    @stickers = CabiePio.all_keys(@all_ids, folder: [:sticker, :order]).flat.trans(:to_i, :to_f)
+    # @transport = CabiePio.all_keys(@orders.map(&:client_id).uniq, folder: [:m, :clients, :transport]).flat
+    @kc_stickers = CabiePio.all_keys(@all_ids, folder: [:sticker, :order_progress]).flat.trans(:to_i, :to_f)
+    @kc_sumstickers = @stickers.map{|k,v|[k, v*@kc_stickers.fetch(k,0)/100]}.to_h
+    @sec_sums = sum_by_sections(@all_ids)
+
+    render 'timeline/months'
+  end
+
   get :stickers do
     @title = "Stickers timeline"
     @print_btn = 1

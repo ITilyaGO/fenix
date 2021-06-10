@@ -1,0 +1,175 @@
+ul class="nav nav-tabs non-print" id="weeks_tab"
+  - today = Date.today
+  - @next = @start.next_month
+  li = link_to tag_icon('arrow-left'), url(:timeline, :months, start: timeline_id(@start.prev_month(5)))
+  - @months.each_with_index do |tab, i|
+    li class=('active' if tab.beginning_of_month == @start.beginning_of_month)
+      = link_to tab.strftime('%B %Y'), url(:timeline, :months, start: timeline_id(tab))
+  - if @next < today.prev_month(2)
+    li = link_to tag_icon('arrow-right'), url(:timeline, :months, start: timeline_id(@next.next_month(5)))
+  - if @start != today
+    li = link_to tag_icon('history'), url(:timeline, :months)
+
+.timeline
+  - price_total = @orders.map(&:total).sum
+  - price_done = @orders.map(&:done_total).sum
+  .summary.text-center.flex-c
+    - by_deli = sum_by_delivery(@orders)
+    - [:postage, :vernissage, :roundtrip, :pickup].each do |ds|
+      - if by_deli[ds] > 0
+        .item-orders
+          span = t :"delivery.#{ds.to_s}"
+          .rpr == deli(rur by_deli[ds])
+  br
+  .summary.text-center.flex-c
+    - sections = Section.all
+    - sections.each do |s|
+      - sec_sum = @sec_sums.fetch(s.id, 0)
+      - if sec_sum > 0
+        .item-all
+          span = s.name
+          .rpr == deli(rur sec_sum)
+  br
+  .summary.clearfix.flex-c
+    .item-done.pull-right
+      span Сумма заказов
+      .rpr == deli(rur price_total)
+    .item-done.pull-right
+      span Отправлено #{((price_done.to_f/price_total)*100).ceil rescue 0}%
+      .rpr == deli(rur price_done)
+  
+    - stickers_done = @kc_sumstickers.values.sum
+    - stickers_total = @stickers.values.sum
+    .item-sticker.pull-right
+      span Клейка
+      .rpr == deli(rur @all_ids.sum{|x|@stickers.fetch(x, 0)})
+    .item-sticker.pull-right
+      span Сделано #{((stickers_done.to_f/stickers_total)*100).ceil rescue 0}%
+      .rpr == deli(rur stickers_done)
+  br
+
+.text-center
+  p Всего заказов: #{@orders.size}
+
+- if @kc_stickers.values.map{|s|s.to_i > 130}.compact.any?
+  table.table.table-hover.table-condensed
+      thead
+        tr
+          th class='header non-print'
+            = check_box_tag 'orders_all', :autocomplete => "off", :value => false, :class => 'list-selectable-checkbox-all'
+          th class='header' Номер
+          th class='header' Заказчик
+          th class='header' Город
+          th class='header non-print' Тр.ком.
+          th class='header non-print' Договор
+          th class='header non-print' Менеджер
+          th class='header' Дата
+          th class='header' Отправка
+          th class='header' Статус
+          th class='header non-print'
+            = partial 'bricks/orders/section_titles'
+          th.only-print width="40%"
+          th.non-print > 130%
+          th class='header list-row-action-header non-print'
+
+      tbody
+        - @orders.each do |order|
+          - next unless @kc_stickers.fetch(order.id, 0) > 130
+          / - order = @orders.detect{|x| x.id == pair.last} || Order.holder(pair.last)
+          / - odate = @week_orders.detect{|x|x.last == order.id}&.first
+          - odate = @ktm.key(order.id)
+          tr class='list-row non-print'
+            td class='list-column list-selectable non-print'
+              /= check_box_tag 'order_ids[]', :autocomplete => "off", :value => order.id, :class => 'list-selectable-checkbox'
+            td class='list-column' = "#{order.id}"
+            td class='list-column' = order.client.name
+            td class='list-column'
+              - code = @kc_orders[order.id.to_s]
+              - town_name = @kc_towns[code]&.model
+              = partial 'bricks/kato/label_print', :locals => { town_name: town_name, el: order }
+            td class='list-column non-print'
+              /= partial 'bricks/orders/transport', :locals => { client_id: order.client_id }
+            td class='list-column non-print' = order.client.contract
+            td class='list-column non-print'
+              - kc_man = @kc_managers[@kc_hometowns[order.client_id.to_s]]
+              = @managers[kc_man.to_i] if kc_man
+            td class='list-column' = to_dm(order.created_at)
+            td class='list-column' = to_dm(timeline_unf(odate))
+            td class='list-column'
+              span class="label label-#{order.status} non-print" = t :"status.#{order.status}"
+              span class="only-print" = t :"status.#{order.status}"
+            td class='list-column non-print text-nowrap'
+              = partial 'orders/squares', :locals => { :order => order }
+            td.only-print
+            td.non-print.list-column
+              - progress = @kc_stickers.fetch(order.id, 0)
+              .progress.short.for-stickers title="#{progress}%"
+                .progress-bar role="progressbar" style="width:#{progress.to_i}%"
+            td class='list-column list-row-action non-print'
+              div class='list-row-action-wrapper'
+                /= hidden_field_tag 'tid[]', :value => odate
+                /= link_to tag_icon(:calendar), '#', :class => 'list-row-action-wrapper-link medium list-menu-timeline-link'
+                = link_to tag_icon(:edit), :href => url(:orders, :edit, :id => order.id), :class => 'list-row-action-wrapper-link'
+
+- if @unorders.any?
+  .text-center
+    p Незаконченных: #{@unorders.size}
+  
+  - if today.beginning_of_month > @start.beginning_of_month
+    table.table.table-hover.table-condensed
+      thead
+        tr
+          th class='header non-print'
+            = check_box_tag 'orders_all', :autocomplete => "off", :value => false, :class => 'list-selectable-checkbox-all'
+          th class='header' Номер
+          th class='header' Заказчик
+          th class='header' Город
+          th class='header non-print' Тр.ком.
+          th class='header non-print' Договор
+          th class='header non-print' Менеджер
+          th class='header' Дата
+          th class='header' Отправка
+          th class='header' Статус
+          th class='header non-print'
+            = partial 'bricks/orders/section_titles'
+          th.only-print width="40%"
+          th.non-print
+          th class='header list-row-action-header non-print'
+
+      tbody
+        - @unorders.each do |order|
+          / - order = @orders.detect{|x| x.id == pair.last} || Order.holder(pair.last)
+          / - odate = @week_orders.detect{|x|x.last == order.id}&.first
+          - odate = @ktm.key(order.id)
+          tr class='list-row non-print'
+            td class='list-column list-selectable non-print'
+              /= check_box_tag 'order_ids[]', :autocomplete => "off", :value => order.id, :class => 'list-selectable-checkbox'
+            td class='list-column' = "#{order.id}"
+            td class='list-column' = order.client.name
+            td class='list-column'
+              - code = @kc_orders[order.id.to_s]
+              - town_name = @kc_towns[code]&.model
+              = partial 'bricks/kato/label_print', :locals => { town_name: town_name, el: order }
+            td class='list-column non-print'
+              /= partial 'bricks/orders/transport', :locals => { client_id: order.client_id }
+            td class='list-column non-print' = order.client.contract
+            td class='list-column non-print'
+              - kc_man = @kc_managers[@kc_hometowns[order.client_id.to_s]]
+              = @managers[kc_man.to_i] if kc_man
+            td class='list-column' = to_dm(order.created_at)
+            td class='list-column' = to_dm(timeline_unf(odate))
+            td class='list-column'
+              span class="label label-#{order.status} non-print" = t :"status.#{order.status}"
+              span class="only-print" = t :"status.#{order.status}"
+            td class='list-column non-print text-nowrap'
+              = partial 'orders/squares', :locals => { :order => order }
+            td.only-print
+            td.non-print.list-column
+              - progress = @kc_stickers.fetch(order.id, 0)
+              .progress.short.for-stickers title="#{progress}%"
+                .progress-bar role="progressbar" style="width:#{progress.to_i}%"
+            td class='list-column list-row-action non-print'
+              div class='list-row-action-wrapper'
+                /= hidden_field_tag 'tid[]', :value => odate
+                /= link_to tag_icon(:calendar), '#', :class => 'list-row-action-wrapper-link medium list-menu-timeline-link'
+                = link_to tag_icon(:edit), :href => url(:orders, :edit, :id => order.id), :class => 'list-row-action-wrapper-link'
