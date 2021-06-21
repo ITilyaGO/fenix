@@ -31,6 +31,7 @@ gem 'rufus-scheduler'
 gem 'princely'
 gem 'libxml-ruby'
 gem 'nokogiri'
+gem 'ox'
 #gem 'simple_enum'
 #gem 'classy_enum'
 

@@ -8,6 +8,7 @@ ul.nav.nav-tabs
         th class='header list-menu'
         th class='header' = mat(:category, :id)
         th class='header' = mat(:category, :name)
+        th class='header' = mat(:category, :index)
         th class='header list-row-action-header'
 
     tbody
@@ -16,6 +17,7 @@ ul.nav.nav-tabs
           td class='list-column list-selectable'
           td class='list-column' = section.id
           td class='list-column' = section.name
+          td class='list-column' = section.index
           td class='list-column list-row-action'
             div class='list-row-action-wrapper'
               = link_to tag_icon(:edit), :href => url(:sections, :edit, :id => section.id), :rel => :tooltip, :title => "#{pat(:edit)} section", :class => 'list-row-action-wrapper-link'

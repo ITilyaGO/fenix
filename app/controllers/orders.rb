@@ -143,6 +143,7 @@ Fenix::App.controllers :orders do
     @title = pat(:edit_title, :model => "order #{params[:id]}")
     @order = Order.includes(:order_lines).find(params[:id])
     @sections = Section.includes(:categories).all
+    habits(@sections, :index)
     @my_section = current_account.section
     @order_part = @order.order_parts.find_by(:section_id => @my_section)
     @tabs = Category.where(:category => nil)

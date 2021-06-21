@@ -50,4 +50,39 @@ module Fenix::App::KyotoHelpers
   def all_wonderbox
     @wonderbox ||= CabiePio.folder(:m, :wonderbox).flat
   end
+
+  def habit(ar, list)
+    list = [list] unless list.respond_to? :each
+    list.each do |prop|
+      ar_class = ar.model_name.i18n_key
+      kc_rec = CabiePio.get([ar_class, prop], ar.id)
+      kcv = kc_rec.data
+      typ = Cabie::Structure::PLOT.dig(:ar, ar_class, prop)
+      typed = kcv.send(typ) if typ
+      ar.send(prop.to_s + '=', typed || kcv) if kcv
+    end
+  end
+
+  def habits(ars, list)
+    return unless ars.any?
+    list = [list] unless list.respond_to? :each
+    list.each do |prop|
+      ar_class = ars.first.model_name.i18n_key
+      typ = Cabie::Structure::PLOT.dig(:ar, ar_class, prop)
+      id_typ = :to_i if ars.first.id.integer?
+      kc_recs = CabiePio.all_keys(ars.map(&:id), folder: [ar_class, prop]).flat.trans(id_typ, typ)
+      ars.each do |ar|
+        kcv = kc_recs.fetch(ar.id, nil)
+        ar.send(prop.to_s + '=', kcv) if kcv
+      end
+    end
+  end
+
+  def inhabit(ar, list)
+    list = [list] unless list.respond_to? :each
+    list.each do |prop|
+      ar_class = ar.model_name.i18n_key
+      CabiePio.set [ar_class, prop], ar.id, ar.send(prop)
+    end
+  end
 end

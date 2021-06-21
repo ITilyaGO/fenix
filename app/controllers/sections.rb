@@ -2,6 +2,7 @@ Fenix::App.controllers :sections do
   get :index do
     @title = "Sections"
     @sections = Section.all
+    habits(@sections, :index)
     render 'sections/index'
   end
 
@@ -12,7 +13,8 @@ Fenix::App.controllers :sections do
   end
 
   post :create do
-    @section = Section.new(params[:section])
+    @section = Section.new
+    @section.update(params[:section])
     if @section.save
       @title = pat(:create_title, :model => "section #{@section.id}")
       flash[:success] = pat(:create_success, :model => 'Section')
@@ -28,6 +30,7 @@ Fenix::App.controllers :sections do
     @title = pat(:edit_title, :model => "section #{params[:id]}")
     @section = Section.find(params[:id])
     if @section
+      habit(@section, :index)
       render 'sections/edit'
     else
       flash[:warning] = pat(:create_error, :model => 'section', :id => "#{params[:id]}")
@@ -39,7 +42,8 @@ Fenix::App.controllers :sections do
     @title = pat(:update_title, :model => "section #{params[:id]}")
     @section = Section.find(params[:id])
     if @section
-      if @section.update_attributes(params[:section])
+      if @section.update(params[:section])
+        inhabit(@section, :index)
         flash[:success] = pat(:update_success, :model => 'Section', :id =>  "#{params[:id]}")
         params[:save_and_continue] ?
           redirect(url(:sections, :index)) :

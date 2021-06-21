@@ -81,7 +81,8 @@ class Xmle
       edict << (prods = create_node('Товары'))
       
       scs = Section.all
-      scs.each do |s|
+      habits(scs, :index)
+      scs.sort_by{|o|o.index||0}.each do |s|
         s.categories.each do |tab|
           order.by_cat(tab.id).each do |item|
             next if item.ignored
