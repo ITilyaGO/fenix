@@ -87,6 +87,8 @@ Fenix::App.controllers :timeline do
     @kc_stickers = CabiePio.all_keys(@all_ids, folder: [:sticker, :order_progress]).flat.trans(:to_i, :to_f)
     @kc_sumstickers = @stickers.map{|k,v|[k, v*@kc_stickers.fetch(k,0)/100]}.to_h
     @sec_sums = sum_by_sections(@all_ids)
+    @sec_done = sum_done_by_sections(@all_ids)
+    @kc_cash = CabiePio.all_keys(@all_ids, folder: [:orders, :cash]).flat.trans(:to_i).reject{|k,v|v!='t'}
 
     render 'timeline/months'
   end
@@ -113,7 +115,17 @@ Fenix::App.controllers :timeline do
     @glass_stickers = CabiePio.all_keys(@all_ids, folder: [:sticker, :order_glass]).flat.trans(:to_i, :to_f)
     @gweek = calendar_group(@ktm.trans(nil, :to_i))
     @sdate = start_from
-    
+    kc_stickers = CabiePio.folder([:products, :sticker]).flat.trans(:to_i, :to_f)
+    @week_sum = {}
+    @month_sum = CabiePio.query("m/order_lines/sticker>.*_#{ky_month_1}..", type: :regex).flat.sum do |i,k|
+      ol = OrderLine.find(i.split('_').first.to_i) rescue nil
+      s = k[:v]*kc_stickers.fetch(ol&.product_id, 0)
+      gd = timeline_unf(i.split('_').last).beginning_of_week
+      @week_sum[gd] ||= 0
+      @week_sum[gd] += s
+      s
+    end
+
     render 'timeline/stickers'
   end
 
@@ -257,6 +269,9 @@ Fenix::App.controllers :dr_timeline, :map => 'timeline/driven' do
     @kc_stickers = CabiePio.all_keys(@all_ids, folder: [:sticker, :order_progress]).flat.trans(:to_i, :to_f)
     @kc_sumstickers = @stickers.map{|k,v|[k, v*@kc_stickers.fetch(k,0)/100]}.to_h
     @sec_sums = sum_by_sections(@all_ids)
+    @sec_done = sum_done_by_sections(@all_ids)
+    @kc_cash = CabiePio.all_keys(@all_ids, folder: [:orders, :cash]).flat.trans(:to_i).reject{|k,v|v!='t'}
+
 
     if params[:sort].to_sym == :manager
       @by_manager = @orders.map(&:id).group_by do |oid|

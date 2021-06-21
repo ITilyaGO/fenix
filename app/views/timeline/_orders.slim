@@ -60,8 +60,10 @@
     
     - price_total = @orders.map(&:total).sum
     - price_done = @orders.map(&:done_total).sum
-    tfoot
-      tr: td.summary colspan=13
+    - cash_total = @orders.select{|o| @kc_cash.keys.include? o.id}.map(&:total).sum
+    - cash_done = @orders.select{|o| @kc_cash.keys.include? o.id}.map(&:done_total).sum
+    - if @current_account.is_admin?
+      tfoot: tr: td.summary colspan=13
         - by_deli = sum_by_delivery(@orders)
         - [:postage, :vernissage, :roundtrip, :pickup].each do |ds|
           - if by_deli[ds] > 0
@@ -72,17 +74,29 @@
         - sections = Section.all
         - sections.each do |s|
           - sec_sum = @sec_sums.fetch(s.id, 0)
+          - sec_done = @sec_done.fetch(s.id, 0)
           - if sec_sum > 0
             .item-all.pull-left
-              span = s.name
+              span
+                = s.name
+                |  #{((sec_done.to_f/sec_sum)*100).ceil rescue 0}%
               .rpr == deli(rur sec_sum)
+              small == deli(rur sec_done)
 
         .item-all.pull-right
           span Сумма заказов
           .rpr == deli(rur price_total)
+          - if cash_total > 0
+            .cashline
+              /.fa.fa-money
+              small.rpr == deli(rur cash_total)
         .item-done.pull-right
           span Отправлено #{((price_done.to_f/price_total)*100).ceil}%
           .rpr == deli(rur price_done)
+          - if cash_total > 0
+            .cashline
+              /.fa.fa-money
+              small.rpr == deli(rur cash_done)
 
         - stickers_done = @kc_sumstickers.values.sum
         - stickers_total = @stickers.values.sum

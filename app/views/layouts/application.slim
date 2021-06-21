@@ -24,7 +24,9 @@ html lang='en'
               = link_to url(:online, :orders) do
                 | Заказы с сайта
                 | &nbsp;&nbsp;
-                span class="badge" = Order.online_count
+                - o_count = OrderJobs.online_count
+                - if o_count > 0
+                  span class="badge" = o_count
                 span class="menu-icon fa fa-cloud-download"
             li.sidebar-list
               = link_to url(:orders, :fullempty) do

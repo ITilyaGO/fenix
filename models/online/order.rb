@@ -2,6 +2,7 @@ class Online::Order < Online::Base
   self.table_name = 'orders'
   belongs_to :account
   has_many :order_lines
+  scope :fresh, -> { where("status = ?", 1) }
   
   def self.status_name(status)
     case status

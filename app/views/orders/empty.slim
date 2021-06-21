@@ -1,7 +1,9 @@
-div class="tabs-content"
+.tabs-content
 = form_for :order, !@id ? url(:orders, :empty) : url(:orders, :save, :id => @id), :class => 'form-horizontal' do |f|
   div class="table non-print row"
-    div class="col-md-8"
+    .col-md-8 style='border: 2px solid rgb(221, 221, 221);border-radius: 6px;'
+      .form-actions.text-center style='position: absolute;right: 30px;top: 10px;'
+        = f.submit pat('Изменить'), :class => 'btn btn-sm btn-wide btn-default', :name => :light_edit
       fieldset class='control-group'
         = f.label 'Тип заказа', :class => 'col-md-3 control-label'
         .col-md-3.controls.custom-control
@@ -27,6 +29,15 @@ div class="tabs-content"
         .col-md-3.controls.custom-control
           = f.radio_button :priority, :value => :true, :checked => @form.priority, :class => 'custom-control-input'
           label.custom-control-label(for = 'order_priority_true') Да
+      
+      fieldset.control-group
+        = f.label 'Нал', :class => 'col-md-3 control-label'
+        .col-md-3.controls.custom-control
+          = f.radio_button :cash, :value => :false, :checked => !@cash, :class => 'custom-control-input'
+          label.custom-control-label(for = 'order_cash_false') Нет
+        .col-md-3.controls.custom-control
+          = f.radio_button :cash, :value => :true, :checked => @cash, :class => 'custom-control-input'
+          label.custom-control-label(for = 'order_cash_true') Да
 
       - if @force_timeline
         fieldset class='control-group'
@@ -61,15 +72,7 @@ div class="tabs-content"
           div class="scrollable-dropdown-menu"
             = f.hidden_field :client_id, :value => (@order_client.id if @order_client)
             = text_field_tag 'cl', :class => 'form-control ', :id => 'typeahead-client', :value => (@order_client.name if @order_client)
-
-      fieldset class='control-group'
-        = f.label "Позиция", :class => 'col-md-3 control-label'
-        div class='col-md-6 controls'
-          div class="scrollable-dropdown-menu"
-            = text_field_tag 'pr', :class => 'form-control', :value => '', :id => 'typeahead-product'
-        div class='col-md-1 controls'
-          div class='btn btn-sm btn-default' id='add-product' Добавить 
-          // = content_tag 'Добавить', :class => 'btn btn-sm btn-default', :id => 'add-product'
+      .control-group &nbsp;
 
     // div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true"
     //   div class="modal-dialog modal-sm"
@@ -81,8 +84,16 @@ div class="tabs-content"
 
     div class="col-md-4"
       div class='controls' id='products_tree'
-    div class="col-md-4"
+    .col-md-8.col-md-offset-1
       div class='controls' id='products2_tree'
+      .control-group &nbsp;
+      fieldset.control-group
+        = f.label "Позиция", :class => 'col-md-3 control-label'
+        div class='col-md-6 controls'
+          div class="scrollable-dropdown-menu"
+            = text_field_tag 'pr', :class => 'form-control', :value => '', :id => 'typeahead-product'
+        div class='col-md-1 controls'
+          div class='btn btn-sm btn-default' id='add-product' Добавить
 
   div class="modal" tabindex="-1" role="dialog" 
     div class="modal-dialog"

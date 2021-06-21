@@ -173,6 +173,8 @@ Fenix::App.controllers :orders do
     parchs = @order.order_lines.map{|l|archetype_order(arches[l.product_id], l.id, @order.id)}
     @rese = CabiePio.all_keys(parchs, folder: [:need, :order]).flat.map{|k,v|[k.split('_')[1].to_i, v.to_i]}.to_h
 
+    cash = CabiePio.get([:orders, :cash], @order.id).data
+    @cash = cash == 't' ? 2 : 1 if cash
     if @order
       @order.actualize
       render 'orders/edit'
@@ -359,7 +361,9 @@ Fenix::App.controllers :orders do
     # order.delete(:account_id)
     # h.save
     params[:order][:delivery] = params[:order][:delivery].to_i
-    order = Order.new(params[:order])
+    ar = params[:order].dup
+    ar.delete(:cash)
+    order = Order.new(ar)
     order.id = params[:order]["id"] if !params[:order]["id"].blank?
     order.status = :draft
 
@@ -407,6 +411,8 @@ Fenix::App.controllers :orders do
     if Kato.valid? code
       CabiePio.set [:orders, :towns], order.id, code
     end
+    cash = params[:order][:cash] == 'true' ? 't' : 'f'
+    CabiePio.set [:orders, :cash], order.id, cash
     redirect(url(:orders, :draft))
   end
 
@@ -464,18 +470,30 @@ Fenix::App.controllers :orders do
     @order_place = order.place
     @descr = order.description
     @form = order
+    @cash = CabiePio.get([:orders, :cash], order.id).data == 't'
     @kc_town = CabiePio.get([:orders, :towns], order.id).data
     render 'orders/empty'
   end
 
   post :save, :with => :id do
     order = Order.find(params[:id])
-    order.status = :draft
     order.delivery = params[:order][:delivery].to_i
     order.priority = params[:order][:priority] == 'true'
     order.description = params[:order][:description]
     order.client_id = params[:order]["client_id"]
     order.place_id = params[:order]["place_id"]
+    code = params[:cabie][:kato_place]
+    if Kato.valid? code
+      CabiePio.set [:orders, :towns], order.id, code
+    end
+    cash = params[:order][:cash] == 'true' ? 't' : 'f'
+    CabiePio.set [:orders, :cash], order.id, cash
+    if params[:light_edit]
+      order.save
+      redirect url(:orders, :draft)
+    end
+
+    order.status = :draft
     order.done_parts = 0
     order.total = 0
     order.done_total = 0
@@ -523,14 +541,9 @@ Fenix::App.controllers :orders do
     order.save
     order.actualize
     calc_complexity_for order
-
     # arbal_need_order_rep(order)
     arbal_need_order_edit order
     
-    code = params[:cabie][:kato_place]
-    if Kato.valid? code
-      CabiePio.set [:orders, :towns], order.id, code
-    end
     redirect(url(:orders, :draft))
   end
 

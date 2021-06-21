@@ -33,7 +33,10 @@ ul class="nav nav-tabs non-print"
 
 .table.non-print
   .col-md-3.flex-v.text-center
-    h3 == deli(rur @order.total)
+    h3
+      - if @current_account.is_admin? && @cash
+        .icash.fa class=(@cash == 1 ? 'fa-credit-card' : 'fa-money')
+      == deli(rur @order.total)
     - if @order.finished? || @order.shipped?
       h5 == deli(rur @order.done_total)
     br

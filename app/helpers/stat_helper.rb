@@ -6,8 +6,24 @@ module Fenix::App::StatHelper
       sec_sums[s.id] = owol.map do |o|
         o.order_lines.map do |ol|
           pcat = category_matrix[products_hash[ol.product_id]]
-          csec = all_catagories.detect{|c|c.id == pcat}.section_id
+          csec = all_catagories.detect{|c|c.id == pcat}&.section_id
           csec == s.id ? ol.price*ol.amount : 0
+        end.sum
+      end.sum
+    end
+    sec_sums
+  end
+
+  def sum_done_by_sections(order_ids)
+    sec_sums = {}
+    owol = Order.includes(:order_lines).find(order_ids)
+    Section.all.each do |s|
+      sec_sums[s.id] = owol.map do |o|
+        o.order_lines.map do |ol|
+          next 0 if ol.ignored
+          pcat = category_matrix[products_hash[ol.product_id]]
+          csec = all_catagories.detect{|c|c.id == pcat}&.section_id
+          csec == s.id ? ol.price*(ol.done_amount||0) : 0
         end.sum
       end.sum
     end

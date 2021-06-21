@@ -29,7 +29,7 @@ class Order < ActiveRecord::Base
   
   
   def self.online_count
-    Online::Order.where("status = ?", 1).count
+    Online::Order.fresh.count
   end
   
   def place_name

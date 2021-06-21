@@ -10,9 +10,11 @@ ul class="nav nav-tabs non-print" id="weeks_tab"
   - if @start != today
     li = link_to tag_icon('history'), url(:timeline, :months)
 
-.timeline
+.timeline.lg
   - price_total = @orders.map(&:total).sum
   - price_done = @orders.map(&:done_total).sum
+  - cash_total = @orders.select{|o| @kc_cash.keys.include? o.id}.map(&:total).sum
+  - cash_done = @orders.select{|o| @kc_cash.keys.include? o.id}.map(&:done_total).sum
   .summary.text-center.flex-c
     - by_deli = sum_by_delivery(@orders)
     - [:postage, :vernissage, :roundtrip, :pickup].each do |ds|
@@ -25,18 +27,30 @@ ul class="nav nav-tabs non-print" id="weeks_tab"
     - sections = Section.all
     - sections.each do |s|
       - sec_sum = @sec_sums.fetch(s.id, 0)
+      - sec_done = @sec_done.fetch(s.id, 0)
       - if sec_sum > 0
-        .item-all
-          span = s.name
+        .item-all.pull-left
+          span
+            = s.name
+            |  #{((sec_done.to_f/sec_sum)*100).ceil rescue 0}%
           .rpr == deli(rur sec_sum)
+          small == deli(rur sec_done)
   br
   .summary.clearfix.flex-c
     .item-done.pull-right
       span Сумма заказов
       .rpr == deli(rur price_total)
+      - if cash_total > 0
+        .cashline
+          /.fa.fa-money
+          small.rpr == deli(rur cash_total)
     .item-done.pull-right
       span Отправлено #{((price_done.to_f/price_total)*100).ceil rescue 0}%
       .rpr == deli(rur price_done)
+      - if cash_total > 0
+        .cashline
+          /.fa.fa-money
+          small.rpr == deli(rur cash_done)
   
     - stickers_done = @kc_sumstickers.values.sum
     - stickers_total = @stickers.values.sum

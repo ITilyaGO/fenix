@@ -2,6 +2,7 @@ class OrderJobs
   extend Fenix::App::OrdersHelper
   extend Fenix::App::ProductsHelper
   extend Fenix::App::KyotoHelpers
+  ONLINE_COUNT_FILE = Padrino.env == :production ? '../yardekol/count.txt' : 'count.txt'
 
   def self.complexity_job(force: false, all: false)
     CabiePio.clear(:complexity, :order) if force
@@ -38,5 +39,12 @@ class OrderJobs
     orders.each do |t|
       #bal_need_order_start(t)
     end
+  end
+
+  def self.online_count
+    @online_date = nil if (Time.now - (@online_date||Time.now)) > 60 && @online_date < File.ctime(ONLINE_COUNT_FILE)
+    @online_count = nil unless @online_date
+    @online_date ||= File.ctime(ONLINE_COUNT_FILE)
+    @online_count ||= File.read(ONLINE_COUNT_FILE).to_i
   end
 end

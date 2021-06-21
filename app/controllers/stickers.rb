@@ -17,7 +17,7 @@ Fenix::App.controllers :stickers do
     if current_account.limited_orders?
       @filtered_by_user = OrderPart.where(:order_id => orders_query.ids, :section => current_account.section_id).pluck(:order_id)
     end
-    @orders = Order.find(last_stickers).sort_by{|o|last_stickers.index(o.id)}
+    @orders = Order.where(id: last_stickers).sort_by{|o|last_stickers.index(o.id)}
     @pages = (orders_query.count/pagesize).ceil
     @sections = Section.includes(:categories).all
     a_managers(@orders.map(&:id), @orders.map(&:client_id))

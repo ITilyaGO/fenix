@@ -2,10 +2,12 @@ module Cabie::Structure
   KEYMAP = {
     [:p, :clients, :hometowns] => nil,
     [:p, :clients, :delivery_towns] => nil,
+    [:p, :orders, :cash] => nil,
     [:p, :orders, :towns] => nil,
     [:p, :orders, :delivery_towns] => nil,
     [:p, :orders, :timeline] => nil,
     [:p, :orders, :stickers_amount] => nil,
+    [:p, :k1c, :product] => nil,
     [:p, :product, :k1c] => nil,
     [:p, :product, :archetype] => nil,
     [:p, :product, :archetype_multi] => nil,
@@ -46,7 +48,8 @@ module Cabie::Structure
     :root => [
       p: [
         :clients => [:hometowns, :delivery_towns],
-        :orders => [:towns, :delivery_towns, :timeline, :stickers_amount],
+        :orders => [:cash, :towns, :delivery_towns, :timeline, :stickers_amount],
+        :k1c => [:product],
         :product => [:k1c, :archetype, :archetype_multi],
         :products => [:sticker],
         :timeline => [:order],

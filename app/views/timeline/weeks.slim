@@ -37,10 +37,17 @@ ul class="nav nav-tabs non-print" id="weeks_tab"
         - 7.times do
           .day
       = link_to tag_icon('arrow-right'), url(:timeline, :weeks, start: timeline_id(@prev.next_month.beginning_of_week))
+  - if (@prev.month-today.month).abs > 1
+    li
+      graphic.collapse
+        - 7.times do
+          .day
+      = link_to tag_icon('history'), url(:timeline, :weeks)
 
 .filters.non-print
-  .filter-item style='line-height:2.2;'
-    = link_to 'по месяцам', url(:timeline, :months), class: 'btn btn-xs btn-default'
+  - if @current_account.is_admin?
+    .filter-item style='line-height:2.2;'
+      = link_to 'по месяцам', url(:timeline, :months), class: 'btn btn-xs btn-default'
   .filter-item.filter-control.custom-radio
     input type="radio" class="filter-control-input" id="customControlValidation1" name="radio-filter" value='delivery'
     label class="filter-control-label" for="customControlValidation1" по типу
@@ -126,8 +133,8 @@ ul class="nav nav-tabs non-print" id="weeks_tab"
   javascript:
     (function($) {
       $(function() {
-        $($('#weeks_tab li a')[1]).tab('show');
-        if($($('#for_order_tab .tab-pane')[1]).not('.non-print').length > 0)
+        $($('#weeks_tab li a')[2]).tab('show');
+        if($($('#for_order_tab .tab-pane')[2]).not('.non-print').length > 0)
           $('#for_order_tab .tab-pane:first').addClass('last');
         $('#for_order_tab .tab-pane:not(.non-print):last').addClass('last');
   
@@ -216,6 +223,13 @@ ul class="nav nav-tabs non-print" id="weeks_tab"
         // loint.innerHTML = f.action
         o.classList.toggle('fade')
         palo.classList.toggle('hidden')
+
+        if ('URLSearchParams' in window) {
+          var searchParams = new URLSearchParams(window.location.search)
+          searchParams.set("start", document.querySelector('#weeks_tab .active input').value);
+          var newRelativePathQuery = window.location.pathname + '?' + searchParams.toString();
+          history.pushState(null, '', newRelativePathQuery);
+        }
         return true
       }
 

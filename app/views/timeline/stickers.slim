@@ -5,7 +5,11 @@
     = link_to url(:timeline, :stickers, start: timeline_id(@sdate.weeks_ago(4))) do
       .btn.scroll.btn-sm.btn-default: i.fa.fa-arrow-left
   .wrapper
-    .head = [@sdate.weeks_ago(2).strftime("%Y"), @sdate.weeks_ago(-4).strftime("%Y")].uniq.join('-')
+    .head
+      .text-center.flex-c.btn.btn-sm.btn-clear style='align-items:baseline;'
+        span = @sdate.strftime("%B %Y")
+        ' &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        .btn.btn-xs.btn-default: .price style='font-size:1.3em;' == deli(rur @month_sum)
 
     - @weeks.each_with_index do |tab, i|
       .flex-c.graphic
@@ -39,6 +43,12 @@
                 == deli(rur wsum-wglsum)
                 br
                 small == deli(rur wglsum)
+        .day style='width:9em;': .wday
+          - ws = @week_sum.fetch(tab[:date], tab[:date].month == @sdate.month ? 0 : false)
+          - if ws
+            .btn.btn-sm.btn-default == deli(rur ws)
+          - else
+            .fa.fa-circle-o-notch
 
   .flex-v.btns.non-print
     = link_to url(:timeline, :stickers, start: timeline_id(@sdate.weeks_ago(-4))) do

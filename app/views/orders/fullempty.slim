@@ -27,6 +27,15 @@ div class="tabs-content"
         .col-md-3.controls.custom-control
           = f.radio_button :priority, :value => :true, :class => 'custom-control-input'
           label.custom-control-label(for = 'order_priority_true') Да
+      
+      fieldset.control-group
+        = f.label 'Нал', :class => 'col-md-3 control-label'
+        .col-md-3.controls.custom-control
+          = f.radio_button :cash, :value => :false, :checked => true, :class => 'custom-control-input'
+          label.custom-control-label(for = 'order_cash_false') Нет
+        .col-md-3.controls.custom-control
+          = f.radio_button :cash, :value => :true, :class => 'custom-control-input'
+          label.custom-control-label(for = 'order_cash_true') Да
 
       / fieldset class='control-group'
         = f.label 'Номер заказа', :class => 'col-md-3 control-label'

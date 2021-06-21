@@ -42,8 +42,9 @@ module Fenix::App::KyotoHelpers
   end
 
   def wonderbox_set(key, value)
-    all_wonderbox
     CabiePio.set [:m, :wonderbox], key, value
+    @wonderbox = nil
+    all_wonderbox
   end
 
   def all_wonderbox
