@@ -778,7 +778,7 @@ Fenix::App.controllers :orders do
     amount = 0.0
     @order.order_lines.each do |ol|
       next if ol.ignored
-      amount += ol.price*ol.done_amount
+      amount += ol.price*(ol.done_amount||0)
     end
     @order.done_total = amount
     @order.save
@@ -798,7 +798,7 @@ Fenix::App.controllers :orders do
       end
       Timeline.destroy_all(:order_id => order.id)
       tl = CabiePio.get [:orders, :timeline], order.id
-      CabiePio.unset [:timeline, :order], timeline_order(order.id, timeline_unf(tl.data))
+      CabiePio.unset [:timeline, :order], timeline_order(order.id, timeline_unf(tl.data)) if tl
       CabiePio.unset [:orders, :timeline], order.id
       redirect url(:orders, :draft)
     else

@@ -57,17 +57,18 @@
 
       - price_total = man_orders.map(&:total).sum
       - price_done = man_orders.map(&:done_total).sum
-      tfoot: tr
-        td.summary colspan=3
-          .text-left = del_name
-        td.summary colspan=8
-          .item-all.pull-right
-            span Сумма заказов
-            div == deli(rur price_total)
-          .item-done.pull-right
-            span Отправлено #{((price_done.to_f/price_total)*100).ceil}%
-            div == deli(rur price_done)
-          .item-sticker.pull-right
-            span Клейка
-            div == deli(rur man_orders.map(&:id).sum{|x|@stickers.fetch(x, 0)})
-    
+      - if @current_account.is_admin?
+        tfoot: tr
+          td.summary colspan=3
+            .text-left = del_name
+          td.summary colspan=8
+            .item-all.pull-right
+              span Сумма заказов
+              div == deli(rur price_total)
+            .item-done.pull-right
+              span Отправлено #{((price_done.to_f/price_total)*100).ceil}%
+              div == deli(rur price_done)
+            .item-sticker.pull-right
+              span Клейка
+              div == deli(rur man_orders.map(&:id).sum{|x|@stickers.fetch(x, 0)})
+      
