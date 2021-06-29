@@ -26,6 +26,17 @@ class OrderJobs
     wonderbox_set(:sticker_job, !all)
   end
 
+  def self.sticker_job_easy(products, force: false, all: false)
+    orderlines = all ?
+      OrderLine.where('updated_at < ?', Date.today - 4.month).where(product_id: products) :
+      OrderLine.where('updated_at > ?', Date.today - 4.month).where(product_id: products)
+    orders = Order.where(id: orderlines.map(&:order_id).uniq)
+    orders.each do |t|
+      calc_stickers_for(t)
+    end
+    wonderbox_set(:sticker_job, !all)
+  end
+
   def self.stock_job(force: false, all: false)
     # CabiePio.clear(:stock, :product) if force
     # CabiePio.clear(:stock, :common, :a) if force

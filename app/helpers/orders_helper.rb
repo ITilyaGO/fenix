@@ -25,6 +25,11 @@ module Fenix::App::OrdersHelper
     "#{'%0.f' %(value||0)}&nbsp;<span class='r'>&#x20B7</span>"
   end
 
+  def rurk(value)
+    # TODO: rebuild font with ruble sign ₽
+    "#{'%.2f' %(value||0)}&nbsp;<span class='r'>&#x20B7</span>"
+  end
+
   def pic_path(img)
     "#{Padrino.root}/public/images/orders/#{img}"
   end

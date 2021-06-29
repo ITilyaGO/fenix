@@ -1,0 +1,17 @@
+collapserb
+  .head onclick="{ toggle }"
+    .fa class="{ fa-plus-circle: !open, fa-circle: open }"
+    .label.label-default.label-before if='{ opts.badge }'
+      | { opts.badge }
+    .title hide="{ false }"
+      | { opts.titler }
+  .content-panel show="{ open }"
+    yield
+
+  javascript:
+
+    this.open = opts.open || false
+
+    this.toggle = function() {
+      this.open = !this.open;
+    }

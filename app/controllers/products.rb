@@ -136,21 +136,28 @@ Fenix::App.controllers :products do
     @categories = Category.all.includes(:category)
     @parents = Product.pluck(:parent_id).compact.uniq
     @kc_products = CabiePio.folder(:products, :sticker).flat
+    ps = @kc_products.keys.map(&:to_i)
+    @catind = @categories.map{|c|[c.id, (c.all_products.map(&:id) & ps).size]}.to_h
     # @kc_categories = CabiePio.folder(:complexity, :category).flat
     render 'products/sticker'
   end
 
   put :sticker do
-    data = params['cplx']
-
+    kc_products = CabiePio.folder(:products, :sticker).flat.trans(:to_i, :to_f)
+    prs = []
     params[:line].each do |k, line|
-      stick = line['sticker']
-      CabiePio.unset([:products, :sticker], line['id']) if stick == '0'
-      next unless stick.to_i > 0
-      CabiePio.set [:products, :sticker], line['id'], stick.to_f
+      prid = line['id'].to_i
+      stick = line['sticker'].to_f
+      anystick = line['sticker'].size > 0
+      CabiePio.unset([:products, :sticker], prid) if anystick && stick == 0
+      prs << prid if anystick && stick == 0
+      next if kc_products.fetch(prid, 0) == stick
+      next unless stick > 0
+      CabiePio.set [:products, :sticker], prid, stick
+      prs << prid
     end
     # $background.in '0s' do
-    OrderJobs.sticker_job
+    OrderJobs.sticker_job_easy(prs)
     # end
 
     redirect url(:products, :sticker)
