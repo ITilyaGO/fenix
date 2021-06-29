@@ -1,7 +1,7 @@
 module Fenix::App::StatHelper
   def sum_by_sections(order_ids)
     sec_sums = {}
-    owol = Order.includes(:order_lines).find(order_ids)
+    owol = Order.includes(:order_lines).where(id: order_ids)
     Section.all.each do |s|
       sec_sums[s.id] = owol.map do |o|
         o.order_lines.map do |ol|
@@ -16,7 +16,7 @@ module Fenix::App::StatHelper
 
   def sum_done_by_sections(order_ids)
     sec_sums = {}
-    owol = Order.includes(:order_lines).find(order_ids)
+    owol = Order.includes(:order_lines).where(id: order_ids)
     Section.all.each do |s|
       sec_sums[s.id] = owol.map do |o|
         o.order_lines.map do |ol|

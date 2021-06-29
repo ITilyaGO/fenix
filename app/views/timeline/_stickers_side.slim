@@ -1,12 +1,13 @@
 .title.text-center = to_dm(@cdate)
+
 - @orders.each do |order|
   .order
     .flex-c
-      = link_to url(:orders, :edit, :id => order.id), class: 'text-left flexie', target: '_blank'
+      = link_to url(:stickers, :order, id: order.id, date: timeline_id(@cdate)), class: 'text-left flexie', target: '_blank'
         = order.id
       - sticker_progress = @stickers.fetch(order.id, nil)
       - if sticker_progress
-        .progress.mini.for-stickers title="#{sticker_progress}%"
+        .progress.mini.for-stickers title="#{sticker_progress}%" class=('danger' if sticker_progress > 130)
           .progress-bar role="progressbar" style="width:#{sticker_progress.to_i}%"
       .flexie.price == deli(rur order.total)
     .text-left = order.client.name

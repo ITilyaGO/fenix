@@ -112,7 +112,7 @@
               = t :"status.#{order.status}"
           td.list-column.non-print
             - progress = @kc_stickers.fetch(order.id, 0)
-            .progress.short.for-stickers title="#{progress}%"
+            .progress.short.for-stickers title="#{progress}%" class=('danger' if progress > 130)
               .progress-bar role="progressbar" style="width:#{progress.to_i}%"
             - if order.finished?
               = link_to "Отправить", :href => url(:orders, :ship, :id => order.id), :class => "btn btn-xs btn-shipped"

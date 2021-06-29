@@ -50,7 +50,7 @@
           td.only-print
           td.non-print.list-column
             - progress = @kc_stickers.fetch(order.id, 0)
-            .progress.short.for-stickers title="#{progress}%"
+            .progress.short.for-stickers title="#{progress}%" class=('danger' if progress > 130)
               .progress-bar role="progressbar" style="width:#{progress.to_i}%"
           td class='list-column list-row-action non-print'
             div class='list-row-action-wrapper'

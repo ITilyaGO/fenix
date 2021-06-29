@@ -117,7 +117,7 @@ hr
     - if sticker.last > 0
       ' &nbsp;
       .label.label-purple == deli (rur sticker.last)
-  .progress.for-stickers.ninety title="#{@sticker_progress}%"
+  .progress.for-stickers.ninety title="#{@sticker_progress}%" class=('danger' if @sticker_progress > 130)
     .progress-bar role="progressbar" style="width:#{@sticker_progress&.ceil}%"
 br
 

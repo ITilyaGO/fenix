@@ -839,7 +839,7 @@ calendar {
     flex: 0 0 100%;
 
     .day {
-      margin: 0 1em;
+      margin: 0 .1em;
     }
 
     .wday {
@@ -852,6 +852,11 @@ calendar {
       margin: 3px 10px;
       padding: 6px 10px;
       text-align: center;
+
+      &.wend {
+        background: #bdc3c7;
+        color: #ffffff;
+      }
 
       &.small {
         padding: 0;
@@ -918,7 +923,7 @@ calendar {
 }
 
 .td-sticker-input {
-  min-width: 7em;
+  min-width: 9em;
   .label-success {
     font-size: 90%;
     background-color: rgba(92, 184, 92, 0.78);
@@ -959,6 +964,10 @@ calendar {
 
   &.ninety {
     width: 90%;
+  }
+
+  &.danger .progress-bar {
+    background: rgb(255, 122, 147);
   }
 }
 

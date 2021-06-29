@@ -6,19 +6,23 @@
       .btn.scroll.btn-sm.btn-default: i.fa.fa-arrow-left
   .wrapper
     .head
-      .text-center.flex-c.btn.btn-sm.btn-clear style='align-items:baseline;'
+      a.text-center.flex-c.btn.btn-sm.btn-clear style='align-items:baseline;' href=url(:timeline, :stickers, start: timeline_id(@sdate.beginning_of_month.beginning_of_week.weeks_ago(-2)))
         span = @sdate.strftime("%B %Y")
         ' &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         .btn.btn-xs.btn-default: .price style='font-size:1.3em;' == deli(rur @month_sum)
 
     - @weeks.each_with_index do |tab, i|
+      - ws = @week_sum.fetch(tab[:date], tab[:date].month == @sdate.month ? 0 : false)
+      - next unless ws
       .flex-c.graphic
         - wsum = 0
         - wglsum = 0
+        - wstic = 0
+        - wglstic = 0
         - 7.times do |gap|
           - cdate = tab[:date] + gap
-          .day class=[('today' if cdate == today)] title=cdate data-id=timeline_id(cdate)
-            .wday
+          .day title=(cdate unless gap < 5) data-id=timeline_id(cdate)
+            .wday.hand class=[('today' if cdate == today)]
               == gap < 5 ? to_dm(cdate) : '&nbsp;'
               .only-print = to_dm(cdate) unless gap < 5
           
@@ -27,28 +31,28 @@
             - glsum = wids.sum{|x|@glass_stickers.fetch(x, 0)}
             - wsum += dsum
             - wglsum += glsum
+            - rstic = @day_sum.fetch(cdate, 0)
+            - glstic = @glday_sum.fetch(cdate, 0)
+            - wstic += rstic
+            - wglstic += glstic
             .price
-              - if dsum > 0
-                == deli(rur dsum-glsum)
-              - else
-                | &nbsp;
-              - if glsum > 0
+              - if rstic > 0
+                == deli(rur rstic)
                 br
-                small == deli(rur glsum)
+                small == deli(rur rstic-glstic)
+              - if glstic > 0
+                br
+                small == deli(rur glstic)
+
         .summary
-          .wday
-            == deli(rur wsum) if wsum > 0
-            .price
-              - if wglsum > 0
-                == deli(rur wsum-wglsum)
-                br
-                small == deli(rur wglsum)
-        .day style='width:9em;': .wday
-          - ws = @week_sum.fetch(tab[:date], tab[:date].month == @sdate.month ? 0 : false)
-          - if ws
-            .btn.btn-sm.btn-default == deli(rur ws)
-          - else
-            .fa.fa-circle-o-notch
+          .wday.wend &nbsp;
+          .price
+            == deli(rur wstic)
+            - if wglstic > 0
+              br
+              small == deli(rur wstic-wglstic)
+              br
+              small == deli(rur wglstic)
 
   .flex-v.btns.non-print
     = link_to url(:timeline, :stickers, start: timeline_id(@sdate.weeks_ago(-4))) do

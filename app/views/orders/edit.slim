@@ -17,7 +17,7 @@ ul class="nav nav-tabs non-print"
       ' &nbsp;
       .label.label-purple == deli (rur sticker.last)
   li
-    .progress.for-stickers title="#{@sticker_progress}%"
+    .progress.for-stickers title="#{@sticker_progress}%" class=('danger' if @sticker_progress > 130)
       .progress-bar role="progressbar" style="width:#{@sticker_progress.to_i}%"
   li.pull-right: a 
     = partial 'orders/squares', :locals => { :order => @order }

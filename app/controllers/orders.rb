@@ -421,6 +421,9 @@ Fenix::App.controllers :orders do
     @title = "New order"
     @cats = Category.where(category: nil).order(:index => :asc)
     @parents = Product.pluck(:parent_id).compact.uniq
+    @arp = CabiePio.folder(:product, :archetype).flat.trans(:to_i)
+    @kc_stocks = CabiePio.folder(:stock, :archetype).flat.trans(nil, :to_i)
+    @kc_needs = CabiePio.folder(:need, :archetype).flat.trans(nil, :to_i)
     calendar_init
     render 'orders/fullempty'
   end

@@ -175,6 +175,7 @@ div class="tabs-content"
               th Наименование
               th Коммент
               th Количество
+              th Остаток
               th Цена
               th Сумма
               th &nbsp;
@@ -191,6 +192,19 @@ div class="tabs-content"
                   = text_field_tag 'line[][comment]', :placeholder => "Комментарий к позиции", :class => "form-control input-sm"
                 td class="col-md-1" class="vert-align"
                   = text_field_tag 'line[][amount]', :autocomplete => :off, :class => "form-control form-amount input-sm"
+                td
+                  - p_id = @arp.fetch(line.id, nil)
+                  - stock = @kc_stocks.fetch(p_id, 0)
+                  - need = @kc_needs.fetch(p_id, 0)
+                  - defz = stock - need
+                  - if p_id.nil?
+                    .fa.fa-exclamation-triangle.text-warning
+                  - elsif defz < 0
+                    .label.label-danger == deli defz.abs
+                  - elsif defz == 0
+                    .label.label-default нет
+                  - else
+                    .label.label-success == deli defz
                 td class="col-md-1 price" class="vert-align"
                   = line.price
                   | &nbsp;&#x20B7

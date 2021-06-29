@@ -5,7 +5,8 @@ module Fenix::App::ArchetypeHelper
     products.each do |p|
       next if with_archs.include? p.id
       pcat = category_matrix[products_hash[p.id]]
-      next unless [18,21].include? pcat
+      # next unless [18,21].include? pcat
+      next unless [80,75,59,28,85].include? p.category_id.to_i
       archetype = KSM::Archetype.nest
       archetype.name = p.name
       archetype.category_id = p.category_id.to_i
