@@ -56,9 +56,9 @@
                 = link_to tag_icon(:calendar), '#', :class => 'list-row-action-wrapper-link medium list-menu-timeline-link'
                 = link_to tag_icon(:edit), :href => url(:orders, :edit, :id => order.id), :class => 'list-row-action-wrapper-link'
 
-      - price_total = man_orders.map(&:total).sum
-      - price_done = man_orders.map(&:done_total).sum
       - if @current_account.is_admin?
+        - price_total = man_orders.map(&:total).sum
+        - price_done = man_orders.map(&:done_total).sum
         tfoot: tr
           td.summary colspan=3
             .text-left = man_name

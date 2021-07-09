@@ -55,13 +55,28 @@
                 = link_to tag_icon(:'arrows-alt'), '#', :class => 'list-row-action-wrapper-link medium list-menu-regroup-link'
                 = link_to tag_icon(:edit), :href => url(:orders, :edit, :id => order.id), :class => 'list-row-action-wrapper-link'
 
-      - price_total = man_orders.map(&:total).sum
-      - price_done = man_orders.map(&:done_total).sum
       - if @current_account.is_admin?
+        - price_total = man_orders.map(&:total).sum
+        - price_done = man_orders.map(&:done_total).sum
+        - sec_sums = sum_by_sections(man_orders.map(&:id))
+        - sec_dones = sum_done_by_sections(man_orders.map(&:id))
         tfoot: tr
           td.summary colspan=3
             .text-left = del_name
-          td.summary colspan=8
+          td.summary colspan=9
+            .pull-left
+            - sections = Section.all
+            - sections.each do |s|
+              - sec_sum = sec_sums.fetch(s.id, 0)
+              - sec_done = sec_dones.fetch(s.id, 0)
+              - if sec_sum > 0
+                .item-all.pull-left
+                  span
+                    = s.name
+                    |  #{((sec_done.to_f/sec_sum)*100).ceil rescue 0}%
+                  .rpr == deli(rur sec_sum)
+                  small == deli(rur sec_done)
+
             .item-all.pull-right
               span Сумма заказов
               div == deli(rur price_total)

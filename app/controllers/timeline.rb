@@ -276,7 +276,6 @@ Fenix::App.controllers :dr_timeline, :map => 'timeline/driven' do
     start_from = timeline_unf(params[:start]) rescue Date.today
     start_from = @sdate
     @prev = start_from.beginning_of_week
-    
 
     ky_month_1 = start_from.strftime('%y%m')
     ky_month_2 = start_from.next_month.strftime('%y%m')
@@ -297,7 +296,6 @@ Fenix::App.controllers :dr_timeline, :map => 'timeline/driven' do
     @sec_sums = sum_by_sections(@all_ids)
     @sec_done = sum_done_by_sections(@all_ids)
     @kc_cash = CabiePio.all_keys(@all_ids, folder: [:orders, :cash]).flat.trans(:to_i).reject{|k,v|v!='t'}
-
 
     if params[:sort].to_sym == :manager
       @by_manager = @orders.map(&:id).group_by do |oid|

@@ -138,6 +138,7 @@ div class="tabs-content"
         = text_field_tag 'line[][comment]', :value => line[:comment], :placeholder => "Комментарий к позиции", :class => "form-control input-sm"
       td class="col-md-1" class="vert-align"
         = text_field_tag 'line[][amount]', :value => line[:amount], :class => "form-control form-amount input-sm"
+      td
       td class="col-md-1 price" class="vert-align"
         = line[:price]
         | &nbsp;&#x20B7
@@ -159,6 +160,7 @@ div class="tabs-content"
         th Наименование
         th Коммент
         th Количество
+        th Остаток
         th Цена
         th Сумма
         th &nbsp;
