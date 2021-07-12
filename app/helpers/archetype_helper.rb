@@ -24,7 +24,7 @@ module Fenix::App::ArchetypeHelper
     "#{archetype}_#{timeline_id(day)}"
   end
 
-  def arbal_unstock_order(order, di_lines, sum_lines)
+  def arbal_unstock_order(order, di_lines, sum_lines, day)
     # stickers = CabiePio.all_keys(order.order_lines.map(&:product_id), folder: [:products, :sticker]).flat.trans(:to_i, :to_f)
     # line_stickers = CabiePio.all_keys(order.order_lines.map(&:id), folder: [:m, :order_lines, :sticker_sum])
     #   .flat.map{|k,v|[k.to_i,v[:v]]}.to_h
@@ -38,6 +38,8 @@ module Fenix::App::ArchetypeHelper
       if real_done != 0
         ssum = CabiePio.get([:stock, :archetype], parch).data.to_i || 0
         CabiePio.set [:stock, :archetype], parch, ssum-real_done
+        daysum = CabiePio.get([:stock, :common, :d], parch).data.to_i || 0
+        CabiePio.set [:stock, :common, :d], archetype_daystock(parch, day), daysum+real_done
 
         prev = CabiePio.get([:need, :order], archetype_order(parch, line.id, order.id)).data.to_i || 0
         whole_done = (sum_lines[line.id] || 0)*m
@@ -134,15 +136,20 @@ module Fenix::App::ArchetypeHelper
   def arbal_need_order_fin(order)
     arches = CabiePio.folder(:product, :archetype).flat.trans(:to_i)
     stickers = CabiePio.all_keys(order.order_lines.map(&:product_id), folder: [:products, :sticker]).flat.trans(:to_i).keys
+    multi = CabiePio.folder(:product, :archetype_multi).flat.trans(:to_i, :to_i)
+    doneday = CabiePio.get([:stock, :order, :done], order.id).data
     order.order_lines.each do |line|
       parch = arches.fetch(line.product_id, nil)
       next unless parch
 
       unless stickers.include? line.product_id
-        real_done = line.ignored ? 0 : line.done_amount||line.amount
+        m = multi.fetch(line.product_id, 1)
+        real_done = (line.ignored ? 0 : line.done_amount||line.amount)*m
         if real_done > 0
           ssum = CabiePio.get([:stock, :archetype], parch).data.to_i || 0
           CabiePio.set [:stock, :archetype], parch, ssum-real_done
+          daysum = CabiePio.get([:stock, :common, :d], parch).data.to_i || 0
+          CabiePio.set [:stock, :common, :d], archetype_daystock(parch, Date.parse(doneday)), daysum+real_done
         end
       end
 
@@ -156,7 +163,8 @@ module Fenix::App::ArchetypeHelper
   end
 
   def arbal_need_order_done(order)
-    CabiePio.set [:stock, :order, :done], order.id, Time.now
+    done = CabiePio.get([:stock, :order, :done], order.id)
+    CabiePio.set [:stock, :order, :done], order.id, Time.now if done.blank?
   end
 
   def arbal_need_order_fin1(order)

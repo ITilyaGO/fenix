@@ -6,6 +6,7 @@
         th class='header' Номер
         th class='header' Город
         th class='header' Куда едет
+        th.header width='50px'
         th class='header' Заказчик
         th class='header' Дата
         th class='header non-print'
@@ -28,6 +29,7 @@
             - code = @kc_delivery[order.id.to_s] || @kc_client_delivery[order.client_id.to_s]
             - town_name = @kc_towns[code]&.model
             = partial 'bricks/kato/label', :locals => { town_name: town_name, el: order }
+          td.list-column.minirur.text-nowrap == deli(rur (order.total/1000.0).floor)
           td class='list-column' = order.client.name
           td class='list-column text-nowrap' = to_msk(order.created_at)
           td class='list-column text-nowrap non-print'

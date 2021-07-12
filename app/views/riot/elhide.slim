@@ -1,0 +1,16 @@
+elhide class='{ hide: !displayed }'
+  / elhide class="{ hidden: !displayed }" show='{ !displayed }'
+  yield
+
+  javascript:
+    self.displayed = !(opts.hide == 'true' || false)
+
+    rcontrol.on(opts.ts, function(data) {
+      self.displayed = true
+      self.update()
+    })
+
+    rcontrol.on(opts.th, function(data) {
+      self.displayed = false
+      self.update()
+    })

@@ -1,0 +1,12 @@
+clicker onclick='{ click_send }'
+  yield
+  / .btn.btn-default onclick='{ click_send }' ss
+  /text Поиск
+  /span.fa.fa-search
+
+  javascript:
+    click_send(event) {
+      rcontrol.trigger(opts.action, opts)
+      event.preventDefault()
+      event.stopPropagation()
+    }

@@ -16,6 +16,7 @@ Fenix::App.controllers :orders do
     a_managers(@orders.map(&:id), @orders.map(&:client_id))
     @transport = CabiePio.all_keys(@orders.map(&:client_id).uniq, folder: [:m, :clients, :transport]).flat
     @kc_timelines = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :timeline]).flat.trans(:to_i)
+    @kc_blinks = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :timeline_blink]).flat.trans(:to_i)
     @kc_stickers = CabiePio.all_keys(@orders.map(&:id), folder: [:sticker, :order_progress]).flat.trans(:to_i, :to_f)
     @r = url(:orders, :index)
     render 'orders/index'
@@ -165,6 +166,7 @@ Fenix::App.controllers :orders do
     manager = kc_town_managers.fetch(hier.detect{|c| kc_town_managers[c]}, 0)
     @manager = Manager.find(manager) rescue nil
     @timeline_at = CabiePio.get([:orders, :timeline], @order.id).data
+    @timeline_blink = !CabiePio.get([:orders, :timeline_blink], @order.id).blank?
     @timeline_date = timeline_unf(@timeline_at) unless @timeline_at.nil?
 
     calendar_init(Date.today)
@@ -592,6 +594,12 @@ Fenix::App.controllers :orders do
   end
 
   put :update, :with => :id do
+    if params[:unblink]
+      order = Order.find(params[:id])
+      CabiePio.unset [:orders, :timeline_blink], order.id
+      redirect url(:orders, :edit, id: order.id)
+    end
+
     @title = pat(:update_title, :model => "order #{params[:id]}")
     @order = Order.find(params[:id])
     @order_part = @order.order_parts.find_by(:section_id => current_account.section)
@@ -599,8 +607,12 @@ Fenix::App.controllers :orders do
     @order.priority = params[:priority] == "true"
     delivery_at = params[:cabie][:timeline_at] rescue nil
     if timeline_date = Date.parse(delivery_at) rescue nil
+      current_kc = CabiePio.get([:orders, :timeline], @order.id).data
+      current_tl = timeline_unf(current_kc)
+      CabiePio.unset [:timeline, :order], timeline_order(@order.id, current_tl)
       CabiePio.set [:timeline, :order], timeline_order(@order.id, timeline_date), @order.id
       CabiePio.set [:orders, :timeline], @order.id, timeline_id(timeline_date)
+      CabiePio.set([:orders, :timeline_blink], @order.id, 1) if timeline_date != current_tl
     end
 
     order_part_st = @order.order_parts.find_by(:section_id => 1)
@@ -689,8 +701,8 @@ Fenix::App.controllers :orders do
       arbal_need_order_st_fin(@order)
     end
     if status_before && @order.finished?
-      arbal_need_order_fin(@order)
       arbal_need_order_done(@order)
+      arbal_need_order_fin(@order)
     end
 
     if @order.finished?

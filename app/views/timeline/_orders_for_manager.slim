@@ -11,6 +11,7 @@
           th class='header' Номер
           th class='header' Заказчик
           th class='header' Город
+          th.header width='50px'
           th class='header non-print' Тр.ком.
           th class='header non-print' Договор
           th class='header' Дата
@@ -35,11 +36,13 @@
               - code = @kc_orders[order.id.to_s]
               - town_name = @kc_towns[code]&.model
               = partial 'bricks/kato/label_print', :locals => { town_name: town_name, el: order }
+            td.list-column.minirur.text-nowrap == deli(rur (order.total/1000.0).floor)
             td class='list-column non-print'
               = partial 'bricks/orders/transport', :locals => { client_id: order.client_id }
             td class='list-column non-print' = order.client.contract
-            td class='list-column' = to_dm(order.created_at)
-            td class='list-column' = to_dm(timeline_unf(odate))
+            td.list-column.text-center.text-nowrap = to_dm(order.created_at)
+            td.list-column.text-center.text-nowrap class=('date-warning' if @kc_blinks.fetch(order.id, nil))
+              = to_dm(timeline_unf(odate))
             td class='list-column non-print'
               span class="label label-#{order.status} non-print" = t :"status.#{order.status}"
               span class="only-print" = t :"status.#{order.status}"
@@ -62,7 +65,7 @@
         tfoot: tr
           td.summary colspan=3
             .text-left = man_name
-          td.summary colspan=8
+          td.summary colspan=20
             .item-all.pull-right
               span Сумма заказов
               div == deli(rur price_total)

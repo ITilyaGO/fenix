@@ -23,6 +23,7 @@ Fenix::App.controllers :stickers do
     a_managers(@orders.map(&:id), @orders.map(&:client_id))
     @transport = CabiePio.all_keys(@orders.map(&:client_id).uniq, folder: [:m, :clients, :transport]).flat
     @kc_timelines = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :timeline]).flat.trans(:to_i)
+    @kc_blinks = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :timeline_blink]).flat.trans(:to_i)
     @kc_stickers = CabiePio.all_keys(@orders.map(&:id), folder: [:sticker, :order_progress]).flat.trans(:to_i, :to_f)
     @r = url(:stickers, :orders)
     render 'orders/index'
@@ -116,7 +117,7 @@ Fenix::App.controllers :stickers do
     now_stickers = CabiePio.all_keys(@order.order_lines.map(&:id), folder: [:m, :order_lines, :sticker_sum])
       .flat.trans(:to_i).transform_values{|v|v[:v]}
     dilines = now_stickers.map{|k,v|[k,v-saved_stickers.fetch(k,0)]}.to_h
-    arbal_unstock_order(@order, dilines, now_stickers)
+    arbal_unstock_order(@order, dilines, now_stickers, day)
 
     redirect(url(:orders, :index))
   end

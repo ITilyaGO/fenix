@@ -59,10 +59,16 @@
     margin: 0 !important;
     padding: 0 !important;
     border-width: 1px !important;
+    border-collapse: collapse;
   }
   
   table .only-print {
     display: table-cell;
+  }
+
+  table tr > td,
+  table tr > th {
+    border: 1px solid black !important;
   }
 
   table tr.only-print {

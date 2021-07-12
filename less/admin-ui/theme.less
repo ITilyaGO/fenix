@@ -583,6 +583,34 @@ complex, sticker_line, .sticker-block {
   border-bottom: 1px solid rgba(237, 238, 242, 1);
   border-top: none;
 }
+.list-column.minirur {
+  white-space: nowrap;
+  .r {
+    color: #c8c5ee;
+    font-size: 0.9em;
+    margin-left: -.1em;
+  }
+}
+.list-column.date-warning {
+  text-shadow: 0px 1px;
+  .text-warning();
+}
+.list-column.bg-warning {
+  background-color: #f1c40f !important;
+  color: white;
+}
+
+// .list-row-action {
+//   position: relative;
+// } 
+.list-row .list-row-unwrap {
+  position: absolute;
+  top: 25%;
+  display: inline;
+}
+.list-row:hover .list-row-unwrap {
+  display: none;
+}
 
 // 
 .filters {

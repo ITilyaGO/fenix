@@ -20,6 +20,11 @@ module Fenix::App::OrdersHelper
     ("%.2f" % value).gsub('.', ',')
   end
 
+  def listrur(value)
+    # TODO: rebuild font with ruble sign ₽
+    "<span class='r'>&#x20B7</span>#{'%0.f' %(value||0)}"
+  end
+
   def rur(value)
     # TODO: rebuild font with ruble sign ₽
     "#{'%0.f' %(value||0)}&nbsp;<span class='r'>&#x20B7</span>"

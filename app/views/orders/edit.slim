@@ -78,7 +78,9 @@ ul class="nav nav-tabs non-print"
     p Емайл: #{@order.client.email}
     p Дата: #{to_msk(@order.created_at)}
     - unless @timeline_at.nil?
-      p Дата отправки: #{to_msk(@timeline_date)}
+      p
+        span Дата отправки: 
+        span class=('text-warning' if @timeline_blink) = to_msk(@timeline_date)
     p Менеджер: #{@manager&.name}
 
   
@@ -199,6 +201,9 @@ ul class="nav nav-tabs non-print"
           .fa.fa-calendar.fa-btn
           | график
 
+        - if @timeline_blink
+          = submit_tag "Убрать мигание", :class => 'btn btn-sm btn-warning', :name => 'unblink'
+
       = partial 'timeline/calendar'
 
   - if !@order.draft? && @order_part && @order_part.anew?
@@ -272,7 +277,7 @@ ul class="nav nav-tabs non-print"
             - s.categories.each do |tab|
               - cat_visible = @order.by_cat?(tab.id)
               - if cat_visible
-                div class="table-res4ponsive"
+                .table-res4ponsive
                   h4.non-print = tab.name
                   table.table
                     thead.only-print
@@ -284,7 +289,7 @@ ul class="nav nav-tabs non-print"
                           - if tab.id == 21
                             = sticker.last
                     tr
-                      th.only-print width='10%' Собрано
+                      th.only-print width='20%' Собрано
                       th Наименование
                       th Коммент
                       th Количество
@@ -293,8 +298,8 @@ ul class="nav nav-tabs non-print"
                       th.non-print Наклеено
                       th.non-print Факт
                       th.non-print Не&nbsp;делаем
-                      th.only-print width='5%' Деколи
-                      th.only-print width='5%' Тираж
+                      /th.only-print width='5%' Деколи
+                      /th.only-print width='5%' Тираж
                     
                     - @order.by_cat(tab.id).each do |ol|
                       tr class="order-line"
@@ -340,8 +345,9 @@ ul class="nav nav-tabs non-print"
                             = check_box_tag "line[#{ol.id}][ignored]", :checked => ol.ignored
                           - else
                             = check_box_tag '', :checked => ol.ignored, :disabled => true
-                        td.only-print
-                        td.only-print
+                        /td.only-print
+                        /td.only-print
+                p.only-print &nbsp;
       .tab-pane.non-print id="cat-fail"
         p У этого заказа заглючили секции. Тут будет кнопка для исправления.
         - if current_account.is_admin? && @order.current?

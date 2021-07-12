@@ -19,6 +19,7 @@ div class="tabs-content"
         // th class='header' = mat(:order, :name)
         // th class='header' = mat(:order, :amount)
         th class='header' Заказчик
+        th.header width='50px'
         th class='header' Город
         th class='header' Куда едет
         th class='header only-print' Тр.ком
@@ -37,6 +38,7 @@ div class="tabs-content"
           td class='list-column' = order.id
           // td class='list-column' = order.name
           td class='list-column' = order.client.name
+          td.list-column.minirur.text-nowrap == deli(rur (order.total/1000.0).floor)
           td class='list-column'
             - code = @kc_orders[order.id.to_s]
             - town_name = @kc_towns[code]&.model

@@ -232,6 +232,7 @@ Fenix::App.controllers :timeline do
       CabiePio.unset [:timeline, :order], id
       CabiePio.set [:timeline, :order], timeline_order(order_id, timeline_date), order_id
       CabiePio.set [:orders, :timeline], order_id, timeline_id(timeline_date)
+      CabiePio.set [:orders, :timeline_blink], order_id, 1
     end
     true
   end
@@ -292,6 +293,7 @@ Fenix::App.controllers :dr_timeline, :map => 'timeline/driven' do
     @stickers = CabiePio.all_keys(@all_ids, folder: [:sticker, :order]).flat.trans(:to_i, :to_f)
     @transport = CabiePio.all_keys(@orders.map(&:client_id).uniq, folder: [:m, :clients, :transport]).flat
     @kc_stickers = CabiePio.all_keys(@all_ids, folder: [:sticker, :order_progress]).flat.trans(:to_i, :to_f)
+    @kc_blinks = CabiePio.all_keys(@all_ids, folder: [:orders, :timeline_blink]).flat.trans(:to_i)
     @kc_sumstickers = @stickers.map{|k,v|[k, v*@kc_stickers.fetch(k,0)/100]}.to_h
     @sec_sums = sum_by_sections(@all_ids)
     @sec_done = sum_done_by_sections(@all_ids)

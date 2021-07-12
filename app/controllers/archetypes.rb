@@ -117,10 +117,12 @@ Fenix::App.controllers :archetypes do
     @title = "Stock"
     @day = Date.parse(params[:day]) rescue Date.today
     @holders = {}
+    @destocks = {}
     ksm_arch = KSM::Archetype.all
     ar_hash = ksm_arch.map(&:id)
     ar_hash.each do |sk|
       @holders[sk] ||= {}
+      @destocks[sk] ||= {}
     end
     7.times do |i|
       dt = (@day-i).strftime('%y%m%d')
@@ -130,6 +132,12 @@ Fenix::App.controllers :archetypes do
         p = sk.split('_').first
         @holders[p] ||= {}
         @holders[p][@day-i] = sv.to_i
+      end
+      destockday = CabiePio.all_keys(all_ids, folder: [:stock, :common, :d]).flat
+      destockday.each do |sk, sv|
+        p = sk.split('_').first
+        @destocks[p] ||= {}
+        @destocks[p][@day-i] = sv.to_i
       end
     end
         

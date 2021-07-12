@@ -1,4 +1,6 @@
 .pull-right
+  switcher.btn.btn-sm.btn-clear t2='DESTOCK_SHOW' t1='DESTOCK_HIDE' Списания
+  '
   - if params[:all]
     = link_to :'скрыть склад', url(:archetypes, :stock), class: 'btn btn-sm btn-glue'
   - else
@@ -89,14 +91,25 @@ br
                       - day = @day - 6 + i
                       - if @holders[p.id].fetch(day, nil)
                         .text-center: .label.label-default = @holders[p.id][day]
+                      - if @destocks[p.id].fetch(day, nil)
+                        .text-center
+                          elhide th='DESTOCK_HIDE' ts='DESTOCK_SHOW' hide='true'
+                            .label.label-lightdanger = -@destocks[p.id][day]
+                            br
+                            br
 
                         / .col = text_field_tag "lines[#{p.id}][#{day}]", class: 'form-control input-large',
                           placeholder: @holders[p.id][day]
                   - 2.times do |i|
                     td class="col-md-1"
                       - day = @day - 1 + i
-                      .col = text_field_tag "lines[#{p.id}][#{day}]", class: 'form-control input-large',
+                      .col
+                        = text_field_tag "lines[#{p.id}][#{day}]", class: 'form-control input-large',
                         placeholder: @holders[p.id].fetch(day, nil)
+                        - if @destocks[p.id].fetch(day, nil)
+                          .text-center
+                            elhide th='DESTOCK_HIDE' ts='DESTOCK_SHOW' hide='true'
+                              .label.label-lightdanger = -@destocks[p.id][day]
 
                       /- 7.times do |di|
                         = (text_field_tag "line[#{p.id}][#{di}out]", :autocomplete => "off",
@@ -129,8 +142,11 @@ br
   / script type="riot/tag" src="/riot/tags/sticker_line.tag"
   rscript type="riot/tag" src="/riot/tags/idcollapser.tag"
   rscript type="riot/tag" src="/riot/tags/subclick.tag"
+  rscript type="riot/tag" src="/riot/tags/switcher.tag"
+  rscript type="riot/tag" src="/riot/tags/elhide.tag"
+
   javascript:
     
     document.addEventListener("DOMContentLoaded", function(event) {
-      riot.mount('idcollapser, subclick')
+      riot.mount('idcollapser, subclick, switcher, elhide')
     });

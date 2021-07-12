@@ -1,0 +1,13 @@
+switcher onclick='{ fire }'
+  yield
+
+  javascript:
+    self.estate = false
+    
+    fire() {
+      if (self.estate)
+        rcontrol.trigger(opts.t1)
+      else
+        rcontrol.trigger(opts.t2)
+      self.estate = !self.estate
+    }
