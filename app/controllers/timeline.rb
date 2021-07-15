@@ -264,6 +264,8 @@ Fenix::App.controllers :dr_timeline, :map => 'timeline/driven' do
     @sec_sums = sum_by_sections(@all_ids)
     @sec_done = sum_done_by_sections(@all_ids)
     @kc_cash = CabiePio.all_keys(@all_ids, folder: [:orders, :cash]).flat.trans(:to_i).reject{|k,v|v!='t'}
+    @kc_os = KSM::OrderStatus.find_all(@all_ids)
+    @abl_view = @sections.map{|s|can_view_section?(:sections, :list, s.id) ? s.id : nil }
 
     if params[:sort].to_sym == :manager
       @by_manager = @orders.map(&:id).group_by do |oid|

@@ -15,7 +15,11 @@
         th class='header list-row-action-header non-print'
     
     tbody
+      - abl_view = @sections.map{|s|can_view_section?(:sections, :draft, s.id) ? s.id : nil }
+      - kc_os = KSM::OrderStatus.find_all(@orders.map(&:id))
       - @orders.each do |order|
+        - os = kc_os.detect{|kc|kc.id.to_i == order.id} || KSM::OrderStatus.new(id: order.id)
+        - next if (abl_view & os.pstate.keys).empty?
         tr class='list-row'
           td class='list-column list-selectable non-print' = check_box_tag 'order_ids[]', :autocomplete => "off", :value => order.id, :class => 'list-selectable-checkbox'
           td class='list-column'
@@ -33,16 +37,15 @@
           td class='list-column' = order.client.name
           td class='list-column text-nowrap' = to_msk(order.created_at)
           td class='list-column text-nowrap non-print'
-            = partial 'orders/squares', :locals => { :order => order }
+            = partial 'orders/squares', :locals => { :order => order, status: os }
             // - @sections.each do |s|
             //   - s_st = order.order_parts.find_by(:section_id => s.id)
             //   = content_tag :button, !s_st.nil? && s_st.transfer ? "п": "", :class => "btn btn-sm btn-#{s_st.nil? ? 'default' : s_st.state}"
             //   | &nbsp;
             // | &nbsp;
-            span class="label label-#{order.status}"
-              = t :"status.#{order.status}"
+            span.label class="label-#{os.state}" = t :"status.#{os.state}"
           td class='list-column non-print'
-            - if order.finished?
+            /- if order.finished?
               = link_to "Отправить", :href => url(:orders, :ship, :id => order.id), :class => "btn btn-xs btn-shipped"
             - if order.draft?
               = link_to "Подтвердить", :href => url(:orders, :anew, :id => order.id), :class => "btn btn-xs btn-anew"
@@ -51,7 +54,7 @@
             div class='list-row-action-wrapper'
               - if current_account.is_admin?
                 = link_to tag_icon(:paw), :rel => :tooltip, :title => "Edit order", :href => url(:orders, :correct, :id => order.id), :class => 'list-row-action-wrapper-link'
-              - if order.draft?
+              - if order.draft? && current_account.is_admin?
                 = link_to tag_icon(:save), :href => url(:c1c, :create, :id => order.id), :class => 'list-row-action-wrapper-link'
                 = link_to tag_icon("trash-o"), :rel => :tooltip, :title => "#{pat(:delete)} order", :class => 'list-row-action-delete-one list-row-action-wrapper-link'
             div class='modal'

@@ -53,6 +53,9 @@ Fenix::App.helpers do
       any: 1,
       all: 2,
       archetypes: 4
+    },
+    list: {
+      draft: 1
     }
   }.freeze
 
@@ -61,8 +64,8 @@ Fenix::App.helpers do
   AH_ROLE_NONE = { sections: 1, btn: {} }.freeze
   AH_ROLE_STICKER = { list: 18, timeline: 7, sys: 4, sections: { list: (1..6).sum{|d|2**d} }, btn: {} }.freeze
   AH_ROLE_MNG = { order: 9, list: 31, timeline: 7, sys: 15, sections: (1..6).sum{|d|2**d}, btn: { stock: 7 } }.freeze
-  AH_ROLE_LSC = { order: 1, list: 0, timeline: 0, sys: 0, btn: { stock: 3 } }.freeze
-  AH_ROLE_FSC = { order: 1, list: 0, timeline: 0, sys: 9, btn: { stock: 7 } }.freeze
+  AH_ROLE_LSC = { order: 0, list: 0, timeline: 0, sys: 0, btn: { stock: 3 } }.freeze
+  AH_ROLE_FSC = { order: 1, list: 0, timeline: 0, sys: 9, btn: { stock: 7, list: 1 } }.freeze
 
   def can_view?(dir, sub = nil, user: current_account.id)
     @kc_access_user ||= CabiePio.get([:m, :access, :user], user).data || AH_ROLE_NONE

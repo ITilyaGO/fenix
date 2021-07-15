@@ -28,6 +28,8 @@
         - man_id.last.each do |order_id|
           - order = @orders.detect{|x| x.id == order_id} || Order.holder(order_id)
           - odate = @week_orders.detect{|x|x.last == order_id}&.first
+          - os = @kc_os.detect{|kc|kc.id.to_i == order.id} || KSM::OrderStatus.new(id: order.id)
+          - next if (@abl_view & os.pstate.keys).empty?
           tr class='list-row non-print'
             td class='list-column list-selectable non-print' = check_box_tag 'order_ids[]', :autocomplete => "off", :value => order.id, :class => 'list-selectable-checkbox'
             td class='list-column' = "#{order.id}"
@@ -44,8 +46,8 @@
             td.list-column.text-center.text-nowrap class=('date-warning' if @kc_blinks.fetch(order.id, nil))
               = to_dm(timeline_unf(odate))
             td class='list-column non-print'
-              span class="label label-#{order.status} non-print" = t :"status.#{order.status}"
-              span class="only-print" = t :"status.#{order.status}"
+              span.label.non-print class="label-#{os.state}" = t :"status.#{os.state}"
+              span.only-print = t :"status.#{os.state}"
             td class='list-column non-print text-nowrap'
               = partial 'orders/squares', :locals => { :order => order }
             td.only-print
@@ -60,13 +62,13 @@
                   = link_to tag_icon(:calendar), '#', :class => 'list-row-action-wrapper-link medium list-menu-timeline-link'
                 = link_to tag_icon(:edit), :href => url(:orders, :edit, :id => order.id), :class => 'list-row-action-wrapper-link'
 
-      - if @current_account.is_admin?
-        - price_total = man_orders.map(&:total).sum
-        - price_done = man_orders.map(&:done_total).sum
-        tfoot: tr
-          td.summary colspan=3
-            .text-left = man_name
-          td.summary colspan=20
+      tfoot: tr
+        td.summary colspan=3
+          .text-left = man_name
+        td.summary colspan=20
+          - if @current_account.is_admin?
+            - price_total = man_orders.map(&:total).sum
+            - price_done = man_orders.map(&:done_total).sum
             .item-all.pull-right
               span Сумма заказов
               div == deli(rur price_total)

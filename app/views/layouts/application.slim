@@ -41,7 +41,7 @@ html lang='en'
           //   = link_to url(:orders, :index) do
           //     | На эту неделю
           //     span class="menu-icon fa fa-exclamation-circle"
-          - if allow_route?(:orders_draft)
+          - if can_btn_view?(:list, :draft) || can_view?(:list, :draft) || allow_route?(:orders_draft)
             li class="sidebar-list"
               = link_to url(:orders, :draft) do
                 | Непроверенные

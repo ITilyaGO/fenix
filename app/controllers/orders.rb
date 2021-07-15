@@ -617,7 +617,7 @@ Fenix::App.controllers :orders do
 
       status = KSM::OrderStatus.find(order.id)
       status.set_prepare(my_section)
-      status.setg(:prepare) if status.what?(:anew)
+      status.setg(:prepare)
       status.save
 
       o_life = KSM::OrderLife.find(order.id)
@@ -656,7 +656,7 @@ Fenix::App.controllers :orders do
     @order = Order.find(params[:id])
     @order_part = @order.order_parts.find_by(:section_id => current_account.section)
     # @order.status = params[:status]
-    @order.priority = params[:priority] == "true"
+    # @order.priority = params[:priority] == "true"
     delivery_at = params[:cabie][:timeline_at] rescue nil
     if timeline_date = Date.parse(delivery_at) rescue nil
       current_kc = CabiePio.get([:orders, :timeline], @order.id).data
@@ -686,7 +686,7 @@ Fenix::App.controllers :orders do
       @order.order_parts.each do |part|
         part.state = :finished
         part.save
-        o_status.sets(@order_part.section_id, :finished)
+        o_status.sets(part.section_id, :finished)
       end
     end
     o_status.save
@@ -759,11 +759,11 @@ Fenix::App.controllers :orders do
     if status_before && @order.finished?
       arbal_need_order_done(@order)
       arbal_need_order_fin(@order)
-    end
 
-    o_status = KSM::OrderStatus.find(@order.status)
-    o_status.setg(@order.status)
-    o_status.save
+      o_status = KSM::OrderStatus.find(@order.id)
+      o_status.setg(@order.status)
+      o_status.save
+    end
 
     if @order.finished?
       redirect(url(:orders, :invoice, :id => @order.id))

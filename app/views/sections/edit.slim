@@ -7,7 +7,7 @@ ul.nav.nav-tabs
     fieldset class='control-group#{error ? ' has-error' : ''}'
       = f.label :name, :class => 'col-md-3 control-label'
       .col-md-6.controls
-        = f.text_field :name, :class => 'form-control input-large input-with-feedback', :autofocus => true
+        = f.text_field :name, :class => 'form-control input-large input-with-feedback', :readonly => true
     fieldset.control-group
       = f.label :index, :class => 'col-md-3 control-label'
       .col-md-6.controls
