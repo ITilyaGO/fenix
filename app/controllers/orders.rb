@@ -7,7 +7,7 @@ Fenix::App.controllers :orders do
     dir = !params[:sort] && !params[:dir] ? "desc" : params[:dir] || "asc"
     orders_query = Order.where("status > ?", Order.statuses[:draft]).where("status < ?", Order.statuses[:finished])
     orders_query = orders_query.where(delivery: params[:deli].to_i) if params[:deli]
-    @orders = orders_query.includes(:client, :place, :order_parts, :timeline).order(sort => dir)
+    @orders = orders_query.includes(:client).order(sort => dir)
     if current_account.limited_orders?
       @filtered_by_user = OrderPart.where(:order_id => orders_query.ids, :section => current_account.section_id).pluck(:order_id)
     end
@@ -29,7 +29,7 @@ Fenix::App.controllers :orders do
       .where("status = ?", Order.statuses[:draft]).order(:updated_at => :desc)
     @sections = Section.includes(:categories).all
     a_towns(@orders.map(&:id), @orders.map(&:client_id))
-    @r = url(:orders, :index)
+    @r = url(:orders, :draft)
     render 'orders/draft'
   end
 
@@ -167,7 +167,10 @@ Fenix::App.controllers :orders do
     @manager = Manager.find(manager) rescue nil
     @timeline_at = CabiePio.get([:orders, :timeline], @order.id).data
     @timeline_blink = !CabiePio.get([:orders, :timeline_blink], @order.id).blank?
+    @stickday_order = CabiePio.get([:orders, :stickday], @order.id).data
     @timeline_date = timeline_unf(@timeline_at) unless @timeline_at.nil?
+    @stickday_date = timeline_unf(@stickday_order) unless @stickday_order.nil?
+    @orderstatus = KSM::OrderStatus.find(@order.id)
 
     calendar_init(Date.today)
     @ps = KSM::OrderImage.all_for(@order.id)
@@ -306,6 +309,8 @@ Fenix::App.controllers :orders do
     end
     order.save
 
+    o_status = KSM::OrderStatus.find(order.id)
+    o_status.setg(:draft)
     sections = Section.all
     sections.each do |s|
       include_section = false
@@ -316,8 +321,10 @@ Fenix::App.controllers :orders do
       if include_section
         op = OrderPart.new(:section_id => s.id, :state => :anew)
         order.order_parts << op
+        o_status.sets(s.id, :anew)
       end
     end
+    o_status.save
     order.all_parts = order.order_parts.size if order.order_parts.any?
     order.save
     order.actualize
@@ -328,6 +335,9 @@ Fenix::App.controllers :orders do
       CabiePio.set [:timeline, :order], timeline_order(order.id, timeline_date), order.id
       CabiePio.set [:orders, :timeline], order.id, timeline_id(timeline_date)
     end
+    cash = params[:order][:cash] == 'true' ? 't' : 'f'
+    CabiePio.set [:orders, :cash], order.id, cash
+
     code = params[:cabie][:kato_place]
     if Kato.valid? code
       CabiePio.set [:orders, :towns], order.id, code
@@ -388,6 +398,8 @@ Fenix::App.controllers :orders do
     end
     order.save
 
+    o_status = KSM::OrderStatus.find(order.id)
+    o_status.setg(:draft)
     sections = Section.all
     sections.each do |s|
       include_section = false
@@ -398,8 +410,10 @@ Fenix::App.controllers :orders do
       if include_section
         op = OrderPart.new(:section_id => s.id, :state => :anew)
         order.order_parts << op
+        o_status.sets(s.id, :anew)
       end
     end
+    o_status.save
     order.all_parts = order.order_parts.size if order.order_parts.any?
     order.save
     order.actualize
@@ -422,6 +436,8 @@ Fenix::App.controllers :orders do
   get :fullempty do
     @title = "New order"
     @cats = Category.where(category: nil).order(:index => :asc)
+    # Padrino.cache['cats'] ||= cats
+    # @cats = Padrino.cache['cats']
     @parents = Product.pluck(:parent_id).compact.uniq
     @arp = CabiePio.folder(:product, :archetype).flat.trans(:to_i)
     @kc_stocks = CabiePio.folder(:stock, :archetype).flat.trans(nil, :to_i)
@@ -528,6 +544,9 @@ Fenix::App.controllers :orders do
     order.save
 
     order.order_parts.destroy_all
+    o_status = KSM::OrderStatus.find(order.id)
+    o_status.setg(:draft)
+    o_status.pstate = {}
     sections = Section.all
     sections.each do |s|
       include_section = false
@@ -539,10 +558,12 @@ Fenix::App.controllers :orders do
       if include_section
         op = OrderPart.new(:section_id => s.id, :state => :anew)
         order.order_parts << op unless found
+        o_status.sets(s.id, :anew)
       elsif found
         found.destroy
       end
     end
+    o_status.save
     order.all_parts = order.order_parts.size if order.order_parts.any?
     order.save
     order.actualize
@@ -559,6 +580,9 @@ Fenix::App.controllers :orders do
     if @order.draft?
       @order.status = :anew
       @order.save
+      o_status = KSM::OrderStatus.find(@order.id)
+      o_status.setg(:anew)
+      o_status.save
       redirect(url(:orders, :draft))
     end
     redirect(url(:orders, :draft))
@@ -571,26 +595,54 @@ Fenix::App.controllers :orders do
       @order.track = "VO34888864"
       @order.status = :shipped
       @order.save
+      o_status = KSM::OrderStatus.find(@order.id)
+      o_status.setg(:shipped)
+      o_status.save
       flash[:success] = 'Заказ отправлен и у него есть номер накладной'
       redirect(url(:orders, :finished))
     end
     redirect(url(:orders, :finished))
   end
 
-  get :status, :with => :id do
-    @title = pat(:edit_title, :model => "order #{params[:id]}")
-    @order = Order.find(params[:id])
-    @my_section = current_account.section
-    @order_part = @order.order_parts.find_by(:section_id => @my_section)
-    if @order_part.anew?
-      @order_part.state = :current if @order_part.anew?
-      @order_part.save
-      @order.status = :current
-      @order.save
+  put :status, :with => :id do
+    order = Order.find(params[:id])
+    s = params[:section].to_i
+    my_section = s > 0 ? s : current_account.section
+    order_part = order.order_parts.find_by(:section_id => my_section)
+    if order_part.anew?
+      order_part.state = :current if order_part.anew?
+      order_part.save
+      order.status = :current
+      order.save
 
-      arbal_need_order_start @order
+      status = KSM::OrderStatus.find(order.id)
+      status.set_prepare(my_section)
+      status.setg(:prepare) if status.what?(:anew)
+      status.save
+
+      o_life = KSM::OrderLife.find(order.id)
+      o_life.ts_prepare(my_section)
+      o_life.save
+
+      arbal_need_order_start order
     end
-    redirect(url(:orders, :edit, :id => @order.id))
+    redirect url(:orders, :edit, :id => order.id)
+  end
+
+  put :midstatus, :with => :id do
+    order = Order.find(params[:id])
+    s = params[:section].to_i
+    my_section = s > 0 ? s : current_account.section
+    order_part = order.order_parts.find_by(:section_id => my_section)
+    status = KSM::OrderStatus.find(order.id)
+    status.set_current(my_section)
+    status.setg(:current)
+    status.save
+
+    o_life = KSM::OrderLife.find(order.id)
+    o_life.ts_current(my_section)
+    o_life.save
+    redirect url(:orders, :edit, :id => order.id)
   end
 
   put :update, :with => :id do
@@ -618,6 +670,7 @@ Fenix::App.controllers :orders do
     order_part_st = @order.order_parts.find_by(:section_id => 1)
     part_before = order_part_st&.current?
 
+    o_status = KSM::OrderStatus.find(@order.id)
     if @order_part and params[:order_part]
       # @order_part.status = params[:order_part]['done'] ? :finished : :current
       no_boxes = params[:order_part][:no_boxes] == '1'
@@ -626,14 +679,17 @@ Fenix::App.controllers :orders do
       @order_part.transfer = params[:order_part][:transfer] || false
       @order_part.state = :finished if params[:next_status]
       @order_part.save
+      o_status.sets(@order_part.section_id, :finished) if params[:next_status]
       # @order_part.update_attributes(params[:order_part])
     end
     if params[:next_status_all]
       @order.order_parts.each do |part|
         part.state = :finished
         part.save
+        o_status.sets(@order_part.section_id, :finished)
       end
     end
+    o_status.save
 
     params[:line].each do |line|
       l = line.second
@@ -704,6 +760,10 @@ Fenix::App.controllers :orders do
       arbal_need_order_done(@order)
       arbal_need_order_fin(@order)
     end
+
+    o_status = KSM::OrderStatus.find(@order.status)
+    o_status.setg(@order.status)
+    o_status.save
 
     if @order.finished?
       redirect(url(:orders, :invoice, :id => @order.id))

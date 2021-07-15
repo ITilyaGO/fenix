@@ -72,6 +72,7 @@ module Fenix
       role.project_module :sections, '/sections'
       role.project_module :places, '/places'
       role.project_module :editors, '/clients'
+      role.project_module :prefs, '/prefs'
       role.project_module :kyoto, '/kyoto'
       role.project_module :health, '/health'
     end
@@ -99,6 +100,13 @@ module Fenix
       role.project_module :orders_stickers, '/orders/stickers'
     end
 
+    [:sectioner, :limsectioner, :director, :manager, :supplier].each do |r|
+      access_control.roles_for r do |role|
+        role.project_module :orders, '/orders'
+        role.project_module :orders_infact, '/orders/infact'
+      end
+    end
+
     ##
     # You can configure for a specified environment like:
     #
@@ -111,9 +119,11 @@ module Fenix
     ##
     # You can manage errors like:
     #
-    #   error 404 do
-    #     render 'errors/404'
-    #   end
+
+    error 404 do
+      render 'errors/404', :layout => :basic 
+    end
+    
     #
     #   error 500 do
     #     render 'errors/500'

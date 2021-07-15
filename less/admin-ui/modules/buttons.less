@@ -55,7 +55,7 @@
 
 // Alternate buttons
 // --------------------------------------------------
-.btn-default {
+.btn-default, .btn-none {
   .button-variant(@btn-default-color, @btn-default-bg, @btn-hover-bg, @btn-active-bg);
 }
 .btn-draft {
@@ -116,7 +116,7 @@
   padding-left: 30px;
   padding-right: 30px;
 }
-  
+
  
 // Link buttons
 // -------------------------
@@ -176,6 +176,27 @@
 
 .btn-block {
   white-space: normal;
+}
+
+//
+.btn-border {
+  border: 2px solid transparent;
+  &:hover,
+  &:focus {
+    color: rgb(118, 130, 166);
+  }
+}
+.btn-section {
+  .btn-border;
+  padding: 6px 12px;
+}
+.btn-prepare {
+  .btn-border;
+  background: #ffffff;
+  border-color: @brand-warning;
+  &:hover {
+    border-color: @btn-warning-hover-bg;
+  }
 }
 
 // SOCIAL BUTTONS

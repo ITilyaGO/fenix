@@ -109,4 +109,23 @@ module Fenix::App::StickerHelper
     end
     all
   end
+
+  def stickday_busy?(money)
+    mil = wonderbox(:stickday_threshold, :level)
+    mal = wonderbox(:stickday_threshold, :limit)
+
+    return :busy if money >= mal
+    return :unsure if money < mal && money >= mil
+    :unbusy if money < mil
+  end
+
+  def save_stickday_automatic
+    history = CabiePio.folder(:m, :sticker, :order_history).flat
+    history.each do |k, val|
+      day = val.detect{|k,v|v>0}&.first
+      next unless day
+      CabiePio.set [:stickday, :order], timeline_order(k, timeline_unf(day)), k
+      CabiePio.set [:orders, :stickday], k, day
+    end
+  end
 end

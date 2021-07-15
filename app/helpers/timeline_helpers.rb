@@ -53,8 +53,11 @@ module Fenix::App::TimelineHelper
     ids = field.map(&:last)
     cplx_ary = complex_hash.select {|k| ids.include?(k)}
     cplx_sum = cplx_ary.values.map(&:to_i).sum
-    return :busy if cplx_sum >= wonderbox(:complexity, :level)
-    :unbusy if cplx_sum < wonderbox(:complexity, :level)
+    thr = wonderbox(:complexity, :level)
+    thr2 = wonderbox(:complexity, :limit)
+    return :busy if cplx_sum >= thr2
+    return :unsure if cplx_sum >= thr && cplx_sum < thr2
+    :unbusy if cplx_sum < thr
   end
 
   def timeline_busy?(date)
@@ -63,7 +66,10 @@ module Fenix::App::TimelineHelper
     ids = field.map(&:last)
     cplx_ary = complex_hash.select {|k| ids.include?(k)}
     cplx_sum = cplx_ary.values.map(&:to_i).sum
-    return :busy if cplx_sum >= wonderbox(:complexity, :level)
-    :unbusy if cplx_sum < wonderbox(:complexity, :level)
+    thr = wonderbox(:complexity, :level)
+    thr2 = wonderbox(:complexity, :limit)
+    return :busy if cplx_sum >= thr2
+    return :unsure if cplx_sum >= thr && cplx_sum < thr2
+    :unbusy if cplx_sum < thr
   end
 end

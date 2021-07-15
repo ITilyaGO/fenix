@@ -1,8 +1,19 @@
 ul class="nav nav-tabs"
   li = link_to tag_icon(:list, pat(:list)), url(:accounts, :index)
   li = link_to tag_icon(:plus, pat(:new)), url(:accounts, :new)
-  li class="active" = link_to tag_icon(:edit, pat(:edit)), url(:accounts, :edit, :id => @account.id)
+  li class="active" = link_to tag_icon(:edit, pat(:edit)), url(:accounts, :edit, id: @account.id)
+  li = link_to tag_icon(:'unlock-alt', 'Права'), url(:accounts, :control, id: @account.id)
 
 div class="tabs-content"
   = form_for :account, url(:accounts, :update, :id => @account.id), :method => :put, :class => 'form-horizontal' do |f|
     = partial 'accounts/form', :locals => { :f => f, :sections => @sections }
+
+- content_for :js_assets do
+  = javascript_include_tag :riot
+  rscript type="riot/tag" src="/riot/tags/collapser.tag"
+
+  javascript:
+    
+    document.addEventListener("DOMContentLoaded", function(event) {
+      riot.mount('collapser')
+    });

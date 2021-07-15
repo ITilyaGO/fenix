@@ -1,7 +1,7 @@
 Fenix::App.controllers :kyoto_schema, :map => 'kyoto/schema' do
   get :index do
     @schema = wonderbox(:schema)
-    @avail = 8
+    @avail = 10
     render 'kyoto/schema'
   end
 
@@ -27,6 +27,10 @@ Fenix::App.controllers :kyoto_schema, :map => 'kyoto/schema' do
         sticker_day_007_up
       when 8
         create_archetypes_008_up(force:force)
+      when 9
+        stickday_009_up(force:force)
+      when 10
+        order_status_010_up(force:force)
       end
       
       wonderbox_set(:schema, n)

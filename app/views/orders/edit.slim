@@ -5,20 +5,21 @@ ul class="nav nav-tabs non-print"
   li = link_to tag_icon(:list, pat(:list)), url(:orders, :index)
   li class="active" = link_to tag_icon(:edit, "Show order #{@order.id}"), url(:orders, :show, :id => @order.id)
   li = link_to '#' do
-    span class="label label-#{@order.status}"
-      = t :"status.#{@order.status}"
+    span.label  class="label-#{@orderstatus.state}"
+      = t :"status.#{@orderstatus.state}"
   li = link_to '#' do
     ' сложность
     .label.label-info = cplx
-  li = link_to url(:stickers, :order, id: @order.id) do
-    ' клейка
-    .label.label-darkrose == deli (rur sticker.first)
-    - if sticker.last > 0
-      ' &nbsp;
-      .label.label-purple == deli (rur sticker.last)
-  li
-    .progress.for-stickers title="#{@sticker_progress}%" class=('danger' if @sticker_progress > 130)
-      .progress-bar role="progressbar" style="width:#{@sticker_progress.to_i}%"
+  - if can_view?(:list, :stickers) || allow_route?(:orders_stickers)
+    li = link_to url(:stickers, :order, id: @order.id) do
+      ' клейка
+      .label.label-darkrose == deli (rur sticker.first)
+      - if sticker.last > 0
+        ' &nbsp;
+        .label.label-purple == deli (rur sticker.last)
+    li
+      .progress.for-stickers title="#{@sticker_progress}%" class=('danger' if @sticker_progress > 130)
+        .progress-bar role="progressbar" style="width:#{@sticker_progress.to_i}%"
   li.pull-right: a 
     = partial 'orders/squares', :locals => { :order => @order }
 
@@ -81,6 +82,8 @@ ul class="nav nav-tabs non-print"
       p
         span Дата отправки: 
         span class=('text-warning' if @timeline_blink) = to_msk(@timeline_date)
+    - if @stickday_date
+      p Дата клейки: #{to_msk(@stickday_date)}
     p Менеджер: #{@manager&.name}
 
   
@@ -177,12 +180,28 @@ ul class="nav nav-tabs non-print"
     - if !@order.description.blank?
       tr: td colspan=3 = @order.description
 
+- if !@order.draft? && @order_part && @order_part.anew?
+  .non-print
+    h4 Моя часть заказа:
+    / span Когда вы взяли заказ в работу, нажмите кнопку
+    / ' &nbsp;
+    = form_tag url(:orders, :status, :id => @order.id, section: @order_part.section_id), :method => :put do
+      = submit_tag "Подтвердить #{@order_part.section.name}", class: 'btn btn-sm btn-prepare'
+
+- if @orderstatus&.prepare? @order_part&.section_id
+  .non-print
+    h4 Моя часть заказа:
+    /span Когда вы взяли заказ в работу, нажмите кнопку
+    /' &nbsp;
+    = form_tag url(:orders, :midstatus, :id => @order.id, section: @order_part.section_id), :method => :put do
+      = submit_tag t("status.prep.s#{@order_part.section_id}"), class: 'btn btn-sm btn-current'
 
 = form_tag url(:orders, :update, :id => @order.id), :method => :put, :class => 'form-horizontal order' do
   / = hidden_field_tag 'order[id]', :value => @order[:id]
   .block
   
   - if !@order.draft? && current_account.is_admin?
+    hr
     .non-print
       h4 Настройки
       fieldset.control-group
@@ -206,16 +225,8 @@ ul class="nav nav-tabs non-print"
 
       = partial 'timeline/calendar'
 
-  - if !@order.draft? && @order_part && @order_part.anew?
-    div class="non-print"
-      h4 Моя часть заказа:
-      span Когда вы взяли заказ в работу, нажмите кнопку
-      '
-      = link_to url(:orders, :status, :id => @order.id), :class => 'btn btn-sm btn-current' do
-        | Подтвердить
-
-  - if !@order.draft? && @order_part && @order_part.current?
-    div class="non-print"
+  /- if !@order.draft? && @order_part && @order_part.current?
+    /div class="non-print"
       h4 Моя часть заказа:
       fieldset class='control-group'
         = label_tag "Коробок", :class => 'col-md-3 control-label'
@@ -231,7 +242,7 @@ ul class="nav nav-tabs non-print"
           div class='col-md-6 controls'
             = hidden_field_tag "order_part[transfer]", :value => 'false'
             = check_box_tag "order_part[transfer]", :checked => @order_part.transfer, :class => ""
-    
+  - if true
     .modal.incorrect tabindex="-1" role="dialog"
       div class="modal-dialog"
         div class='modal-content'
@@ -258,7 +269,7 @@ ul class="nav nav-tabs non-print"
       - @sections.sort_by{|o|o.index||0}.each do |tab|
         - cat_enabled = @order.by_sec?(tab.id)
         - displayed_n += 1 if cat_enabled
-        - my = @my_section.id == tab.id
+        - my = @my_section&.id == tab.id
         li class=[('disabled' unless cat_enabled), ('my' if my)]
           = link_to tag_icon('fa fa-ok', "#{tab.name}"), "#cat-#{tab.id}", 'data-toggle' => "tab"
       - if @order.order_parts.size != displayed_n 
@@ -269,11 +280,24 @@ ul class="nav nav-tabs non-print"
     div class="tab-content" id="for_order_tab"
       - @sections.sort_by{|o|o.index||0}.each_with_index do |s, i|
         - tab_visible = @order.by_sec?(s.id)
-        - my = @my_section.id == s.id
+        - my = @my_section&.id == s.id
         - unless tab_visible
           block.non-print id="cat-#{s.id}"
         - else
           .tab-pane id="cat-#{s.id}" class=[('filled' if tab_visible), ('my' if my), ('non-print' unless tab_visible && my)]
+            - if my
+              - if !@order.draft? && @order_part && @order_part.current?
+                div class="non-print"
+                  h4 Моя часть заказа:
+                  fieldset class='control-group'
+                    = label_tag "Коробок", :class => 'col-md-3 control-label'
+                    .col-xs-1.controls
+                      = text_field_tag :"order_part[boxes]", :size => 3, :autocomplete => "off", :value => @order_part.boxes, :class => "form-control"
+                    .col-xs-1
+                    .col-md-3.controls.custom-control
+                      = check_box_tag :"order_part[no_boxes]", :id => 'no_boxes', :checked => @order_part.no_boxes?, :class => 'custom-control-input'
+                      label.custom-control-label(for = 'no_boxes') Нет коробок
+
             - s.categories.each do |tab|
               - cat_visible = @order.by_cat?(tab.id)
               - if cat_visible
@@ -327,7 +351,7 @@ ul class="nav nav-tabs non-print"
                               /= (text_field_tag "line_s[#{ol.id}][sticker]", :value => ols&.fetch(:v),
                                 :autocomplete => "off", :class => "form-control input-sm")
                             - else
-                              = ols&.fetch(:v)
+                              /= ols&.fetch(:v)
                             - if ols
                               /.input-group-addon
                               = ols&.fetch(:v)
@@ -371,7 +395,7 @@ ul class="nav nav-tabs non-print"
   - unless role_is?(:stickerman)
     - if @order_part and @order_part.current?
       |&nbsp;
-      = submit_tag "Собрать", :class => 'btn btn-sm btn-finished', :name => 'next_status'
+      = submit_tag "Собрать #{@order_part.section.name}", :class => 'btn btn-sm btn-finished', :name => 'next_status'
     - if current_account.is_admin? && @order.current?
       |&nbsp;
       = submit_tag "Собрать все части", :class => 'btn btn-sm btn-finished', :name => 'next_status_all'

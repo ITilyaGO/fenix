@@ -1,0 +1,35 @@
+ul.nav.nav-tabs
+  li = link_to tag_icon(:list, 'Список'), url(:accounts, :index)
+  li = link_to tag_icon(:edit, 'Профиль'), url(:accounts, :edit, id: @account.id)
+  li.active = link_to tag_icon(:'unlock-alt', 'Права'), url(:accounts, :control, id: @account.id)
+
+.ac-page
+  .text-center
+    .title = @account.name
+    sub = t([:ac, :role, @account.role].join('.'))
+
+  .col-md-offset-4.col-md-4
+    br
+    table.table.table-hover
+      - print_ac_view(user: @account.id).each do |array|
+        tr
+          td = t ["ac", array.first].flatten.join('.')
+          td: .fa class=[('fa-check' if array.last), ('fa-times' unless array.last)]
+  .clearfix
+
+  
+  .col-md-offset-2.col-md-8: table.table.table-hover
+    h3 Секции
+    tr
+      th &nbsp;
+      - @sections.each do |s|
+        th = s.name
+    - print_ac_sections_view(user: @account.id).each do |ka, av|
+      tr
+        td = t ["ac", ka].flatten.join('.')
+        - av.each do |array|
+          td: .fa class=[('fa-check' if array.last), ('fa-times' unless array.last)]
+            /= array.inspect
+          /span = t ["ac", array.first].flatten.join('.')
+          / hr
+  .clearfix

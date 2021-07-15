@@ -3,7 +3,7 @@
 - @orders.each do |order|
   .order
     .flex-c
-      = link_to url(:orders, :edit, :id => order.id), class: 'text-left flexie', target: '_blank'
+      = link_to url(:stickers, :order, id: order.id, date: timeline_id(@cdate)), class: 'text-left flexie', target: '_blank'
         = order.id
       - sticker_progress = @stickers.fetch(order.id, nil)
       - if sticker_progress

@@ -6,6 +6,15 @@ en:
     finished: Собран
     shipped: Отправлен
     canceled: Отменен
+    none: Неизвестно    
+    prepare: Подготовка
+    prep:
+      s1: Готова к работе
+      s2: Готова к работе
+      s3: Готова к работе
+      s4: Готова к работе
+      s5: Готова к работе
+      s6: Готова к работе
   duration:
     day: Точная дата
     halfweek: Полнедели
@@ -29,3 +38,50 @@ en:
     city: Город
     other: Другое
     church: Монастырь
+  tit:
+    stickers:
+      timeline: График клейки
+      pastline: Реальная клейка
+    prefs:
+      page: Настройки
+  box:
+    complexity: Сложность дня отправки
+    stickday_threshold: Цена дня клейки
+  ac:
+    role:
+      admin: Админ
+      none: Никто
+      user: Юзер*
+      editor: Редактор*
+      manager: Менеджер
+      sectioner: Секционер
+      limsectioner: Лимитированный секционер
+      director: Директор
+      stickerman: Клейщик
+      supplier: Снабжение
+    order:
+      create: Создать заказ
+      confirm: Подтвердить любой заказ
+      fact: ---
+      modify: Изменять заказ
+    sections:
+      draft: Подтвердить свой заказ
+      list: Список своих заказов
+      sum: Суммы в своем списке
+      stock: Свои склады
+    list:
+      draft: Непроверенные
+      current: Все текущие
+      finished: Готовые
+      archive: Архив
+      stickers: Наклеенные
+    timeline:
+      all: График
+      stickers: График клейки
+      trips: График поездок
+    sys:
+      editors: Редакторы
+      stats: Статистика
+      stock: Весь склад
+      archetypes: Все связи на складе
+      sync: Синхронизация

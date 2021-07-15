@@ -1,0 +1,15 @@
+.ac-page
+  .col-md-4
+  .col-md-4.text-center
+    h2
+    h1
+    /sub.title.upper Настройки
+    h1.clearfix
+    = link_to :levels, url(:prefs, :levels), class: 'col-sm-12 btn btn-sm btn-default'
+    h2.clearfix
+    = link_to :sections, url(:sections, :index), class: 'col-sm-12 btn btn-sm btn-default'
+    h2.clearfix
+    = link_to :users, url(:accounts, :index), class: 'col-sm-12 btn btn-sm btn-default'
+
+  .col-md-4
+  .clearfix

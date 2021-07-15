@@ -1,0 +1,66 @@
+.ac-page
+  .text-center
+    .title Уровни
+    br
+
+  .col-md-offset-3.col-md-6
+    = form_for :supermodel, url(:prefs, :levels), :method => :put, :class => 'form-horizontal' do |f|
+
+      .col-md-8
+        label = t 'box.complexity'
+      .col-md-4.control-group.td-sticker-input
+        .input-group-sm.input-group
+          = text_field_tag "complexity[level]", :value => wonderbox(:complexity, :level), :autocomplete => "off", :class => "form-control input-sm"
+          .input-group-addon
+            .label.label-success 256
+
+      .col-md-8
+        label = t 'box.complexity'
+      .col-md-4.control-group.td-sticker-input
+        .input-group-sm.input-group
+          = text_field_tag "complexity[limit]", :value => wonderbox(:complexity, :limit), :autocomplete => "off", :class => "form-control input-sm"
+          .input-group-addon
+            .label.label-success 512
+
+      .col-md-8
+        label = t 'box.stickday_threshold'
+      .col-md-4.control-group.td-sticker-input
+        .input-group-sm.input-group
+          = text_field_tag "stickday_threshold[level]", :value => wonderbox(:stickday_threshold, :level), :autocomplete => "off", :class => "form-control input-sm"
+          .input-group-addon
+            .label.label-success 22_000
+
+      .col-md-8
+        label = t 'box.stickday_threshold'
+      .col-md-4.control-group.td-sticker-input
+        .input-group-sm.input-group
+          = text_field_tag "stickday_threshold[limit]", :value => wonderbox(:stickday_threshold, :limit), :autocomplete => "off", :class => "form-control input-sm"
+          .input-group-addon
+            .label.label-success 30_000
+
+      .clearfix
+      .text-center
+        = f.submit :save, class: 'btn btn-sm btn-glue'
+      /table.table.table-hover
+      /- print_ac_view(user: @account.id).each do |array|
+        tr
+          td = t ["ac", array.first].flatten.join('.')
+          td: .fa class=[('fa-check' if array.last), ('fa-times' unless array.last)]
+  .clearfix
+
+  
+  /.col-md-offset-2.col-md-8: table.table.table-hover
+    /h3 Секции
+    /tr
+      th &nbsp;
+      /- @sections.each do |s|
+        th = s.name
+    /- print_ac_sections_view(user: @account.id).each do |ka, av|
+      tr
+        td = t ["ac", ka].flatten.join('.')
+        - av.each do |array|
+          td: .fa class=[('fa-check' if array.last), ('fa-times' unless array.last)]
+            /= array.inspect
+          /span = t ["ac", array.first].flatten.join('.')
+          / hr
+  .clearfix

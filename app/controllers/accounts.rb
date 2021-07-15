@@ -13,9 +13,14 @@ Fenix::App.controllers :accounts do
   end
 
   post :create do
+    params[:account].delete(:role) if params[:account][:role].empty?
     @account = Account.new(params[:account])
     @sections = Section.all
     if @account.save
+      if params[:save_ac]
+        role_hash = combine_rights(params[:account][:role].to_sym, params[:secta]&.keys&.map(&:to_i))
+        kc_save_box_ac(@account.id, role_hash)
+      end
       @title = pat(:create_title, :model => "account #{@account.id}")
       flash[:success] = pat(:create_success, :model => 'Account')
       params[:save_and_continue] ? redirect(url(:accounts, :index)) : redirect(url(:accounts, :edit, :id => @account.id))
@@ -45,7 +50,12 @@ Fenix::App.controllers :accounts do
     @account = Account.find(params[:id])
     @sections = Section.all
     if @account
+      params[:account].delete(:role) if params[:account][:role].empty?
       if @account.update_attributes(params[:account])
+        if params[:save_ac]
+          role_hash = combine_rights(params[:account][:role].to_sym, params[:secta]&.keys&.map(&:to_i))
+          kc_save_box_ac(@account.id, role_hash)
+        end
         flash[:success] = pat(:update_success, :model => 'Account', :id => "#{params[:id]}")
         params[:save_and_continue] ?
           redirect(url(:accounts, :index)) :
@@ -60,5 +70,11 @@ Fenix::App.controllers :accounts do
     end
   end
 
+  get :control, :with => :id do
+    @account = Account.find(params[:id])
+    @sections = Section.all
+
+    render 'accounts/control'
+  end
 
 end

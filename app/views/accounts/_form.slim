@@ -13,9 +13,42 @@ fieldset class='control-group#{error ? ' has-error' : ''}'
 - error = @account.errors.include?(:role)
 fieldset class='control-group#{error ? ' has-error' : ''}'
   = f.label :role, :class => 'col-md-3 control-label'
-  div class='col-md-6 controls'
-    = f.text_field :role, :class => 'form-control input-large input-with-feedback', :value => @account.role.blank? ? 'user' : @account.role, :readonly => @account.is_me?
+  /.col-md-6.controls.control-label: .control-label.pull-left = @account.role
+  .col-md-6.controls
+    = text_field_tag :textrole, :class => 'form-control', :value => t([:ac, :role, @account.role].join('.')), :readonly => @account.is_me?
     // span class='help-inline' = error ? f.error_message_on(:tel, :class => 'text-error') : pat(:example)
+
+.col-md-3
+.col-md-6: collapser titler="Дополнительные роли"
+  fieldset class='control-group#{error ? ' has-error' : ''}'
+    .col-md-6.controls
+      select name="account[role]" class="ghuge mbl"
+        = content_tag(:option, 'Нет', { :value => '' })
+        = content_tag(:option, 'Никто', { :value => :none, selected: @account.role.nil? })
+        - rolesh = LEVEL0_ROLES
+        - rolesh.each_with_index do |s, i|
+          - html_attributes = { :value => s }
+          - html_attributes[:selected] ||= option_is_selected?(s, t([:ac, :role, s].join('.')), @account.role)
+          = content_tag(:option, t([:ac, :role, s].join('.')), html_attributes)
+
+      fieldset.control-group
+        - sections.each do |s|
+          .col-md-12.controls.custom-control
+            = check_box_tag :"secta[#{s.id}]", id: "secta[#{s.id}]", :value => s.id, :class => 'custom-control-input'
+            label.custom-control-label(for = "secta[#{s.id}]") = s.name
+    .col-md-6.text-center
+      sub
+        ' Чтобы увидеть текущие роли нажмите
+        .fa.fa-unlock-alt
+      br
+      br
+      .controls.custom-control
+      = f.submit 'Сохранить с правами', :class => 'btn btn-sm btn-prime', :name => :save_ac
+        / = check_box_tag :save_ac, id: :btn_save_ac, :value => true, :class => 'custom-control-input'
+        / label.custom-control-label(for = :btn_save_ac) &nbsp;
+.clearfix
+br
+
 fieldset class='control-group#{error ? ' has-error' : ''}'
   = f.label :section, :class => 'col-md-3 control-label'
   div class='col-md-6 controls'
@@ -39,7 +72,7 @@ fieldset class='control-group#{error ? ' has-error' : ''}'
     = f.text_field :password_confirmation, :class => 'form-control input-large input-with-feedback'
     // span class='help-inline' = error ? f.error_message_on(:org, :class => 'text-error') : pat(:example)
 
-div class="form-actions"
+.form-actions
   = f.submit pat(:save), :class => 'btn btn-sm btn-prime'
   // |&nbsp;
   // = f.submit pat(:save_and_continue), :class => 'btn btn-sm btn-info', :name => 'save_and_continue'

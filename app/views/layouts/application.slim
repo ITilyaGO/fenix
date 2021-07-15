@@ -3,7 +3,7 @@ html lang='en'
   head
     meta content='text/html; charset=utf-8' http-equiv='Content-Type'
     meta name='viewport' content='width=device-width,initial-scale=1'
-    title = @title.present? ? "#{@title}" : "Unnamed Project"
+    title = @title.present? ? @title : APP_NAME
     = favicon_tag 'favicon.ico'
     = stylesheet_link_tag 'bootstrap', 'font-awesome.min', 'admin-ui', 'dashboard'
 
@@ -17,9 +17,10 @@ html lang='en'
               / TODO: fa-arrows-h
               span.menu-icon.fa.fa-exchange
 
-          - if allow_route?(:orders_create)
+          - if can_view?(:order, :create) || allow_route?(:orders_create)
             li.sidebar-title.separator
               span Создать заказ
+          - if allow_route?(:orders_create)
             li.sidebar-list
               = link_to url(:online, :orders) do
                 | Заказы с сайта
@@ -28,6 +29,7 @@ html lang='en'
                 - if o_count > 0
                   span class="badge" = o_count
                 span class="menu-icon fa fa-cloud-download"
+          - if can_view?(:order, :create) || allow_route?(:orders_create)
             li.sidebar-list
               = link_to url(:orders, :fullempty) do
                 | Создать заказ
@@ -70,14 +72,16 @@ html lang='en'
             = link_to url(:orders, :finished) do
               | Готовые
               span class="menu-icon fa fa-check-square-o"
-          li.sidebar-list
-            = link_to url(:stickers, :orders) do
-              | Наклеенные
-              span class="menu-icon fa fa-ticket"
-          li.sidebar-list
-            = link_to url(:orders, :archive) do
-              | Архив
-              span class="menu-icon fa fa-archive"
+          - if can_view?(:list, :stickers)
+            li.sidebar-list
+              = link_to url(:stickers, :orders) do
+                | Наклеенные
+                span class="menu-icon fa fa-ticket"
+          - if can_view?(:list, :archive)
+            li.sidebar-list
+              = link_to url(:orders, :archive) do
+                | Архив
+                span class="menu-icon fa fa-archive"
 
           li.sidebar-title.separator
             span Расписание
@@ -85,10 +89,11 @@ html lang='en'
             = link_to url(:timeline, :weeks) do
               | График
               span class="menu-icon fa fa-tachometer"
-          li.sidebar-list
-            = link_to url(:timeline, :stickers) do
-              | График клейки
-              span class="menu-icon fa fa-ticket"
+          - if can_view?(:timeline, :stickers)
+            li.sidebar-list
+              = link_to url(:timeline, :stickers) do
+                | График клейки
+                span class="menu-icon fa fa-ticket"
           li.sidebar-list
             = link_to url(:roundtrips, :index) do
               | График поездок
@@ -110,17 +115,18 @@ html lang='en'
                 | 1c
                 span class="menu-icon fa fa-wheelchair"
 
-          - if allow_route?(:online)
+          - if can_btn_view?(:stock, :any) || allow_route?(:online)
             li.sidebar-title.separator
               span Склад
             li.sidebar-list
               = link_to url(:archetypes, :stock) do
                 | Продукция
                 span class="menu-icon fa fa-inbox"
-            li.sidebar-list
-              = link_to url(:archetypes, :index) do
-                | Связи
-                span class="menu-icon fa fa-inbox"
+            - if can_btn_view?(:stock, :archetypes) || allow_route?(:online)
+              li.sidebar-list
+                = link_to url(:archetypes, :index) do
+                  | Связи
+                  span class="menu-icon fa fa-inbox"
 
           - if allow_route?(:editors)
             li.sidebar-title.separator
@@ -145,7 +151,7 @@ html lang='en'
               = link_to url(:categories, :index) do
                 | Категории
                 span class="menu-icon fa fa-book"
-            - if allow_route?(:accounts)
+            /- if allow_route?(:accounts)
               li.sidebar-list
                 = link_to url(:accounts, :index) do
                   | Юзеры
@@ -154,6 +160,12 @@ html lang='en'
               = link_to url(:managers, :index) do
                 | Менеджеры
                 span class="menu-icon fa fa-briefcase"
+
+          - if current_account.is_admin?
+            li.sidebar-title.separator
+            li.sidebar-list
+              = link_to url(:prefs, :page) do
+                | Настройки
 
         .sidebar-footer
           .col-xs-6
@@ -164,7 +176,7 @@ html lang='en'
       div id="content-wrapper"
         div class="page-content"
           div class="row header"
-            div class="col-xs-12"
+            .col-xs-12
               .pull-right
                 - if @print_btn
                   .btn.item.btn-print
@@ -173,72 +185,20 @@ html lang='en'
                       | печать
                 .btn.item
                   .fa-stack
-                    i class="fa fa-circle fa-stack-2x"
-                    i class="fa fa-user fa-stack-1x"
+                    i.fa.fa-circle.fa-stack-2x
+                    i.fa.fa-user.fa-stack-1x
                   span.user = current_account.name
 
                 .btn.item.btn-exit
                   = form_for 'logout', url(:sessions, :destroy), :method => :delete do
                     = submit_tag "выход", :class => "menu-icon btn btn-sm btn-clear"
 
-              / div class="user pull-right"
-              /   div class="mea" style="width: 100px"
-              /     
-              /     div class="page"
-              /       span.menu-icon.fa.fa-user-circle
-              /       span = current_account.name
-                // div class="item"
-                    //i class="fa fa-power-off fa-fw pull-right"
-                // <div class="item dropdown">
-                //   <a href="#" class="dropdown-toggle"><i class="fa fa-user"></i>
-                //     <img src="img/avatar.jpg">
-                //   </a>
-                //   <ul class="dropdown-menu dropdown-menu-right">
-                //     <li class="dropdown-header">
-                //       Joe Bloggs
-                //     </li>
-                //     <li class="divider"></li>
-                //     <li class="link">
-                //       <a href="#">
-                //         Profile
-                //       </a>
-                //     </li>
-                //     <li class="link">
-                //       <a href="#">
-                //         Menu Item
-                //       </a>
-                //     </li>
-                //     <li class="divider"></li>
-                //     <li class="link">
-                //       <a href="#">
-                //         Logout
-                //       </a>
-                //     </li>
-                //   </ul>
-                // </div>
-                // <div class="item dropdown">
-                //  <a href="#" class="dropdown-toggle"><i class="fa fa-bell-o"></i></a>
-                //   <ul class="dropdown-menu dropdown-menu-right">
-                //     <li class="dropdown-header">
-                //       Notifications
-                //     </li>
-                //     <li class="divider"></li>
-                //     <li>
-                //       <a href="#">Server Down!</a>
-                //     </li>
-                //   </ul>
-                // </div>
-              div class="meta"
-                div class="page"
-                  div class=""
-                   span Home
-                   - if @title
-                    = " — #{@title}"
-
+              .meta: .page
+                = @title
           
           = {:error => 'danger', :warning => 'warning', :success => 'success', :notice => 'info'}.map { |type, class_name| flash_tag(type, :class => "alert alert-#{class_name} alert-top") }.join.html_safe
           
-          div class='main-wrapper-push' = yield
+          .main-wrapper-push = yield
           
           // <div class="row">
           //   <div class="col-xs-12">
@@ -295,11 +255,6 @@ html lang='en'
     //     </div>
     //   	</aside>
       
-
-
-    - if content_for?(:map_section_asset)
-      = yield_content :map_section_asset
-
     
     = javascript_include_tag 'jquery-2.1.1.min', 'jquery.cookie', 'bootstrap.min', 'typeahead.min', 'handlebars', 'bootstrap-select', :application, :fu
     = yield_content :js_assets

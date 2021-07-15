@@ -5,3 +5,13 @@ ul class="nav nav-tabs"
 div class="tabs-content"
   = form_for :account, url(:accounts, :create), :class => 'form-horizontal' do |f|
     = partial 'accounts/form', :locals => { :f => f, :sections => @sections }
+
+- content_for :js_assets do
+  = javascript_include_tag :riot
+  rscript type="riot/tag" src="/riot/tags/collapser.tag"
+
+  javascript:
+    
+    document.addEventListener("DOMContentLoaded", function(event) {
+      riot.mount('collapser')
+    });

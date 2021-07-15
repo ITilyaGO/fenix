@@ -37,19 +37,17 @@ ul class="nav nav-tabs non-print" id="weeks_tab"
           small == deli(rur sec_done)
   br
   .summary.clearfix.flex-c
-    .item-done.pull-right
+    .item-done.cashable.pull-right
       span Сумма заказов
       .rpr == deli(rur price_total)
       - if cash_total > 0
         .cashline
-          /.fa.fa-money
           small.rpr == deli(rur cash_total)
-    .item-done.pull-right
+    .item-done.cashable.pull-right
       span Отправлено #{((price_done.to_f/price_total)*100).ceil rescue 0}%
       .rpr == deli(rur price_done)
       - if cash_total > 0
         .cashline
-          /.fa.fa-money
           small.rpr == deli(rur cash_done)
   
     - stickers_done = @kc_sumstickers.values.sum

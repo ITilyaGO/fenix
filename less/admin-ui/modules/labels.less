@@ -24,7 +24,7 @@
 // Colors
 // Contextual variations (linked labels get darker on :hover)
 
-.label-default {
+.label-default, .label-none {
   .label-variant(@label-default-bg, @label-default-bg-hover, @label-default-text-color);
 }
 .label-draft {
@@ -80,4 +80,23 @@
 
 .label-purple {
   .label-variant(@label-purple-bg, @label-purple-bg-hover);
+}
+
+.label-border {
+  border: 2px solid transparent;
+  color: @label-default-text-color;
+  padding: 0.25em 0.4em 0.2em;
+  &:hover,
+  &:focus {
+    //color: rgb(118, 130, 166);
+  }
+}
+.label-prepare {
+  .label-border;
+  background: #ffffff;
+  border-color: @brand-warning;
+
+  &:hover {
+    border-color: @btn-warning-hover-bg;
+  }
 }

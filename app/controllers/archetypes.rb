@@ -158,7 +158,7 @@ Fenix::App.controllers :archetypes do
   end
 
   put :stock do
-    params[:lines].each do |k, line|
+    params[:lines]&.each do |k, line|
       line.each do |date, stock_in|
 
         # stock_in = line['in']

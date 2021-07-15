@@ -16,7 +16,7 @@ ul class="nav nav-tabs non-print" id="weeks_tab"
   li
     graphic.collapse
       - 7.times do
-        .day
+        .invisible.day
     = link_to tag_icon('arrow-left'), url(:timeline, :weeks, start: timeline_id(@prev.prev_month.beginning_of_week))
     
   - @weeks.each_with_index do |tab, i|
@@ -35,13 +35,13 @@ ul class="nav nav-tabs non-print" id="weeks_tab"
     li
       graphic.collapse
         - 7.times do
-          .day
+          .invisible.day
       = link_to tag_icon('arrow-right'), url(:timeline, :weeks, start: timeline_id(@prev.next_month.beginning_of_week))
   - if (@prev.month-today.month).abs > 1
     li
       graphic.collapse
         - 7.times do
-          .day
+          .invisible.day
       = link_to tag_icon('history'), url(:timeline, :weeks)
 
 .filters.non-print

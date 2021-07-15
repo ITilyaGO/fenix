@@ -1,5 +1,49 @@
-p = link_to "По городам", url(:statistic, :cities)
-p = link_to "По текущим заказам", url(:statistic, :orders)
-p = link_to "По готовым заказам", url(:statistic, :finished)
-p = link_to "По готовым заказам в год", url(:statistic, :finished_yearly)
-p = link_to "По сумме", url(:statistic, :done)
+.col-md-3.text-center
+  sub.upper Клейка
+  hr
+  .btn.item
+    = link_to url(:stickers, :pastline), :class => 'btn btn-sm btn-glue'
+      i.fa.fa-bar-chart.fa-btn
+      | реальная клейка
+
+.col-md-3
+.col-md-3.text-center
+  sub.upper Готовые
+  hr
+  .btn.item
+    = link_to url(:timeline, :months), :class => 'btn btn-sm btn-glue'
+      i.fa.fa-bar-chart.fa-btn
+      | по месяцам
+  .btn.item
+    = link_to url(:statistic, :finished), :class => 'btn btn-sm btn-clear'
+      i.fa.fa-medkit.fa-btn
+      | готовые заказы
+  .btn.item
+    = link_to url(:statistic, :finished_yearly), :class => 'btn btn-sm btn-clear'
+      i.fa.fa-medkit.fa-btn
+      | в год
+  .btn.item
+    = link_to url(:statistic, :done), :class => 'btn btn-sm btn-clear'
+      i.fa.fa-medkit.fa-btn
+      | по сумме
+
+.col-md-3.text-center
+  sub.upper Текущие
+  hr
+  .btn.item
+    = link_to url(:statistic, :orders), :class => 'btn btn-sm btn-glue'
+      i.fa.fa-medkit.fa-btn
+      | текущие заказы
+.clearfix
+br
+h3
+.col-md-3.text-center
+  sub.upper Города
+  hr
+  .btn.item
+    = link_to url(:statistic, :cities), :class => 'btn btn-sm btn-clear'
+      i.fa.fa-medkit.fa-btn
+      | по городам
+.col-md-3
+
+.clearfix

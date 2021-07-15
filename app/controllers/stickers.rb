@@ -121,4 +121,87 @@ Fenix::App.controllers :stickers do
 
     redirect(url(:orders, :index))
   end
+
+  get :pastline do
+    @title = t "tit.stickers.pastline"
+    @print_btn = 1
+    start_from = timeline_unf(params[:start]) rescue Date.today
+    bow = start_from.weeks_ago(2).beginning_of_week
+    @weeks = []
+    6.times do |i|
+      @weeks << { :date => bow.weeks_ago(-i) }
+    end
+    
+    ky_month_1 = start_from.strftime('%y%m')
+    ky_month_2 = start_from.next_month.strftime('%y%m')
+    ky_month_0 = start_from.prev_month.strftime('%y%m')
+    @ktm = CabiePio.all([:timeline, :order], [ky_month_1]).flat
+    @ktm = @ktm.merge CabiePio.all([:timeline, :order], [ky_month_0]).flat
+    @ktm = @ktm.merge CabiePio.all([:timeline, :order], [ky_month_2]).flat
+    @all_ids = @ktm.trans(nil, :to_i).map(&:last)
+
+    @stickers = CabiePio.all_keys(@all_ids, folder: [:sticker, :order]).flat.trans(:to_i, :to_f)
+    @glass_stickers = CabiePio.all_keys(@all_ids, folder: [:sticker, :order_glass]).flat.trans(:to_i, :to_f)
+    @gweek = calendar_group(@ktm.trans(nil, :to_i))
+    @sdate = start_from
+    kc_stickers = CabiePio.folder([:products, :sticker]).flat.trans(:to_i, :to_f)
+    @week_sum = { start_from.beginning_of_month.beginning_of_week => 0 }
+    @day_sum = {}
+    @glday_sum = {}
+
+    @kts = CabiePio.query("m/order_lines/sticker>.*_#{ky_month_0}2.", type: :regex).flat
+    @kts = @kts.merge CabiePio.query("m/order_lines/sticker>.*_#{ky_month_0}3.", type: :regex).flat
+    # @kts = @kts.merge CabiePio.query("m/order_lines/sticker>.*_#{ky_month_1}..", type: :regex).flat
+    @kts = @kts.merge CabiePio.query("m/order_lines/sticker>.*_#{ky_month_2}0.", type: :regex).flat
+    @month_sum = CabiePio.query("m/order_lines/sticker>.*_#{ky_month_1}..", type: :regex).flat.sum do |i,k|
+      ol = OrderLine.find(i.split('_').first.to_i) rescue nil
+      s = k[:v]*kc_stickers.fetch(ol&.product_id, 0)
+      day = timeline_unf(i.split('_').last)
+      gd = day.beginning_of_week
+      @day_sum[day] ||= 0
+      @day_sum[day] += s
+      if products_hash.fetch(ol&.product_id, nil) == 11
+        @glday_sum[day] ||= 0
+        @glday_sum[day] += s
+      end
+      @week_sum[gd] ||= 0
+      @week_sum[gd] += s
+      s
+    end
+    @kts.each do |i,k|
+      ol = OrderLine.find(i.split('_').first.to_i) rescue nil
+      s = k[:v]*kc_stickers.fetch(ol&.product_id, 0)
+      day = timeline_unf(i.split('_').last)
+      gd = day.beginning_of_week
+      @day_sum[day] ||= 0
+      @day_sum[day] += s
+      if products_hash.fetch(ol&.product_id, nil) == 11
+        @glday_sum[day] ||= 0
+        @glday_sum[day] += s
+      end
+    end
+
+    render 'stickers/pastline'
+  end
+
+end
+
+Fenix::App.controllers :dr_pastline, :map => 'pastline/driven' do
+
+  patch :stickers_info do
+    @cdate = timeline_unf(params[:date]) rescue Date.today
+
+    ky_day = @cdate.strftime('%y%m%d')
+    ols = CabiePio.query("m/order_lines/sticker>.*_#{ky_day}", type: :regex).flat.keys
+    
+    ol_ids = ols.map{|kc|kc.split('_').first.to_i}.uniq
+    @all_ids = ol_ids.map{|i|OrderLine.find_by(id: i)&.order_id}.compact.uniq
+    # @tml = CabiePio.all([:timeline, :order], [ky_day]).flat
+
+    # @all_ids = @tml.map(&:last).map(&:to_i)
+    @orders = Order.where(id: @all_ids).order(:client_id)
+    @stickers = CabiePio.all_keys(@all_ids, folder: [:sticker, :order_progress]).flat.trans(:to_i, :to_f)
+
+    partial 'stickers/stickers_side'
+  end
 end

@@ -58,14 +58,15 @@
           td class='list-column list-row-action non-print'
             div class='list-row-action-wrapper'
               = hidden_field_tag 'tid[]', :value => odate
-              = link_to tag_icon(:calendar), '#', :class => 'list-row-action-wrapper-link medium list-menu-timeline-link'
+              - if can_view?(:order, :modify)
+                = link_to tag_icon(:calendar), '#', :class => 'list-row-action-wrapper-link medium list-menu-timeline-link'
               = link_to tag_icon(:edit), :href => url(:orders, :edit, :id => order.id), :class => 'list-row-action-wrapper-link'
-    
-    - price_total = @orders.map(&:total).sum
-    - price_done = @orders.map(&:done_total).sum
-    - cash_total = @orders.select{|o| @kc_cash.keys.include? o.id}.map(&:total).sum
-    - cash_done = @orders.select{|o| @kc_cash.keys.include? o.id}.map(&:done_total).sum
+   
     - if @current_account.is_admin?
+      - price_total = @orders.map(&:total).sum
+      - price_done = @orders.map(&:done_total).sum
+      - cash_total = @orders.select{|o| @kc_cash.keys.include? o.id}.map(&:total).sum
+      - cash_done = @orders.select{|o| @kc_cash.keys.include? o.id}.map(&:done_total).sum
       tfoot: tr: td.summary colspan=20
         - by_deli = sum_by_delivery(@orders)
         - [:postage, :vernissage, :roundtrip, :pickup].each do |ds|
@@ -86,19 +87,17 @@
               .rpr == deli(rur sec_sum)
               small == deli(rur sec_done)
 
-        .item-all.pull-right
+        .item-all.cashable.pull-right
           span Сумма заказов
           .rpr == deli(rur price_total)
           - if cash_total > 0
             .cashline
-              /.fa.fa-money
               small.rpr == deli(rur cash_total)
-        .item-done.pull-right
+        .item-done.cashable.pull-right
           span Отправлено #{((price_done.to_f/price_total)*100).ceil}%
           .rpr == deli(rur price_done)
           - if cash_total > 0
             .cashline
-              /.fa.fa-money
               small.rpr == deli(rur cash_done)
 
         - stickers_done = @kc_sumstickers.values.sum

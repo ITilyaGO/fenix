@@ -359,6 +359,9 @@ footer {
       background: rgb(246, 240, 249);
     }
     
+    &.cashable {
+      border-bottom: 2px solid #58b936;
+    } 
   }
 }
 .timeline.lg {
@@ -548,6 +551,9 @@ complex, sticker_line, .sticker-block {
   font-size: 1.3em;
   vertical-align: middle;
 }
+.upper {
+  text-transform: uppercase;
+}
 .btn-xs {
   .fa-btn {
     margin-right: .95em;
@@ -585,6 +591,8 @@ complex, sticker_line, .sticker-block {
 }
 .list-column.minirur {
   white-space: nowrap;
+  text-align: right;
+  padding: 0 12px;
   .r {
     color: #c8c5ee;
     font-size: 0.9em;
@@ -734,6 +742,9 @@ calendar {
     &.busy > span {
       border-bottom: 3px solid rgb(230, 132, 141);
     }
+    &.unsure > span {
+      border-bottom: 3px solid rgb(246, 228, 107);
+    }
     &.past {
       color: rgba(93, 96, 128, 0.5);
 
@@ -767,6 +778,17 @@ calendar {
       background: rgba(0, 0, 139, 0.25);
       color: white;
       border-color: white;
+    }
+  }
+}
+
+// access control
+.ac-page {
+  .fa {
+    color: rgba(178, 180, 207, .5);
+
+    &.fa-check {
+      color: #5e9163;
     }
   }
 }
@@ -825,11 +847,15 @@ calendar {
       &.unbusy {
         background: rgba(130, 191, 159, 0.5);
       }
+      &.unsure {
+        background: rgba(246, 228, 107, 1);
+      }
     }
   }
 }
 
-#stickers_cal.nav-tabs {
+#stickers_cal.nav-tabs,
+#stickers_past.nav-tabs {
   border-width: 2px;
   border-color: #e1e4e7;
   border-style: solid;
@@ -906,7 +932,8 @@ calendar {
 }
 
 
-#stickers_cal.nav-tabs {
+#stickers_cal.nav-tabs,
+#stickers_past.nav-tabs  {
   .side-wr {
     overflow: scroll;
     margin: 2em;
@@ -951,6 +978,25 @@ calendar {
         text-align: right;
       }
     }
+  }
+}
+
+#stickers_cal.nav-tabs {
+  .graphic {
+    .wday {
+      border: 2px solid transparent;
+      padding: 4px 8px;
+      &.unbusy {
+        border: 2px solid rgba(130, 191, 159, 0.5);
+      }
+      &.busy {
+        border: 2px solid rgba(218, 87, 93, 0.5);
+      }
+      &.unsure {
+        border: 2px solid rgba(246, 228, 107, 1);
+      }
+    }
+
   }
 }
 

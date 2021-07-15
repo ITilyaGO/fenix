@@ -21,8 +21,25 @@ Fenix::App.controllers :prefs do
   end
 
   get :box, :map => 'list/box' do
-    wonderbox_set(:complex_level, 512)
-    wonderbox_set(:complexity, { level: 256, limit: 512, unbusy: 6 })
+    # wonderbox_set(:complex_level, 512)
+    # wonderbox_set(:complexity, { level: 256, limit: 512, unbusy: 6 })
     render "list/complex"
   end
+  get :page do
+    @title = t 'tit.prefs.page'
+    render 'prefs/page'
+  end
+
+  get :levels do
+    @title = t 'tit.prefs.page'
+    render 'prefs/levels'
+  end
+
+  put :levels do
+    wonderbox_set(:complexity, params[:complexity].transform_values(&:to_i))
+    wonderbox_set(:stickday_threshold, params[:stickday_threshold].transform_values(&:to_i))
+
+    render 'prefs/levels'
+  end
+
 end

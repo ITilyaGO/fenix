@@ -177,7 +177,7 @@ br
       - @sections.each do |tab|
         - cat_enabled = @order.by_sec?(tab.id)
         - displayed_n += 1 if cat_enabled
-        - my = @my_section.id == tab.id
+        - my = @my_section&.id == tab.id
         li class=[('disabled' unless cat_enabled), ('my' if my)]
           = link_to tag_icon('fa fa-ok', "#{tab.name}"), "#cat-#{tab.id}", 'data-toggle' => "tab"
       - if @order.order_parts.size != displayed_n 
@@ -188,7 +188,7 @@ br
     div class="tab-content" id="for_order_tab"
       - @sections.each_with_index do |s, i|
         - tab_visible = @order.by_sec?(s.id)
-        - my = @my_section.id == s.id
+        - my = @my_section&.id == s.id
         - unless tab_visible
           block.non-print id="cat-#{s.id}"
         - else

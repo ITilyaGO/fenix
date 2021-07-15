@@ -56,7 +56,8 @@
             td class='list-column list-row-action non-print'
               div class='list-row-action-wrapper'
                 = hidden_field_tag 'tid[]', :value => odate
-                = link_to tag_icon(:calendar), '#', :class => 'list-row-action-wrapper-link medium list-menu-timeline-link'
+                - if can_view?(:order, :modify)
+                  = link_to tag_icon(:calendar), '#', :class => 'list-row-action-wrapper-link medium list-menu-timeline-link'
                 = link_to tag_icon(:edit), :href => url(:orders, :edit, :id => order.id), :class => 'list-row-action-wrapper-link'
 
       - if @current_account.is_admin?
