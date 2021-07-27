@@ -29,6 +29,7 @@ Fenix::App.controllers :orders do
       .where("status = ?", Order.statuses[:draft]).order(:updated_at => :desc)
     @sections = Section.includes(:categories).all
     a_towns(@orders.map(&:id), @orders.map(&:client_id))
+    calendar_init
     @r = url(:orders, :draft)
     render 'orders/draft'
   end
@@ -254,12 +255,6 @@ Fenix::App.controllers :orders do
       # @clients = Client.includes(:place).where(ct[:email].matches(a.email).or(ct[:place_id].matches(place.id))) rescue []
       # @clients = Client.all if !@clients.any?
     end
-    start_from = Date.today
-    ky_month_1 = start_from.strftime('%y%m')
-    ky_month_2 = start_from.next_month.strftime('%y%m')
-    @ktm = CabiePio.all([:timeline, :order], [ky_month_1]).flat
-    @ktm = @ktm.merge CabiePio.all([:timeline, :order], [ky_month_2]).flat
-    @ctm = calendar_group(@ktm)
     render 'orders/new'
   end
 
@@ -330,11 +325,6 @@ Fenix::App.controllers :orders do
     order.actualize
     calc_complexity_for order
 
-    delivery_at = params[:cabie][:timeline_at]
-    if timeline_date = Date.parse(delivery_at) rescue nil
-      CabiePio.set [:timeline, :order], timeline_order(order.id, timeline_date), order.id
-      CabiePio.set [:orders, :timeline], order.id, timeline_id(timeline_date)
-    end
     cash = params[:order][:cash] == 'true' ? 't' : 'f'
     CabiePio.set [:orders, :cash], order.id, cash
 
@@ -419,11 +409,6 @@ Fenix::App.controllers :orders do
     order.actualize
     calc_complexity_for order
 
-    delivery_at = params[:cabie][:timeline_at]
-    if timeline_date = Date.parse(delivery_at) rescue nil
-      CabiePio.set [:timeline, :order], timeline_order(order.id, timeline_date), order.id
-      CabiePio.set [:orders, :timeline], order.id, timeline_id(timeline_date)
-    end
     code = params[:cabie][:kato_place]
     if Kato.valid? code
       CabiePio.set [:orders, :towns], order.id, code
@@ -442,7 +427,6 @@ Fenix::App.controllers :orders do
     @arp = CabiePio.folder(:product, :archetype).flat.trans(:to_i)
     @kc_stocks = CabiePio.folder(:stock, :archetype).flat.trans(nil, :to_i)
     @kc_needs = CabiePio.folder(:need, :archetype).flat.trans(nil, :to_i)
-    calendar_init
     render 'orders/fullempty'
   end
 
@@ -456,7 +440,6 @@ Fenix::App.controllers :orders do
     @kc_timeline = CabiePio.get([:orders, :timeline], order.id).data
     @form = order
     @force_timeline = true
-    calendar_init
     render 'orders/empty'
   end
 
@@ -478,7 +461,6 @@ Fenix::App.controllers :orders do
     @kc_timeline = CabiePio.get([:orders, :timeline], order.id).data
     @form = order
     @force_timeline = true
-    calendar_init
     render 'orders/empty'
   end
 
@@ -515,26 +497,29 @@ Fenix::App.controllers :orders do
       redirect url(:orders, :draft)
     end
 
-    order.status = :draft
+    order.status = order.draft? ? :draft : :anew
     order.done_parts = 0
     order.total = 0
     order.done_total = 0
-
     # order = order.attributes.merge({ :status => :anew, :online_at => order.created_at })
     # order = Order.new({:online_id => online.id, :status => :anew, :client_id => client, :online_at => online.created_at, :description => online.description, :total => online.total})
+    sections_draft = []
     exst = params[:line].map{|l|l[:ol].to_i}
     order.order_lines.each do |ol|
       ol.destroy unless exst.include? ol.id
+      sections_draft << product_to_section(ol.product_id) unless exst.include? ol.id
     end
     params[:line].each do |line|
       p = Product.find(line['id']) rescue nil
       next if !p
       if col = order.order_lines.detect{|l|l.id == line[:ol].to_i}
+        sections_draft << product_to_section(p.id) unless col.amount == line[:amount].to_i
         col.amount = line[:amount]
         col.description = line[:comment]
         order.total += p.price*col.amount
         col.save
       else
+        sections_draft << product_to_section(p.id)
         ol = OrderLine.new({ :product_id => p.id, :amount => line['amount'], :price => p.price, :description => line['comment'] })
         order.total += p.price*ol.amount
         order.order_lines << ol
@@ -543,9 +528,11 @@ Fenix::App.controllers :orders do
     end
     order.save
 
-    order.order_parts.destroy_all
+    # old_parts = order.order_parts.map{|p|[p.section_id, p.state]}.to_h
+    # order.order_parts.destroy_all
     o_status = KSM::OrderStatus.find(order.id)
-    o_status.setg(:draft)
+    o_status.setg(order.draft? ? :draft : :anew)
+    old_parts = o_status.pstate.map{|k,v|[k, o_status.state(k)]}.to_h
     o_status.pstate = {}
     sections = Section.all
     sections.each do |s|
@@ -556,13 +543,18 @@ Fenix::App.controllers :orders do
       end
       found = order.order_parts.detect{|op|op.section_id == s.id}
       if include_section
-        op = OrderPart.new(:section_id => s.id, :state => :anew)
+        state = old_parts[s.id] || :anew
+        state = :anew if sections_draft.include? s.id
+        old_state = state == :prepare ? :current : state
+        op = OrderPart.new(:section_id => s.id, :state => old_state)
         order.order_parts << op unless found
-        o_status.sets(s.id, :anew)
+        found.update(state: old_state) if found
+        o_status.sets(s.id, state)
       elsif found
         found.destroy
       end
     end
+
     o_status.save
     order.all_parts = order.order_parts.size if order.order_parts.any?
     order.save
@@ -574,18 +566,24 @@ Fenix::App.controllers :orders do
     redirect(url(:orders, :draft))
   end
 
-  get :anew, :with => :id do
-    @title = pat(:edit_title, :model => "order #{params[:id]}")
-    @order = Order.find(params[:id])
-    if @order.draft?
-      @order.status = :anew
-      @order.save
-      o_status = KSM::OrderStatus.find(@order.id)
+  put :anew do
+    order = Order.find(params[:id])
+    if order.draft?
+      delivery_at = params[:timeline_at]
+      if timeline_date = Date.parse(delivery_at) rescue nil
+        CabiePio.set [:timeline, :order], timeline_order(order.id, timeline_date), order.id
+        CabiePio.set [:orders, :timeline], order.id, timeline_id(timeline_date)
+      else
+        return { error: true }.to_json
+      end
+
+      order.status = :anew
+      order.save
+      o_status = KSM::OrderStatus.find(order.id)
       o_status.setg(:anew)
       o_status.save
-      redirect(url(:orders, :draft))
     end
-    redirect(url(:orders, :draft))
+    { }.to_json
   end
 
   get :ship, :with => :id do
@@ -626,7 +624,8 @@ Fenix::App.controllers :orders do
 
       arbal_need_order_start order
     end
-    redirect url(:orders, :edit, :id => order.id)
+    true.to_json
+    # redirect url(:orders, :edit, :id => order.id)
   end
 
   put :midstatus, :with => :id do
@@ -642,7 +641,8 @@ Fenix::App.controllers :orders do
     o_life = KSM::OrderLife.find(order.id)
     o_life.ts_current(my_section)
     o_life.save
-    redirect url(:orders, :edit, :id => order.id)
+    true.to_json
+    # redirect url(:orders, :edit, :id => order.id)
   end
 
   put :update, :with => :id do
@@ -654,7 +654,9 @@ Fenix::App.controllers :orders do
 
     @title = pat(:update_title, :model => "order #{params[:id]}")
     @order = Order.find(params[:id])
-    @order_part = @order.order_parts.find_by(:section_id => current_account.section)
+    id_part = params[:next_status]
+    @order_part = @order.order_parts.find_by(:section_id => id_part)
+    @order_part ||= @order.order_parts.find_by(:section_id => current_account.section)
     # @order.status = params[:status]
     # @order.priority = params[:priority] == "true"
     delivery_at = params[:cabie][:timeline_at] rescue nil
@@ -665,21 +667,26 @@ Fenix::App.controllers :orders do
       CabiePio.set [:timeline, :order], timeline_order(@order.id, timeline_date), @order.id
       CabiePio.set [:orders, :timeline], @order.id, timeline_id(timeline_date)
       CabiePio.set([:orders, :timeline_blink], @order.id, 1) if timeline_date != current_tl
+      @order.touch
     end
 
     order_part_st = @order.order_parts.find_by(:section_id => 1)
     part_before = order_part_st&.current?
 
     o_status = KSM::OrderStatus.find(@order.id)
-    if @order_part and params[:order_part]
+    if @order_part && params[:order_part]
       # @order_part.status = params[:order_part]['done'] ? :finished : :current
-      no_boxes = params[:order_part][:no_boxes] == '1'
-      @order_part.boxes = params[:order_part][:boxes] || 0
-      @order_part.boxes = 0 if no_boxes
-      @order_part.transfer = params[:order_part][:transfer] || false
+      form_s = @order_part.section_id.to_s
+      opf = params[:order_part][form_s]
+      if opf
+        @order_part.boxes = opf[:boxes] || 0
+        @order_part.boxes = 0 if opf[:no_boxes] == '1'
+      end
+      # @order_part.transfer = params[:order_part][@order_part.section_id][:transfer] || false
       @order_part.state = :finished if params[:next_status]
       @order_part.save
       o_status.sets(@order_part.section_id, :finished) if params[:next_status]
+      o_status.setg(:current) if o_status.what?(:prepare) || params[:next_status]
       # @order_part.update_attributes(params[:order_part])
     end
     if params[:next_status_all]
@@ -735,11 +742,11 @@ Fenix::App.controllers :orders do
     #   save_sticker_progress(@order.id, operc)
     # end
     
-    status_before = @order.current?
+    status_before = @order.current? || @order.anew?
     @order.done_parts = @order.order_parts.where("state = ?", OrderPart.states[:finished]).size
     if @order.done_parts == @order.all_parts || params[:next_status_all_force]
       # don't need to use params here
-      @order.status = :finished if !params[:save_finish]
+      @order.status = :finished if status_before
       amount = 0.0
       @order.order_lines.each do |ol|
         next if ol.ignored
@@ -761,14 +768,14 @@ Fenix::App.controllers :orders do
       arbal_need_order_fin(@order)
 
       o_status = KSM::OrderStatus.find(@order.id)
-      o_status.setg(@order.status)
+      o_status.setg(:finished)
       o_status.save
     end
 
     if @order.finished?
-      redirect(url(:orders, :invoice, :id => @order.id))
+      redirect url(:orders, :invoice, id: @order.id)
     else
-      redirect(url(:orders, :index))
+      redirect url(:orders, :edit, id: @order.id)
     end
     # if @order.save
     #   redirect(url(:orders, :index))
@@ -873,7 +880,7 @@ Fenix::App.controllers :orders do
       end
       Timeline.destroy_all(:order_id => order.id)
       tl = CabiePio.get [:orders, :timeline], order.id
-      CabiePio.unset [:timeline, :order], timeline_order(order.id, timeline_unf(tl.data)) if tl
+      CabiePio.unset [:timeline, :order], timeline_order(order.id, timeline_unf(tl.data)) if tl.data
       CabiePio.unset [:orders, :timeline], order.id
       redirect url(:orders, :draft)
     else

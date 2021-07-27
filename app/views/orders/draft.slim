@@ -9,10 +9,11 @@
         th.header width='50px'
         th class='header' Заказчик
         th class='header' Дата
+        th.header
         th class='header non-print'
           = partial 'bricks/orders/section_titles'
         th class='header non-print'
-        th class='header list-row-action-header non-print'
+        th class='header list-row-action-header non-print' Всего: #{@orders.size}
     
     tbody
       - abl_view = @sections.map{|s|can_view_section?(:sections, :draft, s.id) ? s.id : nil }
@@ -20,7 +21,7 @@
       - @orders.each do |order|
         - os = kc_os.detect{|kc|kc.id.to_i == order.id} || KSM::OrderStatus.new(id: order.id)
         - next if (abl_view & os.pstate.keys).empty?
-        tr class='list-row'
+        tr class='list-row' data-id=order.id
           td class='list-column list-selectable non-print' = check_box_tag 'order_ids[]', :autocomplete => "off", :value => order.id, :class => 'list-selectable-checkbox'
           td class='list-column'
             = link_to order.id, :href => url(:orders, :edit, :id => order.id)
@@ -36,19 +37,14 @@
           td.list-column.minirur.text-nowrap == deli(rur (order.total/1000.0).floor)
           td class='list-column' = order.client.name
           td class='list-column text-nowrap' = to_msk(order.created_at)
+          td.list-column.non-print
+            span.label class="label-#{os.state}" = t :"status.#{os.state}"
           td class='list-column text-nowrap non-print'
             = partial 'orders/squares', :locals => { :order => order, status: os }
-            // - @sections.each do |s|
-            //   - s_st = order.order_parts.find_by(:section_id => s.id)
-            //   = content_tag :button, !s_st.nil? && s_st.transfer ? "п": "", :class => "btn btn-sm btn-#{s_st.nil? ? 'default' : s_st.state}"
-            //   | &nbsp;
-            // | &nbsp;
-            span.label class="label-#{os.state}" = t :"status.#{os.state}"
           td class='list-column non-print'
-            /- if order.finished?
-              = link_to "Отправить", :href => url(:orders, :ship, :id => order.id), :class => "btn btn-xs btn-shipped"
             - if order.draft?
-              = link_to "Подтвердить", :href => url(:orders, :anew, :id => order.id), :class => "btn btn-xs btn-anew"
+              = hidden_field_tag 'tid[]', :value => order.id
+              .btn.btn-xs.btn-anew.list-menu-draft-link Подтвердить
 
           td class='list-column list-row-action non-print'
             div class='list-row-action-wrapper'
@@ -68,3 +64,55 @@
                     = form_tag url(:orders, :destroy, :id => order.id), :method => :delete do
                       = submit_tag pat(:delete), :class =>'list-row-action-popover-delete-one-btn btn btn-danger btn-wide'
                       div class='btn btn-default btn-wide cancel' data-dismiss="modal" = pat(:cancel)
+
+.modal#draft-modal
+  .modal-dialog
+    .modal-content
+      = form_tag url(:orders, :anew), :method => :put do
+        .modal-header
+          h4.modal-title Назначаем дату
+        .modal-body
+          = hidden_field_tag :oid
+          = hidden_field_tag :timeline_at
+          = partial 'timeline/calendar'
+        .modal-footer
+          .btn.btn-success.btn-wide.submit Подтвердить
+          .btn.btn-default.btn-wide.cancel data-dismiss="modal" = pat(:cancel)
+
+- content_for :js_assets do
+  javascript:
+    (function($) {
+        $(".list-menu-draft-link").on("click", function(e) {
+          $('calendar').toggle('collapse')
+          $("#draft-modal").modal()
+          $('#draft-modal input[name=oid]').val(this.previousElementSibling.value)
+        })
+
+        $('#draft-modal').on('hidden.bs.modal', function (e) {
+          $('calendar .day').removeClass('selected')
+          $('calendar').toggle('collapse')
+        })
+        $("calendar").on("click", ".day", function() {
+          var day = $(this);
+          let inp = $('input[name="timeline_at"]')
+          inp.val($('input', day).val())
+          $('calendar .day').removeClass('selected')
+          day.toggleClass('selected')
+        })
+        
+        $('#draft-modal .submit').on('click', function (e) {
+          id = $('#draft-modal input[name=oid]').val()
+          at = $('#draft-modal input[name=timeline_at]').val()
+          f = document.querySelector('#draft-modal form')
+          fetch(f.action, {
+            method: 'put',
+            body: 'id=' + id + '&timeline_at=' + at + "&authenticity_token=" + encodeURIComponent(document.querySelector("form [name^=auth]").value),
+            headers: { "Content-Type": "application/x-www-form-urlencoded" }
+          })
+          .then(response => response.json())
+          .then(function(result) {
+            $('#draft-modal').modal('hide')
+            if (!result.error) $("tr[data-id=" + id + "]").fadeOut()
+          })
+        })
+    })(jQuery)

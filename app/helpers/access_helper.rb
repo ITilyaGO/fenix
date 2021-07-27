@@ -43,6 +43,7 @@ Fenix::App.helpers do
     sections: {
       draft: LEVEL2_ACCESS,
       list: LEVEL2_ACCESS,
+      complete: LEVEL2_ACCESS,
       sum: LEVEL2_ACCESS,
       stock: LEVEL2_ACCESS
     }
@@ -135,7 +136,7 @@ Fenix::App.helpers do
 
     if [:sectioner, :limsectioner].include? role
       bws = (sections || []).sum{|a|2**a}
-      section_part = { list: bws, stock: bws }
+      section_part = { list: bws, stock: bws, complete: bws }
       section_part = section_part.merge(draft: bws, sum: bws) if role == :sectioner
       template[:sections] = section_part
     end

@@ -2,8 +2,9 @@
 = form_for :order, !@id ? url(:orders, :empty) : url(:orders, :save, :id => @id), :class => 'form-horizontal' do |f|
   div class="table non-print row"
     .col-md-8 style='border: 2px solid rgb(221, 221, 221);border-radius: 6px;'
-      .form-actions.text-center style='position: absolute;right: 30px;top: 10px;'
-        = f.submit pat('Изменить'), :class => 'btn btn-sm btn-wide btn-default', :name => :light_edit
+      - if @id 
+        .form-actions.text-center style='position: absolute;right: 30px;top: 10px;'
+          = f.submit pat('Изменить'), :class => 'btn btn-sm btn-wide btn-default', :name => :light_edit
       fieldset class='control-group'
         = f.label 'Тип заказа', :class => 'col-md-3 control-label'
         .col-md-3.controls.custom-control
@@ -39,7 +40,7 @@
           = f.radio_button :cash, :value => :true, :checked => @cash, :class => 'custom-control-input'
           label.custom-control-label(for = 'order_cash_true') Да
 
-      - if @force_timeline
+      /- if @force_timeline
         fieldset class='control-group'
           = f.label 'Дата отправки', :class => 'col-md-3 control-label'
           div class='col-md-4 controls'
@@ -533,19 +534,6 @@
         let order_form = document.querySelector('.main-wrapper-push form')
         DekolFu.init_kato_blood(order_form, 'kato_type', '"cabie[kato_place]"')
 
-        $("calendar").on("click", ".day", function() {
-          var day = $(this);
-          let inp = $('input[name="cabie[timeline_at]"]')
-          inp.val($('input', day).val())
-          $('calendar').toggle('collapse')
-          
-          //var data = "id=" + $(":input:first", line).val() + "&authenticity_token=" + $("form:first :input[name^='auth']").val();
-          // $.ajax({ type: "POST", url: "/order/cartdel", data: {} });
-        });
-        $(".btn-timeline").on("click", function() {
-          var day = $(this);
-          $('calendar').toggle('collapse')
-          // $.ajax({ type: "POST", url: "/order/cartdel", data: {} });
-        });
+        
       });
     })(jQuery);

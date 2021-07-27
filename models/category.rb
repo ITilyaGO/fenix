@@ -59,5 +59,7 @@ class Category < ActiveRecord::Base
       Category.create(dup)
     end
     Category.record_timestamps = true
+
+    OrderAssist.reset_products_list
   end
 end

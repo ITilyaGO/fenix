@@ -30,7 +30,19 @@ module Fenix::App::ProductsHelper
   #   option_tags
   # end
   
-  
+  def cache_product_section
+    Padrino.cache[:products_section] ||= store_product_section
+  end
+
+  def store_product_section
+    ps = Product.joins(:category).all
+    ps.map{|p|[p.id, p.category.category.section_id]}.to_h
+  end
+
+  def product_to_section(product)
+    cache_product_section.fetch(product, nil)
+  end
+
   def json_clients()
     nodes = Client.includes(:place).all
     nodes.map do |node|
@@ -50,6 +62,7 @@ module Fenix::App::ProductsHelper
   def reset_products_list
     Padrino.cache.delete(:products_list)
     Padrino.cache.delete(:products_tree)
+    Padrino.cache.delete(:products_section)
   end
 
   def json_list

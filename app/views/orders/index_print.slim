@@ -26,6 +26,7 @@ div class="tabs-content"
         th class='header' Телефон
         // th class='header only-print' Сумма
         th class='header only-print' ИНН (паспорт)
+        th.header.non-print
         th class='header non-print'
           = partial 'bricks/orders/section_titles'
         th class='header non-print'
@@ -56,10 +57,11 @@ div class="tabs-content"
           td class='list-column' = order.client.tel
           // td class='list-column only-print' = "%0.f" % order.done_total
           td class='list-column only-print' = order.client.inn
+          td.list-column.non-print
+            span.label class="label-#{os.state}"
+              = t :"status.#{os.state}"
           td class='list-column text-nowrap non-print'
             = partial 'orders/squares', :locals => { :order => order }
-            span class="label label-#{order.status}"
-              = t :"status.#{order.status}"
           td class='list-column non-print'
             - if current_account.is_admin? && order.finished?
               = link_to "Отправить", :href => url(:orders, :ship, :id => order.id), :class => "btn btn-xs btn-shipped"
