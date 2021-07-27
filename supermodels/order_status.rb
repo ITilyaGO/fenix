@@ -45,8 +45,9 @@ class KSM::OrderStatus < Doppel
   end
 
   def what?(state, section = nil)
-    return BIT_STATES.key(@global) == state if section.nil?
-    @pstate[section] == BIT_STATES[state]
+    state = [state] unless state.respond_to? :include?
+    return state.include? BIT_STATES.key(@global) if section.nil?
+    state.include? BIT_STATES.key(@pstate[section])
   end
 
   def present?(section = nil)
