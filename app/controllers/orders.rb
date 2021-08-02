@@ -635,7 +635,8 @@ Fenix::App.controllers :orders do
     order_part = order.order_parts.find_by(:section_id => my_section)
     status = KSM::OrderStatus.find(order.id)
     status.set_current(my_section)
-    status.setg(:current)
+    status.setg(:current) if status.present?(1) && order_part.section_id == 1
+    status.setg(:current) unless status.present?(1)
     status.save
 
     o_life = KSM::OrderLife.find(order.id)
@@ -662,8 +663,8 @@ Fenix::App.controllers :orders do
     delivery_at = params[:cabie][:timeline_at] rescue nil
     if timeline_date = Date.parse(delivery_at) rescue nil
       current_kc = CabiePio.get([:orders, :timeline], @order.id).data
-      current_tl = timeline_unf(current_kc)
-      CabiePio.unset [:timeline, :order], timeline_order(@order.id, current_tl)
+      current_tl = timeline_unf(current_kc) if current_kc
+      CabiePio.unset [:timeline, :order], timeline_order(@order.id, current_tl) if current_kc
       CabiePio.set [:timeline, :order], timeline_order(@order.id, timeline_date), @order.id
       CabiePio.set [:orders, :timeline], @order.id, timeline_id(timeline_date)
       CabiePio.set([:orders, :timeline_blink], @order.id, 1) if timeline_date != current_tl
@@ -686,7 +687,7 @@ Fenix::App.controllers :orders do
       @order_part.state = :finished if params[:next_status]
       @order_part.save
       o_status.sets(@order_part.section_id, :finished) if params[:next_status]
-      o_status.setg(:current) if o_status.what?(:prepare) || params[:next_status]
+      # o_status.setg(:current) if params[:next_status]
       # @order_part.update_attributes(params[:order_part])
     end
     if params[:next_status_all]
@@ -1002,7 +1003,7 @@ Fenix::App.controllers :orders do
   end
 
   post :clients2, :provides => :json do
-    q = params[:q].gsub(/[^\wА-ЯЁа-яё -0-9A-Za-z\.@]/, '')[0..32]
+    q = params[:q].gsub(/[^\wА-ЯЁа-яё \-0-9A-Za-z\.@]/, ' ')[0..32]
 
     # Client.joins(:place).where('umlike(?, lower("clients"."name"))', q)
     # .where('umlike(?, lower("clients"."name")) OR umlike(?, lower("places"."name"))', q, q)
