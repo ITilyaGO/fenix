@@ -34,10 +34,10 @@
       fieldset.control-group
         = f.label 'Нал', :class => 'col-md-3 control-label'
         .col-md-3.controls.custom-control
-          = f.radio_button :cash, :value => :false, :checked => !@cash, :class => 'custom-control-input'
+          = f.radio_button :cash, :value => :false, :checked => !@cash, :required => true, :class => 'custom-control-input'
           label.custom-control-label(for = 'order_cash_false') Нет
         .col-md-3.controls.custom-control
-          = f.radio_button :cash, :value => :true, :checked => @cash, :class => 'custom-control-input'
+          = f.radio_button :cash, :value => :true, :checked => @cash, :required => true, :class => 'custom-control-input'
           label.custom-control-label(for = 'order_cash_true') Да
 
       /- if @force_timeline

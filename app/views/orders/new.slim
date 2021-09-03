@@ -21,18 +21,18 @@
       fieldset class='control-group'
         = f.label 'Тип заказа', :class => 'col-md-3 control-label'
         .col-md-3.controls.custom-control
-          = f.radio_button :delivery, :value => Order.deliveries[:vernissage], :class => 'custom-control-input'
+          = f.radio_button :delivery, :value => Order.deliveries[:vernissage], :required => true, :class => 'custom-control-input'
           label.custom-control-label(for = 'order_delivery_3') = t :'delivery.vernissage'
         .col-md-3.controls.custom-control
-          = f.radio_button :delivery, :value => Order.deliveries[:postage], :checked => true, :class => 'custom-control-input'
+          = f.radio_button :delivery, :value => Order.deliveries[:postage], :required => true, :class => 'custom-control-input'
           label.custom-control-label(for = 'order_delivery_0') = t :'delivery.postage'
         .clearfix
         label.col-md-3.control-label
         .col-md-3.controls.custom-control
-          = f.radio_button :delivery, :value => Order.deliveries[:roundtrip], :class => 'custom-control-input'
+          = f.radio_button :delivery, :value => Order.deliveries[:roundtrip], :required => true, :class => 'custom-control-input'
           label.custom-control-label(for = 'order_delivery_1') = t :'delivery.roundtrip'
         .col-md-3.controls.custom-control
-          = f.radio_button :delivery, :value => Order.deliveries[:pickup], :class => 'custom-control-input'
+          = f.radio_button :delivery, :value => Order.deliveries[:pickup], :required => true, :class => 'custom-control-input'
           label.custom-control-label(for = 'order_delivery_2') = t :'delivery.pickup'
 
       /fieldset class='control-group'
@@ -47,10 +47,10 @@
       fieldset.control-group
         = f.label 'Нал', :class => 'col-md-3 control-label'
         .col-md-3.controls.custom-control
-          = f.radio_button :cash, :value => :false, :checked => true, :class => 'custom-control-input'
+          = f.radio_button :cash, :value => :false, :required => true, :class => 'custom-control-input'
           label.custom-control-label(for = 'order_cash_false') Нет
         .col-md-3.controls.custom-control
-          = f.radio_button :cash, :value => :true, :class => 'custom-control-input'
+          = f.radio_button :cash, :value => :true, :required => true, :class => 'custom-control-input'
           label.custom-control-label(for = 'order_cash_true') Да
 
       / fieldset class='control-group'

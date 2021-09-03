@@ -1,22 +1,22 @@
 div class="tabs-content"
 = form_for :order, !@id ? url(:orders, :empty) : url(:orders, :save, :id => @id), :class => 'form-horizontal' do |f|
   .row.non-print.flex-c
-    div class="col-md-8"
+    .col-md-8
       fieldset class='control-group'
         = f.label 'Тип заказа', :class => 'col-md-3 control-label'
         .col-md-3.controls.custom-control
-          = f.radio_button :delivery, :value => Order.deliveries[:vernissage], :class => 'custom-control-input'
+          = f.radio_button :delivery, :value => Order.deliveries[:vernissage], :required => true, :class => 'custom-control-input'
           label.custom-control-label(for = 'order_delivery_3') = t :'delivery.vernissage'
         .col-md-3.controls.custom-control
-          = f.radio_button :delivery, :value => Order.deliveries[:postage], :checked => true, :class => 'custom-control-input'
+          = f.radio_button :delivery, :value => Order.deliveries[:postage], :required => true, :class => 'custom-control-input'
           label.custom-control-label(for = 'order_delivery_0') = t :'delivery.postage'
         .clearfix
         label.col-md-3.control-label
         .col-md-3.controls.custom-control
-          = f.radio_button :delivery, :value => Order.deliveries[:roundtrip], :class => 'custom-control-input'
+          = f.radio_button :delivery, :value => Order.deliveries[:roundtrip], :required => true, :class => 'custom-control-input'
           label.custom-control-label(for = 'order_delivery_1') = t :'delivery.roundtrip'
         .col-md-3.controls.custom-control
-          = f.radio_button :delivery, :value => Order.deliveries[:pickup], :class => 'custom-control-input'
+          = f.radio_button :delivery, :value => Order.deliveries[:pickup], :required => true, :class => 'custom-control-input'
           label.custom-control-label(for = 'order_delivery_2') = t :'delivery.pickup'
 
       fieldset class='control-group'
@@ -31,10 +31,10 @@ div class="tabs-content"
       fieldset.control-group
         = f.label 'Нал', :class => 'col-md-3 control-label'
         .col-md-3.controls.custom-control
-          = f.radio_button :cash, :value => :false, :checked => true, :class => 'custom-control-input'
+          = f.radio_button :cash, :value => :false, :required => true, :class => 'custom-control-input'
           label.custom-control-label(for = 'order_cash_false') Нет
         .col-md-3.controls.custom-control
-          = f.radio_button :cash, :value => :true, :class => 'custom-control-input'
+          = f.radio_button :cash, :value => :true, :required => true, :class => 'custom-control-input'
           label.custom-control-label(for = 'order_cash_true') Да
 
       / fieldset class='control-group'
@@ -92,7 +92,10 @@ div class="tabs-content"
         div class='col-md-1 controls'
           div class='btn btn-sm btn-default' id='add-product' Добавить 
           // = content_tag 'Добавить', :class => 'btn btn-sm btn-default', :id => 'add-product'
-
+    
+    .buttons
+      = f.submit pat(:save), :class => 'btn btn-sm btn-prime'
+      
     // div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true"
     //   div class="modal-dialog modal-sm"
     //     div class="modal-header"
@@ -227,8 +230,7 @@ div class="tabs-content"
     div class='col-md-6 controls'
       = f.text_area :description, :class => 'form-control', :value => (@descr if @descr)
 
-
-  div class="form-actions"
+  .form-actions
     = f.submit pat(:save), :class => 'btn btn-sm btn-prime'
 
 - content_for :js_assets do
