@@ -117,15 +117,15 @@ html lang='en'
 
           - if can_btn_view?(:stock, :any) || allow_route?(:online)
             li.sidebar-title.separator
-              span Склад
+              span Заготовки
             li.sidebar-list
               = link_to url(:archetypes, :stock) do
-                | Продукция
-                span class="menu-icon fa fa-inbox"
+                | Склад
+                span class="menu-icon fa fa-flask"
             - if can_btn_view?(:stock, :archetypes) || allow_route?(:online)
               li.sidebar-list
-                = link_to url(:archetypes, :index) do
-                  | Связи
+                = link_to url(:archetypes, :products) do
+                  | Связи на складе
                   span class="menu-icon fa fa-inbox"
 
           - if allow_route?(:editors)

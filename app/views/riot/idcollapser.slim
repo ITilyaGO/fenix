@@ -7,11 +7,12 @@ idcollapser
       /.title hide="{ false }"
       .label.label-default
         | { need == 0 ? 'нет' : need }
-      
+      / .label.label-danger if='{stock[0] == '-'}'
       .label.label-danger if='{stock[0] == '-'}'
-        | { stock }
+        | _
+      /.fa.fa-circle.bg-danger if='{stock[0] == '-'}'
+        /| { stock }
 
-      ' &nbsp;
     .title
       | { opts.titler }
     / .btn.btn-prime hide="{ open }" открыть

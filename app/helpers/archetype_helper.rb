@@ -38,8 +38,9 @@ module Fenix::App::ArchetypeHelper
       if real_done != 0
         ssum = CabiePio.get([:stock, :archetype], parch).data.to_i || 0
         CabiePio.set [:stock, :archetype], parch, ssum-real_done
-        daysum = CabiePio.get([:stock, :common, :d], parch).data.to_i || 0
+        daysum = CabiePio.get([:stock, :common, :d], archetype_daystock(parch, day)).data.to_i || 0
         CabiePio.set [:stock, :common, :d], archetype_daystock(parch, day), daysum+real_done
+        CabiePio.unset [:stock, :common, :d], archetype_daystock(parch, day) if daysum+real_done == 0
 
         prev = CabiePio.get([:need, :order], archetype_order(parch, line.id, order.id)).data.to_i || 0
         whole_done = (sum_lines[line.id] || 0)*m
@@ -148,8 +149,9 @@ module Fenix::App::ArchetypeHelper
         if real_done > 0
           ssum = CabiePio.get([:stock, :archetype], parch).data.to_i || 0
           CabiePio.set [:stock, :archetype], parch, ssum-real_done
-          daysum = CabiePio.get([:stock, :common, :d], parch).data.to_i || 0
+          daysum = CabiePio.get([:stock, :common, :d], archetype_daystock(parch, Date.parse(doneday))).data.to_i || 0
           CabiePio.set [:stock, :common, :d], archetype_daystock(parch, Date.parse(doneday)), daysum+real_done
+          CabiePio.unset [:stock, :common, :d], archetype_daystock(parch, Date.parse(doneday)) if daysum+real_done == 0
         end
       end
 

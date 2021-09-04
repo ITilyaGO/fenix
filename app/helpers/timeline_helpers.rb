@@ -15,6 +15,20 @@ module Fenix::App::TimelineHelper
     timeline_unf(string) rescue ''
   end
 
+  def timeline_months(end_date, start_date = Date.today)
+    count = (end_date.year * 12 + end_date.month) - (start_date.year * 12 + start_date.month)
+    from = count < 0 ? end_date : start_date 
+    ary = [shortline_id(start_date), shortline_id(end_date)]
+    count.abs.times do |i|
+      ary << shortline_id(from.next_month(i))
+    end
+    ary.uniq.sort
+  end
+
+  def shortline_id(date = Date.today)
+    date.strftime('%y%m')
+  end  
+
   def timeline_group(hash, dates = nil)
     prev = Date.today.beginning_of_week
     prev_end = prev.end_of_week

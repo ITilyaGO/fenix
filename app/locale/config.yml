@@ -39,6 +39,10 @@ en:
     other: Другое
     church: Монастырь
   tit:
+    archetypes:
+      arch: Заготовка
+      link: Связи
+      list: Заготовки
     stickers:
       timeline: График клейки
       pastline: Реальная клейка

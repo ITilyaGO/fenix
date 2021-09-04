@@ -1,5 +1,5 @@
 .pull-right
-  switcher.btn.btn-sm.btn-clear t2='DESTOCK_SHOW' t1='DESTOCK_HIDE' Списания ß
+  switcher.btn.btn-sm.btn-clear t2='DESTOCK_SHOW' t1='DESTOCK_HIDE' Списания
   '
   - if params[:all]
     = link_to :'скрыть склад', url(:archetypes, :stock), class: 'btn btn-sm btn-glue'
@@ -24,7 +24,7 @@ br
             //.row.hide
 
             h4 = sub.name
-            table class="table"
+            table.table.table-hover.td-middle
               thead: tr
                 th class="only-print" Отметка
                 th Наименование
@@ -39,7 +39,7 @@ br
                     a.tiny-text href=url(:archetypes, :stock, all: params[:all], day: day)
                       = to_dm day
                     .wd = Date::DAYNAMESRU[day.wday-1]
-                th class="non-print" &nbsp;
+                /th class="non-print" &nbsp;
               
               - @ar_grouped[sub.id]&.sort_by{|p|p.name}&.sort_by{|a| @kc_index.fetch(a.id, 0) }&.each do |p|
                 /- next if @parents.include? p.id
@@ -49,14 +49,14 @@ br
                 tr class="order-line"
                   / = hidden_field_tag "line[#{p.id}][id]", :value => p.id
                   td class="only-print" &nbsp;
-                  td class="col-md-4"
+                  td
                     = p.name
                   td class="col-md-1" 
                     / TODO: parent dishes with no price
                     / == rur(p.price) rescue '?'
                     - if stock != 0
                       .label class=[('label-danger' if stock < 0), ('label-success' if stock > 0)]
-                        == deli stock
+                        == deli stock.abs
                     - else
                       .label.label-default нет
                   td
@@ -88,34 +88,34 @@ br
                       / :class => "form-control input-sm bg-lightred")
                     .flex-c
                   - 5.times do |i|
-                    td class="col-md-41"
+                    td.text-center
                       - day = @day - 6 + i
                       - if @holders[p.id].fetch(day, nil)
-                        .text-center: .label.label-default = @holders[p.id][day]
+                        .label.label-default = @holders[p.id][day]
+                        - if @destocks[p.id].fetch(day, nil)
+                        | &nbsp;
+                      /.text-center
                       - if @destocks[p.id].fetch(day, nil)
-                        .text-center
-                          elhide th='DESTOCK_HIDE' ts='DESTOCK_SHOW' hide='true'
-                            .label.label-lightdanger = -@destocks[p.id][day]
-                            br
-                            br
+                        elhide th='DESTOCK_HIDE' ts='DESTOCK_SHOW' hide='true'
+                          .label.label-lightdanger = @destocks[p.id][day]
+                      - else
+                        br
 
-                        / .col = text_field_tag "lines[#{p.id}][#{day}]", class: 'form-control input-large',
-                          placeholder: @holders[p.id][day]
                   - 2.times do |i|
-                    td class="col-md-1"
+                    td.text-center.col-md-1
                       - day = @day - 1 + i
-                      .col
+                      .col.flex-c.vcenter
                         = text_field_tag "lines[#{p.id}][#{day}]", class: 'form-control input-large',
                         placeholder: @holders[p.id].fetch(day, nil)
                         - if @destocks[p.id].fetch(day, nil)
                           .text-center
-                            elhide th='DESTOCK_HIDE' ts='DESTOCK_SHOW' hide='true'
-                              .label.label-lightdanger = -@destocks[p.id][day]
+                          elhide th='DESTOCK_HIDE' ts='DESTOCK_SHOW' hide='true'
+                            .label.label-lightdanger = @destocks[p.id][day]
 
                       /- 7.times do |di|
                         = (text_field_tag "line[#{p.id}][#{di}out]", :autocomplete => "off",
                         :class => "form-control input-sm bg-lightred")
-                  td.col-md-1.vert-align.non-print
+                  /td.col-md-1.vert-align.non-print
                     .controls
                       /= hidden_field_tag "line[#{p.id}][ignored]", :value => 'false'
                       / .btn.btn-info.btn-xs Обнулить

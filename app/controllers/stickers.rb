@@ -8,10 +8,8 @@ Fenix::App.controllers :stickers do
     orders_query = Order.where("status > ?", Order.statuses[:draft]).where("status < ?", Order.statuses[:finished])
     orders_query = orders_query.where(delivery: params[:deli].to_i) if params[:deli]
     
-    prev_m = Date.today.next_month(-1).strftime('%y%m')
-    last1_stickers = CabiePio.all([:i, :orders, :sticker_date], [timeline_id[0...4]]).flat.keys
-    last2_stickers = CabiePio.all([:i, :orders, :sticker_date], [prev_m]).flat.keys
-    last_stickers = (last1_stickers + last2_stickers)
+    mnths = timeline_months Date.today.next_month(-1)
+    last_stickers = CabieAssist.focus([:i, :orders, :sticker_date], mnths)
       .sort.map{|k|k.split(Fenix::App::IDSEP).last.to_i}.reverse.shift(150)
     # @orders = orders_query.includes(:client, :place, :order_parts, :timeline).order(sort => dir)
     if current_account.limited_orders?

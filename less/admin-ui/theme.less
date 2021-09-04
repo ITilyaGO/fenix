@@ -286,11 +286,21 @@ footer {
 }
 
 .order-table > tbody > tr > td {
-    vertical-align: middle;
+  vertical-align: middle;
 }
 .order .block {
   margin-top: 2em;
 }
+
+.td-middle > tbody > tr > td,
+.td-middle > tbody > tr > th,
+.td-middle > tfoot > tr > td,
+.td-middle > tfoot > tr > th,
+.td-middle > thead > tr > td,
+.td-middle > thead > tr > th {
+  vertical-align: middle;
+}
+
 .timeline .output {
   min-height: 160px;
   > .no, .text {
@@ -542,6 +552,12 @@ complex, sticker_line, .sticker-block {
 .flex-wrap {
   display: flex;
   flex-wrap: wrap;
+}
+.center {
+  justify-content: center;
+}
+.vcenter {
+  align-items: center;
 }
 .hand {
   cursor: pointer;
