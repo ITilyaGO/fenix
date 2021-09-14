@@ -94,7 +94,11 @@
             - code = @kc_delivery[order.id.to_s] || @kc_client_delivery[order.client_id.to_s]
             - town_name = @kc_towns[code]&.model
             = partial 'bricks/kato/label_print', :locals => { town_name: town_name, el: order }
-          td.list-column.minirur.text-nowrap == deli(rur (order.total/1000.0).floor)
+          td.list-column.minirur.text-nowrap
+            == deli(rur (order.total/1000.0).floor)
+            |&nbsp;&nbsp;
+            - if @current_account.is_admin?
+              .icash.fa class=(@kc_cash.fetch(order.id, nil) ? 'fa-money' : 'fa-credit-card')
           td class='list-column' = order.client.name
           td.list-column.text-center.text-nowrap = to_dm(order.created_at)
           td.list-column.text-center.text-nowrap class=('date-warning' if @kc_blinks.fetch(order.id, nil))
