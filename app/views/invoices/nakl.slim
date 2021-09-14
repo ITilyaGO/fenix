@@ -100,6 +100,7 @@ html
 
         <tbody>
           - count = 0
+          - subsum = 0
           - items.each_with_index do |item, i|
             - next if item.ignored || item.done_amount.nil? || item.done_amount <= 0
             <tr class="item">
@@ -119,7 +120,9 @@ html
                 = to_rub item.price
               </td>
               <td class="righted" style="width:100px;">
-                = "%.2f" % (item.price * (item.done_amount || item.amount || 0))
+                - linetotal = item.price * (item.done_amount || item.amount || 0)
+                - subsum += linetotal
+                = "%.2f" % linetotal
               </td>
 
             </tr>
@@ -133,4 +136,7 @@ html
             td class="righted" style="width:67px;"
             td class="righted" style="width:67px;"
             td class="righted" style="font-size:1em;"
-              = to_rub @order.done_total
+              - if @order.current?
+                = to_rub subsum
+              - else
+                = to_rub @order.done_total

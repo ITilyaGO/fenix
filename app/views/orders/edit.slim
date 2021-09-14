@@ -49,6 +49,9 @@ ul class="nav nav-tabs non-print"
         = link_to 'Все', :class => 'btn btn-sm print-all btn-glue'
         '
         = link_to tag_icon(:save), url(:c1c, :create, id: @order.id), class: 'btn btn-default btn-sm'
+      br
+      br
+        = link_to tag_icon(:'file-pdf-o'), url(:orders, :invoice, id: @order.id), class: 'btn btn-default btn-sm'
     - if @stock_out
       br
       p Списан со склада
