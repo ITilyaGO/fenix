@@ -261,12 +261,11 @@ Fenix::App.controllers :dr_timeline, :map => 'timeline/driven' do
     @kc_stickers = CabiePio.all_keys(@all_ids, folder: [:sticker, :order_progress]).flat.trans(:to_i, :to_f)
     @kc_blinks = CabiePio.all_keys(@all_ids, folder: [:orders, :timeline_blink]).flat.trans(:to_i)
     @kc_sumstickers = @stickers.map{|k,v|[k, v*@kc_stickers.fetch(k,0)/100]}.to_h
-    @sec_sums = sum_by_sections(@all_ids)
-    @sec_done = sum_done_by_sections(@all_ids)
     @kc_cash = CabiePio.all_keys(@all_ids, folder: [:orders, :cash]).flat.trans(:to_i).reject{|k,v|v!='t'}
     @kc_os = KSM::OrderStatus.find_all(@all_ids)
     @abl_view = @sections.map{|s|can_view_section?(:sections, :list, s.id) ? s.id : nil }
 
+    return partial 'timeline/nothing' if @orders.empty?
     if params[:sort].to_sym == :manager
       @by_manager = @orders.map(&:id).group_by do |oid|
         fo = @orders.detect{|o| o.id == oid}

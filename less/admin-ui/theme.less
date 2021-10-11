@@ -540,14 +540,20 @@ complex, sticker_line, .sticker-block {
 //
 .flex-c {
   display: flex;
-  justify-content: center;
+  flex-flow: row;
 }
 .flex-v {
-  .flex-c();
-  flex-direction: column;
+  display: flex;
+  flex-flow: column;
 }
 .flexie {
   flex: auto;
+}
+.cmar-05 > * {
+  margin: 0 0.5em;
+}
+.cmar-1 > * {
+  margin: 0 1em;
 }
 .flex-wrap {
   display: flex;
@@ -777,7 +783,7 @@ calendar {
   .header-control.w {
     text-align: center;
     flex-direction: column;
-    .flex-c();
+    .flex-v();
     .wd {
       text-transform: uppercase;
       font-size: .8em;
@@ -806,6 +812,54 @@ calendar {
     &.fa-check {
       color: #5e9163;
     }
+  }
+}
+
+//
+draftswitches {
+
+}
+.switches {
+  position: relative;
+  .btn-section {
+    border: 2px solid #ffffff;;
+    // padding: 8px 14px;
+    padding: 0px 10px;
+    border-radius: 6px;
+    background: rgb(242, 242, 242);
+    // border: 0;
+
+    &:hover {
+      .btn-warning()
+    }
+
+    .fa {
+      font-size: .7em;
+      color: cadetblue;
+    }
+  }
+
+  .btn-section + .btn-section {
+    // border-radius: 0;
+    // margin-left: 2px;
+  }
+
+  .tooltip-block {
+    position: absolute;
+    top: 3em;
+    z-index: 100;
+    // left: 25%;
+    // width: 100%;
+    background: white;
+    margin-left: -.8em;
+    // padding: 0 1em 0 1em;
+    margin: auto;
+    width: 100%;
+    /* display: flex; */
+    /* justify-items: center; */
+    /* min-width: 200px; */
+    /* margin: auto; */
+    // margin-right: 25%;
   }
 }
 

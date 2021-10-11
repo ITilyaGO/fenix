@@ -2,7 +2,9 @@
 - sticker = order_sticker(@order.id)
 
 ul class="nav nav-tabs non-print"
-  li = link_to tag_icon(:list, pat(:list)), url(:orders, :index)
+  li = link_to '#' do
+    = tj :delivery, @order.delivery
+  / = link_to tag_icon(:list, pat(:list)), url(:orders, :index)
   li class="active" = link_to tag_icon(:edit, "Show order #{@order.id}"), url(:orders, :show, :id => @order.id)
   li = link_to '#' do
     span.label  class="label-#{@orderstatus.state}"
@@ -20,7 +22,7 @@ ul class="nav nav-tabs non-print"
     li
       .progress.for-stickers title="#{@sticker_progress}%" class=('danger' if @sticker_progress > 130)
         .progress-bar role="progressbar" style="width:#{@sticker_progress.to_i}%"
-  li.pull-right: a 
+  li.pull-right: a
     = partial 'orders/squares', :locals => { :order => @order }
 
 
@@ -62,15 +64,25 @@ ul class="nav nav-tabs non-print"
       - town_name = @kc_towns[@kc_client_hometown]&.model
       - order_town_name = @kc_towns[@kc_order_town]&.model
       - delivery = @kc_towns[@kc_order_delivery]&.model || @kc_towns[@kc_client_delivery]&.model
-      div
+      .flex-c.cmar-05
+        .flex-v
+          span Заказ на
+          = partial 'bricks/kato/label', :locals => { town_name: order_town_name, el: nil }
+        .flex-v
+          span Клиент из
+          = partial 'bricks/kato/label', :locals => { town_name: town_name, el: nil }
+        .flex-v
+          span Доставка в
+          = partial 'bricks/kato/label', :locals => { town_name: delivery, el: nil }
+      / div
         span
           ' Город заказа
         = partial 'bricks/kato/label', :locals => { town_name: order_town_name, el: nil }
-      div
+      / div
         span
           ' Город клиента
         = partial 'bricks/kato/label', :locals => { town_name: town_name, el: nil }
-      div
+      / div
         span
           ' Город доставки
         = partial 'bricks/kato/label', :locals => { town_name: delivery, el: nil }
@@ -91,7 +103,6 @@ ul class="nav nav-tabs non-print"
     - if !@order.description.blank?
       .order-comment = @order.description
       br
-  
 
     .order-paper: fcollapser titler="файлы: #{@ps.count}"
       .row: div
@@ -121,6 +132,10 @@ ul class="nav nav-tabs non-print"
 
         .clearfix
         /piced value=@picorder product=@product.id
+
+    p
+    .row.text-center.flex-c.center: .switches
+      draftswitches items=dfsmax locale=dfsru bw=@orderstatus.draftbw order=@order.id
 .clearfix
 
 /div class="row non-print"
@@ -151,7 +166,7 @@ ul class="nav nav-tabs non-print"
           = @order.client.name
           
         .block
-          - @sections[0...4].each do |tab|
+          - @sections.each do |tab|
             .section-btn
               = @order.by_sec?(tab.id) ? tab.name[0..3] : nil
         / .block.print-date
@@ -403,7 +418,6 @@ ul class="nav nav-tabs non-print"
         - if current_account.is_admin? && @orderstatus.what?(:current)
           = submit_tag "Собрать заказ", :class => 'btn btn-sm btn-finished', :name => 'next_status_all_force'
 
-
   - if !@order.draft? && !@order.shipped?
     - if current_account.is_admin? || (@order_part && @order_part.current?)
       = submit_tag "Сохранить", :class => 'btn btn-sm btn-prime', :name => 'save'
@@ -436,9 +450,10 @@ picmod
   rscript type="riot/tag" src="/riot/tags/fcollapser.tag"
   rscript type="riot/tag" src="/riot/tags/picmod.tag"
   rscript type="riot/tag" src="/riot/tags/piclist.tag"
+  rscript type="riot/tag" src="/riot/tags/draft_switches.tag"
   javascript:
     document.addEventListener("DOMContentLoaded", function(event) {
-      riot.mount('collapser, fcollapser, piclist, picmod')
+      riot.mount('collapser, fcollapser, piclist, picmod, draftswitches')
     });
 
   javascript:

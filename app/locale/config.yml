@@ -48,6 +48,7 @@ en:
       pastline: Реальная клейка
     prefs:
       page: Настройки
+      draftstatus: Стадии непроверенных
       sections: Секции
       levels: Уровни
       users: Юзеры

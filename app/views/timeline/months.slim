@@ -15,7 +15,7 @@ ul class="nav nav-tabs non-print" id="weeks_tab"
   - price_done = @orders.map(&:done_total).sum
   - cash_total = @orders.select{|o| @kc_cash.keys.include? o.id}.map(&:total).sum
   - cash_done = @orders.select{|o| @kc_cash.keys.include? o.id}.map(&:done_total).sum
-  .summary.text-center.flex-c
+  .summary.text-center.flex-c.center
     - by_deli = sum_by_delivery(@orders)
     - [:postage, :vernissage, :roundtrip, :pickup].each do |ds|
       - if by_deli[ds] > 0
@@ -23,7 +23,7 @@ ul class="nav nav-tabs non-print" id="weeks_tab"
           span = t :"delivery.#{ds.to_s}"
           .rpr == deli(rur by_deli[ds])
   br
-  .summary.text-center.flex-c
+  .summary.text-center.flex-c.center
     - sections = Section.all
     - sections.each do |s|
       - sec_sum = @sec_sums.fetch(s.id, 0)
@@ -36,7 +36,7 @@ ul class="nav nav-tabs non-print" id="weeks_tab"
           .rpr == deli(rur sec_sum)
           small == deli(rur sec_done)
   br
-  .summary.clearfix.flex-c
+  .summary.clearfix.flex-c.center
     .item-done.cashable.pull-right
       span Сумма заказов
       .rpr == deli(rur price_total)

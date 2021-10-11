@@ -12,7 +12,8 @@
 / br
 / = calc_sticker_sum_for_day(@order.order_lines, @day)
 ul class="nav nav-tabs non-print"
-  li = link_to tag_icon(:list, pat(:list)), url(:orders, :index)
+  li = link_to '#' do
+    = tj :delivery, @order.delivery
   li = link_to tag_icon(:edit), url(:orders, :edit, :id => @order.id)
   li.active = link_to tag_icon(:ticket, "Stickers #{@order.id}"), url(:stickers, :order, :id => @order.id)
   li = link_to '#' do
@@ -54,18 +55,16 @@ ul class="nav nav-tabs non-print"
       - town_name = @kc_towns[@kc_client_hometown]&.model
       - order_town_name = @kc_towns[@kc_order_town]&.model
       - delivery = @kc_towns[@kc_order_delivery]&.model || @kc_towns[@kc_client_delivery]&.model
-      div
-        span
-          ' Город заказа
-        = partial 'bricks/kato/label', :locals => { town_name: order_town_name, el: nil }
-      div
-        span
-          ' Город клиента
-        = partial 'bricks/kato/label', :locals => { town_name: town_name, el: nil }
-      div
-        span
-          ' Город доставки
-        = partial 'bricks/kato/label', :locals => { town_name: delivery, el: nil }
+      .flex-c.cmar-05
+        .flex-v
+          span Заказ на
+          = partial 'bricks/kato/label', :locals => { town_name: order_town_name, el: nil }
+        .flex-v
+          span Клиент из
+          = partial 'bricks/kato/label', :locals => { town_name: town_name, el: nil }
+        .flex-v
+          span Доставка в
+          = partial 'bricks/kato/label', :locals => { town_name: delivery, el: nil }
 
     p Тел: #{@order.client.tel}
     p Емайл: #{@order.client.email}

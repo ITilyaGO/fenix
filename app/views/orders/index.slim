@@ -1,16 +1,20 @@
-// ul class="nav nav-tabs"
-//   li class="active" = link_to tag_icon(:list, pat(:list)), url(:orders, :index)
-//   li = link_to tag_icon(:plus, pat(:new)), url(:orders, :create)
-// 
 
-- if @r == url(:orders, :index) && current_account.is_admin?
+- filter = @filtered_by_user.is_a? Array
+- abl_view = @sections.map{|s|can_view_section?(:sections, :list, s.id) ? s.id : nil }
+- kc_os = KSM::OrderStatus.find_all(@orders.map(&:id))
+- reveals = []
+- @orders.each do |order|
+  - os = kc_os.detect{|kc|kc.id.to_i == order.id} || KSM::OrderStatus.new(id: order.id)
+  - next if (abl_view & os.pstate.keys).empty?
+  - next if filter && !@filtered_by_user&.include?(order.id)
+  - reveals << order
+
+- if @r == url(:orders, :index) && can_view_any_section?(:sections, :sum)
+  - @orders = reveals
   - price_total = @orders.map(&:total).sum
   - all_ids = @orders.map(&:id)
-  - @sec_sums = sum_by_sections(all_ids)
+  - sec_sums = sum_by_sections(all_ids)
 
-  - @stickers = CabiePio.all_keys(all_ids, folder: [:sticker, :order]).flat.trans(:to_i, :to_f)
-  - @kc_stickers = CabiePio.all_keys(all_ids, folder: [:sticker, :order_progress]).flat.trans(:to_i, :to_f)
-  - @kc_sumstickers = @stickers.map{|k,v|[k, v*@kc_stickers.fetch(k,0)/100]}.to_h
   .timeline: .summary
     - by_deli = sum_by_delivery(@orders)
     - [:postage, :vernissage, :roundtrip, :pickup].each do |ds|
@@ -22,7 +26,8 @@
     .pull-left
     - sections = Section.all
     - sections.each do |s|
-      - sec_sum = @sec_sums.fetch(s.id, 0)
+      - next unless can_view_section?(:sections, :sum, s.id)
+      - sec_sum = sec_sums.fetch(s.id, 0)
       - if sec_sum > 0
         .item-all.pull-left
           span = s.name
@@ -32,14 +37,18 @@
       span Сумма заказов
       .rpr == deli(rur price_total)
 
-    - stickers_done = @kc_sumstickers.values.sum
-    - stickers_total = @stickers.values.sum
-    .item-sticker.pull-right
-      span Клейка
-      .rpr == deli(rur stickers_total)
-    .item-sticker.pull-right
-      span Сделано #{((stickers_done.to_f/stickers_total)*100).ceil rescue 0}%
-      .rpr == deli(rur stickers_done)
+    - if can_view_stickers?
+      - @stickers = CabiePio.all_keys(all_ids, folder: [:sticker, :order]).flat.trans(:to_i, :to_f)
+      - @kc_stickers = CabiePio.all_keys(all_ids, folder: [:sticker, :order_progress]).flat.trans(:to_i, :to_f)
+      - @kc_sumstickers = @stickers.map{|k,v|[k, v*@kc_stickers.fetch(k,0)/100]}.to_h
+      - stickers_done = @kc_sumstickers.values.sum
+      - stickers_total = @stickers.values.sum
+      .item-sticker.pull-right
+        span Клейка
+        .rpr == deli(rur stickers_total)
+      .item-sticker.pull-right
+        span Сделано #{((stickers_done.to_f/stickers_total)*100).ceil rescue 0}%
+        .rpr == deli(rur stickers_done)
 
 
 .tabs-content
@@ -55,12 +64,14 @@
               li class='list-menu-wrapper list-menu-wrapper-disabled' = link_to 'deselect_all', '#', :id => 'deselect-all', :class => 'list-menu-link list-menu-link-disabled'
               li class='list-menu-divider divider'
         th class='header' Номер
+        th.header
         th class='header' Город
         th class='header' Куда едет
         th.header width='50px'
         th class='header' Заказчик
         th class='header' Дата
-        th class='header' Отправка
+        th.header
+          a href=local(seq: params[:seq] ? :none : :timeline) Отправка
         th class='header' Менеджер
         th class='header' Тр.ком
         th class='header only-print' Сумма
@@ -68,16 +79,15 @@
         th class='header non-print'
           = partial 'bricks/orders/section_titles'
         th class='header non-print'
-        th class='header list-row-action-header non-print' Всего: #{@orders.size}
+        th class='header list-row-action-header non-print'
+          ' Всего:
+          rowsummer target='#list'
     
-    - filter = @filtered_by_user.is_a? Array
-    - abl_view = @sections.map{|s|can_view_section?(:sections, :list, s.id) ? s.id : nil }
-    - kc_os = KSM::OrderStatus.find_all(@orders.map(&:id))
     tbody
-      - @orders.each do |order|
+      - reveals.each do |order|
         - os = kc_os.detect{|kc|kc.id.to_i == order.id} || KSM::OrderStatus.new(id: order.id)
-        - next if (abl_view & os.pstate.keys).empty?
-        - next if filter && !@filtered_by_user&.include?(order.id)
+        / # - next if (abl_view & os.pstate.keys).empty?
+        / # - next if filter && !@filtered_by_user&.include?(order.id)
         tr class='list-row non-print #{order.priority ? "warning" : ""}'
           td class='list-column list-selectable non-print' = check_box_tag 'order_ids[]', :autocomplete => "off", :value => order.id, :class => 'list-selectable-checkbox'
           td class='list-column'
@@ -85,6 +95,9 @@
               = link_to order.id, :href => url(:orders, :edit, :id => order.id)
             - else
               = "#{order.id}"
+          td.list-column
+            = tja :delivery, order.delivery
+            | &nbsp;&nbsp;
           // td class='list-column' = order.name
           td class='list-column'
             - code = @kc_orders[order.id.to_s]
@@ -166,3 +179,16 @@
         
       });
     })(jQuery);
+
+  = javascript_include_tag :riot
+  rscript type="riot/tag" src="/riot/tags/idcollapser.tag"
+  rscript type="riot/tag" src="/riot/tags/subclick.tag"
+  rscript type="riot/tag" src="/riot/tags/switcher.tag"
+  rscript type="riot/tag" src="/riot/tags/elhide.tag"
+  rscript type="riot/tag" src="/riot/tags/rowsummer.tag"
+
+  javascript:
+    
+    document.addEventListener("DOMContentLoaded", function(event) {
+      riot.mount('idcollapser, subclick, switcher, elhide, rowsummer')
+    })

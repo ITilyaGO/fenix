@@ -105,4 +105,11 @@ module Fenix::App::OrdersHelper
     end
   end
 
+  def dfsmax
+    Array(1..KSM::OrderStatus::BIT_DRAFTS_MAX).join(',')
+  end
+
+  def dfsru
+    wonderbox(:draftstatus_ru).values
+  end
 end

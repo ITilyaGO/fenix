@@ -9,14 +9,13 @@ div class="table non-print"
         p
           - town_name = @kc_towns[@kc_client_hometown]
           - client_delivery = @kc_towns[@kc_client_delivery]
-          div
-            span
-              ' Город клиента
-            = partial 'bricks/kato/label_ent', :locals => { town_name: town_name }
-          div
-            span
-              ' Город доставки
-            = partial 'bricks/kato/label_ent', :locals => { town_name: client_delivery }
+          .flex-c.cmar-05
+            .flex-v
+              span Клиент из
+              = partial 'bricks/kato/label_ent', :locals => { town_name: town_name }
+            .flex-v
+              span Доставка в
+              = partial 'bricks/kato/label_ent', :locals => { town_name: client_delivery }
         /p Имя: #{@client.name}
         p Организация: #{@client.org}
         p Тел: #{@client.tel}
@@ -37,7 +36,6 @@ div class="tabs-content"
         th class='header' Id
         // th class='header' = mat(:order, :name)
         // th class='header' = mat(:order, :amount)
-        th class='header' Name
         th class='header' Дата
         th class='header' Город
         th class='header' Город доставки
@@ -49,8 +47,6 @@ div class="tabs-content"
         tr class='list-row' data-rowid=order.id
           td class='list-column list-selectable' = check_box_tag 'order_ids[]', :value => order.id, :class => 'list-selectable-checkbox'
           td class='list-column' = "#{order.id}"
-          // td class='list-column' = order.name
-          td class='list-column'
           td class='list-column' = to_msk(order.created_at)
           td class='list-column column-place'
             - code = @kc_orders[order.id.to_s]
@@ -63,14 +59,14 @@ div class="tabs-content"
           td class='list-column'
             span class="label label-#{order.status}" = t :"status.#{order.status}"
 
-          td class='list-column list-row-action'
-            div class='list-row-action-wrapper'
+          td.list-column.list-row-action
+            .list-row-action-wrapper.flex-c
               - if current_account.is_admin?
                 = link_to tag_icon(:building), :rel => :tooltip, :title => "City", :'data-name' => :cityless, :class => 'list-row-action-wrapper-link list-row-modal'
                 = link_to tag_icon(:truck), :rel => :tooltip, :title => "Delivery", :'data-name' => :cityless, :'data-type' => :delivery, :class => 'list-row-action-wrapper-link list-row-modal'
 
                 = link_to tag_icon("files-o"), :rel => :tooltip, :title => "Copy order", :href => url(:orders, :copy, :id => order.id), :class => 'list-row-action-wrapper-link'
-              = link_to tag_icon("tree"), :title => "Show", :href => url(:orders, :show, :id => order.id), :class => 'list-row-action-wrapper-link'
+                = link_to tag_icon(:edit), :href => url(:orders, :edit, :id => order.id), :class => 'list-row-action-wrapper-link'
 
 = partial 'clients/modal_city'
 

@@ -82,6 +82,22 @@ Fenix::App.helpers do
     (LEVEL3_ACCESS[dir].fetch(sub, nil).fetch(section, 0) & kcr) > 0
   end
 
+  def can_view_any_section?(dir, sub, user: current_account.id)
+    @kc_access_user ||= CabiePio.get([:m, :access, :user], user).data || AH_ROLE_NONE
+    kcr = @kc_access_user[dir].fetch(sub, 0) rescue @kc_access_user[dir]
+    (LEVEL3_ACCESS[dir].fetch(sub, nil).values.sum & kcr) > 0
+  end
+
+  def can_view_stickers?
+    can_view_section?(:sections, :sum, 1)
+  end
+
+  def can_view_all?(dir, sub, user: current_account.id)
+    @kc_access_user ||= CabiePio.get([:m, :access, :user], user).data || AH_ROLE_NONE
+    kcr = @kc_access_user[dir].fetch(sub, 0) rescue @kc_access_user[dir]
+    LEVEL3_ACCESS[dir].fetch(sub, nil).values.sum == kcr
+  end
+
   def can_btn_view?(dir, sub = nil, user: current_account.id)
     @kc_access_user ||= CabiePio.get([:m, :access, :user], user).data || AH_ROLE_NONE
     kcr = @kc_access_user.fetch(:btn, {})[dir] || 0

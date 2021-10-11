@@ -1,0 +1,12 @@
+rowsummer
+  span
+    | { s }
+
+  javascript:
+    self.on('mount', function() {
+      let listel = document.querySelector(opts.target)
+      self.s = listel.querySelectorAll('tbody tr').length
+      if (opts.filter)
+        self.s = listel.querySelectorAll('tbody tr' + opts.filter).length
+      self.update()
+    })

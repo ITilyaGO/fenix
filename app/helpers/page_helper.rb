@@ -9,4 +9,16 @@ Fenix::App.helpers do
     # @r = route
     partial "layouts/paginate"
   end
+
+  def local hash
+    url(*@ra||[:orders, :index], **@rah||{}, **hash)
+  end
+
+  def tj *args
+    t args.join('.')
+  end
+
+  def tja *args
+    (tj *args).first
+  end
 end

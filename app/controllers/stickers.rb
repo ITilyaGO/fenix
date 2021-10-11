@@ -23,7 +23,9 @@ Fenix::App.controllers :stickers do
     @kc_timelines = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :timeline]).flat.trans(:to_i)
     @kc_blinks = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :timeline_blink]).flat.trans(:to_i)
     @kc_stickers = CabiePio.all_keys(@orders.map(&:id), folder: [:sticker, :order_progress]).flat.trans(:to_i, :to_f)
+    @orders = @orders.sort_by{|o|@kc_timelines[o.id]}.reverse if params[:seq] == "timeline"
     @r = url(:stickers, :orders)
+    @ra = [:stickers, :orders]
     render 'orders/index'
   end
 

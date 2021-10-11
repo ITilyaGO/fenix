@@ -30,7 +30,9 @@ div class="tabs-content"
         th class='header non-print'
           = partial 'bricks/orders/section_titles'
         th class='header non-print'
-        th class='header list-row-action-header non-print' Всего: #{@orders.size}
+        th class='header list-row-action-header non-print'
+          ' Всего:
+          rowsummer target='#list' filter='.non-print'
 
     - abl_view = @sections.map{|s|can_view_section?(:sections, :list, s.id) ? s.id : nil }
     - kc_os = KSM::OrderStatus.find_all(@orders.map(&:id))
@@ -117,3 +119,17 @@ div class="tabs-content"
 
       });
     })(jQuery);
+
+
+  = javascript_include_tag :riot
+  rscript type="riot/tag" src="/riot/tags/idcollapser.tag"
+  rscript type="riot/tag" src="/riot/tags/subclick.tag"
+  rscript type="riot/tag" src="/riot/tags/switcher.tag"
+  rscript type="riot/tag" src="/riot/tags/elhide.tag"
+  rscript type="riot/tag" src="/riot/tags/rowsummer.tag"
+
+  javascript:
+    
+    document.addEventListener("DOMContentLoaded", function(event) {
+      riot.mount('idcollapser, subclick, switcher, elhide, rowsummer')
+    })

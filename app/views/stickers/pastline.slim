@@ -1,12 +1,12 @@
 - today = Date.today
 
 #stickers_past.nav.nav-tabs
-  .flex-v.btns.non-print
+  .flex-v.center.btns.non-print
     = link_to url(:stickers, :pastline, start: timeline_id(@sdate.weeks_ago(4))) do
       .btn.scroll.btn-sm.btn-default: i.fa.fa-arrow-left
   .wrapper
     .head
-      a.text-center.flex-c.btn.btn-sm.btn-clear style='align-items:baseline;' href=url(:stickers, :pastline, start: timeline_id(@sdate.beginning_of_month.beginning_of_week.weeks_ago(-2)))
+      a.center.flex-c.btn.btn-sm.btn-clear style='align-items:baseline;' href=url(:stickers, :pastline, start: timeline_id(@sdate.beginning_of_month.beginning_of_week.weeks_ago(-2)))
         span = @sdate.strftime("%B %Y")
         ' &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         .label.btn-default: .price style='font-size:1.3em;' == deli(rur @month_sum)
@@ -14,7 +14,7 @@
     - @weeks.each_with_index do |tab, i|
       - ws = @week_sum.fetch(tab[:date], tab[:date].month == @sdate.month ? 0 : false)
       - next unless ws
-      .flex-c.graphic
+      .flex-c.center.graphic
         - wsum = 0
         - wglsum = 0
         - wstic = 0
@@ -54,7 +54,7 @@
               br
               small == deli(rur wglstic)
 
-  .flex-v.btns.non-print
+  .flex-v.center.btns.non-print
     = link_to url(:stickers, :pastline, start: timeline_id(@sdate.weeks_ago(-4))) do
       .btn.scroll.btn-sm.btn-default: i.fa.fa-arrow-right
 

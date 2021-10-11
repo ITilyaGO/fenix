@@ -1,18 +1,18 @@
 - today = Date.today
 
 #stickers_cal.nav.nav-tabs
-  .flex-v.btns.non-print
+  .flex-v.center.btns.non-print
     = link_to url(:timeline, :stickers, start: timeline_id(@sdate.weeks_ago(4))) do
       .btn.scroll.btn-sm.btn-default: i.fa.fa-arrow-left
   .wrapper
     .head
-      .text-center.flex-c.btn.btn-sm.btn-clear style='align-items:baseline;'
+      .center.flex-c.center.btn.btn-sm.btn-clear style='align-items:baseline;'
         span = @sdate.strftime("%B %Y")
         /' &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         /.btn.btn-xs.btn-default: .price style='font-size:1.3em;' == deli(rur @month_sum)
 
     - @weeks.each_with_index do |tab, i|
-      .flex-c.graphic
+      .flex-c.center.graphic
         - wsum = 0
         - wglsum = 0
         - 7.times do |gap|
@@ -51,7 +51,7 @@
           - else
             .fa.fa-circle-o-notch
 
-  .flex-v.btns.non-print
+  .flex-v.center.btns.non-print
     = link_to url(:timeline, :stickers, start: timeline_id(@sdate.weeks_ago(-4))) do
       .btn.scroll.btn-sm.btn-default: i.fa.fa-arrow-right
 

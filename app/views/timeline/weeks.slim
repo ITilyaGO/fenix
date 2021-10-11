@@ -117,7 +117,7 @@ ul class="nav nav-tabs non-print" id="weeks_tab"
           .btn.btn-default.btn-wide.cancel data-dismiss="modal" = pat(:cancel)
 
 .timeline.tab-content#for_weeks_tab
-  .flex-c.page-loading.hidden
+  .flex-c.center.page-loading.hidden
     .indicator
       i.fa.fa-circle-o-notch.fa-spin.fa-fw
       span.text Data Loading
@@ -130,6 +130,9 @@ ul class="nav nav-tabs non-print" id="weeks_tab"
 = form_for '', url(:dr_timeline, :orders), :class => 'form-page' do |f|
 
 - content_for :js_assets do
+  = javascript_include_tag :riot
+  rscript type="riot/tag" src="/riot/tags/rowsummer.tag"
+
   javascript:
     (function($) {
       $(function() {
@@ -190,6 +193,8 @@ ul class="nav nav-tabs non-print" id="weeks_tab"
         .then(response => response.text())
         .then(function(result) {
           o.innerHTML = result
+
+          riot.mount('switcher, elhide, rowsummer')
 
           $(".list-selectable-checkbox-all").on("change", function() {
             var on = $(this).prop("checked")

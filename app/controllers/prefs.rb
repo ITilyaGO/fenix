@@ -35,6 +35,11 @@ Fenix::App.controllers :prefs do
     render 'prefs/levels'
   end
 
+  get :draftstatus do
+    @title = t 'tit.prefs.page'
+    render 'prefs/page'
+  end
+
   put :levels do
     wonderbox_set(:complexity, params[:complexity].transform_values(&:to_i))
     wonderbox_set(:stickday_threshold, params[:stickday_threshold].transform_values(&:to_i))

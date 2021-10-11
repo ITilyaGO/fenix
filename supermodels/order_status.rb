@@ -1,7 +1,7 @@
 class KSM::OrderStatus < Doppel
   PFX = :order_status
 
-  PROPS = [:pstate, :pflag, :global, :gflag]
+  PROPS = [:pstate, :pflag, :global, :gflag, :gdraft]
   attr_accessor *PROPS
 
   BIT_STATES = {
@@ -18,10 +18,16 @@ class KSM::OrderStatus < Doppel
     blink: 2
   }.freeze
 
+  BIT_DRAFTS_MAX = 4
+
   def initialize(args)
     super
     @pstate ||= {}
     @pflag ||= {}
+  end
+
+  def draftbw
+    @gdraft || 2
   end
 
   def sets(section, state)

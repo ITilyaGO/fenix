@@ -104,7 +104,7 @@ br
                   - 2.times do |i|
                     td.text-center.col-md-1
                       - day = @day - 1 + i
-                      .col.flex-c.vcenter
+                      .col.flex-v.center
                         = text_field_tag "lines[#{p.id}][#{day}]", class: 'form-control input-large',
                         placeholder: @holders[p.id].fetch(day, nil)
                         - if @destocks[p.id].fetch(day, nil)

@@ -1,0 +1,52 @@
+draftswitches.flex-c
+  .items
+    button.btn.btn-sm.btn-section each='{ a in list }' onclick='{clickmode && toggle_bit}' onmouseover='{showtip}' onmouseout='{hidetip}'
+      .fa.fa-check class='{ invisible: (bw & 2**(+a)) === 0 }'
+
+    .tooltip-block.text-center class='{ hidden: !tipmode }'
+      .label.label-default
+        | { tipdesc }
+
+
+  javascript:
+    self.tipmode = false
+    self.clickmode = opts.allow
+    self.bw = +opts.bw||0
+    self.list = opts.items.split(',')
+    self.token = document.querySelector("form [name^='auth']").value
+
+    showtip(el) {
+      self.tipmode = true
+      self.tipdesc = JSON.parse(opts.locale)[+el.item.a-1]
+      self.update()
+    }
+
+    hidetip() {
+      self.tipmode = false
+      self.update()
+    }
+
+    toggle_bit(m) {
+      let im = +m.item.a
+      let check = (self.bw & 2**im) > 0
+      let fbw = check ? self.bw - 2**im : self.bw + 2**im
+      if (!self.clickmode) return true
+
+      var data = {
+        authenticity_token: self.token,
+        id: +opts.order,
+        state: fbw
+      }
+      fetch('/orders/draftbw/' + opts.order, {
+        method: "PUT",
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(data).toString()
+      })
+      .then(function(response) { return response.json() })
+      .then(function(data) {
+        if (!data.error) {
+          self.bw = fbw
+          self.update()
+        }
+      })
+    }

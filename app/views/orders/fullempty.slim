@@ -1,6 +1,6 @@
 div class="tabs-content"
 = form_for :order, !@id ? url(:orders, :empty) : url(:orders, :save, :id => @id), :class => 'form-horizontal' do |f|
-  .row.non-print.flex-c
+  .row.non-print.flex-c.center
     .col-md-8
       fieldset class='control-group'
         = f.label 'Тип заказа', :class => 'col-md-3 control-label'
