@@ -39,6 +39,7 @@ ul class="nav nav-tabs non-print"
     h3
       - if @current_account.is_admin? && @cash
         .icash.fa class=(@cash == 1 ? 'fa-credit-card' : 'fa-money')
+        |&nbsp;
       == deli(rur @order.total)
     - if @order.finished? || @order.shipped?
       h5 == deli(rur @order.done_total)
@@ -50,6 +51,9 @@ ul class="nav nav-tabs non-print"
         = link_to 'Все', :class => 'btn btn-sm print-all btn-glue'
         '
         = link_to tag_icon(:save), url(:c1c, :create, id: @order.id), class: 'btn btn-default btn-sm'
+      br
+      br
+        = link_to tag_icon(:'file-pdf-o'), url(:orders, :invoice, id: @order.id), class: 'btn btn-default btn-sm'
     - if @stock_out
       br
       p Списан со склада
