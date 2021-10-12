@@ -27,7 +27,7 @@ class KSM::OrderStatus < Doppel
   end
 
   def draftbw
-    @gdraft || 2
+    @gdraft || 0
   end
 
   def sets(section, state)
