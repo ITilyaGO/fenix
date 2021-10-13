@@ -453,13 +453,15 @@ Fenix::App.controllers :orders do
     @order_lines = []
     order.order_lines.each do |ol|
       next if (ol.done_amount || 0) >= ol.amount
-      ol.amount -= ol.done_amount || 0
-      @order_lines << ol
+      dol = ol.dup
+      dol.id = nil
+      dol.amount -= dol.done_amount || 0
+      @order_lines << dol
     end
     @order_client = order.client
     @order_place = order.place
     @descr = order.description
-    order.order_lines = @order_lines
+    # order.order_lines = @order_lines
     @total = order.total_price
     @kc_town = CabiePio.get([:orders, :towns], order.id).data
     @kc_timeline = CabiePio.get([:orders, :timeline], order.id).data
@@ -588,6 +590,25 @@ Fenix::App.controllers :orders do
       o_status.save
     end
     { }.to_json
+  end
+
+  put :backdraft, :with => :id do
+    order = Order.find(params[:id])
+    o_status = KSM::OrderStatus.find(order.id)
+    sections = o_status.pstate.keys
+    if o_status.what?(:anew)
+      current_kc = CabiePio.get([:orders, :timeline], order.id).data
+      current_tl = timeline_unf(current_kc) if current_kc
+      CabiePio.unset [:timeline, :order], timeline_order(order.id, current_tl) if current_kc
+      CabiePio.unset [:orders, :timeline], order.id
+
+      order.status = :draft
+      order.save
+
+      o_status.setg(:draft)
+      o_status.save
+    end
+    redirect url(:orders, :index)
   end
 
   get :ship, :with => :id do

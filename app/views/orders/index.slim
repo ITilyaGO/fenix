@@ -151,7 +151,9 @@
             // </div>
           
           td class='list-column list-row-action non-print'
-            div class='list-row-action-wrapper'
+            .list-row-action-wrapper
+              - if os.what?(:anew)
+                = link_to tag_icon(:'exclamation-circle'), :class => 'list-row-action-delete-two list-row-action-wrapper-link'
               - if can_view?(:list, :stickers) || allow_route?(:orders_stickers)
                 = link_to tag_icon(:ticket), :rel => :tooltip, :title => "Stickers", :href => url(:stickers, :order, :id => order.id), :class => 'list-row-action-wrapper-link'
               - if current_account.is_admin?
@@ -160,17 +162,28 @@
                 = link_to tag_icon(:edit), :href => url(:orders, :edit, :id => order.id), :class => 'list-row-action-wrapper-link'
               - if order.draft?
                 = link_to tag_icon("trash-o"), :rel => :tooltip, :title => "#{pat(:delete)} order", :class => 'list-row-action-delete-one list-row-action-wrapper-link'
-            div class='modal'
-              div class="modal-dialog"
-                div class='modal-content'
-                  div class="modal-header"
-                    h4 class="modal-title" We gonna delete this item
-                  div class='modal-body'
+            .modal
+              .modal-dialog
+                .modal-content
+                  .modal-header
+                    h4.modal-title We gonna delete this item
+                  .modal-body
                     p Точно удалить?
-                  div class='modal-footer'
+                  .modal-footer
                     = form_tag url(:orders, :destroy, :id => order.id), :method => :delete do
                       = submit_tag pat(:delete), :class =>'list-row-action-popover-delete-one-btn btn btn-danger btn-wide'
-                      div class='btn btn-default btn-wide cancel' data-dismiss="modal" = pat(:cancel)
+                      .btn.btn-default.btn-wide.cancel data-dismiss="modal" = pat(:cancel)
+            .modal
+              .modal-dialog
+                .modal-content
+                  .modal-header
+                    h4.modal-title Обратно в непроверенные
+                  .modal-body
+                    p Точно?
+                  .modal-footer
+                    = form_tag url(:orders, :backdraft, :id => order.id), :method => :put do
+                      = submit_tag pat(:yes), :class =>'list-row-action-popover-delete-one-btn btn btn-danger btn-wide'
+                      .btn.btn-default.btn-wide.cancel data-dismiss="modal" = pat(:cancel)
 
 - content_for :js_assets do
   javascript:
@@ -179,6 +192,11 @@
   
         $(".list-selectable-checkbox").on("change", function() {
           $(this).parents(".list-row").toggleClass('non-print');
+        });
+
+        $('.list-row-action-delete-two').on('click', function(ev) {
+          ev.preventDefault();
+          $(this).parent().next().next().modal();
         });
         
       });

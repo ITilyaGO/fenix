@@ -1,11 +1,11 @@
-draftswitches.flex-c
+draftswitches.flex-c.center
   .items
     button.btn.btn-sm.btn-section each='{ a in list }' onclick='{clickmode && toggle_bit}' onmouseover='{showtip}' onmouseout='{hidetip}'
       .fa.fa-check class='{ invisible: (bw & 2**(+a)) === 0 }'
 
-    .tooltip-block.text-center class='{ hidden: !tipmode }'
-      .label.label-default
-        | { tipdesc }
+  .tooltip-block.text-center class='{ hidden: !tipmode }'
+    .label.label-default
+      | { tipdesc }
 
 
   javascript:

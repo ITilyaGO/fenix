@@ -7,7 +7,7 @@
         th class='header' Город
         th.header width='50px'
         th class='header' Заказчик
-        th.header.non-print Стадии
+        th.header.non-print.text-center Стадии
         th class='header' Дата
         th.header
         th class='header non-print'
@@ -37,7 +37,7 @@
           td class='list-column' = order.client.name
           td.list-column.non-print.switches.text-nowrap
             draftswitches items=dfsmax locale=dfsru bw=os.draftbw order=order.id allow='change'
-          td class='list-column text-nowrap' = to_msk(order.created_at)
+          td.list-column.text-nowrap.text-right = to_dm(order.created_at)
           td.list-column.non-print
             /span.label class="label-#{os.state}" = t :"status.#{os.state}"
           td class='list-column text-nowrap non-print'

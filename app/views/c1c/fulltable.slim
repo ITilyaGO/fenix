@@ -1,0 +1,57 @@
+.form-horizontal
+  .row.non-print.flex-c.center
+  
+  - i = 0
+  - @cats.each do |category|
+    - category.subs_ordered.each do |sub|
+        h4 = sub.name
+        div class="table-responsive"
+          table class="table table-hover order-table"
+            tr data-sum="0"
+              th
+              th Наименование
+              th
+              th &nbsp;
+              th Цена
+              th &nbsp;
+            - sub.all_products.order(:index => :asc).each do |line|
+              - next if @parents.include?(line.id)
+              - i = i + 1
+              - c1c = @c1c_pro.fetch(line.id, nil)
+              tr.list-row data-sum="0" data-price="#{line.price}"
+                td
+                  .num
+                  /= hidden_field_tag 'line[][id]', :value => line.id
+                td
+                  span class="product" = line.displayname
+                td.text-center
+                  - if c1c
+                    .label.label-default
+                      .fa.fa-tags
+                        | 1c
+                  - else
+                    .fa.fa-exclamation-triangle.text-warning
+                td.col-md-4
+                  - if c1c
+                    - k1c = KSM1C::Cat.find c1c
+                    = link_to k1c&.at_path('НаименованиеПолное'), url(:c1c, :desc_product, id: c1c)
+                    | &nbsp;#{k1c&.at_path :'Code'}
+                td class="col-md-1 price" class="vert-align"
+                  = line.price
+                  | &nbsp;&#x20B7
+                td class='col-md-1 list-column list-row-action'
+                  /.list-row-action-wrapper
+                    a.btn-copy.list-row-action-wrapper-link title="#{pat(:copy)}"
+                      = tag_icon(:'plus-square-o')
+                    a.btn-del.list-row-action-wrapper-link title="#{pat(:delete)}"
+                      = tag_icon(:'trash-o')
+
+- content_for :js_assets do
+  = javascript_include_tag :riot
+  rscript type="riot/tag" src="/riot/tags/collapser.tag"
+  javascript:
+    document.addEventListener("DOMContentLoaded", function(event) {
+      riot.mount('collapser')
+    });
+
+    
