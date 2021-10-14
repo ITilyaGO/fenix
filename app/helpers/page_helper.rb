@@ -11,7 +11,7 @@ Fenix::App.helpers do
   end
 
   def local hash
-    url(*@ra||[:orders, :index], **@rah||{}, **hash)
+    url(*@ra||[:orders, :index], **@rah||{}, **hash.compact)
   end
 
   def tj *args
