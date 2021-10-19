@@ -65,7 +65,8 @@
               li class='list-menu-divider divider'
         th class='header' Номер
         th.header
-        th class='header' Город
+        th.header
+          a href=local(seq: params[:seq] ? nil : :city) Город
         th class='header' Куда едет
         th.header width='50px'
         th class='header' Заказчик
@@ -99,7 +100,7 @@
             = tja :delivery, order.delivery
             | &nbsp;&nbsp;
           // td class='list-column' = order.name
-          td class='list-column'
+          td.list-column
             - code = @kc_orders[order.id.to_s]
             - town_name = @kc_towns[code]&.model
             = partial 'bricks/kato/label_print', :locals => { town_name: town_name, el: order }
