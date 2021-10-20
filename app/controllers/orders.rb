@@ -19,7 +19,7 @@ Fenix::App.controllers :orders do
     @kc_blinks = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :timeline_blink]).flat.trans(:to_i)
     @kc_stickers = CabiePio.all_keys(@orders.map(&:id), folder: [:sticker, :order_progress]).flat.trans(:to_i, :to_f)
     @orders = @orders.sort_by{|o|@kc_timelines[o.id]||''} if params[:seq] == "timeline"
-    @orders = @orders.sort_by{|o|@kc_towns[@kc_orders[o.id.to_s]]&.model&.name} if params[:seq] == "city"
+    @orders = @orders.sort_by{|o|@kc_towns[@kc_orders[o.id.to_s]]&.model&.name||''} if params[:seq] == "city"
     @kc_cash = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :cash]).flat.trans(:to_i).reject{|k,v|v!='t'}
     @r = url(:orders, :index)
     @ra = [:orders, :index]
