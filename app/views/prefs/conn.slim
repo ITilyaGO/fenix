@@ -1,0 +1,55 @@
+.ac-page style='height:100%;'
+  .pull-right
+    .col-lg-10.custom-control.custom-switch
+      = check_box_tag :bypass, :id => :bypass, :class => 'custom-control-input'
+      label.custom-control-label(for = 'bypass') Выключатель
+  .clearfix
+
+  .flex-c.center.col-md-6.col-md-offset-3
+    .col-md-12.flex-c style='justify-content: space-around;'
+      .left
+        | a
+      .mid.flex-v.center.vcenter
+        .fa.fa-retweet
+        br
+        .btn.btn-xs.btn-prime связать
+      .right
+        | b
+  .clearfix
+  br
+  hr
+    
+  .col-md-12
+    .col-md-6
+      select name="archetype" class="huge mbl"
+        = content_tag(:option, 'Не назначен', { value: '', selected:@archetype.nil? })
+        - @cats.each do |cat|
+          optgroup label="#{cat.name}"
+            - cat.subcategories.each do |sub|
+              - html_attributes = { :value => sub.id }
+              - html_attributes[:selected] ||= option_is_selected?(sub.id, sub.name, nil)
+              = content_tag(:option, sub.name, html_attributes)
+              /- @grouped[sub.id]&.each do |a|
+                - next if a.group?
+                - html_attributes = { :value => a.id }
+                - html_attributes[:selected] ||= option_is_selected?(a.id, a.name, @archetype)
+                = content_tag(:option, a.name, html_attributes)
+    .col-md-6
+      bottomworks
+  .clearfix
+
+
+- content_for :js_assets do
+  = javascript_include_tag :riot
+  / script type="riot/tag" src="/riot/tags/sticker_line.tag"
+  rscript type="riot/tag" src="/riot/tags/idcollapser.tag"
+  rscript type="riot/tag" src="/riot/tags/subclick.tag"
+  rscript type="riot/tag" src="/riot/tags/switcher.tag"
+  rscript type="riot/tag" src="/riot/tags/elhide.tag"
+  rscript type="riot/tag" src="/riot/tags/prefs/bottom_works.tag"
+
+  javascript:
+    
+    document.addEventListener("DOMContentLoaded", function(event) {
+      riot.mount('idcollapser, subclick, switcher, elhide, bottomworks')
+    });

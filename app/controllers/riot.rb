@@ -5,4 +5,9 @@ Fenix::App.controllers :riot, :map => "/riot/tags/" do
     render "riot/#{params[:name]}", :layout => false
   end
 
+  get :index, :with => ':dir/:name.tag' do
+    Slim::Engine.options[:pretty] = true
+    render "riot/#{params[:dir]}/#{params[:name]}", :layout => false
+  end
+
 end

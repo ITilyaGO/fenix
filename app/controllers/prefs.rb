@@ -47,4 +47,13 @@ Fenix::App.controllers :prefs do
     render 'prefs/levels'
   end
 
+  get :connector do
+    @title = t 'tit.prefs.page'
+    @cats = Category.where(category: nil).order(:index => :asc)
+    @categories = Category.all.includes(:category)
+    @archs = KSM::Archetype.all
+    @grouped = @archs.group_by{|a|a.category_id.to_i}
+    render 'prefs/conn'
+  end
+
 end

@@ -1158,6 +1158,33 @@ fieldset.stickers_tab{
 .fancytree-container {
   height: 300px;
 }
+cubed, rsred, cubtech, allworks, localworks, .ted {
+  display: block;
+  // background: rgba(223, 223, 223, 0.3);
+  padding: 20px 40px;
+  border-radius: 12px;
+}
+allworks, localworks, .cube-panel {
+  // max-height: 75vh;
+  min-height: 250px;
+  height: 100%;
+  overflow-y: scroll;
+}
+.cube-struct {
+  max-height: 85vh;
+  overflow-y: scroll;
+}
+allworks, localworks, .cube-panel {
+  scrollbar-width: none; /* Firefox */ 
+  &::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
+  }
+}
+.ted2 {
+  .ted();
+  padding-top: 0;
+}
+
 
 .icash {
   font-size: .9em;

@@ -1,0 +1,134 @@
+bottomworks.cube-panel.ted
+  .tiny-text.text-center if='{products.length==0}' Нет работ
+  
+  /.pull-right
+    .btn.btn-xs.btn-danger.rxs.hand if='{ selected.length > 0 }' onclick='{ start_over }' Сбросить
+  .row if='{ products.length > 0 }': showcase: .glass
+  
+    table.table: tbody
+      tr each='{ f in available }'
+        td width='70%'
+          | { f.full || f.name || f.id }
+        td
+          /.badge.hand onclick='{ w_select }' class='{ invisible: !showadd }'
+            | Добавить
+          .badge.hand onclick='{ w_select }' class='{ invisible: showadd }'
+            | Включить
+            / | { f.id }
+        td
+          / a.btn-xxs.btn-steel.fa.fa-id-card-alt if='{ !trashmode }' href="/accounts/edit/{f.id}"
+          .btn-xxs.far.fa-trash.btn-steel onclick='{put_trash}' if='{ trashmode }'
+  
+        
+  javascript:
+    this.is_active = false
+    self.showadd = opts.fit
+    self.trashmode = false
+    self.flow_str = opts.flow || ''
+    self.selected = []
+    self.used = []
+    self.available = []
+  
+    self.token = document.querySelector("form [name^='auth']").value
+  
+    
+    init_selected() {
+      var wi = self.flow_str.split(/[,\/]/)
+      var ri = []
+      wi.forEach(function(i) {
+        var el = self.products.find(el => el.tid && el.tid.includes(i))
+        // var i = wi.indexOf(el.id)
+        if (!el) return
+        self.used.push(el)
+        if (!el) el = { full: 'Неизвестно', id: 'fffffff' }
+        el.tid = i
+        self.selected.push(el)
+        // ri.push(i)
+      })
+      // ri.forEach(function(i) {
+      //   self.products.splice(i, 1)
+      // })
+    }
+  
+    init_available() {
+      self.products.forEach(function(el) {
+        // var el = self.products.find(el => el.tid && el.tid.includes(i))
+        // var i = wi.indexOf(el.id)
+        // if (!el.com && !el.global && el.orphan)
+        self.available.push(el)
+        // if (!el.global && el.orphan) self.available.push(el)
+        // if (!el) el = { full: 'Неизвестно', id: 'fffffff' }
+        // el.tid = i
+        // self.selected.push(el)
+        // ri.push(i)
+      })
+      self.used = self.products.filter(function(el) {
+        if (self.available.indexOf(el) > -1) return false 
+        //return el.id[0] == "2"
+        return !el.global && !el.com
+      })
+      self.gused = self.products.filter(function(el) {
+        return el.global || el.com
+      })
+      // ri.forEach(function(i) {
+      //   self.products.splice(i, 1)
+      // })
+    }
+  
+    
+  
+    start_over() {
+      self.selected = []
+      self.set_flow_str()
+    }
+  
+    w_select(a) {
+      // a.item.f.tid = null
+      self.selected.push(a.item.f)
+      self.set_flow_str()
+      // self.available.splice(self.available.indexOf(a.item.f), 1)
+      rcontrol.trigger('ACCOU_SELECT', a.item.f)
+    }
+  
+    w_unselect(a) {
+      self.selected.splice(self.selected.indexOf(a.item.f), 1)
+      self.set_flow_str()
+    }
+  
+    toggle_trash() {
+      self.trashmode = !self.trashmode
+      self.update() 
+    }
+  
+    results_may_vary() {
+      return self.fspots && self.fspots.length > 0
+    }
+  
+    loadlist() {
+      var data = {
+        // authenticity_token: self.token
+      }
+  
+      fetch('http://0.0.0.0:4630/exile/1/works/available.json?' + opts.tech, {
+        method: "POST",
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(data).toString()
+      })
+      .then(function(response) { return response.json() })
+      .then(function(data) {
+        self.products = self.cache = data.sort((a, b) => a.full.localeCompare(b.full))
+        // self.local = self.products.filter(el => el.id[0] == "2")
+        self.init_selected()
+        self.init_available()
+        // self.init_products()
+        // rcontrol.trigger('SEARCH_READY', data)
+        self.update()
+      })
+
+    }
+  
+    self.on('mount', function() {
+      self.loadlist()
+    })
+ 
+    
