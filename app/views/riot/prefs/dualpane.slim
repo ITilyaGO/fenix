@@ -1,0 +1,26 @@
+dualpane
+  .col-md-12.flex-c style='justify-content: space-around;'
+    .left
+      | {leftname}
+    .mid.flex-v.center.vcenter
+      .fa.fa-retweet
+      br
+      
+    .right
+      | {rightname}
+  .text-center
+    .btn.btn-xs.btn-prime show="{lid&&rid}" связать
+      
+  javascript:
+    
+    rcontrol.on('PREFSCONN_LEFT_SET', function(data) {
+      self.lid = data.id
+      self.leftname = data.name
+      self.update()
+    })
+    
+    rcontrol.on('PREFSCONN_RIGHT_SET', function(data) {
+      self.rid = data.id
+      self.rightname = data.name
+      self.update()
+    })

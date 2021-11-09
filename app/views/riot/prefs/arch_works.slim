@@ -1,4 +1,4 @@
-bottomworks.cube-panel.ted
+archworks.cube-panel.ted
   .tiny-text.text-center if='{products.length==0}' Нет работ
   
   /.pull-right
@@ -9,6 +9,8 @@ bottomworks.cube-panel.ted
       tr each='{ f in available }'
         td width='70%'
           | { f.full || f.name || f.id }
+        td
+          .label.label-warning if='{f.g}' группа
         td
           /.badge.hand onclick='{ w_select }' class='{ invisible: !showadd }'
             | Добавить
@@ -51,6 +53,7 @@ bottomworks.cube-panel.ted
     }
   
     init_available() {
+      self.available = []
       self.products.forEach(function(el) {
         // var el = self.products.find(el => el.tid && el.tid.includes(i))
         // var i = wi.indexOf(el.id)
@@ -83,9 +86,10 @@ bottomworks.cube-panel.ted
     }
   
     w_select(a) {
+      // a.item.f.tid = null
       self.selected.push(a.item.f)
       // self.available.splice(self.available.indexOf(a.item.f), 1)
-      rcontrol.trigger('PREFSCONN_RIGHT_SET', a.item.f)
+      rcontrol.trigger('PREFSCONN_LEFT_SET', a.item.f)
     }
   
     w_unselect(a) {
@@ -93,28 +97,25 @@ bottomworks.cube-panel.ted
       self.set_flow_str()
     }
   
-    toggle_trash() {
-      self.trashmode = !self.trashmode
-      self.update() 
-    }
-  
-    results_may_vary() {
-      return self.fspots && self.fspots.length > 0
-    }
-  
-    loadlist() {
+    
+    rcontrol.on('PREFSCONN_SELECT', function(data) {
+      self.loadlist(data)
+    })
+    
+    loadlist(cat) {
       var data = {
-        // authenticity_token: self.token
+        authenticity_token: self.token,
+        cat: +cat
       }
   
-      fetch('http://0.0.0.0:4630/exile/1/works/available.json?' + opts.tech, {
+      fetch('/archetypes/list.json', {
         method: "POST",
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams(data).toString()
       })
       .then(function(response) { return response.json() })
       .then(function(data) {
-        self.products = self.cache = data.sort((a, b) => a.full.localeCompare(b.full))
+        self.products = self.cache = data.sort((a, b) => a.name.localeCompare(b.name))
         // self.local = self.products.filter(el => el.id[0] == "2")
         self.init_selected()
         self.init_available()
@@ -122,11 +123,11 @@ bottomworks.cube-panel.ted
         // rcontrol.trigger('SEARCH_READY', data)
         self.update()
       })
-
+  
     }
   
     self.on('mount', function() {
       self.loadlist()
     })
- 
-    
+
+  

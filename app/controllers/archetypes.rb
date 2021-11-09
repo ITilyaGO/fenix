@@ -182,4 +182,11 @@ Fenix::App.controllers :archetypes do
 
     redirect url(:archetypes, :stock)
   end
+  
+  post :list, :provides => :json do
+    @archs = KSM::Archetype.all
+    cat = params[:cat].to_i
+    products = @archs.select{|a|a.category_id == cat}.map(&:to_r)
+    products.to_json
+  end
 end

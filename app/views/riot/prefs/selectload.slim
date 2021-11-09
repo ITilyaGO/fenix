@@ -1,0 +1,8 @@
+selectload onchange='{sender}' value='{sval}'
+  yield
+  
+  javascript:
+  
+    sender() {
+      rcontrol.trigger(opts.action, self.root.value)
+    }
