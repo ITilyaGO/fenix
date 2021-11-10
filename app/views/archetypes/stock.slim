@@ -60,11 +60,15 @@ br
                     - else
                       .label.label-default нет
                   td
+                    = link_to url(:archetypes, :detail, id: p.id) do
+                      .fa.fa-inbox.hand
                     - if need != 0
                       .label class=[('label-danger' if need < 0), ('label-info' if need > 0)]
                         == deli need
                     - else
                       .label.label-default нет
+                    - if need != @olneed[p.id]
+                      .label.label-purple = @olneed[p.id]
                   td
                     - defz = stock - need
                     - if defz < 0

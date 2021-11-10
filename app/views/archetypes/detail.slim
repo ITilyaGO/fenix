@@ -1,0 +1,29 @@
+.col-md-6
+  strong = @arch.name
+
+.col-md-6
+  .flex-c
+    span Склад&nbsp;
+    .info: .label.label-success = @stock.data
+    | &nbsp;&nbsp;&nbsp;
+    span Заказы&nbsp;
+    .info: .label.label-info = @need.data
+    - if @need.data.to_i != @olneed.values.sum
+      .info: .label.label-purple = @olneed.values.sum
+.clearfix
+br
+table.table.table-hover
+  tr
+    th class="only-print" Отметка
+    th Заказ
+    th class="non-print" Резерв
+
+    th class="non-print" &nbsp;
+  
+  - @olneed.each do |ol, value|
+    - oid = ol.split('_').last
+    tr class="order-line"
+      td class="only-print" &nbsp;
+      td
+        = link_to oid, url(:orders, :edit, id: oid)
+      td = value

@@ -112,17 +112,30 @@ Fenix::App.controllers :archetypes do
     end
   end
 
+  get :detail, :with => :id do
+    @arch = KSM::Archetype.find(params[:id])
+    @olneed = CabiePio.query("p/need/order>#{@arch.id}_", type: :prefix).flat.trans(nil, :to_i)
+    @need = CabiePio.get([:need, :archetype], @arch.id)
+    @stock = CabiePio.get([:stock, :archetype], @arch.id)
+
+    render 'archetypes/detail'
+  end
+
   get :stock do
     # OrderJobs.stock_job(force: true)
     @title = "Stock"
     @day = Date.parse(params[:day]) rescue Date.today
     @holders = {}
     @destocks = {}
+    @olneed = {}
     ksm_arch = KSM::Archetype.all
     ar_hash = ksm_arch.map(&:id)
     ar_hash.each do |sk|
       @holders[sk] ||= {}
       @destocks[sk] ||= {}
+
+      ol_need = CabiePio.query("p/need/order>#{sk}_", type: :prefix).flat.trans(nil, :to_i)
+      @olneed[sk] = ol_need.values.sum
     end
     7.times do |i|
       dt = (@day-i).strftime('%y%m%d')
@@ -154,6 +167,7 @@ Fenix::App.controllers :archetypes do
 
     @products = Product.all
     @kc_index = arp.map{|p, a| [a, @products.detect{|i|i.id == p}&.index || 0]}.to_h
+
     render 'archetypes/stock'
   end
 
