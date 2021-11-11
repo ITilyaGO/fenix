@@ -62,6 +62,7 @@ br
                   td
                     = link_to url(:archetypes, :detail, id: p.id) do
                       .fa.fa-inbox.hand
+                    |&nbsp;
                     - if need != 0
                       .label class=[('label-danger' if need < 0), ('label-info' if need > 0)]
                         == deli need
