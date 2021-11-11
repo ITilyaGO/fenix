@@ -12,18 +12,29 @@
       .info: .label.label-purple = @olneed.values.sum
 .clearfix
 br
-table.table.table-hover
-  tr
-    th class="only-print" Отметка
-    th Заказ
-    th class="non-print" Резерв
 
-    th class="non-print" &nbsp;
-  
+table.table.table-hover.table-condensed
+  thead: tr
+    th
+    th.header Заказ
+    th
+    th.header Резерв
+    th.header Город
+    th.header Заказчик
+
   - @olneed.each do |ol, value|
     - oid = ol.split('_').last
-    tr class="order-line"
-      td class="only-print" &nbsp;
-      td
-        = link_to oid, url(:orders, :edit, id: oid)
+    - order = @orders.detect{|a|a.id == oid.to_i}
+    - ost = @kc_status.detect{|a|a.id == oid} || KSM::OrderStatus.new(id: oid)
+    tr.order-line
+      td &nbsp;
+      td = link_to oid, url(:orders, :edit, id: oid)
+      td.list-column
+        span.label class="label-#{ost.state}"
+          = t :"status.#{ost.state}"
       td = value
+      td.list-column
+        - code = @kc_orders[oid]
+        - town_name = @kc_towns[code]&.model
+        = partial 'bricks/kato/label_print', :locals => { town_name: town_name, el: order }
+      td.list-column = order&.client&.name

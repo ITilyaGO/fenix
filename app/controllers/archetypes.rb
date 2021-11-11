@@ -117,6 +117,12 @@ Fenix::App.controllers :archetypes do
     @olneed = CabiePio.query("p/need/order>#{@arch.id}_", type: :prefix).flat.trans(nil, :to_i)
     @need = CabiePio.get([:need, :archetype], @arch.id)
     @stock = CabiePio.get([:stock, :archetype], @arch.id)
+    oids = @olneed.keys.map{|ol|ol.split('_').last}
+    @orders = Order.where(id: oids)
+    @kc_orders = CabiePio.all_keys(oids, folder: [:orders, :towns]).flat
+    codes = @kc_orders.values.uniq
+    @kc_towns = KatoAPI.batch(codes)
+    @kc_status = KSM::OrderStatus.find_all(oids)
 
     render 'archetypes/detail'
   end
@@ -201,7 +207,7 @@ Fenix::App.controllers :archetypes do
     ol_need = CabiePio.folder(:need, :order).flat
     oids = ol_need.keys.map{|r|r.split('_').last}.uniq
     os = oids.map{|id|KSM::OrderStatus.find(id)}
-      .select{.reject{|o|!o.exist?||o.what?(:finished)||o.what?(:shipped)||o.what?(:canceled)||o.what?(:draft)}
+      .select{|o|!o.exist?||o.what?(:finished)||o.what?(:shipped)||o.what?(:canceled)||o.what?(:draft)}
     
     @os = os
     render 'archetypes/stock_clean'

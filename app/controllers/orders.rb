@@ -608,6 +608,8 @@ Fenix::App.controllers :orders do
 
       o_status.setg(:draft)
       o_status.save
+
+      arbal_need_order_rep(order)
     end
     redirect url(:orders, :index)
   end
