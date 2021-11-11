@@ -197,6 +197,26 @@ Fenix::App.controllers :archetypes do
     redirect url(:archetypes, :stock)
   end
   
+  get :stock_clean do
+    ol_need = CabiePio.folder(:need, :order).flat
+    oids = ol_need.keys.map{|r|r.split('_').last}.uniq
+    os = oids.map{|id|KSM::OrderStatus.find(id)}
+      .select{|o|o.what?(:finished)||o.what?(:shipped)||o.what?(:canceled)}
+    
+    @os = os
+    render 'archetypes/stock_clean'
+  end
+  
+  put :stock_clean do
+    ol_need = CabiePio.folder(:need, :order).flat
+    oids = ol_need.keys.map{|r|r.split('_').last}.uniq
+    os = oids.map{|id|KSM::OrderStatus.find(id)}
+      .select{|o|o.what?(:finished)||o.what?(:shipped)||o.what?(:canceled)}
+    
+    os.each{|s|arbal_need_order_rep(s)}
+    redirect url(:archetypes, :stock_clean)
+  end
+  
   post :list, :provides => :json do
     @archs = KSM::Archetype.all
     cat = params[:cat].to_i

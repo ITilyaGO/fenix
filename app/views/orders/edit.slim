@@ -185,14 +185,16 @@ ul class="nav nav-tabs non-print"
           ' #{ @timeline_at ? to_msk(@timeline_date) : "?"}
           | (#{((@timeline_date || Date.today) - @order.created_at.to_date).to_i.pred}+)
         .block
+          = @cash == 1 ? 'Безнал' : 'Нал'
+          ' &nbsp;&nbsp;
           ' Счет:
           - 15.times do
             ' &nbsp;
           ' ТК:
-          | #{@order.client.shipping_company}
+          /| #{@order.client.shipping_company}
           - if @order.client.shipping_company.nil? || @order.client.shipping_company.empty?
-            - 15.times do
-              ' &nbsp;
+          - 15.times do
+            ' &nbsp;
 
     - if !@order.client.comment.blank?
       tr: td colspan=3 = @order.client.comment

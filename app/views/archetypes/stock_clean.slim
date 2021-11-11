@@ -1,0 +1,18 @@
+= @os.size
+table.table.table-hover
+  tr
+    th class="only-print" Отметка
+    th Заказ
+    th class="non-print" Резерв
+  
+    th class="non-print" &nbsp;
+  
+  - @os.each do |os|
+    tr class="order-line"
+      td class="only-print" &nbsp;
+      td
+        = link_to os.id, url(:orders, :edit, id: os.id)
+      td = os.state
+
+= form_for :order, url(:archetypes, :stock_clean), method: 'put' do |f|
+  = f.submit 'Снять резерв', class: 'btn btn-sm btn-default'

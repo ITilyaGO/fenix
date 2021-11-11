@@ -704,7 +704,8 @@ Fenix::App.controllers :orders do
       CabiePio.set([:orders, :timeline_blink], @order.id, 1) if timeline_date != current_tl
       @order.touch
     end
-
+    
+    next_all = params[:next_status_all] || params[:next_status_all_force]
     order_part_st = @order.order_parts.find_by(:section_id => 1)
     part_before = order_part_st&.current?
 
@@ -724,7 +725,7 @@ Fenix::App.controllers :orders do
       # o_status.setg(:current) if params[:next_status]
       # @order_part.update_attributes(params[:order_part])
     end
-    if params[:next_status_all]
+    if next_all
       @order.order_parts.each do |part|
         part.state = :finished
         part.save
@@ -777,18 +778,19 @@ Fenix::App.controllers :orders do
     #   save_sticker_progress(@order.id, operc)
     # end
     
-    status_before = @order.current? || @order.anew?
+    status_before = @order.current? || @order.anew? || [:current, :anew, :prepare].include?(o_status.state)
+    status_fin = false
     @order.done_parts = @order.order_parts.where("state = ?", OrderPart.states[:finished]).size
-    if @order.done_parts == @order.all_parts || params[:next_status_all_force]
-      # don't need to use params here
-      @order.status = :finished if status_before
+    if @order.done_parts == @order.all_parts || next_all
       amount = 0.0
       @order.order_lines.each do |ol|
         next if ol.ignored
         amount += ol.price*(ol.done_amount || 0)
       end
       @order.done_total = amount
+      status_fin = true
     end
+    @order.status = :finished if status_fin
     @order.save
     @order.actualize
     calc_complexity_for @order

@@ -42,17 +42,20 @@ module Fenix::App::ArchetypeHelper
         CabiePio.set [:stock, :common, :d], archetype_daystock(parch, day), daysum+real_done
         CabiePio.unset [:stock, :common, :d], archetype_daystock(parch, day) if daysum+real_done == 0
 
-        prev = CabiePio.get([:need, :order], archetype_order(parch, line.id, order.id)).data.to_i || 0
-        whole_done = (sum_lines[line.id] || 0)*m
-        now = whole_done >= line.amount*m ? 0 : line.amount*m - whole_done
-        if now == 0
-          CabiePio.unset [:need, :order], archetype_order(parch, line.id, order.id)
-        else
-          CabiePio.set [:need, :order], archetype_order(parch, line.id, order.id), now
+        prev_ex = CabiePio.get([:need, :order], archetype_order(parch, line.id, order.id))
+        unless prev_ex.blank?
+          prev = prev_ex.data.to_i || 0
+          whole_done = (sum_lines[line.id] || 0)*m
+          now = whole_done >= line.amount*m ? 0 : line.amount*m - whole_done
+          if now == 0
+            CabiePio.unset [:need, :order], archetype_order(parch, line.id, order.id)
+          else
+            CabiePio.set [:need, :order], archetype_order(parch, line.id, order.id), now
+          end
+  
+          psum = CabiePio.get([:need, :archetype], parch).data.to_i || 0
+          CabiePio.set [:need, :archetype], parch, psum-prev+now
         end
-
-        psum = CabiePio.get([:need, :archetype], parch).data.to_i || 0
-        CabiePio.set [:need, :archetype], parch, psum-prev+now
       end
     end
   end
