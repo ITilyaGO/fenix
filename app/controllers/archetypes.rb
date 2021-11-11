@@ -201,7 +201,7 @@ Fenix::App.controllers :archetypes do
     ol_need = CabiePio.folder(:need, :order).flat
     oids = ol_need.keys.map{|r|r.split('_').last}.uniq
     os = oids.map{|id|KSM::OrderStatus.find(id)}
-      .select{|o|o.what?(:finished)||o.what?(:shipped)||o.what?(:canceled)}
+      .select{.reject{|o|!o.exist?||o.what?(:finished)||o.what?(:shipped)||o.what?(:canceled)||o.what?(:draft)}
     
     @os = os
     render 'archetypes/stock_clean'
@@ -211,7 +211,7 @@ Fenix::App.controllers :archetypes do
     ol_need = CabiePio.folder(:need, :order).flat
     oids = ol_need.keys.map{|r|r.split('_').last}.uniq
     os = oids.map{|id|KSM::OrderStatus.find(id)}
-      .select{|o|o.what?(:finished)||o.what?(:shipped)||o.what?(:canceled)}
+      .select{|o|!o.exist?||o.what?(:finished)||o.what?(:shipped)||o.what?(:canceled)||o.what?(:draft)}
     
     os.each{|s|arbal_need_order_rep(s)}
     redirect url(:archetypes, :stock_clean)
