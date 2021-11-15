@@ -1,6 +1,7 @@
 bottomworks.cube-panel.ted
   .tiny-text.text-center if='{products.length==0}' Нет работ
-  
+  .tiny-text.text-center if='{noresp}' Сервер не доступен
+
   /.pull-right
     .btn.btn-xs.btn-danger.rxs.hand if='{ selected.length > 0 }' onclick='{ start_over }' Сбросить
   .row if='{ products.length > 0 }': showcase: .glass
@@ -12,11 +13,10 @@ bottomworks.cube-panel.ted
         td
           /.badge.hand onclick='{ w_select }' class='{ invisible: !showadd }'
             | Добавить
-          .badge.hand onclick='{ w_select }' class='{ invisible: showadd }'
+          .btn-mask.hand onclick='{ w_select }' class='{ invisible: showadd }'
             | Выбрать
             / | { f.id }
         td
-          / a.btn-xxs.btn-steel.fa.fa-id-card-alt if='{ !trashmode }' href="/accounts/edit/{f.id}"
           .btn-xxs.far.fa-trash.btn-steel onclick='{put_trash}' if='{ trashmode }'
   
         
@@ -28,9 +28,7 @@ bottomworks.cube-panel.ted
     self.selected = []
     self.used = []
     self.available = []
-  
     self.token = document.querySelector("form [name^='auth']").value
-  
     
     init_selected() {
       var wi = self.flow_str.split(/[,\/]/)
@@ -106,8 +104,8 @@ bottomworks.cube-panel.ted
       var data = {
         // authenticity_token: self.token
       }
-  
-      fetch('http://0.0.0.0:4630/exile/1/works/available.json?' + opts.tech, {
+      var url = rsquad.config['url']
+      fetch(url + '/works/available.json', {
         method: "POST",
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams(data).toString()
@@ -120,6 +118,10 @@ bottomworks.cube-panel.ted
         self.init_available()
         // self.init_products()
         // rcontrol.trigger('SEARCH_READY', data)
+        self.update()
+      })
+      .catch(function(error) {
+        self.noresp = true
         self.update()
       })
 

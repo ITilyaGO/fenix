@@ -173,9 +173,9 @@ html lang='en'
           .col-xs-6
             = link_to "Админка", "https://yardekol.ru/a", :target => "_blank"
 
-      div id="content-wrapper"
-        div class="page-content"
-          div class="row header"
+      #content-wrapper
+        .page-content
+          .row.header
             .col-xs-12
               .pull-right
                 - if @print_btn
@@ -193,8 +193,12 @@ html lang='en'
                   = form_for 'logout', url(:sessions, :destroy), :method => :delete do
                     = submit_tag "выход", :class => "menu-icon btn btn-sm btn-clear"
 
-              .meta: .page
-                = @title
+              .meta
+                .page.flex-c
+                  span.title = @title
+                  |&nbsp;
+                  = yield_content :header
+                = yield_content :headerx
           
           = {:error => 'danger', :warning => 'warning', :success => 'success', :notice => 'info'}.map { |type, class_name| flash_tag(type, :class => "alert alert-#{class_name} alert-top") }.join.html_safe
           

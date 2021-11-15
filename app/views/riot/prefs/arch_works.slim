@@ -1,10 +1,6 @@
 archworks.cube-panel.ted
-  .tiny-text.text-center if='{products.length==0}' Нет работ
-  
-  /.pull-right
-    .btn.btn-xs.btn-danger.rxs.hand if='{ selected.length > 0 }' onclick='{ start_over }' Сбросить
+  .tiny-text.text-center if='{products.length==0}' Нет заготовок
   .row if='{ products.length > 0 }': showcase: .glass
-  
     table.table.table-hover: tbody
       tr each='{ f in available }'
         td width='70%'
@@ -12,15 +8,11 @@ archworks.cube-panel.ted
         td
           .label.label-warning if='{f.g}' группа
         td
-          /.badge.hand onclick='{ w_select }' class='{ invisible: !showadd }'
-            | Добавить
-          .badge.hand onclick='{ w_select }' class='{ invisible: showadd }'
+          .btn-mask.hand onclick='{ w_select }' class='{ invisible: showadd }'
             | Выбрать
-            / | { f.id }
         td
-          / a.btn-xxs.btn-steel.fa.fa-id-card-alt if='{ !trashmode }' href="/accounts/edit/{f.id}"
-          .btn-xxs.far.fa-trash.btn-steel onclick='{put_trash}' if='{ trashmode }'
-  
+          .fa.fa-lock if='{ f.bbid }'
+
         
   javascript:
     this.is_active = false
@@ -127,7 +119,7 @@ archworks.cube-panel.ted
     }
   
     self.on('mount', function() {
-      self.loadlist()
+      // self.loadlist()
     })
 
   

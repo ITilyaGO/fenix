@@ -1,7 +1,7 @@
 class KSM::Archetype < Doppel
   PFX = :archetype
 
-  PROPS = [:name, :category_id, :created_at, :g]
+  PROPS = [:name, :category_id, :created_at, :g, :bbid]
   attr_accessor *PROPS
 
   def group?

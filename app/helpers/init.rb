@@ -12,5 +12,6 @@ module Fenix
     helpers StatHelper
     helpers ArchetypeHelper
     helpers C1CHelper
+    helpers HttpReady
   end
 end

@@ -229,4 +229,12 @@ Fenix::App.controllers :archetypes do
     products = @archs.select{|a|a.category_id == cat}.map(&:to_r)
     products.to_json
   end
+
+  put :bbtie, :provides => :json do
+    arch = KSM::Archetype.find params[:left]
+    return {}.to_json unless arch.exist?
+    arch.bbid = params[:right]
+    arch.save
+    {}.to_json
+  end
 end

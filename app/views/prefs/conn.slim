@@ -1,20 +1,42 @@
-.ac-page style='height:100%;'
-  .pull-right
+- content_for :header do
+  .container.cmar-1.flex-c.vcenter
+    .btn-mask.bulb class=("bulb-#{@squadconf[:run] ? 'green' : 'red'}") = @squadconf[:run] ? 'включен' : 'выключен'
+    .btn-mask.chevron.hand riot-tag='shower' data-classy='.topset' опции
+
+- content_for :headerx do
+  .container.row.topset.hide
+    .col-md-8.col-md-offset-2.cotext-center
+      .hf1.text-center
+      = form_for :supermodel, url(:prefs, :connector) do |f|
+        .pull-right.form-actions
+          = f.submit :save, class: 'btn btn-sm btn-default'
+        .col-md-12
+          
+          fieldset.control-group
+            = f.label 'Выключатель', :class => 'col-md-3 control-label'
+            .col-md-3.controls.custom-control
+              = check_box_tag :run, :id => 'supermodel_run', :checked => @squadconf[:run], :class => 'custom-control-input'
+              label.custom-control-label(for = 'supermodel_run') &nbsp;
+          fieldset.control-group
+            = f.label 'Url', :class => 'col-md-3 control-label'
+            .col-md-6.controls
+              = f.text_field :url, :value => @squadconf[:url], :autocomplete => true, :class => 'form-control input-large'
+
+.ac-page
+  /.pull-right
     .col-lg-10.custom-control.custom-switch
       = check_box_tag :bypass, :id => :bypass, :class => 'custom-control-input', checked: true
       label.custom-control-label(for = 'bypass') Выключатель
   .clearfix
 
-  .flex-c.center.col-md-6.col-md-offset-3
-    dualpane
+  dualpane.white-sticky.blur
   .clearfix
-  br
   hr
     
   .col-md-12
     .col-md-6
-      .text-center: select name="archetype" class="huge mbl" riot-tag='selectload' action='PREFSCONN_SELECT'
-        = content_tag(:option, 'Не назначен', { value: '', selected:@archetype.nil? })
+      .text-center: select name="archetype" class="huge small mh350" riot-tag='selectload' action='PREFSCONN_SELECT'
+        = content_tag(:option, 'Выберите категорию')
         - @cats.each do |cat|
           optgroup label="#{cat.name}"
             - cat.subcategories.each do |sub|
@@ -39,6 +61,7 @@
   rscript type="riot/tag" src="/riot/tags/subclick.tag"
   rscript type="riot/tag" src="/riot/tags/switcher.tag"
   rscript type="riot/tag" src="/riot/tags/elhide.tag"
+  rscript type="riot/tag" src="/riot/tags/shower.tag"
   rscript type="riot/tag" src="/riot/tags/prefs/bottom_works.tag"
   rscript type="riot/tag" src="/riot/tags/prefs/arch_works.tag"
   rscript type="riot/tag" src="/riot/tags/prefs/dualpane.tag"
@@ -47,5 +70,7 @@
   javascript:
     
     document.addEventListener("DOMContentLoaded", function(event) {
-      riot.mount('idcollapser, subclick, switcher, elhide, bottomworks, archworks, dualpane, selectload')
-    });
+      riot.mount('idcollapser, subclick, switcher, shower, bottomworks, archworks, dualpane, selectload')
+      let confobj = #{{@squadconf.to_json}}
+      rsquad.saveConfig(confobj)
+    })

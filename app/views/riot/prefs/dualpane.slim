@@ -1,18 +1,16 @@
-dualpane
-  .col-md-12.flex-c style='justify-content: space-around;'
-    .left
-      | {leftname}
+dualpane.col-md-12 class='{opts.class}'
+  .vcenter.flex-c style='justify-content: space-around;'
+    .ab.left.col-md-6 class='{set:lid}'
+      | {leftname || 'A'}
     .mid.flex-v.center.vcenter
       .fa.fa-retweet
-      br
-      
-    .right
-      | {rightname}
+    .ab.right.col-md-6 class='{set:rid}'
+      | {rightname || 'B'}
   .text-center
-    .btn.btn-xs.btn-prime show="{lid&&rid}" связать
+    .btn.btn-xs.btn-prime class="{invisible: !lid||!rid}" onclick='{plussend}'
+      | связать
       
   javascript:
-    
     rcontrol.on('PREFSCONN_LEFT_SET', function(data) {
       self.lid = data.id
       self.leftname = data.name
@@ -24,3 +22,21 @@ dualpane
       self.rightname = data.name
       self.update()
     })
+
+    plussend() {
+      var data = {
+        authenticity_token: rsquad.token(),
+        left: self.lid,
+        right: self.rid
+      }
+      fetch('/archetypes/bbtie', {
+        method: "PUT",
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(data).toString()
+      })
+      .then(function(response) { return response.json() })
+      .then(function(data) {
+        self.lid = self.rid = self.leftname = self.rightname = null
+        self.update()
+      })
+    }

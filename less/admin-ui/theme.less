@@ -582,9 +582,45 @@ complex, sticker_line, .sticker-block {
     font-size: .5em;
   }
 }
+.btn-mask {
+  text-transform: uppercase;
+  font-size: .7em;
+  line-height: 1.6;
+  letter-spacing: .08em;
+  font-weight: 600;
+  color: #92a1c2;
+  // background: content-box;
+  line-height: 2.7;
+}
+.bulb {
+  &:before {
+    // content: '';
+    // padding: 4px 0;
+    // background: gray;
+    // border-radius: 50%;
+    // width: 5px;
+    // line-height: 2;
+    margin: 5px;
+    content: '\f111';
+    font-family: 'FontAwesome';
+  }
+  &.bulb-red:before {
+    color: #e48173;
+  }
+  &.bulb-green:before {
+    background: reen;color: #86e473;
+  }
+}
+.chevron {
+  &:before {
+    margin: 5px;
+    content: '\f107';
+    font-family: 'FontAwesome';
+  }
+}
 .header {
   .meta {
-    line-height: 2.6em;
+    line-height: 2.4em;
     padding-left: .5em;
   }
 
@@ -603,7 +639,17 @@ complex, sticker_line, .sticker-block {
   .item {
     margin-left: 1em;
   }
-
+}
+.header {
+  // color: #7c8bad;
+  // font-size: .8em;
+  // letter-spacing: .02em;
+}
+.white-sticky {
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 10;
 }
 
 .table-form > tbody > tr > td {
@@ -856,6 +902,25 @@ draftswitches {
     width: 100%;
   }
 }
+
+// prefs
+dualpane {
+  .ab {
+    border: rgba(214, 185, 100, 0.2) solid 2px;
+    background: rgba(226, 200, 124, 0.15);
+    border-radius: 4px;
+    margin: 10px 3em 0;
+    color: rgb(223, 206, 183);
+    text-align: center;
+
+    &.set {
+      border: rgba(100, 152, 214, 0.2) solid 2px;
+      background: rgba(160, 196, 224, 0.15);
+      color: rgb(144, 147, 161);
+    }
+  }
+}
+
 
 // timeline calendar tab
 #weeks_tab.nav-tabs {

@@ -48,12 +48,22 @@ Fenix::App.controllers :prefs do
   end
 
   get :connector do
-    @title = t 'tit.prefs.page'
+    @title = t 'tit.prefs.conn'
     @cats = Category.where(category: nil).order(:index => :asc)
     @categories = Category.all.includes(:category)
     @archs = KSM::Archetype.all
     @grouped = @archs.group_by{|a|a.category_id.to_i}
+    @squadconf = wonderbox(:bbconnector) || {}
     render 'prefs/conn'
+  end
+
+  post :connector do
+    form = params[:supermodel]
+    ena = params[:run] == '1'
+    data = { url: form[:url], run: ena }
+    wonderbox_set(:bbconnector, data)
+    
+    redirect url(:prefs, :connector)
   end
 
 end

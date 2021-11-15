@@ -1,0 +1,16 @@
+shower onclick='{ collapsy }'
+  / .w100 onclick='{ collapsy }'
+  yield
+  
+  javascript:
+    self.open = false
+    self.celement = opts.dataClassy
+    
+    collapsy() {
+      self.open = !self.open
+      if (self.celement) {
+        document.querySelectorAll(self.celement).forEach(function (el) {
+          el.classList.toggle('hide')
+        })
+      }
+    }
