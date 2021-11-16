@@ -20,6 +20,8 @@ table.table.table-hover.table-condensed
     th
     th.header Резерв
     th.header Город
+    th.header Дата
+    th.header Отправка
     th.header Заказчик
 
   - @olneed.each do |ol, value|
@@ -37,4 +39,8 @@ table.table.table-hover.table-condensed
         - code = @kc_orders[oid]
         - town_name = @kc_towns[code]&.model
         = partial 'bricks/kato/label_print', :locals => { town_name: town_name, el: order }
+      td.list-column = to_dm(order&.created_at) rescue nil
+      td.list-column
+        - odate = @kc_timelines[order&.id]
+        = to_dm(timeline_unf(odate)) if odate
       td.list-column = order&.client&.name

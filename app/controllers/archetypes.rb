@@ -123,6 +123,7 @@ Fenix::App.controllers :archetypes do
     codes = @kc_orders.values.uniq
     @kc_towns = KatoAPI.batch(codes)
     @kc_status = KSM::OrderStatus.find_all(oids)
+    @kc_timelines = CabiePio.all_keys(oids, folder: [:orders, :timeline]).flat.trans(:to_i)
 
     render 'archetypes/detail'
   end
