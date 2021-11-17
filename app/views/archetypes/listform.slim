@@ -1,0 +1,64 @@
+ul.nav.nav-tabs
+  li.active = link_to tag_icon(:list, :list), url(:archetypes, :index)
+  li = link_to tag_icon(:link, t('tit.archetypes.link')), url(:archetypes, :products)
+  li = link_to tag_icon(:flask, t('tit.archetypes.list')), url(:archetypes, :oindex)
+  li = link_to tag_icon(:plus, pat(:new)), url(:archetypes, :new)
+
+.page
+  .col-md-12
+    .col-md-6
+      .text-center.white-sticky: select name="categories" class="huge small mh350" riot-tag='selectload' action='PRODS_SELECT'
+        = content_tag(:option, 'Выберите категорию')
+        - @cats.each do |cat|
+          optgroup label="#{cat.name}"
+            - cat.subcategories.each do |sub|
+              - html_attributes = { :value => sub.id }
+              - html_attributes[:selected] ||= option_is_selected?(sub.id, sub.name, @arch.category_id)
+              = content_tag(:option, sub.name, html_attributes)
+              /- @grouped[sub.id]&.each do |a|
+                - next if a.group?
+                - html_attributes = { :value => a.id }
+                - html_attributes[:selected] ||= option_is_selected?(a.id, a.name, @archetype)
+                = content_tag(:option, a.name, html_attributes)
+      list reload='/archetypes/e/'
+    .col-md-6
+      = form_for @arch, url(:archetypes, :updatex, :id => @arch.id), :method => :put, :class => 'form-std' do |f|
+        fieldset.control-group.emb
+          label.control-label = @arch.id
+          .controls.wp100 = f.text_field :name, :class => 'form-control input-large input-with-feedback'
+        = partial 'archetypes/sideform', :locals => { :f => f, :cats => @cats }
+
+        /fieldset.control-group.hame
+          .alabel.label bb
+          label.control-label = @arch.bbid
+          .controls: .form-control: .fa.fa-exclamation-triangle.text-danger
+          / - a = KSM::Archetype.find @xproduct[:arn]
+          / - if @xproduct[:arn]
+          /   .controls.wp100 = f.text_field :arnt, value: a.name, :class => 'form-control input-large input-with-feedback'
+          / - else
+          /   .controls: .form-control: .fa.fa-exclamation-triangle.text-danger
+
+      /bottomworks
+  .clearfix
+
+
+- content_for :js_assets do
+  = javascript_include_tag :appa, :riot
+  / script type="riot/tag" src="/riot/tags/sticker_line.tag"
+  rscript type="riot/tag" src="/riot/tags/idcollapser.tag"
+  rscript type="riot/tag" src="/riot/tags/subclick.tag"
+  rscript type="riot/tag" src="/riot/tags/switcher.tag"
+  rscript type="riot/tag" src="/riot/tags/elhide.tag"
+  rscript type="riot/tag" src="/riot/tags/shower.tag"
+  rscript type="riot/tag" src="/riot/tags/prefs/bottom_works.tag"
+  rscript type="riot/tag" src="/riot/tags/archetypes/list.tag"
+  rscript type="riot/tag" src="/riot/tags/prefs/dualpane.tag"
+  rscript type="riot/tag" src="/riot/tags/prefs/selectload.tag"  
+
+  javascript:
+    
+    document.addEventListener("DOMContentLoaded", function(event) {
+      riot.mount('idcollapser, subclick, switcher, shower, bottomworks, list, dualpane, selectload')
+      let confobj = #{{@squadconf.to_json}}
+      rsquad.saveConfig(confobj)
+    })

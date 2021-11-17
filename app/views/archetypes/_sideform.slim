@@ -1,0 +1,73 @@
+- error = @arch.errors.include?(:name)
+fieldset class='control-group#{error ? ' has-error' : ''}'
+  = f.label :name, :class => 'control-label'
+  .controls.wp100
+    = f.text_field :name, :class => 'form-control input-large input-with-feedback'
+    / span class='help-inline' = error ? f.error_message_on(:name, :class => 'text-error') : pat(:example)
+fieldset.control-group
+  = f.label :category, :class => 'control-label'
+  .controls
+    select name="ksm_archetype[category_id]" class="huge mbl"
+      - cats.each do |cat|
+        optgroup label="#{cat.name}"
+          - cat.subcategories.each do |sub|
+            - html_attributes = { :value => sub.id }
+            - html_attributes[:selected] ||= option_is_selected?(sub.id, sub.name, @arch.category_id)
+            = content_tag(:option, "#{cat.name} – #{sub.name}", html_attributes)
+            // option value="#{sub.id}" = sub.name
+fieldset.control-group
+  = f.label :group, :class => 'control-label'
+  .controls.custom-control
+    = f.check_box :group, id: 'a_group', :checked => @arch.group?, :class => 'custom-control-input'
+    label.custom-control-label(for = 'a_group') &nbsp;
+br
+
+- error = @arch.errors.include?(:price)
+fieldset class='control-group#{error ? ' has-error' : ''}'
+  = f.label :bbn, :class => 'control-label'
+  div class='controls'
+    = f.text_field :bbid, :class => 'form-control input-large input-with-feedback'
+    / span class='help-inline' = error ? f.error_message_on(:price, :class => 'text-error') : pat(:example)
+- error = @arch.errors.include?(:des)
+/fieldset class='control-group#{error ? ' has-error' : ''}'
+  = f.label "#{:des} (артикул)", :class => 'control-label'
+  div class='controls'
+    = f.text_field :des, :class => 'form-control input-large input-with-feedback'
+    / span class='help-inline' = error ? f.error_message_on(:des, :class => 'text-error') : pat(:example)
+- error = @arch.errors.include?(:index)
+/fieldset class='control-group#{error ? ' has-error' : ''}'
+  = f.label :index, :class => 'control-label'
+  div class='controls'
+    = f.text_field :index, :class => 'form-control input-large input-with-feedback'
+    / span class='help-inline' = error ? f.error_message_on(:index, :class => 'text-error') : pat(:example)
+- error = @arch.errors.include?(:height)
+/fieldset class='control-group#{error ? ' has-error' : ''}'
+  = f.label "#{:height} (mm)", :class => 'control-label'
+  div class='controls'
+    = f.text_field :height, :class => 'form-control input-large input-with-feedback'
+    / span class='help-inline' = error ? f.error_message_on(:height, :class => 'text-error') : pat(:example)
+        // = sub.id == @product.category_id ? "selected" : ""
+          
+- error = @arch.errors.include?(:num_photos)
+/fieldset class='control-group#{error ? ' has-error' : ''}'
+  = f.label :num_photos, :class => 'control-label'
+  div class='controls'
+    = f.text_field :num_photos, :class => 'form-control input-large input-with-feedback'
+    / span class='help-inline' = error ? f.error_message_on(:num_photos, :class => 'text-error') : "Не редактируйте это поле"
+- error = @arch.errors.include?(:active)
+/fieldset class='control-group#{error ? ' has-error' : ''}'
+  = f.label :active, :class => 'control-label'
+  div class='controls'
+    = f.text_field :active, :class => 'form-control input-large input-with-feedback'
+    / span class='help-inline' = error ? f.error_message_on(:active, :class => 'text-error') : pat(:example)
+
+// = select_tag(:color, :include_blank => true, :grouped_options => [['warm',['red','yellow']],['cool',['blue', 'purple']]], :class => "select-block")
+// = categories_tag("product[category_id]", :grouped_options => @cats, :class => "select-block", :selected => @product.category_id)
+br
+
+/.form-actions
+  = f.submit pat(:save).downcase, :class => 'btn btn-sm btn-prime'
+  /|&nbsp;
+  /= f.submit pat(:save_and_continue), :class => 'btn btn-info', :name => 'save_and_continue'
+  /|&nbsp;
+  /= link_to pat(:cancel), url(:products, :index), :class => 'btn btn-default'

@@ -60,3 +60,84 @@
     // @include box-shadow($custom-control-indicator-checked-box-shadow);
   }
 }
+
+.form-std {
+  fieldset {
+    display: flex;
+    align-items: center;
+  }
+  label {
+    min-width: 150px;
+    text-align: right;
+    margin-right: 1em;
+    margin-bottom: 0;
+  }
+  .alabel {
+    background-color: rgba(22, 66, 13, 0.25);
+    color: white;
+    .absol();
+    top: 20%;
+    .label();
+    .caps();
+  }
+  .control-group.emb {
+    background: rgba(111, 98, 98, 0.1);
+    font-size: 1.6rem;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    align-items: baseline;
+    .relat();
+    .form-control {
+      background: transparent;
+    }
+    .title {
+      color: rgba(193, 181, 181, 1);
+      font-size: 1.5rem;
+    }
+  }
+  .control-group.embro {
+    .control-group.emb();
+    background: rgba(11, 136, 17, 0.1);
+    .alabel {
+      background-color: rgba(22, 66, 13, 0.25);
+    }
+  }
+  .control-group.hame {
+    .control-group.emb();
+    background: rgba(222, 205, 177, 0.17);
+    .alabel {
+      background-color: rgba(66, 59, 13, 0.25);
+    }
+  }
+  .form-control, .dropdown-toggle {
+    margin: 2px auto;
+    border: 0;
+    color: #34495e;
+    background: rgba(222, 205, 177, 0.17);
+    /* background: rgba(127, 255, 0, 0.05); */
+    line-height: 1.7;
+    
+    // &.main {
+    //   color: rgba(193, 181, 181, 1);
+    //   background: rgba(111, 98, 98, 0.1);
+    //   font-size: 1.6rem;
+    // }
+
+    &.ro {
+      background: rgba(11, 136, 17, 0.1);
+    }
+  }
+  .form-control {
+    padding: 6px 15px;
+  }
+  .control-label {
+    text-transform: uppercase;
+    font-size: 0.7em;
+    line-height: 1.6;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    color: rgba(11, 107, 112, 0.53);
+    line-height: 2.7;
+    color: rgba(43, 67, 88, 0.67);
+  }
+}

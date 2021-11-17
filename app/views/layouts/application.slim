@@ -124,7 +124,7 @@ html lang='en'
                 span class="menu-icon fa fa-flask"
             - if can_btn_view?(:stock, :archetypes) || allow_route?(:online)
               li.sidebar-list
-                = link_to url(:archetypes, :products) do
+                = link_to url(:archetypes, :index) do
                   | Связи на складе
                   span class="menu-icon fa fa-inbox"
 

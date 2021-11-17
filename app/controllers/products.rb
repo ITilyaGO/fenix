@@ -1,5 +1,6 @@
 Fenix::App.controllers :products do
   get :index do
+    redirect url(:products, :index2)
     @title = "Products"
     pagesize = PAGESIZE
     @page = !params[:page].nil? ? params[:page].to_i : 1
@@ -8,7 +9,34 @@ Fenix::App.controllers :products do
     @r = url(:products, :index)
     render 'products/index'
   end
-  
+
+  get :index2 do
+    @title = t 'tit.products.list'
+    @product = Product.new(id: -1)
+    @xproduct = {}
+    @cats = Category.where(category: nil).order(:index => :asc)
+    @categories = Category.all.includes(:category)
+    
+    render 'products/listform'
+  end
+
+  get :e, :with => :id do
+    @title = t 'tit.products.list'
+    @product = Product.find(params[:id])
+    @xproduct = {
+      n1c: CabiePio.get([:product, :k1c], @product.id).data,
+      arn: CabiePio.get([:product, :archetype], @product.id).data
+    }
+    @cats = Category.where(category: nil).order(:index => :asc)
+    @categories = Category.all.includes(:category)
+    @squadconf = @product.serializable_hash
+
+    render 'products/listform'
+  end
+
+  put :updatex, :with => :id do
+  end
+    
   get :new do
     @title = "New product"
     @product = Product.new

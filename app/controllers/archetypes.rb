@@ -1,5 +1,5 @@
 Fenix::App.controllers :archetypes do
-  get :index do
+  get :oindex do
     @title = "Archetypes"
     @cats = Category.where(category: nil).order(:index => :asc)
     @archetypes = KSM::Archetype.all
@@ -9,8 +9,6 @@ Fenix::App.controllers :archetypes do
     @grouped = @archs.group_by{|a|a.category_id.to_i}
     pagesize = PAGESIZE
     @page = !params[:page].nil? ? params[:page].to_i : 1
-    # @archetypes = Archetype.all.includes(:category).order(:updated_at => :desc).offset((@page-1)*pagesize).take(pagesize)
-    # @pages = (Archetype.count/pagesize).ceil
     @r = url(:archetypes, :index)
     render 'archetypes/index'
   end
@@ -29,6 +27,28 @@ Fenix::App.controllers :archetypes do
     render 'archetypes/products'
   end
   
+  get :index do
+    @title = t 'tit.archetypes.list'
+    @arch = KSM::Archetype.new(id: -1)
+    @cats = Category.where(category: nil).order(:index => :asc)
+    @categories = Category.all.includes(:category)
+    
+    render 'archetypes/listform'
+  end
+
+  get :e, :with => :id do
+    @title = t 'tit.archetypes.list'
+    @arch = KSM::Archetype.find(params[:id])
+    @cats = Category.where(category: nil).order(:index => :asc)
+    @categories = Category.all.includes(:category)
+    @squadconf = @arch.serializable_hash
+
+    render 'archetypes/listform'
+  end
+
+  put :updatex, :with => :id do
+  end
+
   get :new do
     @title = "New archetype"
     @archetype = KSM::Archetype.nest

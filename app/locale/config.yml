@@ -53,6 +53,8 @@ en:
       sections: Секции
       levels: Уровни
       users: Юзеры
+    products:
+      list: Продукция
   box:
     complexity: Сложность дня отправки
     stickday_threshold: Цена дня клейки

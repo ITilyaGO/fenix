@@ -1,0 +1,127 @@
+list.cube-panel.ted
+  .tiny-text.text-center if='{products.length==0}' Нет продукции в этой категории
+  .row if='{ products.length > 0 }': showcase: .glass
+    table.table.table-hover: tbody
+      tr each='{ f in available }'
+        td width='70%'
+          | { f.full || f.name || f.id }
+        td
+          .label.label-warning if='{f.g}' группа
+        td
+          .btn-mask.hand onclick='{ w_select }' class='{ invisible: showadd }'
+            | Выбрать
+        td
+          .fa.fa-lock if='{ f.bbid }'
+
+        
+  javascript:
+    this.is_active = false
+    self.showadd = opts.fit
+    self.trashmode = false
+    self.flow_str = opts.flow || ''
+    self.selected = []
+    self.used = []
+    self.available = []
+  
+    self.token = document.querySelector("form [name^='auth']").value
+  
+    
+    init_selected() {
+      var wi = self.flow_str.split(/[,\/]/)
+      var ri = []
+      wi.forEach(function(i) {
+        var el = self.products.find(el => el.tid && el.tid.includes(i))
+        // var i = wi.indexOf(el.id)
+        if (!el) return
+        self.used.push(el)
+        if (!el) el = { full: 'Неизвестно', id: 'fffffff' }
+        el.tid = i
+        self.selected.push(el)
+        // ri.push(i)
+      })
+      // ri.forEach(function(i) {
+      //   self.products.splice(i, 1)
+      // })
+    }
+  
+    init_available() {
+      self.available = []
+      self.products.forEach(function(el) {
+        // var el = self.products.find(el => el.tid && el.tid.includes(i))
+        // var i = wi.indexOf(el.id)
+        // if (!el.com && !el.global && el.orphan)
+        self.available.push(el)
+        // if (!el.global && el.orphan) self.available.push(el)
+        // if (!el) el = { full: 'Неизвестно', id: 'fffffff' }
+        // el.tid = i
+        // self.selected.push(el)
+        // ri.push(i)
+      })
+      self.used = self.products.filter(function(el) {
+        if (self.available.indexOf(el) > -1) return false 
+        //return el.id[0] == "2"
+        return !el.global && !el.com
+      })
+      self.gused = self.products.filter(function(el) {
+        return el.global || el.com
+      })
+      // ri.forEach(function(i) {
+      //   self.products.splice(i, 1)
+      // })
+    }
+  
+    
+  
+    start_over() {
+      self.selected = []
+      self.set_flow_str()
+    }
+  
+    w_select(a) {
+      // a.item.f.tid = null
+      self.selected.push(a.item.f)
+      // self.available.splice(self.available.indexOf(a.item.f), 1)
+      // rcontrol.trigger('PREFSCONN_LEFT_SET', a.item.f)
+
+      window.location.href = opts.reload + a.item.f.id
+    }
+  
+    w_unselect(a) {
+      self.selected.splice(self.selected.indexOf(a.item.f), 1)
+      self.set_flow_str()
+    }
+  
+    
+    rcontrol.on('PRODS_SELECT', function(data) {
+      self.loadlist(data)
+    })
+    
+    loadlist(cat) {
+      var data = {
+        authenticity_token: self.token,
+        cat: +cat
+      }
+  
+      fetch('/archetypes/list.json', {
+        method: "POST",
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(data).toString()
+      })
+      .then(function(response) { return response.json() })
+      .then(function(data) {
+        self.products = self.cache = data.sort((a, b) => a.name.localeCompare(b.name))
+        // self.local = self.products.filter(el => el.id[0] == "2")
+        self.init_selected()
+        self.init_available()
+        // self.init_products()
+        // rcontrol.trigger('SEARCH_READY', data)
+        self.update()
+      })
+  
+    }
+  
+    self.on('mount', function() {
+      self.loadlist(rsquad.config['category_id'])
+    })
+
+  

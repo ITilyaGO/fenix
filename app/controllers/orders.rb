@@ -568,7 +568,7 @@ Fenix::App.controllers :orders do
     order.actualize
     calc_complexity_for order
     # arbal_need_order_rep(order)
-    arbal_need_order_edit order
+    arbal_need_order_edit(order) unless order.draft?
     
     redirect(url(:orders, :draft))
   end

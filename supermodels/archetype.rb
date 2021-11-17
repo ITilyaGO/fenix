@@ -3,9 +3,15 @@ class KSM::Archetype < Doppel
 
   PROPS = [:name, :category_id, :created_at, :g, :bbid]
   attr_accessor *PROPS
+  attr_accessor :xt
 
   def group?
     @g
+  end
+
+  def n1c
+    xt ||= {}
+    xt[:n1c]
   end
   
   class << self
