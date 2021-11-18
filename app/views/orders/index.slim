@@ -70,7 +70,8 @@
         th class='header' Куда едет
         th.header width='50px'
         th class='header' Заказчик
-        th class='header' Дата
+        th.header
+          a href=local(sort: params[:sort] ? nil : :created_at) Дата
         th.header
           a href=local(seq: params[:seq] ? nil : :timeline) Отправка
         th class='header' Менеджер

@@ -35,7 +35,7 @@ ul class="nav nav-tabs"
           - if @xproduct[:arn]
             .controls.wp100 = f.text_field :arnt, value: a.name, :class => 'form-control input-large input-with-feedback'
           - else
-            .controls: .form-control: .fa.fa-exclamation-triangle.text-danger
+            .controls: .form-control: .fa.fa-exclamation-triangle.text-warning
 
         - c1c = CabiePio.get([:product, :k1c], @product.id).data
         fieldset.control-group.hame
@@ -45,7 +45,7 @@ ul class="nav nav-tabs"
             - k1c = KSM1C::Cat.find c1c
             .controls.wp100 = f.text_field :n1c, value: k1c&.at_path('НаименованиеПолное'), :class => 'form-control input-large'
           - else
-            .controls: .form-control: .fa.fa-exclamation-triangle.text-danger
+            .controls: .form-control: .fa.fa-exclamation-triangle.text-warning
 
       /bottomworks
   .clearfix

@@ -1,3 +1,36 @@
+- abl_view = @sections.map{|s|can_view_section?(:sections, :draft, s.id) ? s.id : nil }
+- kc_os = KSM::OrderStatus.find_all(@orders.map(&:id))
+- reveals = []
+- @orders.each do |order|
+  - os = kc_os.detect{|kc|kc.id.to_i == order.id} || KSM::OrderStatus.new(id: order.id)
+  - next if (abl_view & os.pstate.keys).empty?
+  - reveals << order
+
+- price_total = @orders.map(&:total).sum
+- all_ids = @orders.map(&:id)
+- sec_sums = sum_by_sections(all_ids)
+.timeline: .summary
+  - by_deli = sum_by_delivery(@orders)
+  - [:postage, :vernissage, :roundtrip, :pickup].each do |ds|
+    - if by_deli[ds] > 0
+      .item-orders.pull-left
+        span = t :"delivery.#{ds.to_s}"
+        .rpr == deli(rur by_deli[ds])
+
+  .pull-left
+  - sections = Section.all
+  - sections.each do |s|
+    - next unless can_view_section?(:sections, :sum, s.id)
+    - sec_sum = sec_sums.fetch(s.id, 0)
+    - if sec_sum > 0
+      .item-all.pull-left
+        span = s.name
+        .rpr == deli(rur sec_sum)
+
+  .item-all.pull-right
+    span Сумма заказов
+    .rpr == deli(rur price_total)
+
 .tabs-content
   table#list.table.table-hover.table-condensed
     thead
@@ -18,11 +51,8 @@
           rowsummer target='#list'
     
     tbody
-      - abl_view = @sections.map{|s|can_view_section?(:sections, :draft, s.id) ? s.id : nil }
-      - kc_os = KSM::OrderStatus.find_all(@orders.map(&:id))
-      - @orders.each do |order|
+      - reveals.each do |order|
         - os = kc_os.detect{|kc|kc.id.to_i == order.id} || KSM::OrderStatus.new(id: order.id)
-        - next if (abl_view & os.pstate.keys).empty?
         tr class='list-row' data-id=order.id
           td class='list-column list-selectable non-print' = check_box_tag 'order_ids[]', :autocomplete => "off", :value => order.id, :class => 'list-selectable-checkbox'
           td class='list-column'
