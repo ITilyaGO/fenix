@@ -1,0 +1,86 @@
+/ul class="nav nav-tabs"
+  li class="active" = link_to tag_icon(:list, pat(:list)), url(:products, :index)
+  li = link_to tag_icon(:'puzzle-piece', pat(:complex)), url(:products, :complexity)
+  li = link_to tag_icon(:ticket, pat(:sticker)), url(:products, :sticker)
+  li.pull-right = link_to tag_icon(:'file-excel-o', 'экспорт'), url(:products, :export, :win => '')
+  
+.page
+  .btn.btn-default riot-tag='switcher' t1='THINGS_LIST_OFF' t2='THINGS_LIST_ON' T
+  .col-md-12.content
+    
+    .col-md-6
+      .text-center.white-sticky: select name="categories" class="huge small mh350" riot-tag='selectload' action='PRODS_SELECT'
+        = content_tag(:option, 'Выберите категорию')
+        - @cats.each do |cat|
+          optgroup label="#{cat.name}"
+            - cat.subcategories.each do |sub|
+              - html_attributes = { :value => sub.id }
+              - html_attributes[:selected] ||= option_is_selected?(sub.id, sub.name, @product.category_id)
+              = content_tag(:option, sub.name, html_attributes)
+              /- @grouped[sub.id]&.each do |a|
+                - next if a.group?
+                - html_attributes = { :value => a.id }
+                - html_attributes[:selected] ||= option_is_selected?(a.id, a.name, @archetype)
+                = content_tag(:option, a.name, html_attributes)
+      list reload='/things/edit/'
+    .col-md-6
+      = form_for :product, url(:things, :update, :id => @product.id), :method => :put, :autocomplete => 'off', :class => 'form-std' do |f|
+        fieldset.control-group.emb
+          label.control-label = @product.id
+          .controls.wp100 = f.text_field :displayname, :class => 'form-control input-large input-with-feedback'
+        = partial 'things/sideform', :locals => { :f => f, :cats => @cats }
+
+        fieldset.control-group.hame
+          .alabel.label sku
+          label.control-label = @xproduct[:arn]
+          - a = KSM::Archetype.find @xproduct[:arn]
+          - if @xproduct[:arn]
+            .controls.wp100 = f.text_field :arnt, value: a.name, :class => 'form-control input-large input-with-feedback'
+          - else
+            .controls: .form-control: .fa.fa-exclamation-triangle.text-warning
+
+        - c1c = CabiePio.get([:product, :k1c], @product.id).data
+        fieldset.control-group.hame
+          .alabel.label 1c
+          label.control-label = @xproduct[:n1c][-12..-1] rescue nil
+          - if c1c
+            - k1c = KSM1C::Cat.find c1c
+            .controls.wp100 = f.text_field :n1c, value: k1c&.at_path('НаименованиеПолное'), :class => 'form-control input-large'
+          - else
+            .controls: .form-control: .fa.fa-exclamation-triangle.text-warning
+        .form-actions
+          = f.submit pat(:clone).downcase, :class => 'btn btn-sm btn-default', name: 'clone' 
+          |&nbsp;&nbsp;&nbsp;&nbsp;
+
+          = f.submit pat(:save).downcase, :class => 'btn btn-sm btn-prime'
+
+      /bottomworks
+  .clearfix
+  .table50.hide = partial 'things/table'
+  
+
+- content_for :js_assets do
+  = javascript_include_tag :appa, :riot
+  / script type="riot/tag" src="/riot/tags/sticker_line.tag"
+  / rscript type="riot/tag" src="/riot/tags/idcollapser.tag"
+  / rscript type="riot/tag" src="/riot/tags/subclick.tag"
+  rscript type="riot/tag" src="/riot/tags/switcher.tag"
+  rscript type="riot/tag" src="/riot/tags/elhide.tag"
+  rscript type="riot/tag" src="/riot/tags/shower.tag"
+  rscript type="riot/tag" src="/riot/tags/prefs/bottom_works.tag"
+  rscript type="riot/tag" src="/riot/tags/things/list.tag"
+  rscript type="riot/tag" src="/riot/tags/prefs/dualpane.tag"
+  rscript type="riot/tag" src="/riot/tags/prefs/selectload.tag"  
+
+  javascript:
+    
+    document.addEventListener("DOMContentLoaded", function(event) {
+      riot.mount('switcher, shower, bottomworks, elhide, list, dualpane, selectload')
+      let confobj = #{{@squadconf.to_json}}
+      rsquad.saveConfig(confobj)
+
+
+      let order_form = document.querySelector('.main-wrapper-push form')
+      DekolFu.init_kato_blood(order_form, 'kato_type', '"ksm_thing[place_id]"')
+
+    })

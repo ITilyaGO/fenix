@@ -1,0 +1,57 @@
+.f
+  table class="table table-hover table-condensed" id="list"
+    thead
+      tr
+        th class='header list-menu'
+          div class='dropdown'
+            /a href='#' class='list-menu-toggle.dropdown-toggle dropdown-toggle' data-toggle='dropdown'
+              = tag_icon :magic
+            ul class='list-menu dropdown-menu' role='dropdown'
+              li class='list-menu-wrapper' = link_to tag_icon(:check, pat(:select_all)), '#', :id => 'select-all', :class => 'list-menu-link'
+              li class='list-menu-wrapper list-menu-wrapper-disabled' = link_to tag_icon('check-empty', pat(:deselect_all)), '#', :id => 'deselect-all', :class => 'list-menu-link list-menu-link-disabled'
+              li class='list-menu-divider divider'
+              li class='list-menu-wrapper list-menu-wrapper-disabled'
+                = link_to tag_icon(:trash, pat(:delete_selected)), '#', :id => 'delete-selected', :class => 'list-menu-link list-menu-link-disabled'
+                div class='list-menu-popover-delete-selected popover right'
+                  div class='arrow'
+                  h3 class='popover-title' = pat(:delete_selected_title)
+                  div class='popover-content'
+                    = form_tag url(:products, :destroy_many), :method => :delete do
+                      = hidden_field_tag :product_ids, :'data-delete-many-ids' => true
+                      = submit_tag  pat(:delete), :class =>'list-menu-popover-delete-selected-btn btn btn-danger btn-small'
+                      div class='btn btn-default btn-small cancel' = pat(:cancel)
+        th class='header' = mat(:product, :id)
+        th class='header' = mat(:product, :name)
+        th class='header' = mat(:product, :place)
+        th class='header' = mat(:product, :price)
+        th class='header' = mat(:product, :category)
+        th class='header' = mat(:product, :date)
+        th class='header list-row-action-header'
+
+    tbody
+      .list-row
+        td &nbsp;
+        td &nbsp;
+        td colspan=5 = link_to 'Новый продукт', url(:things, :edit, id: '0000'), style: 'line-height:2.3;'
+        td.list-row-action
+          div class='list-row-action-wrapper'
+            = link_to tag_icon(:edit), :href => url(:things, :edit, :id => '0000'), :rel => :tooltip, :title => "#{pat(:edit)} product", :class => 'list-row-action-wrapper-link'
+      - @products.each do |product|
+        tr class='list-row'
+          td class='list-column list-selectable' = check_box_tag 'product_ids[]', :value => product.id, :class => 'list-selectable-checkbox'
+          td class='list-column' = product.id
+          td class='list-column' = product.displayname
+          td.list-column
+            = town_name = @kc_towns[product.place_id]&.model.name
+          td class='list-column'
+            == rur product.price
+          td class='list-column'
+            = product.category&.category.name
+            '&nbsp;–
+            = product.category&.name
+          td class='list-column'
+            = to_msk(product.updated_at)
+          td class='list-column list-row-action'
+            div class='list-row-action-wrapper'
+              //span class='list-row-action-wrapper-link' 1
+              = link_to tag_icon(:edit), :href => url(:things, :edit, :id => product.id), :rel => :tooltip, :title => "#{pat(:edit)} product", :class => 'list-row-action-wrapper-link'
