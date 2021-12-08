@@ -1,7 +1,7 @@
 class KSM::Thing < Doppel
   PFX = :thing
 
-  PROPS = [:name, :category_id, :place_id, :sketch_id, :company_id, :barcode, :price, :sku, :art, :created_at, :g, :bbid]
+  PROPS = [:name, :sn, :category_id, :place_id, :sketch_id, :company_id, :barcode, :price, :sku, :art, :created_at, :g, :bbid]
   SVSPROPS = [:created_at, :updated_at, :dates, :users, :history]
   PROPS += SVSPROPS
   attr_accessor *PROPS
@@ -16,11 +16,23 @@ class KSM::Thing < Doppel
   end
 
   def category
-    Category.find @category_id
+    KSM::Category.find @category_id
   end
 
   def updated_at
     @updated_at || Date.new(1970,1,1)
+  end
+
+  def autoart
+    nums = ["%02i" % category.section.sn.to_i, category.sequ, "%06i" % sn.to_i].join('.')
+  end
+
+  def autobar
+    "%012i" % autoart.gsub(/\./, '').to_i
+  end
+
+  def sketch_ext
+    "#{autoart}.jpg"
   end
 
   def n1c

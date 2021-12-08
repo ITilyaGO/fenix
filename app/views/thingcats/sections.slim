@@ -1,0 +1,36 @@
+.corners.c1.col-md-4: .c-panel.col-md-12
+  .text-center.title Отделы
+  .cmar-05
+    /= link_to url(:accounts, :new) do
+      .btn.btn-xs.btn-secondary.rxs
+        .fa.fa-plus
+        ' &nbsp;
+        | Новый работник
+    /= link_to 'новый', url(:accounts, :new), class: 'btn btn-xs rxs btn-default'
+      / = link_to 'для печати', url(:accounts, :printusers), class: 'btn btn-xs rxs btn-info'
+    = form_for :supermodel, url(:thingcats, :section) do |f|
+      / - domain = KSM::Box.dig(:domain)
+      - if @section
+        = f.hidden_field :id, :name => :id
+      fieldset.controls-inline.control-group
+        = f.label :name, :class => 'control-label'
+        .controls
+          = f.text_field :name, :class => 'form-control input-large', required: true, :autocomplete => "off"
+      fieldset.controls-inline.control-group
+        = f.label :num, :class => 'control-label'
+        .controls
+          = f.text_field :snum, :class => 'form-control input-large', required: false, pattern: '[0-9]{1,4}',
+            :autocomplete => "off", value: @section&.sn
+      .form-actions = f.submit :save, :class => 'btn btn-prime btn-xs'
+  hr
+
+  .ted: table.table.table-hover
+    - @sections.each do |sec|
+      tr.list-row data-rowid=sec.id
+        td.list-column
+          = sec.name
+        td
+          sub.tiny-text = "%02i" % sec.sn.to_i
+        td.text-end
+          a.btn-xxs.btn-steel.fa.fa-pencil href=url(:thingcats, :section, :id => sec.id)
+  .clearfix

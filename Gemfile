@@ -32,6 +32,7 @@ gem 'princely'
 gem 'libxml-ruby'
 gem 'nokogiri'
 gem 'ox'
+gem 'barby'
 #gem 'simple_enum'
 #gem 'classy_enum'
 

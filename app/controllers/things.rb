@@ -59,12 +59,9 @@ Fenix::App.controllers :things do
     @product = KSM::Thing.nest if params[:id] == '0000' || params[:clone]
     form = params[:ksm_thing]
     @product.fill **KSM::Thing.formize(form), merge: true
+    @product.sn ||= thing_seed_from @product.category_id
     @product.saved_by @current_account
-    bo = wonderbox(:things_by_date)
-    bo.unshift
-    bo.delete @product.id
-    bo << @product.id
-    wonderbox_set(:things_by_date, bo)
+    thing_to_top @product.id
     if @product
       if true
         flash[:success] = pat(:update_success, :model => 'Product', :id =>  "#{params[:id]}")

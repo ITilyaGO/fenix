@@ -50,6 +50,8 @@ end
 #
 Padrino.after_load do
   require 'csv'
+  require 'barby/barcode/ean_13'
+  require 'barby/outputter/svg_outputter'
 end
 
 Padrino.load!

@@ -1271,6 +1271,48 @@ allworks, localworks, .cube-panel {
   padding-top: 0;
 }
 
+deepdown, deepdown-ms {
+  .relat();
+  display: block;
+  user-select: none;
+
+  .dropdown-toggle {
+    .wp100();
+  }
+  .deepdown-float {
+    max-height: 45vh;
+    overflow-y: scroll;
+    margin-top: -2px;
+    border: 2px solid rgb(227, 227, 227);
+    border-radius: 0 0 6px 6px;
+    padding: 2px 4px;
+    // border-top: 0;
+    .item {
+      margin-bottom: 3px;
+      .btn {
+        text-align: left;
+      }
+      // &:hover {
+      //   background: red;
+      //   color: unset;
+      // }
+      &:first-child {
+        margin-top: 4px;
+      }
+    }
+  }
+  
+  &.detach .deepdown-float{
+    margin-top: 0;
+    position: absolute;
+    background: white;
+    width: 100%;
+    z-index: 10;
+    display: block;
+    top: 100%;
+  }
+}
+
 
 .icash {
   font-size: .9em;

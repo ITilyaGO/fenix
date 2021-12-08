@@ -13,5 +13,7 @@ module Fenix
     helpers ArchetypeHelper
     helpers C1CHelper
     helpers HttpHelper
+
+    helpers ThingsHelper
   end
 end

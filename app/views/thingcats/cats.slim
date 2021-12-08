@@ -1,0 +1,48 @@
+.corners.c1.col-md-4: .c-panel.col-md-12
+  .text-center.title Категории
+  .cmar-05
+    /= link_to url(:accounts, :new) do
+      .btn.btn-xs.btn-secondary.rxs
+        .fa.fa-plus
+        ' &nbsp;
+        | Новый работник
+    /= link_to 'новый', url(:accounts, :new), class: 'btn btn-xs rxs btn-default'
+      / = link_to 'для печати', url(:accounts, :printusers), class: 'btn btn-xs rxs btn-info'
+    = form_for :supermodel, url(:thingcats, :category) do |f|
+      / - domain = KSM::Box.dig(:domain)
+      - if @category
+        = f.hidden_field :id, :name => :id
+      fieldset.controls-inline.control-group
+        = f.label :name, :class => 'control-label'
+        .controls
+          = f.text_field :name, :class => 'form-control input-large', required: true, :autocomplete => "off"
+      fieldset.controls-inline.control-group
+        = f.label :num, :class => 'control-label'
+        .controls
+          = f.text_field :snum, :class => 'form-control input-large', required: false, pattern: '[0-9]{1,4}',
+            :autocomplete => "off", value: @category&.sn
+      fieldset.control-group
+        = f.label 'цех', :class => 'control-label'
+        .controls
+          - sections = KSM::Section.all.map{|a|[a.name, a.id, { selected: option_is_selected?(a.id, a.name, @category&.section_id)}]}
+          = f.select :section_id, options: sections, class: "huge mbl"
+      fieldset.control-group
+        = f.label :category, :class => 'control-label'
+        .controls
+          - categories = KSM::Category.all.map{|a|[a.name, a.id, { selected: option_is_selected?(a.id, a.name, @category&.category_id)}]}
+          - categories.unshift ['Нет', '']
+          = f.select :category_id, options: categories, class: "huge mbl"
+      .form-actions = f.submit :save, :class => 'btn btn-prime btn-xs'
+  hr
+
+  .ted: table.table.table-hover
+    - @categories.each do |category|
+      tr.list-row data-rowid=category.id
+        td.list-column
+          = category.display
+        td
+          sub.tiny-text = category.sequ
+
+        td.text-end
+          a.btn-xxs.btn-steel.fa.fa-pencil href=url(:thingcats, :category, :id => category.id)
+  .clearfix

@@ -220,6 +220,14 @@ module Fenix::App::ProductsHelper
     @category_matrix ||= Category.all.pluck(:id, :category_id).to_h
   end
 
+  def section_matrix
+    @section_matrix ||= Category.where(category_id: nil).pluck(:id, :section_id).to_h
+  end
+
+  def category_grouped
+    @cat_group ||= Category.all.group_by(&:category_id)
+  end
+
   def category_parent(product)
 
   end

@@ -1,0 +1,132 @@
+deepdown-ms.deepdown.detach
+  .bootstrap-select
+    .dropdown-toggle.btn.btn-sm.btn-steel onclick='{toggle}'
+      /# = hidden_field_tag :"supermodel[second]", value: work&.second_id
+      input.form-control[
+        type='hidden' value='{selected_id}' id='{opts.dataId}' name='{opts.dataName}'
+      ]
+      span.filter-option.pull-left
+        | { display }
+      span.pull-right.fa.fa-chevron-down
+
+  .deepdown-float class='{hide: !opened}'
+    .item each='{ f in common }'
+      .btn.btn-xs.btn-thru.wp100 class='{btn-info:selected_id==f.id}' onclick='{ w_select }'
+        | { f.name }
+
+      .item-child each='{ c in f.childs }'
+        .btn.btn-xs.btn-thru.wp100 class='{btn-info:selected_id==c.id}' onclick='{ w_select }'
+          | { f.name } – { c.name }
+    
+
+  javascript:
+    this.title = opts.title
+    self.opened = false
+    self.src = opts.src
+    self.selected_id = opts.displayId
+
+    w_select(a) {
+      let item = a.item.f || a.item.c
+      self.selected_id = item.id
+      self.display = item.name
+      // self.in_select(a.item.f)
+      rcontrol.trigger("DEEPDOWN_MS_LOAD", { section: self.selected_id, target: opts.target })
+      self.close()
+    }
+    
+    in_select(item) {
+      self.selected_id = item.id
+      self.backel.innerText = item.name
+      if (self.backinp) self.backinp.value = self.selected_id
+      if (self.back_text) {
+        var btext = document.getElementById(self.back_text)
+        if (btext && btext.value.length == 0) btext.value = item.name
+      }
+      self.refocus()
+    }
+
+    reinit() {
+      self.backel = document.getElementById(self.back_id)
+      self.backinp = self.backel.parentNode.querySelector('input')
+      if (self.backinp) self.selected_id = self.backinp.value
+      self.refocus()
+    }
+
+    refocus() {
+      self.update()
+      var al = self.root.querySelector('.item .btn-info')
+      //if (al && al.nextElementSibling) al = al.nextElementSibling
+      if (al && al.scrollIntoViewIfNeeded) al.scrollIntoViewIfNeeded()
+    }
+
+    toggle() {
+      // rcontrol.trigger("DEEPDOWN_CLOSE")
+      self.opened = !self.opened
+      let opened = self.opened
+      self.refocus()
+    }
+
+    close() {
+      self.opened = false
+      self.update()
+    }
+    
+    open(data) {
+      self.title = data.title
+      self.src = data.src
+      self.back_id = data.scomp
+      self.selected_id = null
+      self.back_text = data.dcomp
+      self.reinit()
+
+      document.body.classList.add('modal-open')
+      document.querySelector('.modal-backdrop').classList.remove('hide')
+      self.open_class = 'flex in'
+      document.addEventListener('touchmove', self.preventer)
+    }
+
+    rcontrol.on("DEEPDOWN_OPEN", function(data) {
+      self.open(data)
+      self.update()
+    })
+
+    rcontrol.on("DEEPDOWN_CLOSE", function(data) {
+      self.close()
+    })
+
+    rcontrol.on("DEEPDOWN_MS_LOAD", function(data) {
+      if (data.target == opts.listen)
+        self.loadlist(data.section)
+    })
+
+    loadlist(section_id) {
+      var data = {
+        authenticity_token: rsquad.token(),
+        section: section_id
+      }
+
+      fetch('/' + opts.dataUrl + '.json', {
+        method: "POST",
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(data).toString()
+      })
+      .then(function(response) { return response.json() })
+      .then(function(data) {
+        self.common = data.sort((a, b) => a.name.localeCompare(b.name))
+        // self.common.push({ id: 'h0', name: 'Нет'})
+        self.common.push({ name: 'Нет'})
+        var fel = self.common.find(el => el.id == self.selected_id)
+        if (fel) self.display = fel.name
+        else self.display = self.common[self.common.length-1].name
+        // self.init_products()
+        // rcontrol.trigger('SEARCH_READY', data)
+        self.update()
+        // self.init_search()
+      })
+    }
+
+    self.on('mount', function() {
+      self.loadlist(opts.dataSid)
+    })
+
+    

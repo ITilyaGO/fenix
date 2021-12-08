@@ -2,9 +2,14 @@
 fieldset class='control-group#{error ? ' has-error' : ''}'
   = f.label :name, :class => 'control-label'
   .controls.wp100
-    = f.text_field :name, :class => 'form-control input-large input-with-feedback'
+    = f.text_field :name, :class => 'form-control input-large input-with-feedback', :required => true
     / span class='help-inline' = error ? f.error_message_on(:name, :class => 'text-error') : pat(:example)
-fieldset class='control-group#{error ? ' has-error' : ''}'
+/fieldset.control-group
+  = f.label 'цех', :class => 'control-label'
+  .controls
+    - sections = Section.all.map{|a|[a.name, a.id, { selected: option_is_selected?(a.id, a.name, @product.category.category.section_id)}]}
+    = f.select :brand_id, options: sections, class: "huge mbl"
+/fieldset class='control-group#{error ? ' has-error' : ''}'
   = f.label :category, :class => 'control-label'
   .controls
     - grouped = {}
@@ -14,6 +19,19 @@ fieldset class='control-group#{error ? ' has-error' : ''}'
         - opt = ["#{cat.name} – #{sub.name}", sub.id, { selected: option_is_selected?(sub.id, sub.name, @product.category_id) }]
         - grouped[cat.name] << opt
     = f.select :category_id, grouped_options: grouped, class: "huge mbl"
+
+fieldset class='control-group#{error ? ' has-error' : ''}'
+  = f.label 'цех', :class => 'control-label'
+  .controls.wp100
+    deepdown-ms display-id=@product.category.category.section_id data-url='aux/sections' target='sd'
+
+fieldset class='control-group#{error ? ' has-error' : ''}'
+  = f.label :category, :class => 'control-label'
+  .controls.wp100
+    deepdown-ms[
+      display-id=@product.category_id data-url='aux/categories'
+      data-sid=@product.category.section_id data-name='ksm_thing[category_id]' listen='sd'
+    ]
 
 fieldset class='control-group'
   = f.label "Город", :class => 'control-label'
@@ -32,8 +50,18 @@ fieldset class='control-group#{error ? ' has-error' : ''}'
 fieldset class='control-group#{error ? ' has-error' : ''}'
   = f.label "артикул", :class => 'control-label'
   div class='controls'
-    = f.text_field :art, :class => 'form-control input-large input-with-feedback'
+    = f.text_field :art, :class => 'form-control input-large input-with-feedback', value: @product.autoart
     / span class='help-inline' = error ? f.error_message_on(:des, :class => 'text-error') : pat(:example)
+- error = @product.errors.include?(:des)
+fieldset class='control-group#{error ? ' has-error' : ''}'
+  = f.label :sku, :class => 'control-label'
+  div class='controls'
+    = f.text_field :sku, :class => 'form-control input-large input-with-feedback'
+- error = @product.errors.include?(:des)
+fieldset class='control-group#{error ? ' has-error' : ''}'
+  = f.label 'деколь', :class => 'control-label'
+  div class='controls'
+    = f.text_field :sketch, :class => 'form-control input-large input-with-feedback', value: @product.sketch_ext
 - error = @product.errors.include?(:weight)
 fieldset class='control-group#{error ? ' has-error' : ''}'
   = f.label "#{:weight} (g)", :class => 'control-label'
@@ -53,8 +81,20 @@ fieldset class='control-group#{error ? ' has-error' : ''}'
 fieldset class='control-group#{error ? ' has-error' : ''}'
   = f.label :barcode, :class => 'control-label'
   div class='controls'
-    = f.text_field :barcode, :class => 'form-control input-large input-with-feedback'
-          
+    = f.text_field :barcode, :class => 'form-control input-large input-with-feedback', value: @product.autobar
+
+fieldset.control-group
+  /= f.label :ean13, :class => 'control-label'
+  .controls.text-center.wp100 style='margin-top: 3em;'
+    /# = f.label :ean13, :class => 'control-label'
+    - barcode13 = Barby::EAN13.new(@product.autobar) rescue nil
+    - if barcode13
+      
+      - File.open("public/barcode/#{@product.id}.svg", 'w'){|f| f.write barcode13.to_svg(margin: 0, foreground: '#565d5e') }
+      .controls: .im = image_tag "/barcode/#{@product.id}.svg", style: 'height: 4ch;width: 30ch;'
+    - else
+      .controls: .fa.fa-exclamation-triangle.text-warning
+
 - error = @product.errors.include?(:num_photos)
 /fieldset class='control-group#{error ? ' has-error' : ''}'
   = f.label :num_photos, :class => 'control-label'

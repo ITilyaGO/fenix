@@ -5,10 +5,10 @@
   li.pull-right = link_to tag_icon(:'file-excel-o', 'экспорт'), url(:products, :export, :win => '')
   
 .page
-  .btn.btn-default riot-tag='switcher' t1='THINGS_LIST_OFF' t2='THINGS_LIST_ON' T
+  .btn.btn-snow.mask.default.fa.fa-table riot-tag='switcher' t1='THINGS_LIST_OFF' t2='THINGS_LIST_ON'
   .col-md-12.content
     
-    .col-md-6
+    .col-md-6.hide
       .text-center.white-sticky: select name="categories" class="huge small mh350" riot-tag='selectload' action='PRODS_SELECT'
         = content_tag(:option, 'Выберите категорию')
         - @cats.each do |cat|
@@ -23,7 +23,7 @@
                 - html_attributes[:selected] ||= option_is_selected?(a.id, a.name, @archetype)
                 = content_tag(:option, a.name, html_attributes)
       list reload='/things/edit/'
-    .col-md-6
+    .col-md-6.col-md-offset-3
       = form_for :product, url(:things, :update, :id => @product.id), :method => :put, :autocomplete => 'off', :class => 'form-std' do |f|
         fieldset.control-group.emb
           label.control-label = @product.id
@@ -31,7 +31,7 @@
         = partial 'things/sideform', :locals => { :f => f, :cats => @cats }
 
         fieldset.control-group.hame
-          .alabel.label sku
+          .alabel.label bku
           label.control-label = @xproduct[:arn]
           - a = KSM::Archetype.find @xproduct[:arn]
           - if @xproduct[:arn]
@@ -49,7 +49,7 @@
           - else
             .controls: .form-control: .fa.fa-exclamation-triangle.text-warning
         .form-actions
-          = f.submit pat(:clone).downcase, :class => 'btn btn-sm btn-default', name: 'clone' 
+          = f.submit pat(:copy).downcase, :class => 'btn btn-sm btn-default', name: 'clone' 
           |&nbsp;&nbsp;&nbsp;&nbsp;
 
           = f.submit pat(:save).downcase, :class => 'btn btn-sm btn-prime'
@@ -57,13 +57,14 @@
       /bottomworks
   .clearfix
   .table50.hide = partial 'things/table'
-  
 
 - content_for :js_assets do
   = javascript_include_tag :appa, :riot
   / script type="riot/tag" src="/riot/tags/sticker_line.tag"
   / rscript type="riot/tag" src="/riot/tags/idcollapser.tag"
   / rscript type="riot/tag" src="/riot/tags/subclick.tag"
+  rscript type="riot/tag" src="/riot/tags/deepdown.tag"
+  rscript type="riot/tag" src="/riot/tags/deepdown_ms.tag"
   rscript type="riot/tag" src="/riot/tags/switcher.tag"
   rscript type="riot/tag" src="/riot/tags/elhide.tag"
   rscript type="riot/tag" src="/riot/tags/shower.tag"
@@ -75,7 +76,7 @@
   javascript:
     
     document.addEventListener("DOMContentLoaded", function(event) {
-      riot.mount('switcher, shower, bottomworks, elhide, list, dualpane, selectload')
+      riot.mount('switcher, shower, bottomworks, elhide, list, dualpane, selectload, deepdown-ms')
       let confobj = #{{@squadconf.to_json}}
       rsquad.saveConfig(confobj)
 
