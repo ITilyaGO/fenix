@@ -72,6 +72,59 @@ Fenix::App.controllers :statistic do
     # end
   end
 
+  get :orders_frame_start do
+    from = timeline_id Date.today-3
+    to = timeline_id Date.today
+    redirect url(:statistic, :orders_frame, :from => from, :to => to)
+  end
+
+  post :orders_frame_start do
+    redirect url(:statistic, :orders_frame, :from => params[:from], :to => params[:to])
+  end
+
+  get :orders_frame, :provides => [:html, :csv] do
+    @title = "Statistics - текущие заказы"
+    id = params[:id]
+    @from = timeline_unf params[:from]
+    @to = timeline_unf params[:to]
+    too_much = (@to-@from).ceil > 31
+    if too_much
+      @pretty_stat = @orders = []
+      flash[:warning] = 'больше 30 дней'
+      return render 'statistic/orders_frame'
+    end
+    @orders = Order.where("status > ?", Order.statuses[:draft])
+      .where("created_at > ?", @from).where("created_at <= ?", @to)
+    stat = OrderLine.where(order_id: @orders)
+      .joins(:product, :product => :category)
+      .group(:product_id, "products.'index'", "categories.'index'")
+      .order("categories_index", "products_index")
+      .sum(:amount)
+    @pretty_stat = []
+    stat.each do |item|
+      pid = item[0][0]
+      p = Product.find(item[0][0])
+      @pretty_stat << { :id => pid, :category => p.category.name, :name => p.displayname, :sum => item[1] }
+    end
+    
+    case content_type
+      when :html then render 'statistic/orders_frame'
+      when :csv then begin
+        fname = 'statistics-' + @category.name + '.csv'
+        headers['Content-Disposition'] = "attachment; filename=#{fname}"
+        output = ''
+        output = "\xEF\xBB\xBF" if params.include? :win
+        output << CSV.generate(:col_sep => ';') do |csv|
+          # csv << "\xEF\xBB\xBF" if params[:win]
+          # csv << %w(id name num)
+          @pretty_stat.each do |item|
+            csv << [item[:category].encode('utf-8'), item[:name].encode('utf-8'), item[:sum]]
+          end
+        end
+      end
+    end
+  end
+
   get :finished do
     @title = "Statistics - готовые заказы"
     @cats = Category.where(:category_id => nil)
