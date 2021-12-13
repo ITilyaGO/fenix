@@ -45,4 +45,10 @@ Fenix::App.controllers :aux do
     end
     usergroups.to_json
   end
+
+  post :current_orders, :provides => :json do
+    orders = Order.where("status > ?", Order.statuses[:draft]).where("status < ?", Order.statuses[:finished]).pluck(:id)
+    results = orders.map{|a|{id:a, keyword:a.to_s}}
+    results.to_json
+  end
 end

@@ -1,0 +1,28 @@
+.tabs-content
+  table class="table table-hover table-condensed" id="list"
+    thead
+      tr
+        th class='header list-menu non-print'
+        th.header Номер
+        th.header
+        th.header
+        th.header
+        th class='header list-row-action-header non-print'
+          rowsummer target='#list'
+    
+    tbody
+      - @draws.each do |draw|
+        tr class='list-row non-print'
+          td class='list-column list-selectable non-print' = check_box_tag 'order_ids[]', :autocomplete => "off", :class => 'list-selectable-checkbox'
+          td.list-column
+            = "#{draw.id}"
+          td.list-column
+            = draw.date   
+          td.list-column
+            = draw.displayname
+          td.list-column
+            = draw.amount
+          
+          
+          td class='list-column list-row-action non-print'
+            .list-row-action-wrapper

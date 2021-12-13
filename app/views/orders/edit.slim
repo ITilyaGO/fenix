@@ -101,7 +101,9 @@ ul class="nav nav-tabs non-print"
     - if @stickday_date
       p Дата клейки: #{to_msk(@stickday_date)}
     p Менеджер: #{@manager&.name}
-
+    .cmar-04a
+      - KSM::Draw.find_all(order_draws_for(@order.id)).each do |d|
+        .label.label-default = d.displayname
   
   .col-md-4
     - if !@order.description.blank?
