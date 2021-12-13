@@ -1,7 +1,9 @@
 module Cabie::Structure
   KEYMAP = {
+    [:p, :anewdate, :order] => nil,
     [:p, :clients, :hometowns] => nil,
     [:p, :clients, :delivery_towns] => nil,
+    [:p, :orders, :anewdate] => nil,
     [:p, :orders, :cash] => nil,
     [:p, :orders, :towns] => nil,
     [:p, :orders, :delivery_towns] => nil,

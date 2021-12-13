@@ -580,6 +580,9 @@ Fenix::App.controllers :orders do
       if timeline_date = Date.parse(delivery_at) rescue nil
         CabiePio.set [:timeline, :order], timeline_order(order.id, timeline_date), order.id
         CabiePio.set [:orders, :timeline], order.id, timeline_id(timeline_date)
+
+        CabiePio.set [:anewdate, :order], timeline_order(order.id), order.id
+        CabiePio.set [:orders, :anewdate], order.id, timeline_id
       else
         return { error: true }.to_json
       end
@@ -602,6 +605,11 @@ Fenix::App.controllers :orders do
       current_tl = timeline_unf(current_kc) if current_kc
       CabiePio.unset [:timeline, :order], timeline_order(order.id, current_tl) if current_kc
       CabiePio.unset [:orders, :timeline], order.id
+
+      current_an = CabiePio.get([:orders, :anewdate], order.id).data
+      current_da = timeline_unf(current_an) if current_an
+      CabiePio.unset [:anewdate, :order], timeline_order(order.id, current_da) if current_an
+      CabiePio.unset [:orders, :anewdate], order.id
 
       order.status = :draft
       order.save

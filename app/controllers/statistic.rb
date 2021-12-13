@@ -93,8 +93,12 @@ Fenix::App.controllers :statistic do
       flash[:warning] = 'больше 30 дней'
       return render 'statistic/orders_frame'
     end
-    @orders = Order.where("status > ?", Order.statuses[:draft])
-      .where("created_at > ?", @from).where("created_at <= ?", @to)
+    dary = @from.step(@to).map{|d|timeline_id(d)}
+    oids = []
+    dary.each do |date|
+      oids << CabiePio.all([:anewdate, :order], [date]).flat.values.map(&:to_i)
+    end
+    @orders = Order.where(id: oids)
     stat = OrderLine.where(order_id: @orders)
       .joins(:product, :product => :category)
       .group(:product_id, "products.'index'", "categories.'index'")
