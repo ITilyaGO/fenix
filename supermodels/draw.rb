@@ -10,7 +10,7 @@ class KSM::Draw < Doppel
   end
 
   def sortname
-    "#{@date.strftime('%y%m%d')}-#{@sn}"
+    "#{@date.strftime('%y%m%d')}-#{'%03i' % @sn.to_i}"
   end
 
   def addon
@@ -31,7 +31,8 @@ class KSM::Draw < Doppel
     def schema
       {
         type: [:to_sym],
-        amount: [:to_i]
+        amount: [:to_i],
+        sn: [:to_i]
       }
     end
   end

@@ -83,6 +83,18 @@ html lang='en'
                 | Архив
                 span class="menu-icon fa fa-archive"
 
+          - if can_view?(:timeline, :stickers)
+            li.sidebar-title.separator
+              span Тиражи
+            li.sidebar-list
+              = link_to url(:draws, :create) do
+                | Создать
+                span class="menu-icon fa fa-film"
+            li.sidebar-list
+              = link_to url(:draws, :index) do
+                | Список
+                span class="menu-icon fa fa-film"
+
           li.sidebar-title.separator
             span Расписание
           li.sidebar-list
