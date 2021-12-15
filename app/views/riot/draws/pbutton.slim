@@ -1,0 +1,23 @@
+pbutton onclick='{sender}'
+  yield
+
+  javascript:
+    sender() {
+      var draws = Array.from(document.querySelectorAll('[name^=' + opts.nq + ']:checked')).map(a => a.value)
+      var pday = document.querySelector('[name^=' + opts.dinp + ']').value
+
+      var data = {
+        day: pday,
+        draws: draws,
+        authenticity_token: rsquad.token()
+      }
+      fetch('/draws/to_print.json', {
+        method: "POST",
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(data).toString()
+      })
+      .then(function(response) { return response.json() })
+      .then(function(data) {
+        location.href = opts.next
+      })
+    }

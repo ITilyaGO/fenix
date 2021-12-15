@@ -1,4 +1,10 @@
-.tabs-content
+.content.col-md-6
+  .vcenter.flex-c.wp100
+    .pull-left: .h6 Собранные
+    .flexie
+    .pull-right.flex-c.cmar-05
+      = text_field_tag :prday, :class => 'ontrol-input form-control', value: @prday
+      pbutton.btn.btn-sm.btn-prime.btn-wide dinp='prday' nq='order_ids' next=url(:draws, :index) Печатать
   table class="table table-hover table-condensed" id="list"
     thead
       tr
@@ -11,18 +17,54 @@
           rowsummer target='#list'
     
     tbody
-      - @draws.each do |draw|
+      - @cdraws.each do |draw|
         tr class='list-row non-print'
-          td class='list-column list-selectable non-print' = check_box_tag 'order_ids[]', :autocomplete => "off", :class => 'list-selectable-checkbox'
-          td.list-column
-            = "#{draw.id}"
-          td.list-column
-            = draw.date   
+          td class='list-column list-selectable non-print' = check_box_tag 'order_ids[]', :autocomplete => "off", :class => 'list-selectable-checkbox', value: draw.id
           td.list-column
             = draw.displayname
           td.list-column
-            = draw.amount
+          td.list-column
+          td.list-column
+          
+          td class='list-column list-row-action non-print'
+            .list-row-action-wrapper
+
+.content.col-md-6.hpad-1
+  .h6 Печать
+  table class="table table-hover table-condensed" id="list"
+    thead
+      tr
+        th class='header list-menu non-print'
+        th.header Номер
+        th.header Отпечатано
+        th.header
+        th.header
+        th class='header list-row-action-header non-print'
+          rowsummer target='#list'
+    
+    tbody
+      - @draws.each do |draw|
+        - next unless draw.printed?
+        tr class='list-row non-print'
+          td class='list-column list-selectable non-print'
+          td.list-column
+            = draw.displayname
+          td.list-column
+            = draw.printed   
+          td.list-column
+            
+          td.list-column
+            / = draw.amount
           
           
           td class='list-column list-row-action non-print'
             .list-row-action-wrapper
+.clearfix
+
+- content_for :js_assets do
+  = javascript_include_tag :riot, :appa
+  rscript type="riot/tag" src="/riot/tags/draws/pbutton.tag"
+  javascript:
+    document.addEventListener("DOMContentLoaded", function(event) {
+      riot.mount('pbutton')
+    })

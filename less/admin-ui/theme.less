@@ -558,6 +558,9 @@ complex, sticker_line, .sticker-block {
 .cmar-04a > * {
   margin: .4em;
 }
+.hpad-1 {
+  padding: 0 1em;
+} 
 .flex-wrap {
   display: flex;
   flex-wrap: wrap;
@@ -1313,6 +1316,18 @@ deepdown, deepdown-ms {
     z-index: 10;
     display: block;
     top: 100%;
+  }
+}
+
+order-select {
+  .xcross {
+    position: absolute;
+    top: 0;
+    color: brown;
+    opacity: 0;
+  }
+  .citem:hover .xcross {
+    opacity: 1;
   }
 }
 

@@ -1,8 +1,8 @@
 = form_for :supermodel, url(:draws, :create), :autocomplete => :off do |f|
   .row.non-print.flex-c.center
-    .col-md-8
+    .col-md-10.col-md-offset-2
       fieldset class='control-group'
-        = f.label 'Тип тиража', :class => 'col-md-3 control-label'
+        = f.label 'Тип тиража', :class => 'col-md-2 control-label'
         .col-md-3.controls.custom-control
           = f.radio_button :type, :value => :k, :checked => true, :class => 'custom-control-input'
           label.custom-control-label(for = 'ksm_draw_type_k') Керамика
@@ -12,7 +12,7 @@
       p
 
       fieldset class='control-group'
-        = f.label 'Название', :class => 'col-md-3 control-label'
+        = f.label 'Название', :class => 'col-md-2 control-label'
         .col-md-6.controls.flex-c
           = f.text_field :name, :class => 'ontrol-input form-control'
           .addon.cmar-05.flex-c
@@ -21,32 +21,39 @@
             = f.text_field :more, :class => 'ontrol-input form-control'
 
       fieldset class='control-group'
-        = f.label 'Размер', :class => 'col-md-3 control-label'
-        .col-md-2.controls.custom-control
-          = f.radio_button :amount, :value => 25, :checked => true, :class => 'custom-control-input'
+        = f.label 'Размер', :class => 'col-md-2 control-label'
+        .col-md-3.controls.flex-c.pull-right
+        .col-md-2.controls.flex-c.pull-right
+          = f.radio_button :amount, :class => 'custom-control-input'
+          label.custom-control-label(for = 'ksm_draw_amount')
+            = f.text_field :amount, :class => 'ontrol-input form-control', 'riot-tag': 'recheck', for: 'ksm_draw_amount'
+        .col-md-1.controls.custom-control
+          = f.radio_button :amount, :value => 25, checked: true, :class => 'custom-control-input'
           label.custom-control-label(for = 'ksm_draw_amount_25') 25
-        .col-md-2.controls.custom-control
+        .col-md-1.controls.custom-control
           = f.radio_button :amount, :value => 50, :class => 'custom-control-input'
           label.custom-control-label(for = 'ksm_draw_amount_50') 50
-        .col-md-2.controls.custom-control
+        .col-md-1.controls.custom-control
           = f.radio_button :amount, :value => 100, :class => 'custom-control-input'
           label.custom-control-label(for = 'ksm_draw_amount_100') 100
-        .col-md-2.controls.custom-control
+        .col-md-1.controls.custom-control
           = f.radio_button :amount, :value => 200, :class => 'custom-control-input'
           label.custom-control-label(for = 'ksm_draw_amount_200') 200
-
+        
+      p
       fieldset class='control-group'
-        = f.label 'Заказы', :class => 'col-md-3 control-label'
+        = f.label 'Заказы', :class => 'col-md-2 control-label'
         .flex-c.controls.custom-control
           order-select
 
-      .formactions
+      .formactions.hpad-1
         = f.submit :save, class: 'btn btn-default'
 
 - content_for :js_assets do
   = javascript_include_tag :riot, :appa, :flexsearch_min
   rscript type="riot/tag" src="/riot/tags/draws/order_select.tag"
+  rscript type="riot/tag" src="/riot/tags/draws/recheck.tag"
   javascript:
     document.addEventListener("DOMContentLoaded", function(event) {
-      riot.mount('order-select')
+      riot.mount('order-select, recheck')
     })

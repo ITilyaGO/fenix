@@ -3,13 +3,15 @@ order-select.wp100
     input.form-control type="text" placeholder="Поиск заказов" onkeyup='{ finditem }' onchange='{ finditem }'
     p.spacer
     .cont
-      .arow if='{ fspots.length > 0 }': showcase: .glass.flex-c.flex-wrap.cmar-04a
-        .label.hand.label-anew each='{ f in fspots }' onclick='{ chooseitem }'
-          | { f.id }
+      .arow if='{ fspots.length > 0 }': showcase: .glass.flex-v.cmar-04a
+        .item.wp100 each='{ f in fspots }'
+          .label.hand.label-anew onclick='{ chooseitem }' { f.id }
+          | &nbsp;&nbsp;{ f.city }
 
-  .col-md-6.cmar-04a.flex-wrap: .label.hand.label-default each='{ f in selected }' onclick='{ unchoose }'
+  .col-md-6.cmar-04a.flex-wrap: .citem.label.hand.label-default each='{ f in selected }' onclick='{ unchoose }'
     input type='hidden' name='ksm_draw[orders][]' value='{f}'  
     | { f }
+    .xcross.fa.fa-times-circle
 
   javascript:
     self.selected = []

@@ -103,7 +103,10 @@ ul class="nav nav-tabs non-print"
     p Менеджер: #{@manager&.name}
     .cmar-04a
       - KSM::Draw.find_all(order_draws_for(@order.id)).each do |d|
-        .label.label-default = d.displayname
+        .label.label-default class=('label-success' if d.printed?)
+          = d.displayname
+          - if d.printed?
+            .badge.hpad-1 = to_dm d.printed
   
   .col-md-4
     - if !@order.description.blank?

@@ -1,0 +1,5 @@
+recheck onfocus='{forcecheck}'
+  javascript:
+    forcecheck() {
+      self.root.closest('fieldset').querySelector('[id=' + opts.for + ']').checked = true
+    }
