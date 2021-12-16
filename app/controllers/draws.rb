@@ -4,7 +4,7 @@ Fenix::App.controllers :draws do
     # @draws = KSM::Draw.all.sort_by{|a|a.sortname}.reverse
 
     @draws = kc_daydraws(Date.today) + kc_daydraws(Date.today - 1) + kc_daydraws(Date.today - 2)
-    current = wonderbox(:draws_stack)
+    current = wonderbox(:draws_stack) || []
     @cdraws = KSM::Draw.find_all(current).sort_by{|a|a.sortname}.reverse
     @prday = (Date.today+1).strftime('%d.%m.%Y')
 
@@ -17,6 +17,34 @@ Fenix::App.controllers :draws do
     @supermodel.name = "#{(Date.today).strftime('%d.%m.%Y')}"
     # @plsn = draw_seed_get
     render 'draws/create'
+  end
+
+  get :orders do
+    @title = "Все текущие рабочие заказы"
+    pagesize = PAGESIZE
+    @page = !params[:page].nil? ? params[:page].to_i : 1
+    sort = params[:sort] || "updated_at"
+    dir = !params[:sort] && !params[:dir] ? "desc" : params[:dir] || "asc"
+    orders_query = Order.where("status > ?", Order.statuses[:draft]).where("status < ?", Order.statuses[:finished])
+    orders_query = orders_query.where(delivery: params[:deli].to_i) if params[:deli]
+    @orders = orders_query.includes(:client).order(sort => dir)
+    if current_account.limited_orders?
+      @filtered_by_user = OrderPart.where(:order_id => orders_query.ids, :section => current_account.section_id).pluck(:order_id)
+    end
+    @pages = (orders_query.count/pagesize).ceil
+    @sections = Section.includes(:categories).all
+    a_managers(@orders.map(&:id), @orders.map(&:client_id))
+    @transport = CabiePio.all_keys(@orders.map(&:client_id).uniq, folder: [:m, :clients, :transport]).flat
+    @kc_timelines = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :timeline]).flat.trans(:to_i)
+    @kc_blinks = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :timeline_blink]).flat.trans(:to_i)
+    @kc_stickers = CabiePio.all_keys(@orders.map(&:id), folder: [:sticker, :order_progress]).flat.trans(:to_i, :to_f)
+    @orders = @orders.sort_by{|o|@kc_timelines[o.id]||''} if params[:seq] == "timeline"
+    @orders = @orders.sort_by{|o|@kc_towns[@kc_orders[o.id.to_s]]&.model&.name||''} if params[:seq] == "city"
+    @kc_cash = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :cash]).flat.trans(:to_i).reject{|k,v|v!='t'}
+    @r = url(:draws, :orders)
+    @ra = [:draws, :orders]
+    @rah = { deli: params[:deli] } if params[:deli]
+    render 'draws/orders'
   end
 
   post :create do
@@ -53,6 +81,13 @@ Fenix::App.controllers :draws do
     draws_stack_pop fdraws
 
     [day, fdraws].to_json
+  end
+
+  post :for_order, :provides => :json do
+    draw_ids = order_draws_for(params[:order])
+    draws = KSM::Draw.find_all(draw_ids).map(&:to_jr)
+
+    draws.to_json
   end
 
 end

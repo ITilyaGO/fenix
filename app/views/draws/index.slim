@@ -30,7 +30,12 @@
             .list-row-action-wrapper
 
 .content.col-md-6.hpad-1
-  .h6 Печать
+  .vcenter.flex-c.wp100
+    .pull-left: .h6 Печать
+    .flexie
+    .pull-right.flex-c.cmar-05
+      = link_to tag_icon(:flash), url(:draws, :create), title: 'Создать тираж'
+      = link_to tag_icon(:'folder-o'), url(:draws, :orders), title: 'Заказы'
   table class="table table-hover table-condensed" id="list"
     thead
       tr
@@ -52,11 +57,7 @@
           td.list-column
             = draw.printed   
           td.list-column
-            
           td.list-column
-            / = draw.amount
-          
-          
           td class='list-column list-row-action non-print'
             .list-row-action-wrapper
 .clearfix

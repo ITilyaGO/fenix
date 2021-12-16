@@ -1,0 +1,91 @@
+
+- filter = @filtered_by_user.is_a? Array
+- abl_view = @sections.map{|s|can_view_section?(:sections, :list, s.id) ? s.id : nil }
+- kc_os = KSM::OrderStatus.find_all(@orders.map(&:id))
+- reveals = []
+- @orders.each do |order|
+  - os = kc_os.detect{|kc|kc.id.to_i == order.id} || KSM::OrderStatus.new(id: order.id)
+  - next if (abl_view & os.pstate.keys).empty?
+  - next if filter && !@filtered_by_user&.include?(order.id)
+  - reveals << order
+
+.tabs-content
+  table class="table table-hover table-condensed" id="list"
+    thead
+      tr
+        th class='header list-menu non-print'
+        th class='header' Номер
+        th.header
+        th.header
+          a href=local(seq: params[:seq] ? nil : :city) Город
+        th.header width='50px'
+        th.header width='10%' Заказчик
+        th.header
+          a href=local(sort: params[:sort] ? nil : :created_at) Дата
+        th.header
+          a href=local(seq: params[:seq] ? nil : :timeline) Отправка
+        th class='header' Менеджер
+        th.header.non-print width='80px'
+        th class='header non-print'
+        /th class='header non-print'
+        th class='header list-row-action-header non-print'
+          rowsummer target='#list'
+    
+    tbody
+      - reveals.each do |order|
+        - os = kc_os.detect{|kc|kc.id.to_i == order.id} || KSM::OrderStatus.new(id: order.id)
+        tr class='list-row non-print #{order.priority ? "warning" : ""}'
+          td class='list-column list-selectable non-print' = check_box_tag 'order_ids[]', :autocomplete => "off", :value => order.id, :class => 'list-selectable-checkbox'
+          td class='list-column'
+            - if !order.draft?
+              = link_to order.id, :href => url(:orders, :edit, :id => order.id)
+            - else
+              = "#{order.id}"
+          td.list-column
+            = tja :delivery, order.delivery
+            | &nbsp;&nbsp;
+          td.list-column
+            - code = @kc_orders[order.id.to_s]
+            - town_name = @kc_towns[code]&.model
+            = partial 'bricks/kato/label_print', :locals => { town_name: town_name, el: order }
+          td.list-column.minirur.text-nowrap
+            == deli(rur (order.total/1000.0).floor)
+            |&nbsp;&nbsp;
+            - if @current_account.is_admin?
+              .icash.fa class=(@kc_cash.fetch(order.id, nil) ? 'fa-money' : 'fa-credit-card')
+          td class='list-column' = order.client.name
+          td.list-column.text-center.text-nowrap = to_dm(order.created_at)
+          td.list-column.text-center.text-nowrap class=('date-warning' if @kc_blinks.fetch(order.id, nil))
+            - odate = @kc_timelines[order.id]
+            = to_dm(timeline_unf(odate)) if odate
+          td class='list-column'
+            - kc_man = @kc_managers[@kc_hometowns[order.client_id.to_s]]
+            = @managers[kc_man.to_i] if kc_man
+          td.list-column.non-print
+            span.label class="label-#{os.state}"
+              = t :"status.#{os.state}"
+          td class='list-column cmar-04a flex-c flex-wrap non-print'
+            dwl order=order.id
+          /td.list-column.non-print
+            - progress = @kc_stickers.fetch(order.id, 0)
+            .progress.short.for-stickers title="#{progress}%" class=('danger' if progress > 130)
+              .progress-bar role="progressbar" style="width:#{progress.to_i}%"
+          
+          td class='list-column list-row-action non-print'
+            .list-row-action-wrapper
+              - if !order.draft?
+                = link_to tag_icon(:edit), :href => url(:orders, :edit, :id => order.id), :class => 'list-row-action-wrapper-link'
+
+- content_for :js_assets do
+  = javascript_include_tag :riot, :appa
+  rscript type="riot/tag" src="/riot/tags/idcollapser.tag"
+  rscript type="riot/tag" src="/riot/tags/draws/dwl.tag"
+  rscript type="riot/tag" src="/riot/tags/switcher.tag"
+  rscript type="riot/tag" src="/riot/tags/elhide.tag"
+  rscript type="riot/tag" src="/riot/tags/rowsummer.tag"
+
+  javascript:
+    
+    document.addEventListener("DOMContentLoaded", function(event) {
+      riot.mount('idcollapser, dwl, switcher, elhide, rowsummer')
+    })

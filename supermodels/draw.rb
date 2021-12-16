@@ -25,6 +25,14 @@ class KSM::Draw < Doppel
     "#{@date.strftime('%d.%m.%y')} (#{@sn}) #{@amount}_#{@type&.capitalize}#{addon}"
   end
 
+  def to_jr
+    {
+      id: id,
+      name: displayname,
+      printed: (printed.strftime('%d.%m') if printed?)
+    }
+  end
+
   class << self
     def nest(day = Date.today, num)
       @dday = day

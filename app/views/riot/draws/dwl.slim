@@ -1,0 +1,33 @@
+dwl
+  .indicator if='{!loaded}'
+    i.fa.fa-circle-o-notch.fa-spin.fa-fw
+  .item each='{ d in films }'
+    .label.label-default class='{ label-success: d.printed }'
+      | { d.name }
+      .badge.hpad-1 if='{d.printed}' {d.printed}
+  .text-center if="{loaded&&(films.length == 0)}" Нет тиражей
+
+  javascript:
+    self.loaded = false
+
+    self.on('mount', function() {
+      self.loadlist()
+    })
+
+    loadlist() {
+      var data = {
+        order: opts.order,
+        authenticity_token: rsquad.token()
+      }
+      fetch('/draws/for_order.json', {
+        method: "POST",
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(data).toString()
+      })
+      .then(function(response) { return response.json() })
+      .then(function(data) {
+        self.loaded = true
+        self.films = data
+        self.update()
+      })
+    }

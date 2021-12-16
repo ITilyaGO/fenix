@@ -1,0 +1,4 @@
+.label.label-default class=('label-success' if d.printed?)
+  = d.displayname
+  - if d.printed?
+    .badge.hpad-1 = to_dm d.printed
