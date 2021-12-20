@@ -19,6 +19,16 @@ Fenix::App.controllers :draws do
     render 'draws/create'
   end
 
+  get :edit, :with => :id do
+    @title = "Тираж"
+    @supermodel = KSM::Draw.find(params[:id])
+    @supermodel.name = "#{(Date.today).strftime('%d.%m.%Y')}"
+    # @supermodel.sns = @supermodel.sn
+    # @supermodel.more = "#{(Date.today).strftime('%d.%m.%Y')}"
+    # @plsn = draw_seed_get
+    render 'draws/create'
+  end
+
   get :orders do
     @title = "Все текущие рабочие заказы"
     pagesize = PAGESIZE
@@ -51,7 +61,7 @@ Fenix::App.controllers :draws do
     form = params[:ksm_draw]
     form[:more] = nil if form[:more].empty?
     day = Date.strptime form[:name], '%d.%m.%Y'
-    sni = form[:sns].to_i
+    sni = form[:sn].to_i
     max = draw_seed_max(day)
     dumb = KSM::Draw.new(sn: sni, type: form[:type])
     daynumtk = draw_seed_taken?(day, dumb.common)
@@ -61,7 +71,7 @@ Fenix::App.controllers :draws do
       return render 'draws/error'
     end
     @draw = KSM::Draw.nest day, sn
-    @draw.fill **KSM::Draw.formize(form), merge: true
+    @draw.fill type: form[:type].to_sym, amount: form[:amount].to_i, more: form[:more], merge: true
     @draw.save
     draws_stack_push @draw.id
     form[:orders]&.each do |fo|

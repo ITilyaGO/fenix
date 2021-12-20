@@ -13,14 +13,21 @@
 
       fieldset class='control-group'
         = f.label 'Название', :class => 'col-md-2 control-label'
-        .col-md-6.controls.flex-c
-          = f.text_field :name, :class => 'ontrol-input form-control'
-          .addon.cmar-05.flex-c
+        .col-md-8.controls.flex-c
+          .flex-v
+            small Дата
+            = f.text_field :name, :class => 'ontrol-input form-control'
+          .addon.cmar-05d.flex-c
             span
-            = f.text_field :sns, :class => 'ontrol-input form-control', placeholder: @plsn,
-              pattern: '[0-9]{1,3}', required: true, autofocus: true
-            = f.text_field :more, :class => 'ontrol-input form-control'
-
+            .flex-v.col-md-3
+              small Номер
+              = f.text_field :sn, :class => 'ontrol-input form-control', placeholder: @plsn,
+                pattern: '[0-9]{1,3}', required: true, autofocus: true
+            .flex-v.col-md-8
+              small Доп
+              = f.text_field :more, :class => 'ontrol-input form-control'
+      p
+      
       fieldset class='control-group'
         = f.label 'Размер', :class => 'col-md-2 control-label'
         .col-md-3.controls.flex-c.pull-right

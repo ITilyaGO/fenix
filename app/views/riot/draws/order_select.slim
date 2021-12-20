@@ -4,8 +4,9 @@ order-select.wp100
     p.spacer
     .cont
       .arow if='{ fspots.length > 0 }': showcase: .glass.flex-v.cmar-04a
-        .item.wp100 each='{ f in fspots }'
-          .label.hand.label-anew onclick='{ chooseitem }' { f.id }
+        .item.wp100 each='{ f in fspots }' onclick='{ chooseitem }'
+          .hand.label.label-anew
+            | { f.id }
           | &nbsp;&nbsp;{ f.city }
 
   .col-md-6.cmar-04a.flex-wrap: .citem.label.hand.label-default each='{ f in selected }' onclick='{ unchoose }'

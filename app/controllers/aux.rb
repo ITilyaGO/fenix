@@ -50,7 +50,7 @@ Fenix::App.controllers :aux do
     orders = Order.where("status > ?", Order.statuses[:draft]).where("status < ?", Order.statuses[:finished]).pluck(:id)
     @kc_orders = CabiePio.all_keys(orders, folder: [:orders, :towns]).flat
     @kc_towns = KatoAPI.batch @kc_orders.values.uniq
-    results = orders.map{|a|{id:a, keyword:a.to_s, city: @kc_towns[@kc_orders[a.to_s]]&.model.to_s}}
+    results = orders.map{|a|{id:a, keyword:a.to_s, city: @kc_towns[@kc_orders[a.to_s]]&.model&.name}}
     results.to_json
   end
 end

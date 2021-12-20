@@ -1,19 +1,16 @@
 .content.col-md-6
-  .vcenter.flex-c.wp100
-    .pull-left: .h6 Собранные
+  .vcenter.flex-c.flex-wrap.wp100
+    .pull-left.col-sm-12.col-md-5: .h6 Собранные
     .flexie
-    .pull-right.flex-c.cmar-05
-      = text_field_tag :prday, :class => 'ontrol-input form-control', value: @prday
-      pbutton.btn.btn-sm.btn-prime.btn-wide dinp='prday' nq='order_ids' next=url(:draws, :index) Печатать
+    .pull-right.flex-c.cmar-05.col-xs-12.col-md-7
+      = text_field_tag :prday, :class => 'col-sm-6 form-control', value: @prday
+      pbutton.btn.btn-sm.btn-prime.btn-wide.col-sm-6 dinp='prday' nq='order_ids' next=url(:draws, :index) Печатать
   table class="table table-hover table-condensed" id="list"
     thead
       tr
         th class='header list-menu non-print'
         th.header Номер
-        th.header
-        th.header
-        th.header
-        th class='header list-row-action-header non-print'
+        th class='header row-action-header non-print'
           rowsummer target='#list'
     
     tbody
@@ -22,12 +19,10 @@
           td class='list-column list-selectable non-print' = check_box_tag 'order_ids[]', :autocomplete => "off", :class => 'list-selectable-checkbox', value: draw.id
           td.list-column
             = draw.displayname
-          td.list-column
-          td.list-column
-          td.list-column
-          
           td class='list-column list-row-action non-print'
-            .list-row-action-wrapper
+            /.list-row-action-wrapper
+              / .btn.btn-xs edit
+              .text.list-row-action-wrapper-link: .span = link_to tag_icon(:edit), :href => url(:draws, :edit, :id => draw.id), :class => ''
 
 .content.col-md-6.hpad-1
   .vcenter.flex-c.wp100
@@ -35,16 +30,14 @@
     .flexie
     .pull-right.flex-c.cmar-05
       = link_to tag_icon(:flash), url(:draws, :create), title: 'Создать тираж'
-      = link_to tag_icon(:'folder-o'), url(:draws, :orders), title: 'Заказы'
+      = link_to tag_icon(:'folder-o'), url(:draws, :orders, :seq => :timeline), title: 'Заказы'
   table class="table table-hover table-condensed" id="list"
     thead
       tr
         th class='header list-menu non-print'
         th.header Номер
         th.header Отпечатано
-        th.header
-        th.header
-        th class='header list-row-action-header non-print'
+        th class='header row-action-header non-print'
           rowsummer target='#list'
     
     tbody
@@ -55,9 +48,7 @@
           td.list-column
             = draw.displayname
           td.list-column
-            = draw.printed   
-          td.list-column
-          td.list-column
+            = draw.printed
           td class='list-column list-row-action non-print'
             .list-row-action-wrapper
 .clearfix

@@ -69,7 +69,7 @@
           a href=local(seq: params[:seq] ? nil : :city) Город
         th class='header' Куда едет
         th.header width='50px'
-        th class='header' Заказчик
+        th.header Заказчик
         th.header
           a href=local(sort: params[:sort] ? nil : :created_at) Дата
         th.header
@@ -81,7 +81,7 @@
         th class='header non-print'
           = partial 'bricks/orders/section_titles'
         th class='header non-print'
-        th class='header list-row-action-header non-print'
+        th class='header text-center non-print' width='150px'
           ' Всего:
           rowsummer target='#list'
     
@@ -159,6 +159,7 @@
               - if can_view?(:list, :stickers) || allow_route?(:orders_stickers)
                 = link_to tag_icon(:ticket), :rel => :tooltip, :title => "Stickers", :href => url(:stickers, :order, :id => order.id), :class => 'list-row-action-wrapper-link'
               - if current_account.is_admin?
+                = link_to tag_icon(:save), :href => url(:c1c, :create, :id => order.id), :class => 'list-row-action-wrapper-link'
                 = link_to tag_icon(:paw), :rel => :tooltip, :title => "Edit order", :href => url(:orders, :correct, :id => order.id), :class => 'list-row-action-wrapper-link'
               - if !order.draft?
                 = link_to tag_icon(:edit), :href => url(:orders, :edit, :id => order.id), :class => 'list-row-action-wrapper-link'
