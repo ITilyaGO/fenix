@@ -147,6 +147,13 @@ html lang='en'
           - if allow_route?(:editors)
             li.sidebar-title.separator
               span Редакторы
+          - if current_account.is_admin?
+            li.sidebar-list
+              = link_to url(:things, :table) do
+                | Продукция
+                .menu-icon
+                  .label.label-warning new
+          - if allow_route?(:editors)
             li.sidebar-list
               = link_to url(:clients, :index) do
                 | Клиенты

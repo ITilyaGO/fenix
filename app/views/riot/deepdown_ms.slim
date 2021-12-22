@@ -1,22 +1,23 @@
 deepdown-ms.deepdown.detach
   .bootstrap-select
-    .dropdown-toggle.btn.btn-sm.btn-steel onclick='{toggle}'
+    .dropdown-toggle.btn.btn-sm.btn-steel.flex-c.vcenter onclick='{toggle}'
       /# = hidden_field_tag :"supermodel[second]", value: work&.second_id
       input.form-control[
         type='hidden' value='{selected_id}' id='{opts.dataId}' name='{opts.dataName}'
       ]
-      span.filter-option.pull-left
+      span.filter-option
         | { display }
-      span.pull-right.fa.fa-chevron-down
+      .flexie
+      span.fa.fa-chevron-down
 
   .deepdown-float class='{hide: !opened}'
     .item each='{ f in common }'
-      .btn.btn-xs.btn-thru.wp100 class='{btn-info:selected_id==f.id}' onclick='{ w_select }'
+      .option.wp100 class='{selected:selected_id==f.id}' onclick='{ w_select }'
         | { f.name }
 
       .item-child each='{ c in f.childs }'
-        .btn.btn-xs.btn-thru.wp100 class='{btn-info:selected_id==c.id}' onclick='{ w_select }'
-          | { f.name } – { c.name }
+        .option.wp100 class='{selected:selected_id==c.id}' onclick='{ w_select }'
+          | { c.name }
     
 
   javascript:

@@ -25,7 +25,7 @@
         th class='header' = mat(:product, :place)
         th class='header' = mat(:product, :price)
         th class='header' = mat(:product, :category)
-        th class='header' = mat(:product, :date)
+        th class='header' = mat(:product, :updated)
         th class='header list-row-action-header'
 
     tbody
@@ -46,9 +46,7 @@
           td class='list-column'
             == rur product.price
           td class='list-column'
-            = product.category&.category.name
-            '&nbsp;–
-            = product.category&.name
+            = product.category.display
           td class='list-column'
             = to_msk(product.updated_at)
           td class='list-column list-row-action'

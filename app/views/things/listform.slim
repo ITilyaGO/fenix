@@ -1,11 +1,5 @@
-/ul class="nav nav-tabs"
-  li class="active" = link_to tag_icon(:list, pat(:list)), url(:products, :index)
-  li = link_to tag_icon(:'puzzle-piece', pat(:complex)), url(:products, :complexity)
-  li = link_to tag_icon(:ticket, pat(:sticker)), url(:products, :sticker)
-  li.pull-right = link_to tag_icon(:'file-excel-o', 'экспорт'), url(:products, :export, :win => '')
-  
-.page
-  .btn.btn-snow.mask.default.fa.fa-table riot-tag='switcher' t1='THINGS_LIST_OFF' t2='THINGS_LIST_ON'
+.page.flex-c
+  .btn.btn-camo.fa.fa-folder-open-o riot-tag='switcher' t1='THINGS_LIST_OFF' t2='THINGS_LIST_ON'
   .col-md-12.content
     
     .col-md-6.hide
@@ -30,7 +24,7 @@
           .controls.wp100 = f.text_field :displayname, :class => 'form-control input-large input-with-feedback'
         = partial 'things/sideform', :locals => { :f => f, :cats => @cats }
 
-        fieldset.control-group.hame
+        fieldset.control-group.hame.tmar-3
           .alabel.label bku
           label.control-label = @xproduct[:arn]
           - a = KSM::Archetype.find @xproduct[:arn]
@@ -48,15 +42,18 @@
             .controls.wp100 = f.text_field :n1c, value: k1c&.at_path('НаименованиеПолное'), :class => 'form-control input-large'
           - else
             .controls: .form-control: .fa.fa-exclamation-triangle.text-warning
-        .form-actions
+        fieldset.control-group
+          .btn.btn-link Связи...
+        .f-actions.tmar-3.text-center
           = f.submit pat(:copy).downcase, :class => 'btn btn-sm btn-default', name: 'clone' 
           |&nbsp;&nbsp;&nbsp;&nbsp;
-
           = f.submit pat(:save).downcase, :class => 'btn btn-sm btn-prime'
+        .tmar-3
 
-      /bottomworks
-  .clearfix
-  .table50.hide = partial 'things/table'
+
+  .table50.col-md-12.hide = partial 'things/table'
+
+.clearfix
 
 - content_for :js_assets do
   = javascript_include_tag :appa, :riot

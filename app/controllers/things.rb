@@ -58,13 +58,13 @@ Fenix::App.controllers :things do
     @product = KSM::Thing.find(params[:id])
     @product = KSM::Thing.nest if params[:id] == '0000' || params[:clone]
     form = params[:ksm_thing]
-    @product.fill **KSM::Thing.formize(form), merge: true
-    @product.sn ||= thing_seed_from @product.category_id
+    @product.formiz(form)
+    @product.sn ||= thing_glob_seed
     @product.saved_by @current_account
     thing_to_top @product.id
     if @product
       if true
-        flash[:success] = pat(:update_success, :model => 'Product', :id =>  "#{params[:id]}")
+        flash[:success] = pat(:update_success, :model => 'Product', :id =>  "#{@product.id}")
         params[:save_and_continue] ?
           redirect(url(:things, :index)) :
           redirect(url(:things, :edit, :id => @product.id))

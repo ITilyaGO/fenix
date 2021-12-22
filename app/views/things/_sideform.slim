@@ -24,6 +24,8 @@ fieldset class='control-group#{error ? ' has-error' : ''}'
   = f.label 'цех', :class => 'control-label'
   .controls.wp100
     deepdown-ms display-id=@product.category.category.section_id data-url='aux/sections' target='sd'
+  .extra
+    a.btn.btn-sm.fa.fa-folder.btn-desert href=url(:thingcats, :sections)
 
 fieldset class='control-group#{error ? ' has-error' : ''}'
   = f.label :category, :class => 'control-label'
@@ -32,6 +34,8 @@ fieldset class='control-group#{error ? ' has-error' : ''}'
       display-id=@product.category_id data-url='aux/categories'
       data-sid=@product.category.section_id data-name='ksm_thing[category_id]' listen='sd'
     ]
+  .extra
+    a.btn.btn-sm.fa.fa-folder.btn-desert href=url(:thingcats, :categories, s: @product&.category&.section_id)
 
 fieldset class='control-group'
   = f.label "Город", :class => 'control-label'
@@ -50,7 +54,7 @@ fieldset class='control-group#{error ? ' has-error' : ''}'
 fieldset class='control-group#{error ? ' has-error' : ''}'
   = f.label "артикул", :class => 'control-label'
   div class='controls'
-    = f.text_field :art, :class => 'form-control input-large input-with-feedback', value: @product.autoart
+    = f.text_field :art, :class => 'form-control input-large', readonly: true, value: @product.autoart
     / span class='help-inline' = error ? f.error_message_on(:des, :class => 'text-error') : pat(:example)
 - error = @product.errors.include?(:des)
 fieldset class='control-group#{error ? ' has-error' : ''}'
@@ -61,7 +65,7 @@ fieldset class='control-group#{error ? ' has-error' : ''}'
 fieldset class='control-group#{error ? ' has-error' : ''}'
   = f.label 'деколь', :class => 'control-label'
   div class='controls'
-    = f.text_field :sketch, :class => 'form-control input-large input-with-feedback', value: @product.sketch_ext
+    = f.text_field :sketch, :class => 'form-control input-large', readonly: true, value: @product.sketch_ext
 - error = @product.errors.include?(:weight)
 fieldset class='control-group#{error ? ' has-error' : ''}'
   = f.label "#{:weight} (g)", :class => 'control-label'
@@ -76,16 +80,21 @@ fieldset class='control-group#{error ? ' has-error' : ''}'
 
     / span class='help-inline' = error ? f.error_message_on(:height, :class => 'text-error') : pat(:example)
         // = sub.id == @product.category_id ? "selected" : ""
+fieldset.control-group
+  label.control-label
+  .controls
+    .btn.btn-link Характеристики...
+.tmar-2
 
 - error = @product.errors.include?(:height)
 fieldset class='control-group#{error ? ' has-error' : ''}'
   = f.label :barcode, :class => 'control-label'
   div class='controls'
-    = f.text_field :barcode, :class => 'form-control input-large input-with-feedback', value: @product.autobar
+    = f.text_field :barcode, :class => 'form-control input-large', value: @product.autobar
 
 fieldset.control-group
   /= f.label :ean13, :class => 'control-label'
-  .controls.text-center.wp100 style='margin-top: 3em;'
+  .controls.text-center.wp100.tmar-2
     /# = f.label :ean13, :class => 'control-label'
     - barcode13 = Barby::EAN13.new(@product.autobar) rescue nil
     - if barcode13
@@ -107,7 +116,6 @@ fieldset.control-group
   div class='controls'
     = f.text_field :active, :class => 'form-control input-large input-with-feedback'
     / span class='help-inline' = error ? f.error_message_on(:active, :class => 'text-error') : pat(:example)
-br
 
 /fieldset class='control-group#{error ? ' has-error' : ''}'
   = f.label :'1cn', :class => 'control-label'
@@ -130,7 +138,6 @@ br
 
 // = select_tag(:color, :include_blank => true, :grouped_options => [['warm',['red','yellow']],['cool',['blue', 'purple']]], :class => "select-block")
 // = categories_tag("product[category_id]", :grouped_options => @cats, :class => "select-block", :selected => @product.category_id)
-br
 
 / .form-actions
 /   = f.submit pat(:save).downcase, :class => 'btn btn-sm btn-prime'

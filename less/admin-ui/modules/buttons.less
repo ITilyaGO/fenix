@@ -83,6 +83,18 @@
 .btn-bell {
   .button-variant(@btn-default-color, @dekolbell, darken(@dekolbell, 10%), mix(@dekolbell, black, 85%));
 }
+.btn-blue {
+  .button-variant(@btn-default-color, @dekolblue, darken(@dekolblue, 10%), mix(@dekolblue, black, 85%));
+}
+.btn-desert {
+  .button-variant(@dekoltextbell, transparent, rgba(222, 205, 177, 0.2), mix(@dekoltextbell, black, 85%));
+}
+.btn-camo {
+  .button-variant(@dekoltextblue, transparent, rgba(206, 205, 255, 0.2), mix(@dekolblue, black, 85%));
+}
+.btn-camo-inv {
+  .button-variant(white, @dekoltextblue, @dekoltextblue, @dekoltextblue);
+}
 .btn-clear {
   .button-variant(rgb(118, 130, 166), rgba(231, 232, 227, 0.47), darken(rgba(231, 232, 227, 0.47), 10%), mix(rgba(231, 232, 227, 0.47), black, 85%));
 }

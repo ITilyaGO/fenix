@@ -1,21 +1,22 @@
 deepdown.deepdown
   .bootstrap-select
-    .dropdown-toggle.btn.btn-sm.btn-steel onclick='{toggle}'
+    .dropdown-toggle.btn.btn-sm.btn-steel.flex-c.vcenter onclick='{toggle}'
       /# = hidden_field_tag :"supermodel[second]", value: work&.second_id
       input.form-control[
         type='hidden' value='{selected_id}' id='{opts.dataId}' name='{opts.dataName}'
       ]
-      span.filter-option.pull-left
+      span.filter-option
         | { display }
-      span.pull-right.fa.fa-chevron-down
+      .flexie
+      span.fa.fa-chevron-down
 
   .deepdown-float class='{hide: !opened}'
     .item each='{ f in common }'
-      .btn.btn-xs.btn-thru.wp100 class='{btn-info:selected_id==f.id}' onclick='{ w_select }'
+      .option.wp100 class='{selected:selected_id==f.id}' onclick='{ w_select }'
         | { f.name }
 
       .item-child each='{ c in f.childs }'
-        .btn.btn-xs.btn-thru.wp100 class='{btn-info:selected_id==c.id}' onclick='{ w_select }'
+        .option.wp100 class='{selected:selected_id==c.id}' onclick='{ w_select }'
           | { c.name }
     
 
@@ -24,13 +25,15 @@ deepdown.deepdown
     self.opened = false
     self.src = opts.src
     self.selected_id = opts.displayId
-    self.token = document.querySelector("form [name^='auth']").value
+    self.saction = opts.fire || 'DEEPDOWN_SELECT'
 
     w_select(a) {
       let item = a.item.f
       self.selected_id = item.id
       self.display = item.name
       // self.in_select(a.item.f)
+
+      rcontrol.trigger(self.saction, { input: self.selected_id })
       self.close()
     }
     
@@ -95,9 +98,8 @@ deepdown.deepdown
 
     loadlist() {
       var data = {
-        authenticity_token: self.token
+        authenticity_token: rsquad.token()
       }
-
       
       fetch('/' + opts.dataUrl + '.json', {
         method: "POST",

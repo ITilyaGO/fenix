@@ -27,7 +27,7 @@ Fenix::App.controllers :thingcats do
     @section = KSM::Section.nest if params[:id].nil? || params[:id] == '0000' || params[:clone]
     @section ||= KSM::Section.find(params[:id])
     
-    @section.fill **KSM::Section.formize(form), merge: true
+    @section.formiz(form)
     seed = wonderbox(:sections, :seed) || 0
     seed += 1
     wonderbox_set(:sections, { seed: seed }) unless @section.sn
@@ -55,9 +55,11 @@ Fenix::App.controllers :thingcats do
     pagesize = PAGESIZE
     @page = !params[:page].nil? ? params[:page].to_i : 1
     @seed = wonderbox(:categories, :seed) || 0
-    @categories = KSM::Category.all.sort_by(&:display)
+    sec = params[:s]
     @supermodel = KSM::Category.new({})
     @pages = 1
+    @section = sec ? KSM::Section.find(sec) : KSM::Section.all.first
+    @categories = KSM::Category.all.select{|a| a.section_id == @section.id}.sort_by(&:display)
     @r = url(:products, :index)
     render 'thingcats/cats'
   end
@@ -67,7 +69,7 @@ Fenix::App.controllers :thingcats do
     @category = KSM::Category.nest if params[:id].nil? || params[:id] == '0000' || params[:clone]
     @category ||= KSM::Category.find(params[:id])
 
-    @category.fill **KSM::Category.formize(form), merge: true
+    @category.formiz(form)
     @category.category_id = nil if form[:category_id].empty?
     # seed = wonderbox(:categories, :seed) || 0
     # seed += 1
@@ -75,7 +77,7 @@ Fenix::App.controllers :thingcats do
     @category.sn ||= cate_seed_from(@category.category_id)
     @category.save
 
-    redirect url(:thingcats, :categories)
+    redirect url(:thingcats, :categories, s: @category.section_id)
   end
 
   get :category, :with => :id do
@@ -83,10 +85,9 @@ Fenix::App.controllers :thingcats do
     pagesize = PAGESIZE
     @page = !params[:page].nil? ? params[:page].to_i : 1
     @seed = wonderbox(:categories, :seed) || 0
-    @categories = KSM::Category.all.sort_by(&:name)
     @category = @supermodel = KSM::Category.find(params[:id])
-    @pages = 1
-    @r = url(:products, :index)
+    @section = @category.section
+    @categories = KSM::Category.all.select{|a| a.section_id == @section.id}.sort_by(&:display)
     render 'thingcats/cats'
   end
 end

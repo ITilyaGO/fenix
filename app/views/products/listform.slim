@@ -3,7 +3,6 @@ ul class="nav nav-tabs"
   li = link_to tag_icon(:'puzzle-piece', pat(:complex)), url(:products, :complexity)
   li = link_to tag_icon(:ticket, pat(:sticker)), url(:products, :sticker)
   li.pull-right = link_to tag_icon(:'file-excel-o', 'экспорт'), url(:products, :export, :win => '')
-  li.pull-right = link_to tag_icon(:'folder-o', 'новые продукты'), url(:things, :table)
   
 .page
   .col-md-12

@@ -558,6 +558,27 @@ complex, sticker_line, .sticker-block {
 .cmar-04a > * {
   margin: .4em;
 }
+.tmar-1 {
+  margin-top: 1em;
+}
+.tmar-2 {
+  margin-top: 2em;
+}
+.tmar-3 {
+  margin-top: 3em;
+}
+.vmar-1 {
+  .tmar-1;
+  margin-bottom: 1em;
+}
+.vmar-2 {
+  .tmar-2;
+  margin-bottom: 2em;
+}
+.vmar-3 {
+  .tmar-3;
+  margin-bottom: 3em;
+}
 .hpad-1 {
   padding: 0 1em;
 } 
@@ -1273,17 +1294,17 @@ allworks, localworks, .cube-panel {
   }
 }
 .ted2 {
-  .ted();
+  .ted;
   padding-top: 0;
 }
 
 deepdown, deepdown-ms {
-  .relat();
+  .relat;
   display: block;
   user-select: none;
 
   .dropdown-toggle {
-    .wp100();
+    .wp100;
   }
   .deepdown-float {
     max-height: 45vh;
@@ -1291,13 +1312,13 @@ deepdown, deepdown-ms {
     margin-top: -2px;
     border: 2px solid rgb(227, 227, 227);
     border-radius: 0 0 6px 6px;
-    padding: 2px 4px;
+    // padding: 2px 4px;
     // border-top: 0;
     .item {
-      margin-bottom: 3px;
-      .btn {
-        text-align: left;
-      }
+      // margin-bottom: 3px;
+      // .btn {
+      //   text-align: left;
+      // }
       // &:hover {
       //   background: red;
       //   color: unset;
@@ -1317,6 +1338,22 @@ deepdown, deepdown-ms {
     display: block;
     top: 100%;
   }
+
+  .option {
+    .btn-xs;
+    padding: 6px 15px;
+    border-radius: 0;
+    .hand;
+    &:hover {
+      background: #f1f1f1;
+    }
+    &.selected {
+      background: @dekoltextblue;
+      color: white;
+      // .btn-info;
+    }
+  }
+
 }
 
 order-select {
@@ -1467,3 +1504,15 @@ newbadge {
   padding: 3px 8px;
 }
 
+.form-std .control-group.emb {
+background: rgba(111, 98, 98, 0.25);
+}
+.form-std .form-control, .form-std .dropdown-toggle {
+background: rgba(208, 192, 166, 0.3);
+}
+.control-group {
+  .controls + .extra {
+    position: absolute;
+    right: -2em;
+  }
+}

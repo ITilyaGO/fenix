@@ -27,12 +27,12 @@ Fenix::App.controllers :aux do
     # usergroups = KSM::UserGroup.all.map(&:to_r)
     usergroups2 = KSM::Category.all
     bcats = KSM::Category.all.select{|a| a.section_id == comp}.map(&:id)
-    usergroups = KSM::Category.all.select{|a| a.section_id == comp && a.top?}.map(&:to_r)
+    usergroups = KSM::Category.all.select{|a| a.section_id == comp}.sort_by(&:display).map(&:to_jr)
     grouped = KSM::Category.all.group_by(&:category_id)
-    usergroups.each do |a|
-      a[:childs] = grouped[a[:id]]&.map(&:to_r)
-      a[:name] = usergroups2.detect{|c|c.id == a[:id]}.display
-    end
+    # usergroups.each do |a|
+    #   a[:childs] = grouped[a[:id]]&.map(&:to_jr)
+    #   # a[:name] = usergroups2.detect{|c|c.id == a[:id]}.display
+    # end
     usergroups.to_json
   end
 

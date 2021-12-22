@@ -15,6 +15,14 @@ module Fenix::App::ThingsHelper
     seed
   end
 
+  def thing_glob_seed
+    bo = wonderbox(:things_glob_seed) || {}
+    seed = bo.fetch(:seed, 0) + 1
+    bo[:seed] = seed
+    wonderbox_set(:things_glob_seed, bo)
+    seed
+  end
+
   def cate_seed_from topcat = :root
     topcat ||= :root
     bo = wonderbox(:cat_seed) || {}

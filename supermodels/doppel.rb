@@ -8,6 +8,10 @@ class Doppel < Cabie::Doppel
   def errors
     {}
   end
+
+  def formiz *args
+    fill self.class.formize(*args).merge(merge: true)
+  end
 end
 
 class Supermodel

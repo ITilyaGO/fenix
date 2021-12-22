@@ -27,6 +27,13 @@ class KSM::Category < Doppel
     nums.map{|n| "%02i" % n.to_i}.join('.')
   end
 
+  def to_jr
+    {
+      **to_r,
+      name: display
+    }
+  end
+
   # def updated_at
   #   @updated_at || Date.new(1970,1,1)
   # end

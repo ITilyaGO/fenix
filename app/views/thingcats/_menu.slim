@@ -1,0 +1,11 @@
+/ul.nav.nav-tabs.flex-v
+  li.btn.btn-camo = link_to tag_icon(:coffee, 'товары'), url(:things, :table)
+  li.btn.btn-camo = link_to tag_icon(:book, 'цеха'), url(:thingcats, :sections)
+  li.btn.btn-camo = link_to tag_icon(:book, 'категории'), url(:thingcats, :categories)
+  /li.pull-right = link_to tag_icon(:'file-excel-o', 'экспорт'), url(:products, :export, :win => '')
+
+- a ||= 1
+ul.na.flex-v style='padding-left: 0;padding-right: 40px;margin-left: -15px;'
+  = link_to tag_icon(:coffee), url(:things, :table), class: ['btn btn-camo mbm', ('btn-camo-inv' if a == :p)]
+  = link_to tag_icon(:bank), url(:thingcats, :sections), class: ['btn btn-camo mbm', ('btn-camo-inv' if a == :s)]
+  = link_to tag_icon(:book), url(:thingcats, :categories), class: ['btn btn-camo mbm', ('btn-camo-inv' if a == :c)]

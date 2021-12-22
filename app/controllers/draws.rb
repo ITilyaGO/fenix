@@ -71,7 +71,7 @@ Fenix::App.controllers :draws do
       return render 'draws/error'
     end
     @draw = KSM::Draw.nest day, sn
-    @draw.fill type: form[:type].to_sym, amount: form[:amount].to_i, more: form[:more], merge: true
+    @draw.formiz(form) 
     @draw.save
     draws_stack_push @draw.id
     form[:orders]&.each do |fo|
