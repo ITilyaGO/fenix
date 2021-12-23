@@ -70,6 +70,9 @@ en:
       director: Директор
       stickerman: Клейщик
       supplier: Снабжение
+    draw:
+      create: Создать тираж
+      all: Все тиражи
     order:
       create: Создать заказ
       confirm: Подтвердить любой заказ
