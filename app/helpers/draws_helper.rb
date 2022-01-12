@@ -33,12 +33,20 @@ module Fenix::App::DrawsHelper
     draworder.split('_').first
   end
 
+  def draw_order_unf2 draworder
+    draworder.split('_').last
+  end
+
   def draw_and_order_set draw, order
     CabiePio.set [:draw, :order], draw_order_id(draw, order), 1
   end
 
   def order_draws_for order
     old_need = CabiePio.query("p/draw/order>.*_#{order}", type: :regex).flat.keys.map{|d|draw_order_unf(d)}
+  end
+
+  def draworders_for draw
+    CabiePio.all([:draw, :order], [draw]).flat.keys.map{|d|draw_order_unf2(d)}
   end
 
   def kc_daydraws day = Date.today

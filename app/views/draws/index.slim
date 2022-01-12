@@ -20,6 +20,9 @@
           td.list-column
             = draw.displayname
           td class='list-column list-row-action non-print'
+            - draworders_for(draw.id).each do |order_id|
+              = link_to order_id, :href => url(:orders, :edit, :id => order_id)
+              |&nbsp;
             /.list-row-action-wrapper
               / .btn.btn-xs edit
               .text.list-row-action-wrapper-link: .span = link_to tag_icon(:edit), :href => url(:draws, :edit, :id => draw.id), :class => ''

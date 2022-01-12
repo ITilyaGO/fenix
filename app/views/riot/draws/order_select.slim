@@ -1,11 +1,11 @@
 order-select.wp100
   .col-md-6
-    input.form-control type="text" placeholder="Поиск заказов" onkeyup='{ finditem }' onchange='{ finditem }'
+    input.form-control.i1 type="text" placeholder="Поиск заказов" onkeyup='{ finditem }' onchange='{ finditem }'
     p.spacer
     .cont
       .arow if='{ fspots.length > 0 }': showcase: .glass.flex-v.cmar-04a
-        .item.wp100 each='{ f in fspots }' onclick='{ chooseitem }'
-          .hand.label.label-anew
+        .item.hand.wp100 each='{ f in fspots }' onclick='{ chooseitem }'
+          .label.label-anew
             | { f.id }
           | &nbsp;&nbsp;{ f.city }
 
@@ -29,6 +29,10 @@ order-select.wp100
     chooseitem(a) {
       var i = self.selected.indexOf(a.item.f.id)
       if (i < 0) self.selected.push(a.item.f.id)
+      self.clear_results()
+      var e1 = self.root.querySelector('input.i1')
+      e1.value = ''
+      e1.focus()
     }
 
     unchoose(a) {
@@ -44,10 +48,6 @@ order-select.wp100
     clear_results() {
       self.fspots = []
       self.update()
-    }
-
-    results_may_vary() {
-      return self.fspots && self.fspots.length > 0
     }
 
     loadlist() {
