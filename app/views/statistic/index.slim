@@ -45,8 +45,8 @@ h3
   sub.upper Города
   hr
   .btn.item
-    = link_to url(:statistic, :cities), :class => 'btn btn-sm btn-clear'
-      i.fa.fa-medkit.fa-btn
+    = link_to url(:statistic, :kcities, year: Date.today.year), :class => 'btn btn-sm btn-clear'
+      i.fa.fa-bar-chart.fa-btn
       | по городам
 .col-md-3
 

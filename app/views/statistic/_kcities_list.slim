@@ -1,0 +1,4 @@
+- @res.sort_by{|k,v|-v.size}.each do |k,v|
+  p
+    = link_to KatoAPI.astral(k).model, url(:statistic, :bykcity, year: params[:year], city: k)
+    | &nbsp;заказов #{v.size}

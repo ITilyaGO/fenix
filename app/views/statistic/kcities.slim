@@ -1,0 +1,11 @@
+kcities data-name='Города 2021' url=url(:statistic, :kcities, year: 2021)
+kcities data-name='Города 2020' url=url(:statistic, :kcities, year: 2020)
+
+- content_for :js_assets do
+  = javascript_include_tag :riot, :appa
+  rscript type="riot/tag" src="/riot/tags/stat/kcities.tag"
+  
+  javascript:
+    document.addEventListener("DOMContentLoaded", function(event) {
+      riot.mount('kcities')
+    })

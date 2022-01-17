@@ -1,0 +1,54 @@
+kcities
+  .btn.btn-link.btn-sm if='{opts.dataName}' show='{!loaded}' onclick='{backsend}'
+    | {opts.dataName}&nbsp;
+    i.fa.fa-angle-down
+
+  .flex-c.center.page-loading.hidden
+    .indicator
+      i.fa.fa-circle-o-notch.fa-spin.fa-fw
+      span.text Data Loading
+      br
+      span.url
+
+  .output
+
+  javascript:
+    self.loaded = false
+    self.aurl = opts.url
+
+    backsend() {
+      self.requestsend = true
+      b = this
+      var o = self.root.querySelector('.output')
+      var palo = self.root.querySelector('.page-loading')
+      loint = self.root.querySelector('.indicator .url')
+      var data = {
+        authenticity_token: rsquad.token()
+      }
+
+      fetch(self.aurl, {
+        method: 'PUT',
+        body: new URLSearchParams(data).toString(),
+        headers: { "Content-Type": "application/x-www-form-urlencoded" }
+      })
+      .then(response => response.text())
+      .then(function(result) {
+        self.loaded = true
+        o.innerHTML = result
+
+        // riot.mount('switcher, elhide, rowsummer')
+
+        o.classList.toggle('fade')
+        palo.classList.toggle('hidden')
+        self.update()
+
+        var first_tab = $('#order_tab li.my:not(.disabled):first a')
+          || $('#order_tab li:not(.disabled):first a');
+        first_tab.tab('show');
+      })
+
+      o.classList.toggle('fade')
+      palo.classList.toggle('hidden')
+
+      return true
+    }

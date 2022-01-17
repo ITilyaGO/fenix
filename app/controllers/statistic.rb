@@ -27,6 +27,60 @@ Fenix::App.controllers :statistic do
     render 'statistic/bycity'
   end
 
+  get :kcities, :with => :year do
+    @title = "Statistics - все известные заказы"
+    # @stat = Order.joins(:place).group(:place_id, "places.name").order("count(*) desc", "places.name").count(:id)
+    render 'statistic/kcities'
+  end
+
+  put :kcities_boot, :with => :year do
+    time = sec do
+      ids = orders_to_cities_by_year params[:year].to_i
+      kc_orders = CabiePio.all_keys(ids, folder: [:orders, :towns]).flat
+      @res = kc_orders.group_by(&:last).transform_values{|a|a.map(&:first).map(&:to_i)}
+    end
+    # wk = "stat_#{params[:year]}".to_sym
+    # wonderbox_set wk, @res
+    @stat = [Thread.current.inspect]
+    @time = notice_for_time(time)
+    {
+      time: @time,
+      res: @res
+    }.to_json
+  end
+
+  put :kcities, :with => :year do
+    time = sec do
+      ids = orders_to_cities_by_year params[:year].to_i
+      kc_orders = CabiePio.all_keys(ids, folder: [:orders, :towns]).flat
+      @res = kc_orders.group_by(&:last).transform_values{|a|a.map(&:first).map(&:to_i)}
+    end
+    # wk = "stat_#{params[:year]}".to_sym
+    # wonderbox_set wk, @res
+    @stat = [Thread.current.inspect]
+    @time = notice_for_time(time)
+    
+    partial 'statistic/kcities_list'
+  end
+
+  get :bykcity, map: 'statistic/bykcity/:year/:city' do
+    @title = "Statistics - по городу за год"
+    @city = KatoAPI.anything(params[:city]).model
+    ids = orders_to_cities_by_year params[:year].to_i
+    kc_orders = CabiePio.all_keys(ids, folder: [:orders, :towns]).flat
+    @res = kc_orders.group_by(&:last).transform_values{|a|a.map(&:first).map(&:to_i)}
+
+    @orders = @res.fetch(params[:city], [])
+    stat = OrderLine.where(order_id: @orders).joins(:product, :product => :category).group(:product_id, "products.'index'", "categories.'index'").order("categories_index", "products_index").sum(:done_amount)
+    @pretty_stat = []
+    stat.each do |item|
+      pid = item[0][0]
+      p = Product.find(item[0][0])
+      @pretty_stat << { :id => pid, :category => p.category.name, :name => p.displayname, :sum => item[1] }
+    end
+    render 'statistic/bycity'
+  end
+
   get :orders do
     @title = "Statistics - текущие заказы"
     @cats = Category.where(:category_id => nil)

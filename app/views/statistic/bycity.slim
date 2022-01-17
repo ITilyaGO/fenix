@@ -1,13 +1,16 @@
-h4 = @city.name
-p Заказов: #{@orders.size}
-
-table class="table"
+.flex-c.cmar-05
+  = link_to tag_icon(:'arrow-left'), url(:statistic, :kcities, year: params[:year]), style: 'fa btn'
+  h4 #{@city.name} #{params[:year]}
+  .block Заказов: #{@orders.size}
+  .block Количество: #{@pretty_stat.sum{|a|a[:sum]}}
+br
+table.table
   tr
     th Категория
     th Наименование
-    th Количество
+    th Отправлено
   
-  - @pretty_stat.each do |s|
+  - @pretty_stat.sort_by{|a|-a[:sum]}.each do |s|
     tr
       td = s[:category]
       td = s[:name]
