@@ -71,7 +71,11 @@ Fenix::App.controllers :statistic do
     @res = kc_orders.group_by(&:last).transform_values{|a|a.map(&:first).map(&:to_i)}
 
     @orders = @res.fetch(params[:city], [])
-    stat = OrderLine.where(order_id: @orders).joins(:product, :product => :category).group(:product_id, "products.'index'", "categories.'index'").order("categories_index", "products_index").sum(:done_amount)
+    stat = OrderLine.where(order_id: @orders)
+      .joins(:product, :product => :category)
+      .group(:product_id, "products.'index'", "categories.'index'")
+      .order("categories_index", "products_index")
+      .sum(:done_amount)
     @pretty_stat = []
     stat.each do |item|
       pid = item[0][0]
@@ -169,6 +173,60 @@ Fenix::App.controllers :statistic do
       when :html then render 'statistic/orders_frame'
       when :csv then begin
         fname = 'statistics-' + @category.name + '.csv'
+        headers['Content-Disposition'] = "attachment; filename=#{fname}"
+        output = ''
+        output = "\xEF\xBB\xBF" if params.include? :win
+        output << CSV.generate(:col_sep => ';') do |csv|
+          # csv << "\xEF\xBB\xBF" if params[:win]
+          # csv << %w(id name num)
+          @pretty_stat.each do |item|
+            csv << [item[:category].encode('utf-8'), item[:name].encode('utf-8'), item[:sum]]
+          end
+        end
+      end
+    end
+  end
+
+  get :stickers_frame_start do
+    from = timeline_id Date.today-3
+    to = timeline_id Date.today
+    redirect url(:statistic, :stickers_frame, :from => from, :to => to)
+  end
+
+  post :stickers_frame_start do
+    redirect url(:statistic, :stickers_frame, :from => params[:from], :to => params[:to])
+  end
+
+  get :stickers_frame, :provides => [:html, :csv] do
+    @title = "Statistics - клейка за период"
+    id = params[:id]
+    @from = timeline_unf params[:from]
+    @to = timeline_unf params[:to]
+    too_much = (@to-@from).ceil > 31
+    if too_much
+      @pretty_stat = @orders = []
+      flash[:warning] = 'больше 30 дней'
+      return render 'statistic/stickers_frame'
+    end
+    dary = @from.step(@to).map{|d|timeline_id(d)}
+    ols = []
+    dary.each do |date|
+      ols << CabiePio.query("m/order_lines/sticker>.*_#{date}", type: :regex).records
+    end
+    olids = ols.flatten.map{|a|a.key.public.split('_').first.to_i}.uniq
+    op = OrderLine.where(id: olids).pluck(:id, :product_id).to_h
+    olsum = ols.flatten.group_by{|a|op.fetch a.key.public.split('_').first.to_i, nil}
+    
+    @pretty_stat = []
+    olsum.each do |pid,items|
+      p = Product.find(pid)
+      @pretty_stat << { :id => pid, :category => p.category.name, :name => p.displayname, :sum => items.sum{|a|a.data[:v]} }
+    end
+
+    case content_type
+      when :html then render 'statistic/stickers_frame'
+      when :csv then begin
+        fname = 'stickers-' + @category.name + '.csv'
         headers['Content-Disposition'] = "attachment; filename=#{fname}"
         output = ''
         output = "\xEF\xBB\xBF" if params.include? :win

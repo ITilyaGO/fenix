@@ -10,7 +10,7 @@ table.table
     th Наименование
     th Отправлено
   
-  - @pretty_stat.sort_by{|a|-a[:sum]}.each do |s|
+  - @pretty_stat.each do |s|
     tr
       td = s[:category]
       td = s[:name]

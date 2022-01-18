@@ -1,0 +1,61 @@
+.non-print
+  .pull-right
+    = link_to 'Печать', 'javascript:print()', :class => 'btn btn-glue btn-sm'
+  .text-center
+    = form_tag url(:statistic, :stickers_frame_start) do
+      span дней: #{(@to-@from).ceil+1} &nbsp;
+      select name="from" class="huge mbl"
+        - today = Date.today
+        - 30.times do |i|
+          - html_attributes = { :value => timeline_id(today) }
+          - html_attributes[:selected] ||= option_is_selected?(today, today, @from)
+          = content_tag(:option, today, html_attributes)
+          - today -= 1
+      |&nbsp;
+      select name="to" class="huge mbl"
+        - today = Date.today
+        - 30.times do |i|
+          - html_attributes = { :value => timeline_id(today) }
+          - html_attributes[:selected] ||= option_is_selected?(today, today, @to)
+          = content_tag(:option, today, html_attributes)
+          - today -= 1
+      |&nbsp;
+      = submit_tag 'сформировать', class: 'btn btn-sm btn-glue'
+
+p
+  ' &nbsp;
+  a href=url(:statistic, :stickers_frame, :from => @from, :to => @to, :format => :csv)
+    span.label.label-info
+      span.fa.fa-file.menu-icon style='padding-right:10px;'
+      ' csv
+  ' &nbsp;
+  a href=url(:statistic, :stickers_frame, :from => @from, :to => @to, :win => '', :format => :csv)
+    span.label.label-success
+      span.fa.fa-file.menu-icon style='padding-right:10px;'
+      ' excel
+
+table.table.table-hover
+  tr
+    th.non-print Печать
+    th Категория
+    th Наименование
+    th Количество
+  
+  - @pretty_stat.each do |s|
+    tr.list-row
+      td class='list-column list-selectable non-print' = check_box_tag 'stats[]', :checked => true, :autocomplete => "off", :class => 'list-selectable-checkbox'
+      td = s[:category]
+      td = s[:name]
+      td = s[:sum]
+
+- content_for :js_assets do
+  javascript:
+    (function($) {
+      $(function() {
+  
+        $(".list-selectable-checkbox").on("change", function() {
+          $(this).parents(".list-row").toggleClass('non-print');
+        });
+        
+      });
+    })(jQuery);
