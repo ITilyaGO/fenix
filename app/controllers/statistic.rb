@@ -85,6 +85,23 @@ Fenix::App.controllers :statistic do
     render 'statistic/bycity'
   end
 
+  get :byclients, map: 'statistic/byclients/:year/:city' do
+    @title = "Statistics - по городу за год"
+    @city = KatoAPI.anything(params[:city]).model
+    ids = orders_to_cities_by_year params[:year].to_i
+    kc_orders = CabiePio.all_keys(ids, folder: [:orders, :towns]).flat
+    @res = kc_orders.group_by(&:last).transform_values{|a|a.map(&:first).map(&:to_i)}
+
+    @orders = @res.fetch(params[:city], [])
+    @gpretty_stat = Order.where(id: @orders)
+      .joins(:client)
+      .group(:client_id)
+      .order('sum(orders.done_total) DESC')
+      .pluck(:client_id, 'sum(orders.done_total), sum(orders.total), count(*)')
+
+    render 'statistic/clients_bycity'
+  end
+
   get :orders do
     @title = "Statistics - текущие заказы"
     @cats = Category.where(:category_id => nil)

@@ -44,7 +44,6 @@ module Fenix::App::StatHelper
     end_date = start_date.next_year
     orders = Order.where(status: Order.statuses[:finished])
       .where('updated_at >= ?', start_date).where('updated_at < ?', end_date)
-      # .where.not(client_id: ignored)
       .pluck(:id)
   end
 end

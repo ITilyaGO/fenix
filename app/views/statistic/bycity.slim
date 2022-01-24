@@ -3,6 +3,8 @@
   h4 #{@city.name} #{params[:year]}
   .block Заказов: #{@orders.size}
   .block Количество: #{@pretty_stat.sum{|a|a[:sum]}}
+  .flexie
+  .block = link_to 'Клиенты', url(:statistic, :byclients, year: params[:year], city: params[:city])
 br
 table.table
   tr

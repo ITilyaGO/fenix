@@ -1,0 +1,19 @@
+.flex-c.cmar-05
+  = link_to tag_icon(:'arrow-left'), url(:statistic, :kcities, year: params[:year]), style: 'fa btn'
+  h4 #{@city.name} #{params[:year]}
+  .block Заказов: #{@orders.size}
+  .block
+    ' Сумма:
+    == deli(rur @gpretty_stat.sum{|a|a[1]})
+br
+table.table
+  tr.trh
+    th Клиент
+    th Отправлено
+    th Заказов
+  
+  - @gpretty_stat.each do |g|
+    tr
+      td = Client.find(g.first).name
+      td: .rpr == deli(rur g[1])
+      td = g.last
