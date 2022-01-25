@@ -46,4 +46,13 @@ module Fenix::App::StatHelper
       .where('updated_at >= ?', start_date).where('updated_at < ?', end_date)
       .pluck(:id)
   end
+
+  def orders_by_client_by_year y, cid
+    start_date = Date.new y, 1, 1
+    end_date = start_date.next_year
+    orders = Order.where(status: Order.statuses[:finished])
+      .where('updated_at >= ?', start_date).where('updated_at < ?', end_date)
+      .where(client: cid)
+      .pluck(:id)
+  end
 end

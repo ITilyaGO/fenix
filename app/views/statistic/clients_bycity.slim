@@ -14,6 +14,6 @@ table.table
   
   - @gpretty_stat.each do |g|
     tr
-      td = Client.find(g.first).name
+      td = link_to Client.find(g.first).name, url(:statistic, :byclient, year: params[:year], city: params[:city], client: g.first)
       td: .rpr == deli(rur g[1])
       td = g.last

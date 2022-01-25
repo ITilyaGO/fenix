@@ -1,0 +1,18 @@
+.flex-c.cmar-05
+  = link_to tag_icon(:'arrow-left'), url(:statistic, :byclients, year: params[:year], city: params[:city]), style: 'fa btn'
+  h4 #{@client.name}.
+  h4 #{@city.name} #{params[:year]}
+  .block Заказов: #{@orders.size}
+  .block Количество: #{@pretty_stat.sum{|a|a[:sum]}}
+br
+table.table
+  tr
+    th Категория
+    th Наименование
+    th Отправлено
+  
+  - @pretty_stat.each do |s|
+    tr
+      td = s[:category]
+      td = s[:name]
+      td = s[:sum]
