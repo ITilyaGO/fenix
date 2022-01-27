@@ -10,9 +10,11 @@ table.table
     th Категория
     th Наименование
     th Отправлено
+    th Цена
   
   - @pretty_stat.each do |s|
     tr
       td = s[:category]
       td = s[:name]
       td = s[:sum]
+      td = s[:price]

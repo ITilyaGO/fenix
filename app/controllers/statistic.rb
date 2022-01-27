@@ -80,7 +80,7 @@ Fenix::App.controllers :statistic do
     stat.each do |item|
       pid = item[0][0]
       p = Product.find(item[0][0])
-      @pretty_stat << { :id => pid, :category => p.category.name, :name => p.displayname, :sum => item[1] }
+      @pretty_stat << { :id => pid, :category => p.category.name, :price => p.price, :name => p.displayname, :sum => item[1] }
     end
     render 'statistic/bycity'
   end
@@ -120,7 +120,7 @@ Fenix::App.controllers :statistic do
     stat.each do |item|
       pid = item[0][0]
       p = Product.find(item[0][0])
-      @pretty_stat << { :id => pid, :category => p.category.name, :name => p.displayname, :sum => item[1] }
+      @pretty_stat << { :id => pid, :category => p.category.name, :price => p.price, :name => p.displayname, :sum => item[1] }
     end
     render 'statistic/byclient'
   end
