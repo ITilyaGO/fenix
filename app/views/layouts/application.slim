@@ -46,32 +46,34 @@ html lang='en'
               = link_to url(:orders, :draft) do
                 | Непроверенные
                 span class="menu-icon fa fa-exclamation-circle"
-          li.sidebar-list
-            = link_to url(:orders, :index) do
-              | Все
-              | &nbsp;&nbsp;
-              span class="badge" = current_account.new_orders
-              span class="menu-icon fa fa-folder-o"
-          li.sidebar-list
-            = link_to url(:orders, :index, :deli => Order.deliveries[:postage]) do
-              | Отправки
-              span class="menu-icon fa fa-folder-o"
-          li.sidebar-list
-            = link_to url(:orders, :index, :deli => Order.deliveries[:roundtrip]) do
-              | Поездки
-              span class="menu-icon fa fa-folder-o"
-          li.sidebar-list
-            = link_to url(:orders, :index, :deli => Order.deliveries[:vernissage]) do
-              = t :'delivery.vernissage'
-              span class="menu-icon fa fa-folder-o"
-          li.sidebar-list
-            = link_to url(:orders, :index, :deli => Order.deliveries[:pickup]) do
-              = t :'delivery.pickup'
-              span class="menu-icon fa fa-folder-o"
-          li.sidebar-list
-            = link_to url(:orders, :finished) do
-              | Готовые
-              span class="menu-icon fa fa-check-square-o"
+          - if can_view?(:list, :current) || can_view_any_section?(:sections, :list)
+            li.sidebar-list
+              = link_to url(:orders, :index) do
+                | Все
+                | &nbsp;&nbsp;
+                span class="badge" = current_account.new_orders
+                span class="menu-icon fa fa-folder-o"
+            li.sidebar-list
+              = link_to url(:orders, :index, :deli => Order.deliveries[:postage]) do
+                | Отправки
+                span class="menu-icon fa fa-folder-o"
+            li.sidebar-list
+              = link_to url(:orders, :index, :deli => Order.deliveries[:roundtrip]) do
+                | Поездки
+                span class="menu-icon fa fa-folder-o"
+            li.sidebar-list
+              = link_to url(:orders, :index, :deli => Order.deliveries[:vernissage]) do
+                = t :'delivery.vernissage'
+                span class="menu-icon fa fa-folder-o"
+            li.sidebar-list
+              = link_to url(:orders, :index, :deli => Order.deliveries[:pickup]) do
+                = t :'delivery.pickup'
+                span class="menu-icon fa fa-folder-o"
+          - if can_view?(:list, :finished) || can_view_any_section?(:sections, :list)
+            li.sidebar-list
+              = link_to url(:orders, :finished) do
+                | Готовые
+                span class="menu-icon fa fa-check-square-o"
           - if can_view?(:list, :stickers)
             li.sidebar-list
               = link_to url(:stickers, :orders) do
@@ -99,21 +101,22 @@ html lang='en'
                 | Заказы
                 span class="menu-icon fa fa-film"
 
-          li.sidebar-title.separator
-            span Расписание
-          li.sidebar-list
-            = link_to url(:timeline, :weeks) do
-              | График
-              span class="menu-icon fa fa-tachometer"
-          - if can_view?(:timeline, :stickers)
+          - if can_view?(:timeline, :all)
+            li.sidebar-title.separator
+              span Расписание
             li.sidebar-list
-              = link_to url(:timeline, :stickers) do
-                | График клейки
-                span class="menu-icon fa fa-ticket"
-          li.sidebar-list
-            = link_to url(:roundtrips, :index) do
-              | График поездок
-              span class="menu-icon fa fa-car"
+              = link_to url(:timeline, :weeks) do
+                | График
+                span class="menu-icon fa fa-tachometer"
+            - if can_view?(:timeline, :stickers)
+              li.sidebar-list
+                = link_to url(:timeline, :stickers) do
+                  | График клейки
+                  span class="menu-icon fa fa-ticket"
+            li.sidebar-list
+              = link_to url(:roundtrips, :index) do
+                | График поездок
+                span class="menu-icon fa fa-car"
 
           - if allow_route?(:online)
             li.sidebar-title.separator
@@ -184,12 +187,13 @@ html lang='en'
                 | Менеджеры
                 span class="menu-icon fa fa-briefcase"
 
-          - if current_account.is_admin?
+          - if can_view? *%i(sys prefs)
             li.sidebar-title.separator
             li.sidebar-list
               = link_to url(:prefs, :page) do
                 | Настройки
 
+        - if can_view? *%i(sys prefs)
         .sidebar-footer
           .col-xs-6
             = link_to "Ярдеколь", "https://yardekol.ru", :target => "_blank"
@@ -283,5 +287,5 @@ html lang='en'
     //   	</aside>
       
     
-    = javascript_include_tag 'jquery-2.1.1.min', 'jquery.cookie', 'bootstrap.min', 'typeahead.min', 'handlebars', 'bootstrap-select', :application, :fu
+    = javascript_include_tag 'jquery-2.1.1.min', 'jquery.cookie', 'bootstrap.min', 'typeahead.min', 'handlebars', 'bootstrap-select', :application, :fu, :appa
     = yield_content :js_assets

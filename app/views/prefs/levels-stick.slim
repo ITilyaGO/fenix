@@ -1,0 +1,118 @@
+- today = Date.today
+- base = wonderbox(:stickday_limit)
+
+#stick_limits.nav.nav-tabs
+  .flex-v.center.btns.non-print
+    = link_to url(:prefs, :levels_stickday, start: timeline_id(@sdate.weeks_ago(4))) do
+      .btn.scroll.btn-sm.btn-default: i.fa.fa-arrow-left
+  .wrapper
+    .head
+      .center.flex-c.center.btn.btn-sm.btn-clear style='align-items:baseline;'
+        span = @sdate.strftime("%B %Y")
+        /' &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        /.btn.btn-xs.btn-default: .price style='font-size:1.3em;' == deli(rur @month_sum)
+
+    - @weeks.each_with_index do |tab, i|
+      .flex-c.center.graphic
+        - 7.times do |gap|
+          - cdate = tab[:date] + gap
+          - a = KSM::StickdayLimit.find(cdate).rebase(base)
+          / - a.booked = 8000 if a.exist?
+
+          .day.bjtn[
+            class=[('today' if cdate == today), ('btnbltn-glue' if a.exist?)]
+            title=cdate data-id=timeline_id(cdate)
+          ]
+            .wday.hand class=a.avail_css
+              == gap < 5 ? to_dm(cdate) : '&nbsp;'
+
+              - if a.exist?
+                - if a.delivery
+                  .edit = tja :delivery, a.delivery
+                - else
+                  .fa.fa-pencil.edit
+
+            .price.small.normal == deli((a.price))
+            .price.small.text-warning
+              == deli((a.booked)) if a.exist? && a.booked > -10
+              == '&nbsp;' unless a.exist?
+
+  .flex-v.center.btns.non-print
+    = link_to url(:prefs, :levels_stickday, start: timeline_id(@sdate.weeks_ago(-4))) do
+      .btn.scroll.btn-sm.btn-default: i.fa.fa-arrow-right
+
+  .side-wr.flex-v.non-print
+
+    = form_for '', url(:prefs, :stickday_info), :class => 'form-page' do
+    
+    .col-md-12 = form_for :supermodel, url(:prefs, :stick_limits), :method => :put, :class => 'form-horizontal pbl' do |f|
+      fieldset
+        label = t 'box.stickday_limit'
+        .input-group-sm
+          = text_field_tag :limit, :value => wonderbox(:stickday_limit), :autocomplete => "off", :class => "form-control input-sm"
+      = f.submit :save, class: 'col-sm-12 btn btn-sm btn-glue mtm mbl'
+      = link_to t('tit.prefs.stadies'), url(:prefs, :stadies), class: ''
+
+    .bottom
+      .btn.btn-xs.btn-default: i.fa.fa-arrow-down
+      
+    .side-list.flex-v
+
+- content_for :js_assets do
+  = javascript_include_tag :appa, :riot
+  rscript type="riot/tag" src="/riot/tags/deepdown.tag"
+  / rscript type="riot/tag" src="/riot/tags/deepdown_ms.tag"
+  / rscript type="riot/tag" src="/riot/tags/things/deedselect.tag"
+  / rscript type="riot/tag" src="/riot/tags/switcher.tag"
+  / rscript type="riot/tag" src="/riot/tags/elhide.tag"
+  / rscript type="riot/tag" src="/riot/tags/shower.tag"
+  / rscript type="riot/tag" src="/riot/tags/prefs/bottom_works.tag"
+  / rscript type="riot/tag" src="/riot/tags/things/list.tag"
+  / rscript type="riot/tag" src="/riot/tags/prefs/dualpane.tag"
+  / rscript type="riot/tag" src="/riot/tags/prefs/selectload.tag"  
+
+  javascript:
+    
+    document.addEventListener("DOMContentLoaded", function(event) {
+      riot.mount('deepdown')
+      let confobj = #{{@squadconf.to_json}}
+      rsquad.saveConfig(confobj)
+    });
+  javascript:
+    (function() {
+      document.querySelector('.side-wr .bottom .btn').addEventListener('click', function () {
+        document.querySelector('.side-wr').classList.add('hidden')
+      })
+
+      function filters(day_el) {
+        return 'date=' + day_el.getAttribute('data-id')
+      }
+
+      function no_href() {
+        b = this
+        o = document.querySelector('.side-list')
+        f = document.querySelector('.form-page')
+        palo = document.querySelector('.page-loading')
+        wr = document.querySelector('.side-wr')
+        loint = document.querySelector('.indicator .url')
+        fetch(f.action, {
+          method: 'PATCH',
+          body: filters(b) + "&authenticity_token=" + encodeURIComponent(document.querySelector("form [name^=auth]").value),
+          headers: { "Content-Type": "application/x-www-form-urlencoded" }
+        })
+        .then(response => response.text())
+        .then(function(result) {
+          o.innerHTML = result
+          riot.mount('deepdown')
+          o.classList.toggle('fade')
+        })
+        o.classList.toggle('fade')
+        wr.classList.remove('hidden')
+        // palo.classList.toggle('hidden')
+        return true
+      }
+
+      document.querySelectorAll('#stick_limits .day').forEach(function(b) {
+        b.onclick = no_href
+      })
+    })()

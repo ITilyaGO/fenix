@@ -36,7 +36,19 @@ Fenix::App.helpers do
   def shortday(day)
     today = Date.today
     tom = { today => 'сегодня', today-1 => 'вчера' }
-    today == day || today-1 == day ? tom[day] :  Date::DAYNAMESRU[day.wday-1]
+    today == day || today-1 == day ? tom[day] : Date::DAYNAMESRU[day.wday-1]
+  end
+
+  def smartday(day)
+    today = Date.today
+    return day.year unless today.year == day.year
+    tom = { today => 'сегодня', today-1 => 'вчера', today+1 => 'завтра' }
+    [today, today-1, today+1].include?(day) ? tom[day] : Date::DAYNAMESRU[day.wday-1]
+  end
+
+  def domiday(day)
+    today = Date.today
+    today.year == day.year && today.month == day.month ? day.strftime('%d') : day.strftime('%d.%m')
   end
 end
 

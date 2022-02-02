@@ -86,4 +86,11 @@ module Fenix::App::TimelineHelper
     return :unsure if cplx_sum >= thr && cplx_sum < thr2
     :unbusy if cplx_sum < thr
   end
+
+  def stadie_gap order
+    om = Order.find order
+    deli = om.delivery.to_sym
+    std = wonderbox(:stadie_days).fetch(deli, {})
+    std.values.sum
+  end
 end

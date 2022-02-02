@@ -1,0 +1,70 @@
+stickamount.flex-c
+  .flex-c
+    .pane.flex-c.vcenter
+      .fa.fa-ticket.text-darkrose
+      / .flex-c
+      | &nbsp;{ amount }&nbsp;
+      .r &#x20B7
+
+    .mll
+  / .flexie
+  .btn-sm
+  .inline
+    / = tj :stadie, :'01'
+
+    .daydelay.vcenter
+      .fa.fa-caret-left.text-danger if='{amdelay<0}'
+      .btn.btn-xs.btn-default class='{ btn-success: amdelay>0, btn-danger: amdelay<0 }'
+        | {Math.abs(amdelay)} д
+      .fa.fa-caret-right.text-success if='{amdelay>0}'
+  .btn-sm
+  .inline
+    .domiday.narrow.btn each="{ f in dates }"
+      span
+        | {f}
+      
+
+  javascript:
+    this.amount = 'PLACEHOLDER'
+    this.delay = -1
+    this.amdelay = 0
+
+    rcontrol.on('LOAD_STICKER_AMOUNT', function(order) {
+      var data = {
+        authenticity_token: rsquad.token(),
+        order: order
+      }
+
+      fetch('/orders/stickers_info.json', {
+        method: "POST",
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(data).toString()
+      })
+      .then(function(response) { return response.json() })
+      .then(function(data) {
+        self.amount = data.amount
+        self.update()
+      })
+    })
+
+    rcontrol.on('PREVIEW_STICKER_DATE', function(order, date) {
+      var data = {
+        authenticity_token: rsquad.token(),
+        order: order,
+        date: date
+      }
+
+      fetch('/orders/stickers_info.json', {
+        method: "POST",
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(data).toString()
+      })
+      .then(function(response) { return response.json() })
+      .then(function(data) {
+        self.amount = data.amount
+        self.dates = data.dates
+        self.amdelay = data.amdelay
+        self.update()
+      })
+    })
+    

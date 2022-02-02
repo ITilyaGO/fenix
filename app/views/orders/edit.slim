@@ -101,6 +101,22 @@ ul class="nav nav-tabs non-print"
     - if @stickday_date
       p Дата клейки: #{to_msk(@stickday_date)}
     p Менеджер: #{@manager&.name}
+
+    
+    .clearfix.pbm
+    .inline.ptm
+      = partial 'bricks/orders/domiday', locals: { day: @order.created_at, css: :create }
+      = partial 'bricks/orders/domiday', locals: { day: Date.today-800, css: :start }
+      / = partial 'bricks/orders/domiday', locals: { day: Date.today-1 }
+      - CabiePio.get(%i(m sticker days), @order.id).data.each do |k,v|
+        = partial 'bricks/orders/domiday', locals: { day: k }  
+      = partial 'bricks/orders/domiday', locals: { day: Date.today+3, css: :danger }
+      = partial 'bricks/orders/domiday', locals: { day: @timeline_date ||= Date.today, css: :finish }
+      - daydiff = @timeline_date.to_date-@order.created_at.to_date
+      = partial 'bricks/orders/domi', locals: { info: "#{daydiff.to_i} дней", css: :start }
+
+    / inplace data-name='Клейка' url=url(:aux, :stickdates, id: @order.id)
+
     .cmar-04a
       - KSM::Draw.find_all(order_draws_for(@order.id)).each do |d|
         .label.label-default class=('label-success' if d.printed?)

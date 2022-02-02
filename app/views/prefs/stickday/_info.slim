@@ -1,0 +1,23 @@
+.title.text-center = to_dm(@cdate)
+
+= form_for :supermodel, url(:prefs, :stickday_set, id: @day.id), :method => :put, :class => 'form-horizontal pbl' do |f|
+  fieldset
+    label = t 'box.stickday_limit'
+    .input-group-sm
+      = text_field_tag :price, :value => @day.price, :autocomplete => "off", :class => "form-control input-sm"
+    
+  fieldset.mtm
+    deepdown display-id=@day.delivery data-url='aux/deliveries' data-name=:delivery    
+  = f.submit :save, class: 'btn btn-sm btn-glue mtm'
+
+- @orders.each do |order|
+  .order
+    .flex-c
+      = link_to url(:orders, :edit, :id => order.id), class: 'text-left flexie', target: '_blank'
+        = order.id
+      - sticker_progress = @stickers.fetch(order.id, nil)
+      - if sticker_progress
+        .progress.mini.for-stickers title="#{sticker_progress}%" class=('danger' if sticker_progress > 130)
+          .progress-bar role="progressbar" style="width:#{sticker_progress.to_i}%"
+      .flexie.price == deli(rur order.total)
+    .text-left = order.client.name

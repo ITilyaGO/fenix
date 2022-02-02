@@ -53,4 +53,13 @@ Fenix::App.controllers :aux do
     results = orders.map{|a|{id:a, keyword:a.to_s, city: @kc_towns[@kc_orders[a.to_s]]&.model&.name}}
     results.to_json
   end
+
+  post :deliveries, :provides => :json do
+    # usergroups = KSM::UserGroup.all.map(&:to_r)
+    usergroups = Order.deliveries.map{|k,v| { id: k, name: tj(:delivery, k)} }
+    usergroups.each do |a|
+      # a[:name] = '' if a[:name].nil?
+    end
+    usergroups.to_json
+  end
 end

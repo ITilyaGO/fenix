@@ -852,13 +852,16 @@ calendar {
       border: 2px solid #606e7d;
     }
 
-    &.unbusy > span {
+    &.unbusy > span,
+    &.unbusy > .num {
       border-bottom: 3px solid rgb(149, 207, 141);
     }
-    &.busy > span {
+    &.busy > span,
+    &.busy > .num {
       border-bottom: 3px solid rgb(230, 132, 141);
     }
-    &.unsure > span {
+    &.unsure > span,
+    &.unsure > .num {
       border-bottom: 3px solid rgb(246, 228, 107);
     }
     &.past {
@@ -869,7 +872,95 @@ calendar {
       }
     }
   }
+}
 
+.calendar2 {
+  height: calc(85vh - 160px);
+  margin: 1em;
+  overflow-y: scroll;
+  display: flex;
+  justify-content: center;
+
+  .mtitle {
+    text-align: center;
+    width: 100%;
+    color: rgba(112, 146, 182, 0.4);
+  }
+
+  .noday {
+    width: 6em;
+    // height: 3em;
+    color: rgb(93, 96, 128);
+    font-size: 1em;
+    font-weight: normal;
+    line-height: 1.4;
+    border: 2px solid transparent;
+    border-radius: 6px;
+    display: inline-block;
+    margin: 2px .5em;
+    white-space: nowrap;
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  .wday {
+    .noday;
+
+    color: rgba(112, 146, 182, 0.4);
+    padding-top: 0;
+  }
+
+  .day {
+    .noday;
+    .relat;
+
+    background: rgba(242, 242, 242, 0.5);
+    cursor: pointer;
+
+    &.faster {
+      background: rgba(235, 203, 203, 0.4);
+    }
+    &:hover {
+      color: white;
+      background-color: #606e7d;
+      border-color: #606e7d;
+    }
+    &.selected {
+      border: 2px solid #606e7d;
+    }
+
+    .marks {
+      position: absolute;
+      font-size: 0.9em;
+      right: 6px;
+      top: 6px;
+      color: rgb(195, 178, 168);
+    }
+    .num {
+      padding: 0 5px;
+      font-size: 1.2em;
+    }
+
+    &.unbusy > span,
+    &.unbusy .num {
+      border-top: 3px solid rgb(149, 207, 141);
+    }
+    &.busy > span,
+    &.busy .num {
+      border-top: 3px solid rgb(230, 132, 141);
+    }
+    &.unsure > span,
+    &.unsure .num {
+      border-top: 3px solid rgb(246, 228, 107);
+    }
+    &.past {
+      color: rgba(93, 96, 128, 0.5);
+
+      &:hover {
+        background-color: transparent;
+      }
+    }
+  }
 }
 
 // stock
@@ -1108,9 +1199,102 @@ dualpane {
   }
 }
 
+#stick_limits.nav-tabs {
+  border-width: 2px;
+  border-color: #e1e4e7;
+  border-style: solid;
+  border-radius: 6px;
+  margin: 1em;
+  display: flex;
+  position: relative;
+  height: 80vh;
+  overflow-y: scroll;
+
+  .head {
+    width: 100%;
+    color: #8d89a6;
+    text-align: center;
+  }
+
+  .wrapper {
+    flex-flow: wrap;
+    display: flex;
+    margin-top: 2em;
+  }
+
+  .btns .scroll {
+    height: 5em;
+    font-size: 0.6em;
+  }
+
+  .btn-abs .graphic {
+    align-items: center;
+    height: 100%;
+    margin: 0;
+    color: rgba(46, 21, 8, 0.5);
+  }
+
+  .graphic {
+    padding-top: 1em;
+    margin: 0 1em;
+    display: flex;
+    flex: 0 0 100%;
+
+    .day {
+      margin: 0 .1em;
+      min-width: 6em;
+      &.today {
+        background: rgb(255, 241, 226);
+      }
+    }
+
+    .wday {
+      display: block;
+      font-size: 0.8em;
+      background: #ffffff;
+      border-radius: 6px;
+      align-self: center;
+      min-width: 5em;
+      margin: 3px 10px;
+      padding: 6px 10px;
+      text-align: center;
+
+      &.wend {
+        background: #bdc3c7;
+        color: #ffffff;
+      }
+
+      &.small {
+        padding: 0;
+      }
+      &.today {
+        border: 2px solid rgba(168, 172, 147, 0.75);
+      }
+    }
+
+    .edit {
+      color: rgb(172, 187, 198);
+      font-size: .9em;
+      padding: 0px 0px 6px 4px;
+      display: inline-flex;
+    }
+    
+    .price {
+      &.small {
+        line-height: 1.4;
+      }
+      &.normal {
+        color: #8d89a6;
+      }
+      text-align: center;
+    }
+
+  }
+}
 
 #stickers_cal.nav-tabs,
-#stickers_past.nav-tabs  {
+#stickers_past.nav-tabs,
+#stick_limits {
   .side-wr {
     overflow: scroll;
     margin: 2em;
@@ -1158,7 +1342,8 @@ dualpane {
   }
 }
 
-#stickers_cal.nav-tabs {
+#stickers_cal.nav-tabs,
+#stick_limits {
   .graphic {
     .wday {
       border: 2px solid transparent;
@@ -1268,6 +1453,63 @@ fieldset.stickers_tab{
     }
   }
 }
+
+// domidays
+.domiday {
+  .btn;
+  // .btn-xs;
+  .btn-clear;
+  display: inline-flex;
+  background: transparent;
+  min-width: 4ch;
+  height: 2.7em;
+
+  > span {
+    // bottom: .5em;
+    font-size: 1.3em;
+    line-height: 1.2;
+  }
+  sub {
+    top: -.5em;
+  }
+
+  &.create {
+    // color: @brand-info;
+    // border-right: 2px dotted grey;
+    border-right: 2px dotted rgb(205, 205, 205);
+    border-radius: 0;
+  }
+  &.start {
+    color: lighten(@brand-primary, 50%);
+    // border-bottom: 2px solid @brand-danger;
+  }
+  &.danger > span {
+    color: @brand-danger;
+    // border-bottom: 2px solid @brand-danger;
+  }
+  &.finish > span {
+    color: @brand-info;
+    // border-bottom: 2px solid @brand-info;
+  }
+
+  &.grey {
+    color: #717171;
+  }
+  &.zoom {
+    letter-spacing: .05em;
+  }
+  &.narrow {
+    height: unset;
+    padding: 1px 15px;    
+  }
+}
+
+.h7 {
+  font-size: 1.1em;
+  color: rgba(62, 107, 147, 0.7);
+}
+
+
 .fancytree-container {
   height: 300px;
 }

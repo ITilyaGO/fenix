@@ -128,4 +128,46 @@ module Fenix::App::StickerHelper
       CabiePio.set [:orders, :stickday], k, day
     end
   end
+
+  def assign_sticker_days order, dates
+    CabiePio.set [:m, :sticker, :days], order, dates
+    base = wonderbox(:stickday_limit)
+    dates.each do |date, stickers|
+      sl = KSM::StickdayLimit.find(date).rebase(base)
+      sl.orders[order] = stickers
+      sl.booked += stickers.to_i
+      sl.save
+    end
+  end
+
+  def unassign_sticker_days order
+    dates = CabiePio.get([:m, :sticker, :days], order).data || {}
+    base = wonderbox(:stickday_limit)
+    dates.each do |date, stickers|
+      sl = KSM::StickdayLimit.find(date).rebase(base)
+      sl.orders[order] = nil
+      sl.orders = sl.orders.compact
+      sl.booked -= stickers
+      sl.save
+    end
+    CabiePio.unset [:m, :sticker, :days], order
+  end
+
+  def calc_sticker_sow order, from
+    om = Order.find order
+    stks = order_sticker(order).sum
+    base = wonderbox(:stickday_limit)
+    remain = stks
+    res = {}
+    date = from
+    while remain > 0
+      sl = KSM::StickdayLimit.find(date).rebase(base)
+      delta = remain < sl.avail ? remain : sl.avail
+      delta = 0 if sl.delivery && sl.delivery != om.delivery.to_sym
+      remain -= delta
+      res[date] = delta.floor if delta > 0
+      date += 1
+    end
+    res
+  end
 end

@@ -1,0 +1,45 @@
+en:
+  ac:
+    role:
+      admin: Админ
+      none: Никто
+      user: Юзер*
+      editor: Редактор*
+      manager: Менеджер
+      sectioner: Секционер
+      limsectioner: Лимитированный секционер
+      director: Директор
+      stickerman: Клейщик
+      stager: Работник
+      supplier: Снабжение
+    draw:
+      create: Создать тираж
+      all: Все тиражи
+    order:
+      create: Создать заказ
+      confirm: Подтвердить любой заказ
+      fact: ---
+      modify: Изменять заказ
+    sections:
+      draft: Подтвердить свой заказ
+      list: Список своих заказов
+      complete: Собрать свою секцию
+      sum: Суммы в своем списке
+      stock: Свои склады
+    list:
+      draft: Непроверенные
+      current: Все текущие
+      finished: Готовые
+      archive: Архив
+      stickers: Наклеенные
+    timeline:
+      all: График
+      stickers: График клейки
+      trips: График поездок
+    sys:
+      editors: Редакторы
+      stats: Статистика
+      stock: Весь склад
+      archetypes: Все связи на складе
+      sync: Синхронизация
+      prefs: Настройки

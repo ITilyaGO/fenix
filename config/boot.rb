@@ -12,8 +12,9 @@ require "./db/lib/main.rb"
 require "./db/map.rb"
 require "./config/scheduler.rb"
 require './config/cabies.rb'
-require './supermodels/doppel.rb'
-Dir["./supermodels/**/*.rb"].each {|file| require file }
+Padrino.dependency_paths << "#{Padrino.root}/supermodels/**/*.rb"
+Padrino.dependency_paths << "#{Padrino.root}/starlets/**/*.rb"
+
 
 ##
 # ## Enable devel logging

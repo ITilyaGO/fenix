@@ -98,15 +98,20 @@
                       div class='btn btn-default btn-wide cancel' data-dismiss="modal" = pat(:cancel)
 
 .modal#draft-modal
-  .modal-dialog
+  .modal-dialog style='width: 90% !important;'
     .modal-content
       = form_tag url(:orders, :anew), :method => :put do
-        .modal-header
+        .modal-header.flex-c
           h4.modal-title Назначаем дату
+          .flexie
+          stickamount
+          .flexie
+          - if can_view?(:sys, :prefs)
+            = link_to 'Настройки', url(:prefs, :levels_stickday) if can_view?(:sys, :editors)
         .modal-body
           = hidden_field_tag :oid
           = hidden_field_tag :timeline_at
-          = partial 'timeline/calendar'
+          = partial 'timeline/calendar_stick'
         .modal-footer
           .btn.btn-success.btn-wide.submit Подтвердить
           .btn.btn-default.btn-wide.cancel data-dismiss="modal" = pat(:cancel)
@@ -115,21 +120,25 @@
   javascript:
     (function($) {
         $(".list-menu-draft-link").on("click", function(e) {
-          $('calendar').toggle('collapse')
+          // $('#calendar').toggle('collapse')
           $("#draft-modal").modal()
-          $('#draft-modal input[name=oid]').val(this.previousElementSibling.value)
+          var oid = this.previousElementSibling.value
+          rcontrol.trigger('LOAD_STICKER_AMOUNT', +oid)
+          $('#draft-modal input[name=oid]').val(oid)
         })
 
         $('#draft-modal').on('hidden.bs.modal', function (e) {
-          $('calendar .day').removeClass('selected')
-          $('calendar').toggle('collapse')
+          $('#calendar .day').removeClass('selected')
+          $('#calendar').toggle('collapse')
         })
-        $("calendar").on("click", ".day", function() {
+        $("#calendar").on("click", ".day", function() {
           var day = $(this);
           let inp = $('input[name="timeline_at"]')
           inp.val($('input', day).val())
-          $('calendar .day').removeClass('selected')
+          $('#calendar .day').removeClass('selected')
           day.toggleClass('selected')
+          let oid = $('#draft-modal input[name=oid]').val()
+          rcontrol.trigger('PREVIEW_STICKER_DATE', +oid, $('input', day).val())
         })
         
         $('#draft-modal .submit').on('click', function (e) {
@@ -150,16 +159,19 @@
         })
     })(jQuery)
 
-  = javascript_include_tag :riot
+  = javascript_include_tag :riot, :appa
   rscript type="riot/tag" src="/riot/tags/idcollapser.tag"
   rscript type="riot/tag" src="/riot/tags/subclick.tag"
   rscript type="riot/tag" src="/riot/tags/switcher.tag"
   rscript type="riot/tag" src="/riot/tags/elhide.tag"
   rscript type="riot/tag" src="/riot/tags/draft_switches.tag"
   rscript type="riot/tag" src="/riot/tags/rowsummer.tag"
+  rscript type="riot/tag" src="/riot/tags/timeline/stickamount.tag"
 
   javascript:
     
     document.addEventListener("DOMContentLoaded", function(event) {
-      riot.mount('idcollapser, subclick, switcher, draftswitches, elhide, rowsummer')
+      riot.mount('idcollapser, subclick, switcher, draftswitches, elhide, rowsummer, stickamount')
     })
+    let confobj = #{{@squadconf.to_json}}
+    rsquad.saveConfig(confobj)

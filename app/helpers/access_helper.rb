@@ -1,6 +1,8 @@
 Fenix::App.helpers do
-  LEVEL0_NAMES = [:order, :draw, :list, :timeline, :sys].freeze
-  LEVEL0_ROLES = [:admin, :user, :editor, :manager, :director, :stickerman, :supplier, :sectioner, :limsectioner].freeze
+  LEVEL0_NAMES = %i[order draw list timeline sys].freeze
+  LEVEL0_ROLES = %i[
+    admin user editor manager director
+    stickerman supplier sectioner limsectioner stager].freeze
 
   LEVEL1_ACCESS = {
     order: {
@@ -30,7 +32,8 @@ Fenix::App.helpers do
       stats: 2,
       stock: 4,
       archetypes: 8,
-      sync: 16
+      sync: 16,
+      prefs: 32
     }
   }.freeze
 
@@ -77,6 +80,7 @@ Fenix::App.helpers do
   AH_ROLE_MNG = { order: 9, list: 31, timeline: 7, sys: 15, sections: (1..6).sum{|d|2**d}, btn: { stock: 7 } }.freeze
   AH_ROLE_LSC = { order: 0, list: 0, timeline: 0, sys: 0, btn: { stock: 3 } }.freeze
   AH_ROLE_FSC = { order: 1, list: 0, timeline: 0, sys: 9, btn: { stock: 7, list: 1 } }.freeze
+  AH_ROLE_STG = { sections: 0, btn: {} }.freeze
 
   def can_view?(dir, sub = nil, user: current_account.id)
     @kc_access_user ||= CabiePio.get([:m, :access, :user], user).data || AH_ROLE_NONE
@@ -121,6 +125,7 @@ Fenix::App.helpers do
         mtx << [[k,r], can_view?(k,r, **args)]
       end
     end
+    @kc_access_user = nil
     mtx
   end
 
@@ -135,6 +140,7 @@ Fenix::App.helpers do
         end
       end
     end
+    @kc_access_user = nil
     mtx
   end
 
@@ -155,7 +161,7 @@ Fenix::App.helpers do
   def combine_rights(role, sections = nil)
     achash = {
       sectioner: AH_ROLE_FSC, limsectioner: AH_ROLE_LSC, admin: ac_admin_template,
-      stickerman: AH_ROLE_STICKER, manager: AH_ROLE_MNG
+      stickerman: AH_ROLE_STICKER, manager: AH_ROLE_MNG, stager: AH_ROLE_STG
     }
     wonderbox_set(:ac, achash)
     template = wonderbox(:ac, role) || {}

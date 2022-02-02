@@ -1,0 +1,40 @@
+#calendar.calendar2.collapse: .inner
+  / - wonderbox_set(:stadie, nil)
+  / = wonderbox(:stadie)
+  / - CabiePio.unset %i(m wonderbox), :stadie
+  - today_marker = Date.today
+  - base = wonderbox(:stickday_limit)
+  - grr = Date.today - Date.today.mday + 1
+  - grr2 = grr.next_month(3) - 1
+  - cdate = grr
+  - while cdate < grr2
+    - if cdate.mday == 1
+      .mtitle = cdate.strftime('%B')
+      - tempweek = Date.today.beginning_of_week
+      - 7.times do
+        .wday = Date::DAYNAMESRU[tempweek.wday - 1]
+        - tempweek += 1
+      .week
+      - ((cdate.wday+6)%7).times do
+        .noday
+    - if cdate.wday == 1
+      .week
+    
+    - busy ||= false
+    - sday = KSM::StickdayLimit.find(cdate).rebase(base)
+    / - sday.booked = 5000 if sday.exist?
+    
+    .day.flex-v class=[(sday.avail_css unless busy), (:past if today_marker > cdate),
+      (:faster if cdate >= today_marker && cdate < today_marker + 5)]
+      - if sday.delivery
+        .marks = tja :delivery, sday.delivery
+      input type="hidden" name="dayno[]" value=cdate.strftime('%Y-%m-%d')
+      .pts.flex-c.center: .num = cdate.strftime('%-d')
+
+      .addon.flex-v
+        sub.small = sday.price
+        
+        sup.small.text-warning
+          = sday.booked if sday.booked > 0
+          == '&nbsp;' unless sday.booked > 0 
+    - cdate += 1

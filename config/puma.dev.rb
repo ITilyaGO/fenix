@@ -11,4 +11,4 @@ pidfile 'tmp/pids/puma.pid'
 # threads 16, 16
 
 # bind 'unix:/var/run/fenix.sock'
-bind 'tcp://127.0.0.1:8101'
+bind 'tcp://0.0.0.0:8101'

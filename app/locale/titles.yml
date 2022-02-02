@@ -1,0 +1,20 @@
+en:
+  tit:
+    archetypes:
+      arch: Заготовка
+      link: Связи
+      list: Заготовки
+    stickers:
+      timeline: График клейки
+      pastline: Реальная клейка
+    prefs:
+      page: Настройки
+      conn: Коннектор
+      draftstatus: Стадии непроверенных
+      sections: Секции
+      sticklimits: Уровни клейки
+      stadies: Стадии производства
+      levels: Уровни
+      users: Юзеры
+    products:
+      list: Продукция

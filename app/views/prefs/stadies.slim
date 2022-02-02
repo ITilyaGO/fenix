@@ -1,0 +1,22 @@
+/ .text-center
+/   .title Стадии
+/   br
+
+.col-md-8.col-md-offset-2 = form_tag url(:prefs, :stadies), :method => :put, :class => 'form-hrz' do
+  .flex-c
+    .e.col-md-8 &nbsp;
+    - Order.deliveries.keys.each do |del|
+      .col-md-2
+        .text-center = tja :delivery, del
+  
+  - @stadies.each do |st|
+    .flex-c
+      .e.col-md-8 = tj :stadie, st
+      - Order.deliveries.keys.each do |del|
+        .col-md-2
+          = text_field_tag :"st[#{del}][#{st}]", value: @shash.dig(del.to_sym, st) || 0, class: %w(form-control form-amount input-sm)
+    .mbs
+  hr
+  .text-center
+    = submit_tag :save, class: 'btn btn-sm btn-glue'
+.clearfix
