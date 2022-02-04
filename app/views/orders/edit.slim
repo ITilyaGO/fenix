@@ -108,7 +108,7 @@ ul class="nav nav-tabs non-print"
       = partial 'bricks/orders/domiday', locals: { day: @order.created_at, css: :create }
       = partial 'bricks/orders/domiday', locals: { day: Date.today-800, css: :start }
       / = partial 'bricks/orders/domiday', locals: { day: Date.today-1 }
-      - CabiePio.get(%i(m sticker days), @order.id).data.each do |k,v|
+      - CabiePio.get(%i(m sticker days), @order.id).data&.each do |k,v|
         = partial 'bricks/orders/domiday', locals: { day: k }  
       = partial 'bricks/orders/domiday', locals: { day: Date.today+3, css: :danger }
       = partial 'bricks/orders/domiday', locals: { day: @timeline_date ||= Date.today, css: :finish }

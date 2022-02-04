@@ -96,7 +96,7 @@ Fenix::App.controllers :prefs do
   get :stadies do
     @title = t 'tit.prefs.stadies'
     @stadies = %i[01 02 03 04 05 06 08 0a 0b]
-    @shash = wonderbox :stadie_days
+    @shash = wonderbox(:stadie_days) || {}
     render 'prefs/stadies'
   end
 
