@@ -575,31 +575,29 @@ Fenix::App.controllers :orders do
 
   put :anew do
     order = Order.find(params[:id])
-    if true #order.draft?
+    if order.draft?
       delivery_at = params[:timeline_at]
       if timeline_date = Date.parse(delivery_at) rescue nil
-        # CabiePio.set [:timeline, :order], timeline_order(order.id, timeline_date), order.id
-        # CabiePio.set [:orders, :timeline], order.id, timeline_id(timeline_date)
-
-        CabiePio.set [:anewdate, :order], timeline_order(order.id), order.id
-        CabiePio.set [:orders, :anewdate], order.id, timeline_id
+        CabiePio.set %i[anewdate order], timeline_order(order.id), order.id
+        CabiePio.set %i[orders anewdate], order.id, timeline_id
 
         unassign_sticker_days order.id
         sow = calc_sticker_sow order.id, timeline_date
         assign_sticker_days order.id, sow
+
+        td = stadie_done order.id
+        CabiePio.set %i[timeline order], timeline_order(order.id, td), order.id
+        CabiePio.set %i[orders timeline], order.id, timeline_id(td)
+
+        order.status = :anew
+        order.save
+        o_status = KSM::OrderStatus.find(order.id)
+        o_status.setg(:anew)
+        o_status.save
       else
         return { error: true }.to_json
       end
-
-      order.status = :anew
-      order.save
-      o_status = KSM::OrderStatus.find(order.id)
-      o_status.setg(:anew)
-      o_status.save
     end
-    # KSM::StickdayLimit.find('220216').remove
-    # KSM::StickdayLimit.find('220217').remove
-    # KSM::StickdayLimit.find('220218').remove
     { }.to_json
   end
 
@@ -716,9 +714,17 @@ Fenix::App.controllers :orders do
       current_kc = CabiePio.get([:orders, :timeline], @order.id).data
       current_tl = timeline_unf(current_kc) if current_kc
       CabiePio.unset [:timeline, :order], timeline_order(@order.id, current_tl) if current_kc
-      CabiePio.set [:timeline, :order], timeline_order(@order.id, timeline_date), @order.id
-      CabiePio.set [:orders, :timeline], @order.id, timeline_id(timeline_date)
+      # CabiePio.set [:timeline, :order], timeline_order(@order.id, timeline_date), @order.id
+      # CabiePio.set [:orders, :timeline], @order.id, timeline_id(timeline_date)
       CabiePio.set([:orders, :timeline_blink], @order.id, 1) if timeline_date != current_tl
+
+      unassign_sticker_days @order.id
+      sow = calc_sticker_sow @order.id, timeline_date
+      assign_sticker_days @order.id, sow
+
+      td = stadie_done @order.id
+      CabiePio.set %i[timeline order], timeline_order(@order.id, td), @order.id
+      CabiePio.set %i[orders timeline], @order.id, timeline_id(td)
       @order.touch
     end
     
@@ -1113,13 +1119,10 @@ Fenix::App.controllers :orders do
     order = params[:order].to_i
     amt = deli(order_sticker(order).sum.ceil)
     start = Date.parse(params[:date]) rescue nil
-    # rand(5).times do |i|
-    #   ar << (start + i).strftime("%-d")
-    # end if start
     return { id: order, amount: amt }.to_json unless start
     sowa = calc_sticker_sow(order, start)
     ar = sowa.keys.map{|k|k.strftime("%-d")}
-    lapse = stadie_gap order
+    lapse = stadie_pregap order
     dl = (sowa.keys.first - lapse) - Date.today
     { id: order, amount: amt, dates: ar, amdelay: dl.to_i }.to_json
   end

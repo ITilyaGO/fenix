@@ -878,8 +878,10 @@ calendar {
   height: calc(85vh - 160px);
   margin: 1em;
   overflow-y: scroll;
-  display: flex;
-  justify-content: center;
+  .center;
+  &:not(.collapse) {
+    display: flex;
+  }
 
   .mtitle {
     text-align: center;
@@ -960,6 +962,12 @@ calendar {
         background-color: transparent;
       }
     }
+  }
+}
+
+.daydelay {
+  .arrow {
+    vertical-align: middle;
   }
 }
 

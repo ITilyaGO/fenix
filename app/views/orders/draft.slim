@@ -37,6 +37,7 @@
       tr
         th class='header list-menu non-print'
         th class='header' Номер
+        th.header: .hidden-md.hidden-lg Доставка
         th class='header' Город
         th.header width='50px'
         th class='header' Заказчик
@@ -58,6 +59,9 @@
           td class='list-column'
             = link_to order.id, :href => url(:orders, :edit, :id => order.id)
           // td class='list-column' = order.name
+          td.list-column
+            = tja :delivery, order.delivery
+            | &nbsp;&nbsp;
           td class='list-column'
             - code = @kc_orders[order.id.to_s]
             - town_name = @kc_towns[code]&.model
@@ -107,7 +111,7 @@
           stickamount
           .flexie
           - if can_view?(:sys, :prefs)
-            = link_to 'Настройки', url(:prefs, :levels_stickday) if can_view?(:sys, :editors)
+            = link_to 'Настройки', url(:timeline, :stickdays) if can_view?(:sys, :editors)
         .modal-body
           = hidden_field_tag :oid
           = hidden_field_tag :timeline_at
@@ -120,7 +124,7 @@
   javascript:
     (function($) {
         $(".list-menu-draft-link").on("click", function(e) {
-          // $('#calendar').toggle('collapse')
+          $('#calendar').toggleClass('collapse')
           $("#draft-modal").modal()
           var oid = this.previousElementSibling.value
           rcontrol.trigger('LOAD_STICKER_AMOUNT', +oid)
@@ -129,7 +133,7 @@
 
         $('#draft-modal').on('hidden.bs.modal', function (e) {
           $('#calendar .day').removeClass('selected')
-          // $('#calendar').toggle('collapse')
+          $('#calendar').toggleClass('collapse')
         })
         $("#calendar").on("click", ".day", function() {
           var day = $(this);

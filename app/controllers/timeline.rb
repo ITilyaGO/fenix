@@ -234,6 +234,20 @@ Fenix::App.controllers :timeline do
     redirect url(:orders, :index)
   end
 
+  get :stickdays do
+    @title = t 'tit.prefs.sticklimits'
+    @print_btn = 1
+    start_from = timeline_unf(params[:start]) rescue Date.today
+    bow = start_from.beginning_of_week
+    @weeks = []
+    6.times do |i|
+      @weeks << { :date => bow.weeks_ago(2-i) }
+    end
+
+    @sdate = start_from
+    render 'prefs/levels-stick'
+  end
+
 end
 
 Fenix::App.controllers :dr_timeline, :map => 'timeline/driven' do

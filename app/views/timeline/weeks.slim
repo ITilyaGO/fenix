@@ -59,7 +59,7 @@ ul class="nav nav-tabs non-print" id="weeks_tab"
     label class="filter-control-label" for="customControlValidation3" по менеджеру
 
 .modal#calendar-modal
-  .modal-dialog
+  .modal-dialog style='width: 90% !important;'
     .modal-content
       = form_tag url(:timeline, :change), :method => :put do
         .modal-header
@@ -67,7 +67,7 @@ ul class="nav nav-tabs non-print" id="weeks_tab"
         .modal-body
           = hidden_field_tag :timeline_id
           = hidden_field_tag :timeline_at
-          = partial 'timeline/calendar'
+          = partial 'timeline/calendar_stick'
         .modal-footer
           / = submit_tag pat(:save), :class =>'list-row-action-popover-delete-one-btn btn btn-success btn-wide'
           .btn.btn-success.btn-wide.submit = pat(:save)
@@ -132,8 +132,12 @@ ul class="nav nav-tabs non-print" id="weeks_tab"
 - content_for :js_assets do
   = javascript_include_tag :riot
   rscript type="riot/tag" src="/riot/tags/rowsummer.tag"
+  rscript type="riot/tag" src="/riot/tags/timeline/stickamount.tag"
 
   javascript:
+    // let confobj = #{{@squadconf.to_json}}
+    // rsquad.saveConfig(confobj)
+
     (function($) {
       $(function() {
         $($('#weeks_tab li a')[2]).tab('show');
@@ -194,7 +198,7 @@ ul class="nav nav-tabs non-print" id="weeks_tab"
         .then(function(result) {
           o.innerHTML = result
 
-          riot.mount('switcher, elhide, rowsummer')
+          riot.mount('switcher, elhide, rowsummer, stickamount')
 
           $(".list-selectable-checkbox-all").on("change", function() {
             var on = $(this).prop("checked")

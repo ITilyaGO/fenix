@@ -62,4 +62,11 @@ Fenix::App.controllers :aux do
     end
     usergroups.to_json
   end
+
+  post :stadies, :provides => :json do
+    stadies = wonderbox :stadie_grade
+    st = stadies.map{|k| { id: k, name: tj(:stadie, k)} }
+    st.to_json
+  end
+
 end

@@ -1,4 +1,4 @@
-#calendar.calendar2.nocollapse: .inner
+#calendar.calendar2.collapse: .inner
   / - wonderbox_set(:stadie, nil)
   / = wonderbox(:stadie)
   / - CabiePio.unset %i(m wonderbox), :stadie
@@ -24,8 +24,7 @@
     - sday = KSM::StickdayLimit.find(cdate).rebase(base)
     / - sday.booked = 5000 if sday.exist?
     
-    .day.flex-v class=[(sday.avail_css unless busy), (:past if today_marker > cdate),
-      (:faster if cdate >= today_marker && cdate < today_marker + 5)]
+    .day.flex-v class=[(sday.avail_css unless busy), (:past if today_marker > cdate)]
       - if sday.delivery
         .marks = tja :delivery, sday.delivery
       input type="hidden" name="dayno[]" value=cdate.strftime('%Y-%m-%d')

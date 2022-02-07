@@ -3,7 +3,7 @@
 
 #stick_limits.nav.nav-tabs
   .flex-v.center.btns.non-print
-    = link_to url(:prefs, :levels_stickday, start: timeline_id(@sdate.weeks_ago(4))) do
+    = link_to url(:timeline, :stickdays, start: timeline_id(@sdate.weeks_ago(4))) do
       .btn.scroll.btn-sm.btn-default: i.fa.fa-arrow-left
   .wrapper
     .head
@@ -38,25 +38,26 @@
               == '&nbsp;' unless a.exist?
 
   .flex-v.center.btns.non-print
-    = link_to url(:prefs, :levels_stickday, start: timeline_id(@sdate.weeks_ago(-4))) do
+    = link_to url(:timeline, :stickdays, start: timeline_id(@sdate.weeks_ago(-4))) do
       .btn.scroll.btn-sm.btn-default: i.fa.fa-arrow-right
 
-  .side-wr.flex-v.non-print
+  - if can_view? :sys, :prefs
+    .side-wr.flex-v.non-print
 
-    = form_for '', url(:prefs, :stickday_info), :class => 'form-page' do
-    
-    .col-md-12 = form_for :supermodel, url(:prefs, :stick_limits), :method => :put, :class => 'form-horizontal pbl' do |f|
-      fieldset
-        label = t 'box.stickday_limit'
-        .input-group-sm
-          = text_field_tag :limit, :value => wonderbox(:stickday_limit), :autocomplete => "off", :class => "form-control input-sm"
-      = f.submit :save, class: 'col-sm-12 btn btn-sm btn-glue mtm mbl'
-      = link_to t('tit.prefs.stadies'), url(:prefs, :stadies), class: ''
-
-    .bottom
-      .btn.btn-xs.btn-default: i.fa.fa-arrow-down
+      = form_for '', url(:prefs, :stickday_info), :class => 'form-page' do
       
-    .side-list.flex-v
+      .col-md-12 = form_for :supermodel, url(:prefs, :stick_limits), :method => :put, :class => 'form-horizontal pbl' do |f|
+        fieldset
+          label = t 'box.stickday_limit'
+          .input-group-sm
+            = text_field_tag :limit, :value => wonderbox(:stickday_limit), :autocomplete => "off", :class => "form-control input-sm"
+        = f.submit :save, class: 'col-sm-12 btn btn-sm btn-glue mtm mbl'
+        = link_to t('tit.prefs.stadies'), url(:prefs, :stadies), class: ''
+
+      .bottom
+        .btn.btn-xs.btn-default: i.fa.fa-arrow-down
+        
+      .side-list.flex-v
 
 - content_for :js_assets do
   = javascript_include_tag :appa, :riot

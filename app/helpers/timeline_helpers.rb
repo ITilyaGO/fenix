@@ -93,4 +93,27 @@ module Fenix::App::TimelineHelper
     std = wonderbox(:stadie_days).fetch(deli, {})
     std.values.sum
   end
+
+  def stadie_pregap order
+    om = Order.find order
+    deli = om.delivery.to_sym
+    items = wonderbox :stadie_grade
+    still = wonderbox :stadie_still
+    items = items[0...items.index(still)]
+    std = wonderbox(:stadie_days).fetch(deli, {})
+    items.map(&std).sum
+  end
+
+  def stadie_done order
+    om = Order.find order
+    deli = om.delivery.to_sym
+    orderstill = CabiePio.get(%i(m sticker days), om.id).data
+    return nil unless orderstill
+    items = wonderbox :stadie_grade
+    still = wonderbox :stadie_still
+    items = items[items.index(still)+1..-1]
+    std = wonderbox(:stadie_days).fetch(deli, {})
+    gap = items.map(&std).sum
+    orderstill.keys.last + gap
+  end
 end

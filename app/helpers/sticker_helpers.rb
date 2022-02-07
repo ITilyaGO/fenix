@@ -156,7 +156,8 @@ module Fenix::App::StickerHelper
   def calc_sticker_sow order, from
     om = Order.find order
     stks = order_sticker(order).sum
-    base = wonderbox(:stickday_limit)
+    base = wonderbox :stickday_limit
+    gather = wonderbox :stickday_gather
     remain = stks
     res = {}
     date = from
@@ -164,6 +165,7 @@ module Fenix::App::StickerHelper
       sl = KSM::StickdayLimit.find(date).rebase(base)
       delta = remain < sl.avail ? remain : sl.avail
       delta = 0 if sl.delivery && sl.delivery != om.delivery.to_sym
+      delta = remain if (remain - delta) < gather
       remain -= delta
       res[date] = delta.floor if delta > 0
       date += 1

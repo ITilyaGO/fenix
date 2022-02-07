@@ -12,11 +12,28 @@
   - @stadies.each do |st|
     .flex-c
       .e.col-md-8 = tj :stadie, st
-      - Order.deliveries.keys.each do |del|
-        .col-md-2
-          = text_field_tag :"st[#{del}][#{st}]", value: @shash.dig(del.to_sym, st) || 0, class: %w(form-control form-amount input-sm)
+      - if st == @still
+        .col-md-8 *
+      - else
+        - Order.deliveries.keys.each do |del|
+          .col-md-2
+            = text_field_tag :"st[#{del}][#{st}]", value: @shash.dig(del.to_sym, st) || 0, class: %w(form-control form-amount input-sm)
     .mbs
+  hr
+    fieldset.mtm
+      deepdown display-id=@still data-url='aux/stadies' data-name=:still    
   hr
   .text-center
     = submit_tag :save, class: 'btn btn-sm btn-glue'
 .clearfix
+
+- content_for :js_assets do
+  = javascript_include_tag :appa, :riot
+  rscript type="riot/tag" src="/riot/tags/deepdown.tag"
+
+  javascript:
+    document.addEventListener("DOMContentLoaded", function(event) {
+      riot.mount('deepdown')
+      let confobj = #{{@squadconf.to_json}}
+      rsquad.saveConfig(confobj)
+    })
