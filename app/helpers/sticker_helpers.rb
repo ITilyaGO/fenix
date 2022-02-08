@@ -161,6 +161,7 @@ module Fenix::App::StickerHelper
     remain = stks
     res = {}
     date = from
+    res = { from => 0 } if stks == 0
     while remain > 0
       sl = KSM::StickdayLimit.find(date).rebase(base)
       delta = remain < sl.avail ? remain : sl.avail
