@@ -206,6 +206,7 @@ br
                       th Количество
                       th.non-print Цена
                       th.non-print Сумма
+                      th.non-print Клейка
                       th.non-print Наклеено
                       th.non-print.text-center Факт
                     
@@ -225,6 +226,8 @@ br
                           == rur(ol.price)
                         td.col-md-1.non-print
                           == rur(ol.price*ol.amount)
+                        td.col-md-1.non-print
+                          == rur(@kc_products.fetch(ol.product_id, 0).to_f*ol.amount)
                         td.col-md-1.non-print.td-sticker-input
                           - ols = @olstickers.fetch(ol.id, nil)
                           - olh = @olsum.fetch(ol.id, nil)
