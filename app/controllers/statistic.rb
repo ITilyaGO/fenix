@@ -364,7 +364,7 @@ Fenix::App.controllers :statistic do
     stat.each do |item|
       pid = item[0][0]
       p = Product.find(pid)
-      @pretty_stat << { :id => pid, :category => p.category.name, :name => p.displayname, :sum => item[1] }
+      @pretty_stat << { :id => pid, :category => p.category.name, :name => p.displayname, :sum => item[1], :price => p.price }
     end
     @category = Category.find(id)
     
@@ -378,7 +378,7 @@ Fenix::App.controllers :statistic do
         output << CSV.generate(:col_sep => ';') do |csv|
           # csv << %w(id name num)
           @pretty_stat.each do |item|
-            csv << [item[:category], item[:name], item[:sum]]
+            csv << [item[:category], item[:name], item[:sum], item[:price]]
           end
         end
       end
