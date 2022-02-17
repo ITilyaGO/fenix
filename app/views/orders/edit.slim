@@ -376,6 +376,7 @@ ul class="nav nav-tabs non-print"
                       = content_tag :button, type: :submit, class: 'btn btn-sm btn-finished', name: 'next_status', value: op.section.id do
                         | Собрать #{op.section.name}
 
+            - catsum = 0
             - s.categories.each do |tab|
               - cat_visible = @order.by_cat?(tab.id)
               - if cat_visible
@@ -404,6 +405,7 @@ ul class="nav nav-tabs non-print"
                       /th.only-print width='5%' Тираж
                     
                     - @order.by_cat(tab.id).each do |ol|
+                      - catsum += ol.price*ol.amount
                       tr class="order-line"
                         = hidden_field_tag "line[#{ol.id}][id]", :value => ol[:id]
                         td.only-print &nbsp;
@@ -450,6 +452,8 @@ ul class="nav nav-tabs non-print"
                         /td.only-print
                         /td.only-print
                 p.only-print &nbsp;
+            p == rur catsum
+
       .tab-pane.non-print id="cat-fail"
         p У этого заказа заглючили секции. Тут будет кнопка для исправления.
         - if current_account.is_admin? && @orderstatus.what?(:current)
