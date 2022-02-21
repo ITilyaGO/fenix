@@ -31,4 +31,11 @@ module Fenix::App::ThingsHelper
     wonderbox_set(:cat_seed, bo)
     seed
   end
+
+  def sect_seed_root
+    seed = wonderbox(:sections, :seed) || 0
+    seed += 1
+    wonderbox_set(:sections, { seed: seed })
+    seed
+  end
 end

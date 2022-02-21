@@ -184,7 +184,7 @@ div class="tabs-content"
               th Цена
               th Сумма
               th &nbsp;
-            - sub.all_products.order(:index => :asc).each do |line|
+            - all_products_for(sub.id).each do |line|
               - next if @parents.include?(line.id)
               - i = i + 1
               tr.list-row data-sum="0" data-price="#{line.price}"

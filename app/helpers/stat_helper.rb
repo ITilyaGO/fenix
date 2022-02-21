@@ -1,13 +1,13 @@
 module Fenix::App::StatHelper
   def sum_by_sections(order_ids)
     sec_sums = {}
-    owol = Order.includes(:order_lines).where(id: order_ids)
-    Section.all.each do |s|
-      sec_sums[s.id] = owol.map do |o|
+    owol = Order.includes(:order_lines_ar).where(id: order_ids)
+    KSM::Section.all.each do |s|
+      sec_sums[s.ix] = owol.map do |o|
         o.order_lines.map do |ol|
           pcat = category_matrix[products_hash[ol.product_id]]
           csec = all_catagories.detect{|c|c.id == pcat}&.section_id
-          csec == s.id ? ol.price*ol.amount : 0
+          csec == s.ix ? ol.price*ol.amount : 0
         end.sum
       end.sum
     end
@@ -16,14 +16,14 @@ module Fenix::App::StatHelper
 
   def sum_done_by_sections(order_ids)
     sec_sums = {}
-    owol = Order.includes(:order_lines).where(id: order_ids)
-    Section.all.each do |s|
-      sec_sums[s.id] = owol.map do |o|
+    owol = Order.includes(:order_lines_ar).where(id: order_ids)
+    KSM::Section.all.each do |s|
+      sec_sums[s.ix] = owol.map do |o|
         o.order_lines.map do |ol|
           next 0 if ol.ignored
           pcat = category_matrix[products_hash[ol.product_id]]
           csec = all_catagories.detect{|c|c.id == pcat}&.section_id
-          csec == s.id ? ol.price*(ol.done_amount||0) : 0
+          csec == s.ix ? ol.price*(ol.done_amount||0) : 0
         end.sum
       end.sum
     end

@@ -1,4 +1,4 @@
-- abl_view = @sections.map{|s|can_view_section?(:sections, :draft, s.id) ? s.id : nil }
+- abl_view = @sections.map{|s|can_view_section?(:sections, :draft, s.ix) ? s.ix : nil }
 - kc_os = KSM::OrderStatus.find_all(@orders.map(&:id))
 - reveals = []
 - @orders.each do |order|

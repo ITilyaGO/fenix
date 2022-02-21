@@ -1,4 +1,4 @@
-class Product < ActiveRecord::Base
+class ZProduct < ActiveRecord::Base
   belongs_to :category
   has_many :variants, -> { order(:name) }, :class_name => "Product", :foreign_key => "parent_id"
   belongs_to :parent, :class_name => "Product", :foreign_key => "parent_id"

@@ -1,6 +1,6 @@
 
 - filter = @filtered_by_user.is_a? Array
-- abl_view = @sections.map{|s|can_view_section?(:sections, :list, s.id) ? s.id : nil }
+- abl_view = @sections.map{|s|can_view_section?(:sections, :list, s.ix) ? s.ix : nil }
 - kc_os = KSM::OrderStatus.find_all(@orders.map(&:id))
 - reveals = []
 - @orders.each do |order|

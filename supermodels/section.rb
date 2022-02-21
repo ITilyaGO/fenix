@@ -1,9 +1,10 @@
 class KSM::Section < Doppel
   PFX = :section
 
-  PROPS = [:name, :sn, :created_at]
+  PROPS = [:name, :sn, :ix, :created_at]
   attr_accessor *PROPS
-  
+  attr_accessor :index
+
   # def updated_at
   #   @updated_at || Date.new(1970,1,1)
   # end
@@ -19,6 +20,10 @@ class KSM::Section < Doppel
   #   save
   # end
   
+  def categories
+    KSM::Category.all.select{|a| a.category_id.nil? && a.section_id == id}
+  end
+
   class << self
     def nest
       e = super

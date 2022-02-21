@@ -134,9 +134,9 @@ Fenix::App.helpers do
     LEVEL3_ACCESS.each do |k,v|
       v.each do |r, bw|
         mtx[[k,r]] = []
-        s = Section.all
+        s = KSM::Section.all
         s.each do |ars|
-          mtx[[k,r]] << [[k,r], [ars.name, ars.id], can_view_section?(k,r, ars.id, **args)]
+          mtx[[k,r]] << [[k,r], [ars.name, ars.ix], can_view_section?(k,r, ars.ix, **args)]
         end
       end
     end

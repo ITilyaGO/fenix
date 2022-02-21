@@ -4,7 +4,7 @@ class Order < ActiveRecord::Base
   
   belongs_to :client
   belongs_to :place
-  has_many :order_lines
+  has_many :order_lines_ar, class_name: 'OrderLine'
   has_many :order_parts
   has_many :logs
   has_one :timeline
@@ -49,25 +49,32 @@ class Order < ActiveRecord::Base
     end
     total
   end
+
+  def order_lines
+    oids = order_lines_ar.ids
+    KSM::OrderLine.find_all oids
+  end
   
   def by_cat(id)
-    order_lines.joins(product: :category)
-      .preload(:product)
-      .select("order_lines.*")
-      .select('"products"."index" as p_index').select('"categories"."index" as c_index')
-      .where('"categories"."category_id" = %s', id)
-      .order("c_index, p_index")
+    order_lines.select{ |ol| Product.find(ol.product_id).category.category_id == id }
+    # order_lines.joins(product: :category)
+    #   .preload(:product)
+    #   .select("order_lines.*")
+    #   .select('"products"."index" as p_index').select('"categories"."index" as c_index')
+    #   .where('"categories"."category_id" = %s', id)
+    #   .order("c_index, p_index")
   end
 
   def by_cat?(id)
-    order_lines.joins(product: :category)
-      .where('"categories"."category_id" = %s', id)
-      .any?
+    order_lines.select{ |ol| Product.find(ol.product_id).category.category_id == id }.any?
+    # order_lines.joins(product: :category)
+    #   .where('"categories"."category_id" = %s', id)
+    #   .any?
   end
 
   def by_sec?(id)
     v = false
-    s = Section.find(id)
+    s = KSM::Section.find(id)
     s.categories.each do |cat|
       if by_cat?(cat.id)
         v = true
@@ -75,6 +82,15 @@ class Order < ActiveRecord::Base
       end
     end
     v
+    # v = false
+    # s = Section.find(id)
+    # s.categories.each do |cat|
+    #   if by_cat?(cat.id)
+    #     v = true
+    #     break
+    #   end
+    # end
+    # v
   end
 
   def by_section?(id)

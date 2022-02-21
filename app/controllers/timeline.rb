@@ -77,7 +77,7 @@ Fenix::App.controllers :timeline do
     ky_month = start_from.strftime('%y%m')
     @ktm = CabiePio.all([:timeline, :order], [ky_month]).flat.trans(nil, :to_i)
 
-    @sections = Section.includes(:categories).all
+    @sections = KSM::Section.all
     @all_ids = @ktm.values
     @orders = Order.where(id: @all_ids).in_work.order(:client_id)
     @unorders = Order.where(id: @all_ids).in_work.where("status < ?", Order.statuses[:finished]).order(:client_id)
@@ -264,7 +264,7 @@ Fenix::App.controllers :dr_timeline, :map => 'timeline/driven' do
     @ktm = @ktm.merge CabiePio.all([:timeline, :order], [ky_month_2]).flat
     @gtm = timeline_group(@ktm.trans(nil, :to_i))
 
-    @sections = Section.includes(:categories).all
+    @sections = KSM::Section.all
     @week_orders = @gtm.fetch(@sdate, [])
     @all_ids = @week_orders.map(&:last).map(&:to_i)
     @orders = Order.where(id: @all_ids).in_work.order(:client_id)

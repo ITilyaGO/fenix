@@ -12,6 +12,14 @@ class KSM::Category < Doppel
     KSM::Section.find @section_id
   end
 
+  def subs_ordered
+    KSM::Category.all.select{ |a| a.category_id == id }
+  end
+
+  def all_products
+    Product.all.select{ |a| a.category_id == id }
+  end
+
   def top?
     @category_id.nil?
   end

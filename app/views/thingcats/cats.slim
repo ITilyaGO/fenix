@@ -41,7 +41,7 @@
         = f.label :category, :class => 'control-label'
         .controls.wp100
           deepdown-ms[
-            display-id=@category&.category_id data-url='aux/categories'
+            display-id=@category&.category_id data-url='aux/topcategories'
             data-sid=@section.id data-name='ksm_category[category_id]' target='notfound'
           ]
       .form-actions.vmar-2 = f.submit :save, :class => 'btn btn-prime btn-sm btn-wide'

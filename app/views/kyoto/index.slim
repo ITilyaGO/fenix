@@ -15,7 +15,7 @@ h3 Сервис
 p.line
   span Status
   '
-  - [:status, :query, :play, :to_schema].each do |btn|
+  - [:status, :query, :to_schema].each do |btn|
     a.btn.btn-xs.btn-primary.btn-embossed href=url(:kyoto, btn)
       = btn
       '
@@ -78,6 +78,9 @@ p.line
     a.btn.patch.btn-xs.btn-info.btn-embossed href=url(:kyoto, :close, db: db, act: 'read') = db
     '
     a.btn.patch.btn-xs.btn-danger.btn-embossed href=url(:kyoto, :close, db: db, act: 'write') = db
+    '
+    a.btn.patch.btn-xs.btn-danger.btn-embossed href=url(:kyoto, :close, db: db, act: 'nosync') = "#{db} no as"
+
 
 / p.line
 /   span Создать amounts

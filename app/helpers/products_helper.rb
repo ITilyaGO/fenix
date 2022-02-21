@@ -66,10 +66,12 @@ module Fenix::App::ProductsHelper
   end
 
   def json_list
-    parents = Product.pluck(:parent_id).compact.uniq
-    Product.joins(:category).eager_load(:parent).select(:id, :name, :price)
-      .reject{|a| parents.include? a[:id]}
-      .map{|a| {id: a[:id], price: a[:price], name: a.displayname}}
+    Product.all.map{|a| {id: a.id, price: a.price, name: a.displayname}}
+
+    # parents = Product.pluck(:parent_id).compact.uniq
+    # Product.joins(:category).eager_load(:parent).select(:id, :name, :price)
+    #   .reject{|a| parents.include? a[:id]}
+    #   .map{|a| {id: a[:id], price: a[:price], name: a.displayname}}
   end
 
   def json_cats
@@ -213,7 +215,7 @@ module Fenix::App::ProductsHelper
   end
 
   def products_hash
-    @products_hash ||= Product.all.pluck(:id, :category_id).map{|a|[a.first, a.last.to_i]}.to_h
+    @products_hash ||= Product.pluck(:id, :category_id).map{|a|[a.first, a.last.to_i]}.to_h
   end
 
   def category_matrix
@@ -234,6 +236,12 @@ module Fenix::App::ProductsHelper
 
   def all_catagories
     @all_catagories ||= Category.all
+  end
+
+  def all_products_for sub
+    @ksm_pro_gr ||= Product.all.group_by(&:category_id)
+    
+    @ksm_pro_gr.fetch(sub, [])
   end
 
   private

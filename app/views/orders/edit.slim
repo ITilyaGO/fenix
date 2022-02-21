@@ -349,20 +349,20 @@ ul class="nav nav-tabs non-print"
           block.non-print id="cat-#{s.id}"
         - else
           .tab-pane id="cat-#{s.id}" class=[('filled' if tab_visible), ('my' if my), ('non-print' unless tab_visible && my)]
-            - op = @order.order_parts.find_by(section_id: s.id)
+            - op = @order.order_parts.find_by(section_id: s.ix)
             - if op&.finished?
               .non-print.pull-right
                 p Коробок: #{op.boxes}
-            - if can_view_section?(:sections, :complete, s.id)
-              - if @orderstatus.what?(:anew, s.id)
+            - if can_view_section?(:sections, :complete, s.ix)
+              - if @orderstatus.what?(:anew, s.ix)
                 .non-print.text-center
                   .btn.btn-sm.btn-prepare.put-status data-action=url(:orders, :status, id: @order.id, section: s.id)
                     | Подтвердить #{op.section.name}
-              - if @orderstatus.what?(:prepare, s.id)
+              - if @orderstatus.what?(:prepare, s.ix)
                 .non-print.text-center
                   .btn.btn-sm.btn-current.put-status data-action=url(:orders, :midstatus, id: @order.id, section: s.id)
                     | #{t("status.prep.s#{op.section_id}")} #{op.section.name}
-              - if @orderstatus.what?(:current, s.id)
+              - if @orderstatus.what?(:current, s.ix)
                 .non-print
                   fieldset class='control-group'
                     = label_tag "Коробок", :class => 'col-md-3 control-label'
@@ -407,7 +407,7 @@ ul class="nav nav-tabs non-print"
                     - @order.by_cat(tab.id).each do |ol|
                       - catsum += ol.price*ol.amount
                       tr class="order-line"
-                        = hidden_field_tag "line[#{ol.id}][id]", :value => ol[:id]
+                        = hidden_field_tag "line[#{ol.id}][id]", :value => ol.id
                         td.only-print &nbsp;
                         td.col-md-4
                           = ol.product.displayname
@@ -416,7 +416,7 @@ ul class="nav nav-tabs non-print"
                             div = ol.description
                         td.col-md-1
                           = ol.amount
-                          - rsv = @rese.fetch(ol.id, 0)
+                          - rsv = @rese.fetch(ol.id.to_i, 0)
                           - if rsv > 0
                             .non-print.label.label-info = rsv
                         td.col-md-1.non-print

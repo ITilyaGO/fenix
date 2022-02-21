@@ -12,7 +12,7 @@ Fenix::App.controllers :orders do
       @filtered_by_user = OrderPart.where(:order_id => orders_query.ids, :section => current_account.section_id).pluck(:order_id)
     end
     @pages = (orders_query.count/pagesize).ceil
-    @sections = Section.includes(:categories).all
+    @sections = KSM::Section.all
     a_managers(@orders.map(&:id), @orders.map(&:client_id))
     @transport = CabiePio.all_keys(@orders.map(&:client_id).uniq, folder: [:m, :clients, :transport]).flat
     @kc_timelines = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :timeline]).flat.trans(:to_i)
@@ -32,7 +32,7 @@ Fenix::App.controllers :orders do
     @orders = Order.all
       .includes(:client, :place, :order_parts)
       .where("status = ?", Order.statuses[:draft]).order(:updated_at => :desc)
-    @sections = Section.includes(:categories).all
+    @sections = KSM::Section.all
     a_towns(@orders.map(&:id), @orders.map(&:client_id))
     calendar_init
     @r = url(:orders, :draft)
@@ -148,9 +148,11 @@ Fenix::App.controllers :orders do
 
   get :edit, :with => :id do
     @title = pat(:edit_title, :model => "order #{params[:id]}")
-    @order = Order.includes(:order_lines).find(params[:id])
-    @sections = Section.includes(:categories).all
-    habits(@sections, :index)
+    @order = Order.includes(:order_lines_ar).find params[:id]
+    # @order = Order.includes(:order_lines_ar).find(params[:id])
+    @sections = KSM::Section.all
+    # @sections = Section.includes(:categories).all
+    # habits(@sections, :index)
     @my_section = current_account.section
     @order_part = @order.order_parts.find_by(:section_id => @my_section)
     @tabs = Category.where(:category => nil)
@@ -181,7 +183,7 @@ Fenix::App.controllers :orders do
     calendar_init(Date.today)
     @ps = KSM::OrderImage.all_for(@order.id)
 
-    arches = CabiePio.folder(:product, :archetype).flat.trans(:to_i)
+    arches = CabiePio.folder(:product, :archetype).flat
     parchs = @order.order_lines.map{|l|archetype_order(arches[l.product_id], l.id, @order.id)}
     @rese = CabiePio.all_keys(parchs, folder: [:need, :order]).flat.map{|k,v|[k.split('_')[1].to_i, v.to_i]}.to_h
 
@@ -425,11 +427,12 @@ Fenix::App.controllers :orders do
 
   get :fullempty do
     @title = "New order"
-    @cats = Category.where(category: nil).order(:index => :asc)
+    # @cats = Category.where(category: nil).order(:index => :asc)
+    @cats = KSM::Category.all.select{ |c| c.category_id.nil? }
     # Padrino.cache['cats'] ||= cats
     # @cats = Padrino.cache['cats']
     @parents = Product.pluck(:parent_id).compact.uniq
-    @arp = CabiePio.folder(:product, :archetype).flat.trans(:to_i)
+    @arp = CabiePio.folder(:product, :archetype).flat
     @kc_stocks = CabiePio.folder(:stock, :archetype).flat.trans(nil, :to_i)
     @kc_needs = CabiePio.folder(:need, :archetype).flat.trans(nil, :to_i)
     render 'orders/fullempty'
