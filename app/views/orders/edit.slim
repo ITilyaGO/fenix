@@ -438,13 +438,13 @@ ul class="nav nav-tabs non-print"
                               '  
                               .label.label-success = to_dm timeline_unf(ols[:t])
                         td.col-md-1.non-print: .controls
-                          - if allow_route?(:orders_infact) && can_view_section?(:sections, :complete, s.id)
+                          - if allow_route?(:orders_infact) && can_view_section?(:sections, :complete, s.ix)
                             = (text_field_tag "line[#{ol.id}][done_amount]", :value => ol.done_amount,
                             :autocomplete => "off", :class => "form-control input-sm")
                           - else
                             .text-center = ol.done_amount
                         td.col-md-1.vert-align.non-print: .controls
-                          - if allow_route?(:orders_infact) && can_view_section?(:sections, :complete, s.id)
+                          - if allow_route?(:orders_infact) && can_view_section?(:sections, :complete, s.ix)
                             = hidden_field_tag "line[#{ol.id}][ignored]", :value => 'false'
                             = check_box_tag "line[#{ol.id}][ignored]", :checked => ol.ignored
                           - else

@@ -34,7 +34,7 @@ div class="tabs-content"
           ' Всего:
           rowsummer target='#list' filter='.non-print'
 
-    - abl_view = @sections.map{|s|can_view_section?(:sections, :list, s.id) ? s.id : nil }
+    - abl_view = @sections.map{|s|can_view_section?(:sections, :list, s.ix) ? s.ix : nil }
     - kc_os = KSM::OrderStatus.find_all(@orders.map(&:id))
     tbody
       - @orders.each do |order|

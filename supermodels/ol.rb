@@ -25,6 +25,17 @@ class KSM::OrderLine < Doppel
   #   @history[Time.now] = account.id
   #   save
   # end
+
+  def nest value = nextseed
+    self.new id: value
+  end
+
+  def nextseed
+    cs = LAYER.get(%i[m wonderbox] << PFX, :seed).data || 0
+    cs += 1
+    LAYER.set %i[m wonderbox] << PFX, :seed, cs
+    cs
+  end
   
   class << self
     # def nest

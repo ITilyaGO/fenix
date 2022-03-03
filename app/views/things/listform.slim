@@ -44,6 +44,9 @@
             .controls: .form-control: .fa.fa-exclamation-triangle.text-warning
         fieldset.control-group
           .btn.btn-link Связи...
+        fieldset.control-group
+          a.btn.btn-link href=url(:things, :transfer) Excel...
+        
         .f-actions.tmar-3.text-center
           = f.submit pat(:copy).downcase, :class => 'btn btn-sm btn-default', name: 'clone' 
           |&nbsp;&nbsp;&nbsp;&nbsp;

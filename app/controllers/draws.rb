@@ -38,8 +38,9 @@ Fenix::App.controllers :draws do
     orders_query = Order.where("status > ?", Order.statuses[:draft]).where("status < ?", Order.statuses[:finished])
     orders_query = orders_query.where(delivery: params[:deli].to_i) if params[:deli]
     @orders = orders_query.includes(:client).order(sort => dir)
+    usersec = KSM::Section.find current_account.section_id
     if current_account.limited_orders?
-      @filtered_by_user = OrderPart.where(:order_id => orders_query.ids, :section => current_account.section_id).pluck(:order_id)
+      @filtered_by_user = OrderPart.where(:order_id => orders_query.ids, :section => usersec.ix).pluck(:order_id)
     end
     @pages = (orders_query.count/pagesize).ceil
     @sections = KSM::Section.all

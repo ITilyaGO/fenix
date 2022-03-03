@@ -74,9 +74,9 @@
           - cash_total = man_orders.select{|o| @kc_cash.keys.include? o.id}.map(&:total).sum
           - cash_done = man_orders.select{|o| @kc_cash.keys.include? o.id}.map(&:done_total).sum
           .pull-left
-          - sections = Section.all
+          - sections = KSM::Section.all
           - sections.each do |s|
-            - next unless can_view_section?(:sections, :sum, s.id)
+            - next unless can_view_section?(:sections, :sum, s.ix)
             - sec_sum = sec_sums.fetch(s.id, 0)
             - sec_done = sec_dones.fetch(s.id, 0)
             - if sec_sum > 0

@@ -50,9 +50,13 @@ class Order < ActiveRecord::Base
     total
   end
 
+  def order_lines_ids
+    KSM::Order.find(id).lines
+  end
+
   def order_lines
-    oids = order_lines_ar.ids
-    KSM::OrderLine.find_all oids
+    # oids = order_lines_ar.ids
+    KSM::OrderLine.find_all KSM::Order.find(id).lines
   end
   
   def by_cat(id)

@@ -78,7 +78,7 @@ module Fenix::App::OrdersHelper
   end
 
   def sticker_price(order)
-    kc_sticker = CabiePio.folder(:products, :sticker).flat.trans(:to_i, :to_f)
+    kc_sticker = CabiePio.folder(:products, :sticker).flat.trans(nil, :to_f)
     sticker = 0
     glass = 0
     order.order_lines.each do |line|

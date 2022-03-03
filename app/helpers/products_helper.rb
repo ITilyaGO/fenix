@@ -35,7 +35,7 @@ module Fenix::App::ProductsHelper
   end
 
   def store_product_section
-    ps = Product.joins(:category).all
+    ps = Product.all
     ps.map{|p|[p.id, p.category.category.section_id]}.to_h
   end
 
@@ -215,11 +215,11 @@ module Fenix::App::ProductsHelper
   end
 
   def products_hash
-    @products_hash ||= Product.pluck(:id, :category_id).map{|a|[a.first, a.last.to_i]}.to_h
+    @products_hash ||= Product.all.map{ |p| [p.id, p.category_id] }.to_h
   end
 
   def category_matrix
-    @category_matrix ||= Category.all.pluck(:id, :category_id).to_h
+    @category_matrix ||= KSM::Category.all.map{ |c| [c.id, c.category_id] }.to_h
   end
 
   def section_matrix

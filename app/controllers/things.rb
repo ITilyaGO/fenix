@@ -77,4 +77,56 @@ Fenix::App.controllers :things do
       halt 404
     end
   end
+
+  get :transfer do
+    render 'things/transfer'
+  end
+
+  post :transfer do
+    file = params[:file]
+    tempfile = file[:tempfile]
+    lines = CSV.read(tempfile.path, :headers => :first_row, col_sep: ';', header_converters: lambda { |a| a.to_sym }) rescue []
+    @counter = 0
+    @products = []
+    lines.each do |line|
+      product = Product.find(line[:id]) unless line[:id]&.blank?
+      # product = Product.nest unless product&.exist?
+      item = {
+        name: line[:name],
+        category_id: line[:category].split(':').first,
+        place_id: line[:place].split(':').first,
+        price: line[:price],
+        sku: line[:sku], bbid: line[:bb]
+      }
+
+      product.formiz item
+      # product.sn ||= thing_glob_seed
+      # product.saved_by @current_account
+      @products << product
+      @counter += 1
+    end
+    tempfile.unlink
+
+    render 'things/transfer'
+  end
+
+  get :export, :with => :id, :provides => :csv do
+    is_sample = params[:id] == 'sample'
+    ids = wonderbox(:things_by_date).reverse
+    @products = Product.find_all(ids).sort_by{|a| ids.index(a.id)}
+    codes = @products.map(&:place_id).uniq
+    @kc_towns = KatoAPI.batch(codes)
+    cats = KSM::Category.all.map{ |c| [c.id, c.hiername] }.to_h
+
+    fname = 'pio-excel.csv'
+    headers['Content-Disposition'] = "attachment; filename=#{fname}"
+    output = ''
+    output = "\xEF\xBB\xBF" if params.include? :win
+    output << CSV.generate(:col_sep => ';') do |csv|
+      csv << %w(id name category place price sku bb)
+      @products.each do |t|
+        csv << [t.id, t.name, cats[t.category_id], t.hierplace(@kc_towns[t.place_id]&.model), t.price, t.sku, nil]
+      end
+    end
+  end
 end

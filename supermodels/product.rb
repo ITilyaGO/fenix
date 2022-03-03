@@ -40,6 +40,10 @@ class Product < Doppel
     xt[:n1c]
   end
 
+  def hierplace kato
+    [place_id, kato].join(':')
+  end
+
   def saved_by account
     @dates ||= []
     @created_at ||= Time.now

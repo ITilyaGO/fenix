@@ -277,7 +277,7 @@ Fenix::App.controllers :dr_timeline, :map => 'timeline/driven' do
     @kc_sumstickers = @stickers.map{|k,v|[k, v*@kc_stickers.fetch(k,0)/100]}.to_h
     @kc_cash = CabiePio.all_keys(@all_ids, folder: [:orders, :cash]).flat.trans(:to_i).reject{|k,v|v!='t'}
     @kc_os = KSM::OrderStatus.find_all(@all_ids)
-    @abl_view = @sections.map{|s|can_view_section?(:sections, :list, s.id) ? s.id : nil }
+    @abl_view = @sections.map{|s|can_view_section?(:sections, :list, s.ix) ? s.ix : nil }
 
     return partial 'timeline/nothing' if @orders.empty?
     if params[:sort].to_sym == :manager

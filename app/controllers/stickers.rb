@@ -17,7 +17,7 @@ Fenix::App.controllers :stickers do
     end
     @orders = Order.where(id: last_stickers).sort_by{|o|last_stickers.index(o.id)}
     @pages = (orders_query.count/pagesize).ceil
-    @sections = Section.includes(:categories).all
+    @sections = KSM::Section.all
     a_managers(@orders.map(&:id), @orders.map(&:client_id))
     @transport = CabiePio.all_keys(@orders.map(&:client_id).uniq, folder: [:m, :clients, :transport]).flat
     @kc_timelines = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :timeline]).flat.trans(:to_i)
@@ -33,8 +33,8 @@ Fenix::App.controllers :stickers do
   get :order, :with => :id do
     @day = Date.parse(params[:date]) rescue Date.today.prev_day
     @title = pat(:edit_title, :model => "stickers for #{params[:id]}")
-    @order = Order.includes(:order_lines).find(params[:id])
-    @sections = Section.includes(:categories).all
+    @order = Order.includes(:order_lines_ar).find(params[:id])
+    @sections = KSM::Section.all
     @my_section = current_account.section
     @order_part = @order.order_parts.find_by(:section_id => @my_section)
     @tabs = Category.where(:category => nil)
@@ -47,12 +47,12 @@ Fenix::App.controllers :stickers do
 
     ol_with_day = @order.order_lines.map(&:id).map{|ol| "#{ol}_#{timeline_id(@day)}" }
     @olstickers = CabiePio.all_keys(ol_with_day, folder: [:m, :order_lines, :sticker]).flat
-      .transform_keys{|k|k.split(Fenix::App::IDSEP).first.to_i}
-    @olsum = CabiePio.all_keys(@order.order_lines.map(&:id), folder: [:m, :order_lines, :sticker_sum]).flat.trans(:to_i)
+      .transform_keys{|k|k.split(Fenix::App::IDSEP).first}
+    @olsum = CabiePio.all_keys(@order.order_lines.map(&:id), folder: [:m, :order_lines, :sticker_sum]).flat
 
     kc_amt = CabiePio.get([:orders, :stickers_amount], @order.id).data.to_i
     @sticker_progress = sticker_order_progress(@order.id)
-    @kc_products = CabiePio.folder(:products, :sticker).flat.trans(:to_i)
+    @kc_products = CabiePio.folder(:products, :sticker).flat
 
     kc_town_managers = CabiePio.folder(:towns, :managers).flat
     hier = Kato::Hier.for(@kc_client_hometown).codes

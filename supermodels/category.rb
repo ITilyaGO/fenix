@@ -29,6 +29,11 @@ class KSM::Category < Doppel
     name
   end
 
+  def hiername
+    na = top? ? [id, section.name, category.name, name] : [id, section.name, name]
+    na.join(':')
+  end
+
   def sequ
     nums = [sn]
     nums.unshift(category.sn) unless top?

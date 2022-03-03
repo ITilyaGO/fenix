@@ -8,7 +8,7 @@ module Fenix::App::MigrateHelpers
     plookup = {}
     products.each do |p|
       thing = KSM::Thing.nest
-      thing.name = p.name
+      thing.name = p.displayname
       # thing.category_id = p.category_id
       thing.category_id = cats[p.category_id.to_i]
       thing.place_id = 'RU-YAR-ARO'
@@ -20,20 +20,41 @@ module Fenix::App::MigrateHelpers
       plookup[p.id] = thing.id
     end
     wonderbox_set(:things_by_date, backorder.pop(50))
+    
+    CabiePio.close
+    conf = Cabie.species(:pio).merge({ autosync: false })
+    Cabie.room :pio, **conf
+    CabiePio.open
     ol_move_up plookup
-    arch_move_up plookup
+    m013_arch_move_up plookup, cats
+    m013_stickers_move_up plookup
     # os_move_up sections
+    m013_accounts_up sections
+    m013_orders_move
 
     CabiePio.wire.sync(true)
   end
 
-  def arch_move_up plookup
+  def m013_arch_move_up plookup, clookup
     arp = CabiePio.folder(:product, :archetype).flat.trans(:to_i)
     # File.write 'tmp/arch.yaml', YAML.dump(arp)
     # return
     CabiePio.clear(:product, :archetype)
     arp.each do |k,v|
       CabiePio.set [:product, :archetype], plookup[k], v
+    end
+
+    KSM::Archetype.all.each do |a|
+      a.category_id = clookup[a.category_id]
+      a.save
+    end
+  end
+
+  def m013_stickers_move_up plookup
+    stp = CabiePio.folder(:products, :sticker).flat.trans(:to_i)
+    CabiePio.clear(:products, :sticker)
+    stp.each do |k,v|
+      CabiePio.set [:products, :sticker], plookup[k], v
     end
   end
 
@@ -99,5 +120,21 @@ module Fenix::App::MigrateHelpers
       thing.save
     end
     lookup
+  end
+
+  def m013_accounts_up slookup
+    Account.all.each do |a|
+      a.section_id = slookup[a.section_id]
+      a.save
+    end
+  end
+
+  def m013_orders_move
+    orders = Order.includes(:order_lines_ar).all
+    orders.each do |oe|
+      kso = KSM::Order.new oe.attributes
+      kso.lines = oe.order_lines_ar_ids
+      kso.save
+    end
   end
 end

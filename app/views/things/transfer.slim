@@ -1,0 +1,33 @@
+.col-md-6
+  .h4.text-center Выгрузка продуктов
+  .text-center
+    a.btn.btn-xs.btn-default.btn-embossed href=url(:things, :export, :id => :sample) Сэмпл
+
+.col-md-6
+  .h4.text-center Загрузка продуктов
+  = form_tag url(:things, :transfer), :method => :post, :enctype => "multipart/form-data" do
+    .fileinput.fileinput-new data-provides="fileinput"
+      .text-center
+      
+        .btn.btn-xs.btn-prime.btn-embossed.btn-file.fileinput-new
+          .fileinput-new Загрузить
+          input type="file" name="file" accept='.csv'
+        '
+        button.btn.btn-xs.btn-prime.btn-embossed.fileinput-exists type="submit"
+          .fa.fa-upload
+          | Upload
+.clearfix
+
+= @counter
+table.table.table-hover
+  - @products&.each do |p|
+    tr
+      td = p.id
+      td = p.name
+      td = p.category.name
+      td = p.place_id
+      td = p.price
+
+
+- content_for :js_assets do
+  = javascript_include_tag :fileinput

@@ -212,7 +212,7 @@ br
                     
                     - @order.by_cat(tab.id).each do |ol|
                       tr class="order-line"
-                        = hidden_field_tag "line[#{ol.id}][id]", :value => ol[:id]
+                        = hidden_field_tag "line[#{ol.id}][id]", :value => ol.id
                         td.only-print &nbsp;
                         td.col-md-4
                           /sup = ol[:id]

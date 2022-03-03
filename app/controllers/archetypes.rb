@@ -181,10 +181,10 @@ Fenix::App.controllers :archetypes do
       end
     end
         
-    @cats = Category.where(category: nil).order(:index => :asc)
-    @categories = Category.all.includes(:category)
-    @ar_grouped = ksm_arch.group_by{|a|a.category_id.to_i}
-    arp = CabiePio.folder(:product, :archetype).flat.trans(:to_i)
+    @cats = KSM::Category.all.select{|c| c.category_id.nil?}.sort_by(&:sn)
+    @categories = KSM::Category.all
+    @ar_grouped = ksm_arch.group_by(&:category_id)
+    arp = CabiePio.folder(:product, :archetype).flat
     @kc_stocks = CabiePio.folder(:stock, :archetype).flat.trans(nil, :to_i)
     @kc_needs = CabiePio.folder(:need, :archetype).flat.trans(nil, :to_i)
     catgroup = products_hash.keys.group_by{|k|products_hash[k]}
@@ -193,7 +193,7 @@ Fenix::App.controllers :archetypes do
     @kc_archs = arp
 
     @products = Product.all
-    @kc_index = arp.map{|p, a| [a, @products.detect{|i|i.id == p}&.index || 0]}.to_h
+    @kc_index = arp.map{|p, a| [a, @products.detect{|i|i.id == p}&.sn || 0]}.to_h
 
     render 'archetypes/stock'
   end
