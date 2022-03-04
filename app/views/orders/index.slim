@@ -160,7 +160,9 @@
                 = link_to tag_icon(:ticket), :rel => :tooltip, :title => "Stickers", :href => url(:stickers, :order, :id => order.id), :class => 'list-row-action-wrapper-link'
               - if current_account.is_admin?
                 = link_to tag_icon(:save), :href => url(:c1c, :create, :id => order.id), :class => 'list-row-action-wrapper-link'
-                = link_to tag_icon(:paw), :rel => :tooltip, :title => "Edit order", :href => url(:orders, :correct, :id => order.id), :class => 'list-row-action-wrapper-link'
+              / - if current_account.is_admin? || can_view_section?(:sections, :complete, k,r, ars.id)
+              / TODO: AC Rights
+              = link_to tag_icon(:paw), :rel => :tooltip, :title => "Edit order", :href => url(:orders, :correct, :id => order.id), :class => 'list-row-action-wrapper-link'
               - if !order.draft?
                 = link_to tag_icon(:edit), :href => url(:orders, :edit, :id => order.id), :class => 'list-row-action-wrapper-link'
               - if order.draft?

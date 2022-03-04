@@ -79,7 +79,7 @@ Fenix::App.helpers do
   }.freeze
   AH_ROLE_MNG = { order: 9, list: 31, timeline: 7, sys: 15, sections: (1..6).sum{|d|2**d}, btn: { stock: 7 } }.freeze
   AH_ROLE_LSC = { order: 0, list: 0, timeline: 0, sys: 0, btn: { stock: 3 } }.freeze
-  AH_ROLE_FSC = { order: 1, list: 0, timeline: 0, sys: 9, btn: { stock: 7, list: 1 } }.freeze
+  AH_ROLE_FSC = { order: 1, list: 0, timeline: 1, sys: 9, btn: { stock: 7, list: 1 } }.freeze
   AH_ROLE_STG = { sections: 0, btn: {} }.freeze
 
   def can_view?(dir, sub = nil, user: current_account.id)
