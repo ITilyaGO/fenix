@@ -16,10 +16,18 @@ Fenix::App.controllers :things do
     @page = !params[:page].nil? ? params[:page].to_i : 1
     ids = wonderbox(:things_by_date).reverse
     @products = KSM::Thing.find_all(ids).sort_by{|a| ids.index(a.id)}
+    if ccat = params[:cat]
+      @products = KSM::Thing.all.select{ |a| a.category_id == ccat }
+      @product = KSM::Thing.new({ category_id: ccat })
+      @ccat = ccat
+    end
     codes = @products.map(&:place_id).uniq
     @kc_towns = KatoAPI.batch(codes)
     # Product.all.includes(:category).order(:updated_at => :desc).offset((@page-1)*pagesize).take(pagesize)
     @pages = 1
+
+    @cats = KSM::Category.toplevel
+
     @r = url(:products, :index)
     render 'things/table'
   end
@@ -42,14 +50,19 @@ Fenix::App.controllers :things do
       n1c: CabiePio.get([:product, :k1c], @product.id).data,
       arn: CabiePio.get([:product, :archetype], @product.id).data
     }
-    @cats = Category.where(category: nil).order(:index => :asc)
-    @categories = Category.all.includes(:category)
-    @squadconf = @product.serializable_hash
+    @cats = KSM::Category.toplevel
+    # @categories = Category.all.includes(:category)
 
     ids = wonderbox(:things_by_date).reverse
     @products = KSM::Thing.find_all(ids).sort_by{|a| ids.index(a.id)}
+    if ccat = params[:cat]
+      @products = KSM::Thing.all.select{ |a| a.category_id == ccat }
+      @product.category_id = ccat unless @product.exist?
+      @ccat = ccat
+    end
     codes = @products.map(&:place_id).uniq
     @kc_towns = KatoAPI.batch(codes)
+    @squadconf = @product.serializable_hash
 
     render 'things/listform'
   end

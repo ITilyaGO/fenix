@@ -1,0 +1,9 @@
+selectreload onchange='{sender}' value='{sval}'
+  yield
+  
+  javascript:
+  
+    sender() {
+      window.location = opts.loc + '?cat=' + self.root.value
+      // rcontrol.trigger(opts.action, self.root.value)
+    }

@@ -68,6 +68,10 @@ class KSM::Category < Doppel
       e.fill(created_at: Time.now, name: 'Unknown', merge: true)
       e
     end
+
+    def toplevel
+      all.select(&:top?)
+    end
   end
 end
 
