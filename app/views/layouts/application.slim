@@ -113,10 +113,10 @@ html lang='en'
                 = link_to url(:timeline, :stickdays) do
                   | График клейки
                   span class="menu-icon fa fa-ticket"
-            li.sidebar-list
-              = link_to url(:roundtrips, :index) do
-                | График поездок
-                span class="menu-icon fa fa-car"
+              li.sidebar-list
+                = link_to url(:roundtrips, :index) do
+                  | График поездок
+                  span class="menu-icon fa fa-car"
 
           - if allow_route?(:online)
             li.sidebar-title.separator
