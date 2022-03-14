@@ -141,9 +141,9 @@ Fenix::App.controllers :c1c do
   end
 
   get :full do
-    @cats = Category.where(category: nil).order(:index => :asc)
+    @cats = KSM::Category.all
     @parents = Product.pluck(:parent_id).compact.uniq
-    @c1c_pro = CabiePio.folder(:product, :k1c).flat.trans(:to_i)
+    @c1c_pro = CabiePio.folder(:product, :k1c).flat
     render 'c1c/fulltable'
   end
 end

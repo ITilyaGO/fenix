@@ -1,5 +1,7 @@
 module Fenix::App::MigrateHelpers
   def products_to_things_013_up force: nil
+    eval "SMProduct = Product; Product = ARProduct;"
+
     sections = to_thingsecs_up
     cats = to_thingcats_up sections
     products = Product.all
@@ -11,7 +13,7 @@ module Fenix::App::MigrateHelpers
       thing.name = p.displayname
       # thing.category_id = p.category_id
       thing.category_id = cats[p.category_id.to_i]
-      thing.place_id = 'RU-YAR-ARO'
+      thing.place_id = 'RU'
       thing.art = p.des
       thing.price = p.price
       thing.saved_by @current_account
@@ -31,8 +33,10 @@ module Fenix::App::MigrateHelpers
     # os_move_up sections
     m013_accounts_up sections
     m013_orders_move
+    m013_k1c_move plookup
 
     CabiePio.wire.sync(true)
+    puts "M013 Complete #{Time.now}"
   end
 
   def m013_arch_move_up plookup, clookup
@@ -132,9 +136,25 @@ module Fenix::App::MigrateHelpers
   def m013_orders_move
     orders = Order.includes(:order_lines_ar).all
     orders.each do |oe|
-      kso = KSM::Order.new oe.attributes
-      kso.lines = oe.order_lines_ar_ids
-      kso.save
+      begin
+        kso = KSM::Order.new oe.attributes
+        kso.lines = oe.order_lines_ar_ids
+        kso.save
+      end rescue nil
+    end
+  end
+
+  def m013_k1c_move plookup
+    stp = CabiePio.folder(:k1c, :product).flat.trans(nil, :to_i)
+    CabiePio.clear(:k1c, :product)
+    stp.each do |k,v|
+      CabiePio.set [:k1c, :product], k, plookup[v]
+    end
+
+    stp = CabiePio.folder(:product, :k1c).flat.trans(:to_i)
+    CabiePio.clear(:product, :k1c)
+    stp.each do |k,v|
+      CabiePio.set [:product, :k1c], plookup[k], v
     end
   end
 end

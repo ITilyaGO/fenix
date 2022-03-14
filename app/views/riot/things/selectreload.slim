@@ -4,6 +4,8 @@ selectreload onchange='{sender}' value='{sval}'
   javascript:
   
     sender() {
-      window.location = opts.loc + '?cat=' + self.root.value
-      // rcontrol.trigger(opts.action, self.root.value)
+      var searchParams = new URLSearchParams(window.location.search)
+      searchParams.set(opts.rname, self.root.value)
+
+      window.location = opts.loc + '?' + searchParams.toString()
     }

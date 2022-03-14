@@ -14,7 +14,7 @@
               th &nbsp;
               th Цена
               th &nbsp;
-            - sub.all_products.order(:index => :asc).each do |line|
+            - sub.all_products.each do |line|
               - next if @parents.include?(line.id)
               - i = i + 1
               - c1c = @c1c_pro.fetch(line.id, nil)

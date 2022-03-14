@@ -26,19 +26,18 @@
 
         fieldset.control-group.hame.tmar-3
           .alabel.label bku
-          label.control-label = @xproduct[:arn]
-          - a = KSM::Archetype.find @xproduct[:arn]
-          - if @xproduct[:arn]
+          label.control-label = @xproduct.arn
+          - a = KSM::Archetype.find @xproduct.arn
+          - if @xproduct.arn
             .controls.wp100 = f.text_field :arnt, value: a.name, :class => 'form-control input-large input-with-feedback'
           - else
             .controls: .form-control: .fa.fa-exclamation-triangle.text-warning
 
-        - c1c = CabiePio.get([:product, :k1c], @product.id).data
         fieldset.control-group.hame
           .alabel.label 1c
-          label.control-label = @xproduct[:n1c][-12..-1] rescue nil
-          - if c1c
-            - k1c = KSM1C::Cat.find c1c
+          label.control-label = @xproduct.k1c[-12..-1] rescue nil
+          - if @xproduct.k1c
+            - k1c = KSM1C::Cat.find @xproduct.k1c
             .controls.wp100 = f.text_field :n1c, value: k1c&.at_path('НаименованиеПолное'), :class => 'form-control input-large'
           - else
             .controls: .form-control: .fa.fa-exclamation-triangle.text-warning

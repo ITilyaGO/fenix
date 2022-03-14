@@ -21,6 +21,10 @@ Fenix::App.controllers :things do
       @product = KSM::Thing.new({ category_id: ccat })
       @ccat = ccat
     end
+    if townfilter = params[:place]
+      @products = @products.select{ |a| a.place_id == townfilter }
+      @place = townfilter
+    end
     codes = @products.map(&:place_id).uniq
     @kc_towns = KatoAPI.batch(codes)
     # Product.all.includes(:category).order(:updated_at => :desc).offset((@page-1)*pagesize).take(pagesize)
@@ -46,10 +50,7 @@ Fenix::App.controllers :things do
     @title = t 'tit.products.list'
     @product = KSM::Thing.find(params[:id])
     @kc_place = KatoAPI.anything(@product.place_id)
-    @xproduct = {
-      n1c: CabiePio.get([:product, :k1c], @product.id).data,
-      arn: CabiePio.get([:product, :archetype], @product.id).data
-    }
+    @xproduct = SL::Product.new @product.id
     @cats = KSM::Category.toplevel
     # @categories = Category.all.includes(:category)
 

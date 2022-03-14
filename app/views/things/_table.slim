@@ -1,7 +1,11 @@
 .f
   .deepdown-wrap.text-center.mbs.cmar-05
     = link_to 'Последние', url(:things, :table), :class => 'btn btn-sm btn-default'
-    select name="categories" class="huge small mh350" riot-tag='selectreload' loc=url(:things, :table)
+    select.huge name="categories" riot-tag='selectreload' rname='place' loc=url(:things, :table)
+      = content_tag(:option, 'Ярославль', { value: 'RU-YAR-ARO', selected: @place == 'RU-YAR-ARO' })
+      = content_tag(:option, 'Россия', { value: 'RU', selected: @place == 'RU' })
+      
+    select name="categories" class="huge small mh350" riot-tag='selectreload' rname='cat' loc=url(:things, :table)
       = content_tag(:option, 'Выберите категорию')
       - @cats.each do |cat|
         optgroup label="#{cat.name}"
@@ -38,6 +42,8 @@
         th class='header' = mat(:product, :price)
         th class='header' = mat(:product, :category)
         th class='header' = mat(:product, :updated)
+        th.header bku
+        th.header 1c
         th class='header list-row-action-header'
 
     tbody
@@ -49,6 +55,7 @@
           div class='list-row-action-wrapper'
             = link_to tag_icon(:edit), :href => url(:things, :edit, :id => '0000'), :rel => :tooltip, :title => "#{pat(:edit)} product", :class => 'list-row-action-wrapper-link'
       - @products.each do |product|
+        - xprod = SL::Product.new(product.id)
         tr class='list-row'
           td class='list-column list-selectable' = check_box_tag 'product_ids[]', :value => product.id, :class => 'list-selectable-checkbox'
           td class='list-column' = product.id
@@ -61,6 +68,12 @@
             = product.category.display
           td class='list-column'
             = to_msk(product.updated_at)
+          td.list-column
+            - unless xprod.arn
+              .fa.fa-exclamation-triangle.text-warning
+          td.list-column
+            - unless xprod.k1c
+              .fa.fa-exclamation-triangle.text-warning
           td class='list-column list-row-action'
             div class='list-row-action-wrapper'
               //span class='list-row-action-wrapper-link' 1
