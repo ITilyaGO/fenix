@@ -385,6 +385,49 @@ Fenix::App.controllers :statistic do
     end
   end
 
+  get :doneold do
+    @title = "Statistics - суммы готовых за год"
+    # @cats = Category.where(:category_id => nil)
+    @years = []
+    start_date = Date.new(Date.today.year, Date.today.month, 1)
+
+    5.times do |i|
+      @years << start_date.prev_year(4-i).strftime("%Y")
+    end
+    render 'statistic/index_done'
+  end
+
+  get :doneold, :with => :id, :provides => [:html, :csv] do
+    @title = "Statistics - суммы готовых за год"
+    id = params[:id].to_i
+    @start_date = Date.new(id, 1, 1)
+    end_date = @start_date.next_year
+
+    @orders = Order.where(status: Order.statuses[:finished])
+      .where('orders.updated_at >= ?', @start_date).where('orders.updated_at < ?', end_date)
+    @stat = @orders.joins(:place).group(:place_id, "places.name").sum(:done_total)
+
+    @pretty_stat = []
+    @stat.sort_by{|item|-item[1]}.each do |item|
+      @pretty_stat << { :name => item[0][1], :sum => "%0.f" % item[1] }
+    end
+    
+    case content_type
+      when :html then render 'statistic/done'
+      when :csv then begin
+        fname = 'statistics_done-' + @start_date.strftime("%Y") + '.csv'
+        headers['Content-Disposition'] = "attachment; filename=#{fname}"
+        output = ''
+        output = "\xEF\xBB\xBF" if params.include? :win
+        output << CSV.generate(:col_sep => ';') do |csv|
+          @pretty_stat.each do |item|
+            csv << [item[:name], item[:sum]]
+          end
+        end
+      end
+    end
+  end
+
   get :done do
     @title = "Statistics - суммы готовых за год"
     # @cats = Category.where(:category_id => nil)
@@ -405,11 +448,13 @@ Fenix::App.controllers :statistic do
 
     @orders = Order.where(status: Order.statuses[:finished])
       .where('orders.updated_at >= ?', @start_date).where('orders.updated_at < ?', end_date)
-    @stat = @orders.joins(:place).group(:place_id, "places.name").sum(:done_total)
+    kc_orders = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :towns]).flat.trans(:to_i)
+    @kc_towns = KatoAPI.batch(kc_orders.values.uniq)
+    @stat = @orders.group_by{ |o| kc_orders[o.id] }
 
     @pretty_stat = []
-    @stat.sort_by{|item|-item[1]}.each do |item|
-      @pretty_stat << { :name => item[0][1], :sum => "%0.f" % item[1] }
+    @stat.each do |item, ary|
+      @pretty_stat << { :name => @kc_towns[item]&.model || item, :sum => "%0.f" % ary.map(&:done_total).sum }
     end
     
     case content_type
