@@ -110,7 +110,10 @@ Fenix::App.controllers :things do
         category_id: line[:category].split(':').first,
         place_id: line[:place].split(':').first,
         price: line[:price],
-        sku: line[:sku], bbid: line[:bb]
+        sku: line[:sku],
+        bbid: line[:bb],
+        barcode: line[:barcode]
+
       }
 
       product.formiz item
@@ -128,6 +131,9 @@ Fenix::App.controllers :things do
     is_sample = params[:id] == 'sample'
     ids = wonderbox(:things_by_date).reverse
     @products = Product.find_all(ids).sort_by{|a| ids.index(a.id)}
+    if !is_sample && ccat = params[:id]
+      @products = Product.all.select{ |a| a.category_id == ccat }
+    end
     codes = @products.map(&:place_id).uniq
     @kc_towns = KatoAPI.batch(codes)
     cats = KSM::Category.all.map{ |c| [c.id, c.hiername] }.to_h
@@ -137,9 +143,12 @@ Fenix::App.controllers :things do
     output = ''
     output = "\xEF\xBB\xBF" if params.include? :win
     output << CSV.generate(:col_sep => ';') do |csv|
-      csv << %w(id name category place price sku bb)
+      csv << %w(id name category place price sku bb k1c barcode)
       @products.each do |t|
-        csv << [t.id, t.name, cats[t.category_id], t.hierplace(@kc_towns[t.place_id]&.model), t.price, t.sku, nil]
+        xt = SL::Product.new t.id
+        csv << [t.id, t.name, cats[t.category_id],
+          t.hierplace(@kc_towns[t.place_id]&.model), t.price, t.sku, xt.arn, xt.k1c, t.barcode
+        ]
       end
     end
   end

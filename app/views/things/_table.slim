@@ -13,7 +13,7 @@
             - html_attributes = { :value => sub.id }
             - html_attributes[:selected] ||= option_is_selected?(sub.id, sub.name, @product&.category_id)
             = content_tag(:option, sub.name, html_attributes)
-    a.fa.fa-upload.btn.btn-sm.btn-default href=url(:things, :transfer)
+    a.fa.fa-upload.btn.btn-sm.btn-default href=url(:things, :transfer, cat: @product&.category_id)
 
   table class="table table-hover table-condensed" id="list"
     thead
