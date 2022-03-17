@@ -30,6 +30,13 @@ class KSM::Section < Doppel
       e.fill(created_at: Time.now, name: 'Unknown', merge: true)
       e
     end
+
+    def schema
+      {
+        ix: [:to_i],
+        sn: [:to_i]
+      }
+    end
   end
 end
 

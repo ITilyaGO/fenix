@@ -15,10 +15,10 @@ Fenix::App.controllers :things do
     pagesize = PAGESIZE
     @page = !params[:page].nil? ? params[:page].to_i : 1
     ids = wonderbox(:things_by_date).reverse
-    @products = KSM::Thing.find_all(ids).sort_by{|a| ids.index(a.id)}
+    @products = Product.find_all(ids).sort_by{|a| ids.index(a.id)}
     if ccat = params[:cat]
-      @products = KSM::Thing.all.select{ |a| a.category_id == ccat }
-      @product = KSM::Thing.new({ category_id: ccat })
+      @products = Product.all.select{ |a| a.category_id == ccat }
+      @product = Product.new({ category_id: ccat })
       @ccat = ccat
     end
     if townfilter = params[:place]
@@ -48,16 +48,16 @@ Fenix::App.controllers :things do
 
   get :edit, :with => :id do
     @title = t 'tit.products.list'
-    @product = KSM::Thing.find(params[:id])
+    @product = Product.find(params[:id])
     @kc_place = KatoAPI.anything(@product.place_id)
     @xproduct = SL::Product.new @product.id
     @cats = KSM::Category.toplevel
     # @categories = Category.all.includes(:category)
 
     ids = wonderbox(:things_by_date).reverse
-    @products = KSM::Thing.find_all(ids).sort_by{|a| ids.index(a.id)}
+    @products = Product.find_all(ids).sort_by{|a| ids.index(a.id)}
     if ccat = params[:cat]
-      @products = KSM::Thing.all.select{ |a| a.category_id == ccat }
+      @products = Product.all.select{ |a| a.category_id == ccat }
       @product.category_id = ccat unless @product.exist?
       @ccat = ccat
     end
@@ -69,9 +69,9 @@ Fenix::App.controllers :things do
   end
 
   put :update, :with => :id do
-    @product = KSM::Thing.find(params[:id])
-    @product = KSM::Thing.nest if params[:id] == '0000' || params[:clone]
-    form = params[:ksm_thing]
+    @product = Product.find(params[:id])
+    @product = Product.nest if params[:id] == '0000' || params[:clone]
+    form = params[:product]
     @product.formiz(form)
     @product.sn ||= thing_glob_seed
     @product.saved_by @current_account
@@ -110,9 +110,12 @@ Fenix::App.controllers :things do
         category_id: line[:category].split(':').first,
         place_id: line[:place].split(':').first,
         price: line[:price],
-        sku: line[:sku],
-        bbid: line[:bb],
-        barcode: line[:barcode]
+        sn: line[:sku].split('.').last,
+        desc: line[:desc],
+        weight: line[:weight],
+        height: line[:height]
+        # bbid: line[:bb],
+        # barcode: line[:barcode]
 
       }
 
@@ -143,11 +146,12 @@ Fenix::App.controllers :things do
     output = ''
     output = "\xEF\xBB\xBF" if params.include? :win
     output << CSV.generate(:col_sep => ';') do |csv|
-      csv << %w(id name category place price sku bb k1c barcode)
+      csv << %w(id name brand category place price sku bb k1c barcode img weight height desc)
       @products.each do |t|
         xt = SL::Product.new t.id
-        csv << [t.id, t.name, cats[t.category_id],
-          t.hierplace(@kc_towns[t.place_id]&.model), t.price, t.sku, xt.arn, xt.k1c, t.barcode
+        csv << [t.id, t.name, t.category.section.name, cats[t.category_id],
+          t.hierplace(@kc_towns[t.place_id]&.model), t.price, t.autoart, xt.arn, xt.k1c, t.autobar,
+          t.sketch_ext, t.weight, t.height, t.desc
         ]
       end
     end

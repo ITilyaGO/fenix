@@ -51,6 +51,10 @@ module Fenix::App::ProductsHelper
     end
   end
 
+  def known_cities
+    Padrino.cache[:known_cities] ||= KatoAPI.batch(%w[RU RU-YAR-ARO])
+  end
+
   def json_products_list
     Padrino.cache[:products_list] ||= json_list.to_json
   end
@@ -75,15 +79,15 @@ module Fenix::App::ProductsHelper
   end
 
   def json_cats
-    @parents = Product.pluck(:parent_id).compact.uniq
-    nodes = Category.where(:category => nil)
+    @parents = [] #Product.pluck(:parent_id).compact.uniq
+    nodes = KSM::Category.toplevel
     nodes.map do |node|
       { :title => node.name, :key => node.id, :children => json_subs(node).compact }
     end
   end
   
   def json_subs(node)
-    nodes = node.subcategories.order(:index => :asc)
+    nodes = node.subs_ordered
     nodes.map do |node|
       next if !node.all_products.any?
       { :title => node.name, :key => node.id, :lazy => true, :children => json_prods(node).compact }
@@ -91,7 +95,7 @@ module Fenix::App::ProductsHelper
   end
   
   def json_prods(node)
-    nodes = node.all_products.includes(:parent).order(:index => :asc)
+    nodes = node.all_products
     nodes.map do |node|
       next if @parents.include? node.id
       { :title => node.displayname, :key => node.id }

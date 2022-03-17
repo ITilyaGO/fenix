@@ -2,7 +2,14 @@
   .h4.text-center Выгрузка продуктов
   .text-center
     a.btn.btn-xs.btn-default.btn-embossed href=url(:things, :export, :id => :sample) Сэмпл
-    a.btn.btn-xs.btn-default.btn-embossed href=url(:things, :export, :id => params[:cat]) Категория
+    |&nbsp;
+    a.btn.btn-xs.btn-default.btn-embossed href=url(:things, :export, :id => :sample, win: 1) Сэмпл для Excel
+    - unless pcat = params[:cat]
+    - else
+      |&nbsp;
+      a.btn.btn-xs.btn-default.btn-embossed href=url(:things, :export, :id => pcat) Категория
+      |&nbsp;
+      a.btn.btn-xs.btn-default.btn-embossed href=url(:things, :export, :id => pcat, win: 1) Категория для Excel
 
 .col-md-6
   .h4.text-center Загрузка продуктов
@@ -11,12 +18,12 @@
       .text-center
       
         .btn.btn-xs.btn-prime.btn-embossed.btn-file.fileinput-new
-          .fileinput-new Загрузить
+          .fileinput-new Выбрать
           input type="file" name="file" accept='.csv'
         '
         button.btn.btn-xs.btn-prime.btn-embossed.fileinput-exists type="submit"
           .fa.fa-upload
-          | Upload
+          | Загрузить
 .clearfix
 
 = @counter
@@ -24,10 +31,11 @@ table.table.table-hover
   - @products&.each do |p|
     tr
       td = p.id
-      td = p.name
-      td = p.category.name
-      td = p.place_id
+      td = p.displayname
+      td = p.category.hiername
+      / td = p.place_id
       td = p.price
+      td = p.bbid
 
 
 - content_for :js_assets do

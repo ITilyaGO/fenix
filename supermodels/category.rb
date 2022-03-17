@@ -30,7 +30,7 @@ class KSM::Category < Doppel
   end
 
   def hiername
-    na = top? ? [id, section.name, category.name, name] : [id, section.name, name]
+    na = !top? ? [id, section.name, category.name, name] : [id, section.name, name]
     na.join(':')
   end
 

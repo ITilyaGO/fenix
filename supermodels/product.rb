@@ -1,7 +1,9 @@
 class Product < Doppel
   PFX = :thing
 
-  PROPS = [:name, :sn, :category_id, :place_id, :sketch_id, :company_id, :barcode, :price, :sku, :art, :created_at, :g, :bbid]
+  PROPS = [:name, :sn, :category_id, :place_id, :sketch_id, :company_id, :barcode, :price, :sku, :art, :g, :bbid,
+    :desc, :weight, :height
+  ]
   SVSPROPS = [:created_at, :updated_at, :dates, :users, :history]
   PROPS += SVSPROPS
   attr_accessor *PROPS
@@ -12,7 +14,7 @@ class Product < Doppel
   end
 
   def displayname
-    @name
+    "#{@name} (#{OrderAssist.known_cities[@place_id]&.model&.name})"
   end
 
   def category
@@ -24,7 +26,7 @@ class Product < Doppel
   end
 
   def autoart
-    nums = ["%02i" % category.section.sn.to_i, category.sequ, "%06i" % sn.to_i].join('.')
+    nums = ["%02i" % category.section.sn, category.sequ, "%06i" % sn].join('.')
   end
 
   def autobar
@@ -64,7 +66,10 @@ class Product < Doppel
 
     def schema
       {
-        price: [:to_f]
+        price: [:to_i],
+        weight: [:to_i],
+        height: [:to_i],
+        sn: [:to_i]
       }
     end
 

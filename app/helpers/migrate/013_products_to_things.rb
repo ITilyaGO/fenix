@@ -5,17 +5,18 @@ module Fenix::App::MigrateHelpers
     sections = to_thingsecs_up
     cats = to_thingcats_up sections
     products = Product.all
-    KSM::Thing.destroy_all if force
+    Product.destroy_all if force
     backorder = []
     plookup = {}
     products.each do |p|
-      thing = KSM::Thing.nest
+      thing = Product.nest
       thing.name = p.displayname
       # thing.category_id = p.category_id
       thing.category_id = cats[p.category_id.to_i]
       thing.place_id = 'RU'
       thing.art = p.des
       thing.price = p.price
+      thing.sn ||= thing_glob_seed
       thing.saved_by @current_account
 
       backorder << thing.id
