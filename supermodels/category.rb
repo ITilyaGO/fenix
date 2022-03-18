@@ -29,9 +29,13 @@ class KSM::Category < Doppel
     name
   end
 
-  def hiername
-    na = !top? ? [id, section.name, category.name, name] : [id, section.name, name]
-    na.join(':')
+  def idname
+    [id, name].join(':')
+  end
+
+  def hiername show_sec: false
+    na = !top? ? [id, show_sec ? section.name : nil, category.name, name] : [id, show_sec ? section.name : nil, name]
+    na.compact.join(':')
   end
 
   def sequ

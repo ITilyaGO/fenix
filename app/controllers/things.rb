@@ -139,17 +139,17 @@ Fenix::App.controllers :things do
     end
     codes = @products.map(&:place_id).uniq
     @kc_towns = KatoAPI.batch(codes)
-    cats = KSM::Category.all.map{ |c| [c.id, c.hiername] }.to_h
+    cats = KSM::Category.all.map{ |c| [c.id, c.idname] }.to_h
 
     fname = 'pio-excel.csv'
     headers['Content-Disposition'] = "attachment; filename=#{fname}"
     output = ''
     output = "\xEF\xBB\xBF" if params.include? :win
     output << CSV.generate(:col_sep => ';') do |csv|
-      csv << %w(id name brand category place price sku bb k1c barcode img weight height desc)
+      csv << %w(id name topcat category place price sku bb k1c barcode img weight height desc)
       @products.each do |t|
         xt = SL::Product.new t.id
-        csv << [t.id, t.name, t.category.section.name, cats[t.category_id],
+        csv << [t.id, t.name, t.category.category.name, cats[t.category_id],
           t.hierplace(@kc_towns[t.place_id]&.model), t.price, t.autoart, xt.arn, xt.k1c, t.autobar,
           t.sketch_ext, t.weight, t.height, t.desc
         ]
