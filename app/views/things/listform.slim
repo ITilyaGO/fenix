@@ -73,6 +73,37 @@
   rscript type="riot/tag" src="/riot/tags/prefs/selectload.tag"  
 
   javascript:
+    (function($) {
+      $(function() {
+
+        var names_adapter = new Bloodhound({
+          datumTokenizer: Bloodhound.tokenizers.whitespace,
+          queryTokenizer: Bloodhound.tokenizers.whitespace,
+          prefetch: '../../aux/autoproduct.json'
+        });
+        $('#product_name').typeahead({
+          minLength: 3
+        }, {
+          name: 'prtname',
+          source: names_adapter,
+          limit: 15
+        });
+        var look_adapter = new Bloodhound({
+          datumTokenizer: Bloodhound.tokenizers.whitespace,
+          queryTokenizer: Bloodhound.tokenizers.whitespace,
+          prefetch: '../../aux/autolook.json'
+        });
+        $('#product_look').typeahead({
+          minLength: 3
+        }, {
+          name: 'prtlook',
+          source: look_adapter,
+          limit: 15
+        });
+      });
+    })(jQuery);
+
+  javascript:
     
     document.addEventListener("DOMContentLoaded", function(event) {
       riot.mount('switcher, shower, bottomworks, elhide, list, dualpane, selectload, deepdown-ms')

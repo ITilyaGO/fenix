@@ -55,6 +55,10 @@ module Fenix::App::ProductsHelper
     Padrino.cache[:known_cities] ||= KatoAPI.batch(%w[RU RU-YAR-ARO])
   end
 
+  def cache_corel_root
+    Padrino.cache[:corel_root] ||= wonderbox(:corel_root)
+  end
+
   def json_products_list
     Padrino.cache[:products_list] ||= json_list.to_json
   end

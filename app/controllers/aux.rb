@@ -71,4 +71,11 @@ Fenix::App.controllers :aux do
     st.to_json
   end
 
+  get :autoproduct, :provides => :json do
+    KSM::Dic.find(:autoproduct).contents.to_json
+  end
+
+  get :autolook, :provides => :json do
+    KSM::Dic.find(:autolook).contents.to_json
+  end
 end

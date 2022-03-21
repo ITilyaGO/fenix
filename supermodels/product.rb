@@ -2,9 +2,10 @@ class Product < Doppel
   PFX = :thing
 
   PROPS = [:name, :sn, :category_id, :place_id, :sketch_id, :company_id, :barcode, :price, :sku, :art, :g, :bbid,
-    :desc, :weight, :height
+    :desc, :dim_weight, :dim_height, :dim_length, :dim_width, :look, :corel
   ]
-  SVSPROPS = [:created_at, :updated_at, :dates, :users, :history]
+  FPROPS = %i[art desc dim_weight dim_height dim_length dim_width look corel]
+  SVSPROPS = %i[created_at updated_at dates users history settings]
   PROPS += SVSPROPS
   attr_accessor *PROPS
   attr_accessor :xt
@@ -14,7 +15,15 @@ class Product < Doppel
   end
 
   def displayname
-    "#{@name} (#{OrderAssist.known_cities[@place_id]&.model&.name})"
+    nip = settings&.fetch(:ni, 0)
+    city = OrderAssist.known_cities[@place_id]&.model&.name
+    a = [name, city, look]
+    a = [name, look, city] if nip == 1
+    a.compact.join(' ')
+  end
+
+  def fullcorel
+    [OrderAssist.cache_corel_root, corel].join
   end
 
   def category
@@ -56,6 +65,20 @@ class Product < Doppel
     @history[Time.now] = account.id
     save
   end
+
+  def clear_formize form
+    @settings ||= {}
+    ht = { :nit => :ni }
+    ht.values.each do |v|
+      settings.store(v, form[ht.key(v)].send(*self.class.schema[v]))
+    end
+    FPROPS.each do |prop|
+      form[prop] = nil if pe = form[prop]&.empty?
+      instance_variable_set("@#{prop}", nil) if pe
+    end
+
+    formiz form
+  end
   
   class << self
     def nest
@@ -69,7 +92,8 @@ class Product < Doppel
         price: [:to_i],
         weight: [:to_i],
         height: [:to_i],
-        sn: [:to_i]
+        sn: [:to_i],
+        ni: [:to_i]
       }
     end
 

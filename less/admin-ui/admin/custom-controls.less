@@ -148,3 +148,23 @@
     color: rgba(43, 67, 88, 0.67);
   }
 }
+
+label.swap-label {
+  min-width: unset;
+  text-align: unset;
+  margin-right: unset;
+  margin-bottom: unset;
+}
+
+.swap-input {
+  position: absolute;
+  left: 0;
+  z-index: -1;
+  width: 1.5rem;
+  height: 2.5rem;
+  opacity: 0;
+
+  &:checked ~ .swap-label .fa {
+    transform:rotate(180deg);
+  }
+}

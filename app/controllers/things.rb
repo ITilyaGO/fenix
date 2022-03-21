@@ -72,7 +72,7 @@ Fenix::App.controllers :things do
     @product = Product.find(params[:id])
     @product = Product.nest if params[:id] == '0000' || params[:clone]
     form = params[:product]
-    @product.formiz(form)
+    @product.clear_formize(form)
     @product.sn ||= thing_glob_seed
     @product.saved_by @current_account
     thing_to_top @product.id
@@ -103,17 +103,24 @@ Fenix::App.controllers :things do
     @counter = 0
     @products = []
     lines.each do |line|
-      product = Product.find(line[:id]) unless line[:id]&.blank?
+      product = Product.find(id = line[:id]) unless id&.blank? || id.eql?('уин')
+      next if id.eql?('уин')
       # product = Product.nest unless product&.exist?
       item = {
-        name: line[:name],
+        name: line[:type],
+        look: line[:view],
         category_id: line[:category].split(':').first,
         place_id: line[:place].split(':').first,
         price: line[:price],
         sn: line[:sku].split('.').last,
         desc: line[:desc],
-        weight: line[:weight],
-        height: line[:height]
+        corel: line[:corel],
+        art: line[:art],
+        dim_weight: line[:weight],
+        dim_height: line[:height],
+        dim_width: line[:width],
+        dim_length: line[:length]
+        
         # bbid: line[:bb],
         # barcode: line[:barcode]
 
@@ -146,12 +153,15 @@ Fenix::App.controllers :things do
     output = ''
     output = "\xEF\xBB\xBF" if params.include? :win
     output << CSV.generate(:col_sep => ';') do |csv|
-      csv << %w(id name topcat category place price sku bb k1c barcode img weight height desc)
+      csv << %w(id name topcat category type place view price art img corel bb
+        weight height width length sku k1c barcode desc)
+      csv << %w(уин название отдел группа тип город вид цена артикул картинка собрание склад
+        вес высота ширина длина индекс 1с штрихкод описание)
       @products.each do |t|
         xt = SL::Product.new t.id
-        csv << [t.id, t.name, t.category.category.name, cats[t.category_id],
-          t.hierplace(@kc_towns[t.place_id]&.model), t.price, t.autoart, xt.arn, xt.k1c, t.autobar,
-          t.sketch_ext, t.weight, t.height, t.desc
+        csv << [t.id, t.displayname, t.category.category.name, cats[t.category_id], t.name,
+          t.hierplace(@kc_towns[t.place_id]&.model), t.look, t.price, t.art, t.sketch_ext, t.fullcorel,
+          xt.arn, t.dim_weight, t.dim_height, t.dim_width, t.dim_length, t.autoart, xt.k1c, t.autobar, t.desc
         ]
       end
     end
