@@ -58,6 +58,8 @@ Fenix::App.controllers :orders do
     end
     @sections = Section.all
     a_towns(@orders.map(&:id), @orders.map(&:client_id))
+    @kc_done = CabiePio.all_keys(@orders.map(&:id), folder: [:stock, :order, :done]).flat.trans(:to_i)
+
     render 'orders/finished'
   end
 
@@ -569,6 +571,7 @@ Fenix::App.controllers :orders do
     calc_complexity_for order
     # arbal_need_order_rep(order)
     arbal_need_order_edit(order) unless order.draft?
+    arbal_need_order_edit(order_rm) unless order.draft?
     
     redirect(url(:orders, :draft))
   end
@@ -814,6 +817,7 @@ Fenix::App.controllers :orders do
       status_fin = true
     end
     @order.status = :finished if status_fin
+    @order.track = params[:track]
     @order.save
     @order.actualize
     calc_complexity_for @order

@@ -73,7 +73,11 @@ module Fenix::App::ArchetypeHelper
       whole_done = (sum_lines[line.id] || 0)*m
       now = whole_done >= line.amount*m ? 0 : line.amount*m - whole_done
       if now != prev
-        CabiePio.set [:need, :order], archetype_order(parch, line.id, order.id), now
+        if now == 0
+          CabiePio.unset [:need, :order], archetype_order(parch, line.id, order.id)
+        else
+          CabiePio.set [:need, :order], archetype_order(parch, line.id, order.id), now
+        end
 
         psum = CabiePio.get([:need, :archetype], parch).data.to_i || 0
         CabiePio.set [:need, :archetype], parch, psum-prev+now
