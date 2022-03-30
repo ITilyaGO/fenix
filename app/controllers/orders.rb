@@ -936,6 +936,78 @@ Fenix::App.controllers :orders do
     redirect(url(:orders, :price, :id => params[:id]))
   end
 
+  get :bunch do
+    render 'orders/bunch'
+  end
+
+  post :bunch do
+    ids = params[:ksm_draw][:orders].join(',')
+    redirect url(:orders, :bunch, id: ids.to_s)
+  end
+
+  get :bunch, :with => :id, :provides => :html do
+    @title = pat(:edit_title, :model => "order #{params[:id]}")
+    ids = params[:id].split(',').map(&:to_i)
+    @orders = Order.includes(:order_lines).where(id: ids)
+    @sections = Section.includes(:categories).all
+    habits(@sections, :index)
+
+    @order = OrderBunch.new
+    @orders.each do |order|
+      order.order_lines.each do |ool|
+        @order.order_lines << OrderLineBun.new(ool.serializable_hash)
+      end
+      
+      @order.total += order.total
+      @order.done_total += order.done_total
+    end
+    @kc_products = CabiePio.folder(:products, :sticker).flat.trans(:to_i)
+
+    render 'orders/bunch_view'    
+  end
+
+  get :bunch, :with => :id, :provides => :csv do
+    ids = params[:id].split(',').map(&:to_i)
+    @orders = Order.includes(:order_lines).where(id: ids)
+    @sections = Section.includes(:categories).all
+    habits(@sections, :index)
+
+    @order = OrderBunch.new
+    @orders.each do |order|
+      order.order_lines.each do |ool|
+        @order.order_lines << OrderLineBun.new(ool.serializable_hash)
+      end
+      
+      @order.total += order.total
+      @order.done_total += order.done_total
+    end
+    gol = @order.order_lines.group_by(&:product_id)
+    
+    fname = 'orders.csv'
+    headers['Content-Disposition'] = "attachment; filename=#{fname}"
+    output = ''
+    output = "\xEF\xBB\xBF" if params.include? :win
+    output << CSV.generate(:col_sep => ';') do |csv|
+      csv << [:name, ids, :sum].flatten
+      @sections.sort_by{|o|o.index||0}.each_with_index do |s, i|
+        next unless tab_visible = @order.by_sec?(s.id)
+        s.categories.each do |tab|
+          next unless cat_visible = @order.by_cat?(tab.id)
+          cp = nil
+          @order.by_cat(tab.id).each do |ol|
+            next if cp == ol.product_id
+            cp = ol.product_id
+            por = []
+            ids.each do |oid|
+              por << gol[ol.product_id].select{ |gr| gr.order_id == oid }.sum(&:amount)
+            end
+            csv << [ol.product.displayname, por, gol[ol.product_id].sum(&:amount)].flatten
+          end
+        end
+      end
+    end
+  end
+
   delete :destroy, :with => :id do
     # TODO: Delete order from tables
     @title = "Orders"

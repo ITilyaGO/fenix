@@ -84,6 +84,11 @@ html lang='en'
               = link_to url(:orders, :archive) do
                 | Архив
                 span class="menu-icon fa fa-archive"
+          - if can_view?(:list, :archive)
+            li.sidebar-list
+              = link_to url(:orders, :bunch) do
+                | Несколько
+                span class="menu-icon fa fa-calculator"
 
           - if can_view?(:draw, :all)
             li.sidebar-title.separator

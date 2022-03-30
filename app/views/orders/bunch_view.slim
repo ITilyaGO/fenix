@@ -1,0 +1,102 @@
+.table.non-print
+  .col-md-6.flex-v.text-center: .flex-c
+    .g: h3
+      == deli(rur @order.total)
+    - if @order.finished? || @order.shipped?
+    .col-md-3.flex-v.vcenter
+    h3 = link_to :excel, url(:orders, :bunch, id: params[:id], :format => :csv, win: 1), class: 'btn btn-default btn-sm'
+     
+.clearfix
+
+.order
+  - displayed_n = 0
+  .block
+    ul class="nav nav-tabs non-print" id="order_tab"
+      - @sections.sort_by{|o|o.index||0}.each do |tab|
+        - cat_enabled = @order.by_sec?(tab.id)
+        - displayed_n += 1 if cat_enabled
+        - my = @my_section&.id == tab.id
+        li class=[('disabled' unless cat_enabled), ('my' if my)]
+          = link_to tag_icon('fa fa-ok', "#{tab.name}"), "#cat-#{tab.id}", 'data-toggle' => "tab"
+      
+    .tab-content id="for_order_tab"
+      - @sections.sort_by{|o|o.index||0}.each_with_index do |s, i|
+        - tab_visible = @order.by_sec?(s.id)
+        - my = @my_section&.id == s.id
+        - unless tab_visible
+          block.non-print id="cat-#{s.id}"
+        - else
+          .tab-pane id="cat-#{s.id}" class=[('filled' if tab_visible), ('my' if my), ('non-print' unless tab_visible && my)]
+            - catsum = 0
+            - s.categories.each do |tab|
+              - cat_visible = @order.by_cat?(tab.id)
+              - if cat_visible
+                .table-res4ponsive
+                  h4.non-print = tab.name
+                  table.table.table-hover
+                    thead.only-print
+                      tr
+                        td = tab.name
+                    tr
+                      th.only-print width='20%' Собрано
+                      th Наименование
+                      th Заказ
+                      th Коммент
+                      th Количество
+                      th.non-print Цена
+                      th.non-print Сумма
+                      th.non-print Факт
+                      th.non-print.toggle-ignore Не&nbsp;делаем
+                    
+                    - @order.by_cat(tab.id).each do |ol|
+                      - catsum += ol.price*ol.amount
+                      tr class="order-line"
+                        = hidden_field_tag "line[#{ol.id}][id]", :value => ol[:id]
+                        td.only-print &nbsp;
+                        td.col-md-4
+                          = ol.product.displayname
+                        td = link_to ol.order_id, url(:orders, :edit, id: ol.order_id)
+                        td.col-md-3
+                          - if !ol.description.blank?
+                            div = ol.description
+                        td.col-md-1
+                          = ol.amount
+                        td.col-md-1.non-print
+                          == rur(ol.price)
+                        td.col-md-1.non-print
+                          == rur(ol.price*ol.amount)
+                            
+                        td.col-md-1.non-print: .controls
+                          - if allow_route?(:orders_infact) && can_view_section?(:sections, :complete, s.id)
+                            = (text_field_tag "line[#{ol.id}][done_amount]", :value => ol.done_amount,
+                            :autocomplete => "off", :class => "form-control input-sm")
+                          - else
+                            .text-center = ol.done_amount
+                        td.col-md-1.vert-align.non-print: .controls
+                          - if allow_route?(:orders_infact) && can_view_section?(:sections, :complete, s.id)
+                            = hidden_field_tag "line[#{ol.id}][ignored]", :value => 'false'
+                            = check_box_tag "line[#{ol.id}][ignored]", :checked => ol.ignored
+                          - else
+                            = check_box_tag '', :checked => ol.ignored, :disabled => true
+
+                p.only-print &nbsp;
+            .absol style='top:0;' == deli(rur catsum)
+
+  .clearfix
+
+
+- content_for :js_assets do
+  = javascript_include_tag :riot, :fileinput
+  rscript type="riot/tag" src="/riot/tags/collapser.tag"
+  rscript type="riot/tag" src="/riot/tags/fcollapser.tag"
+  rscript type="riot/tag" src="/riot/tags/picmod.tag"
+  rscript type="riot/tag" src="/riot/tags/piclist.tag"
+  rscript type="riot/tag" src="/riot/tags/draft_switches.tag"
+  rscript type="riot/tag" src="/riot/tags/timeline/stickamount.tag"
+
+  javascript:
+    document.addEventListener("DOMContentLoaded", function(event) {
+      riot.mount('collapser, fcollapser, piclist, draftswitches, inplace, stickamount')
+    })
+    let confobj = #{{@squadconf.to_json}}
+    rsquad.saveConfig(confobj)

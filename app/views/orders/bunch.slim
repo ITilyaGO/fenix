@@ -1,0 +1,22 @@
+= form_for :supermodel, url(:orders, :bunch), :autocomplete => :off do |f|
+  .row.non-print.flex-c.center
+    .col-md-10.col-md-offset-2
+      
+      fieldset.control-group
+        = f.label 'Заказы', :class => 'col-md-2 control-label'
+        .flex-c.controls.custom-control
+          order-select
+
+      .formactions.hpad-1.flex-c.vcenter.cmar-05
+        = f.submit :'Сформировать', class: 'btn btn-default'
+        .tiny-text.small Найдите несколько заказов и объедините их
+        
+
+- content_for :js_assets do
+  = javascript_include_tag :riot, :appa, :flexsearch_min
+  rscript type="riot/tag" src="/riot/tags/draws/order_select.tag"
+  rscript type="riot/tag" src="/riot/tags/draws/recheck.tag"
+  javascript:
+    document.addEventListener("DOMContentLoaded", function(event) {
+      riot.mount('order-select, recheck')
+    })
