@@ -64,6 +64,7 @@ Fenix::App.controllers :things do
     codes = @products.map(&:place_id).uniq
     @kc_towns = KatoAPI.batch(codes)
     @squadconf = @product.serializable_hash
+    @product.id = '0000' if params[:clone]
 
     render 'things/listform'
   end
@@ -76,6 +77,11 @@ Fenix::App.controllers :things do
     @product.sn ||= thing_glob_seed
     @product.saved_by @current_account
     thing_to_top @product.id
+    update_autodic @product
+    xproduct = SL::Product.new @product.id
+    xproduct.raw = params[:raw]
+    xproduct.save_links
+    @product.backsync
     if @product
       if true
         flash[:success] = pat(:update_success, :model => 'Product', :id =>  "#{@product.id}")

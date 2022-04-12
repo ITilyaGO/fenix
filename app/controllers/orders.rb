@@ -306,10 +306,21 @@ Fenix::App.controllers :orders do
     order.priority = params[:order][:priority] == "true"
     order.delivery = params[:order][:delivery].to_i
     online.order_lines.each do |line|
-      ol = OrderLine.new(product_id: line.product_id, description: line.description, amount: line.amount, price: line.amount > 0 ? line.sum/line.amount : 0)
-      order.order_lines << ol
+      ol = OrderLine.new(product_id: line.product.pio_id, description: line.description, amount: line.amount, price: line.amount > 0 ? line.sum/line.amount : 0)
+      order.order_lines_ar << ol
     end
     order.save
+    oids = []
+    plookup = KSM::Backmig.find(:product).contents
+    order.order_lines_ar.each do |line|
+      ol = KSM::OrderLine.nest
+      ol.fill({ :merge => true, :product_id => plookup[line.product_id], :order_id => order.id, :amount => line.amount, :price => line.price, :description => line.description })
+      ol.save
+      oids << ol.id
+    end
+    kso = KSM::Order.new(order.attributes)
+    kso.lines = oids
+    kso.save
 
     o_status = KSM::OrderStatus.find(order.id)
     o_status.setg(:draft)
@@ -321,7 +332,7 @@ Fenix::App.controllers :orders do
         break if include_section
       end
       if include_section
-        op = OrderPart.new(:section_id => s.id, :state => :anew)
+        op = OrderPart.new(:section_id => s.ix, :state => :anew)
         order.order_parts << op
         o_status.sets(s.id, :anew)
       end
@@ -437,7 +448,7 @@ Fenix::App.controllers :orders do
     end
     cash = params[:order][:cash] == 'true' ? 't' : 'f'
     CabiePio.set [:orders, :cash], order.id, cash
-    0/0
+
     redirect(url(:orders, :draft))
   end
 
@@ -531,13 +542,14 @@ Fenix::App.controllers :orders do
     # order = Order.new({:online_id => online.id, :status => :anew, :client_id => client, :online_at => online.created_at, :description => online.description, :total => online.total})
     sections_draft = []
     exst = params[:line].map{|l|l[:ol].to_i}
-    order.order_lines.each do |ol|
+    order.order_lines_ar.each do |ol|
       ol.destroy unless exst.include? ol.id
       sections_draft << product_to_section(ol.product_id) unless exst.include? ol.id
     end
     params[:line].each do |line|
       p = Product.find(line['id']) rescue nil
       next if !p
+      next unless p.exist?
       if col = order.order_lines.detect{|l|l.id == line[:ol].to_i}
         sections_draft << product_to_section(p.id) unless col.amount == line[:amount].to_i
         col.amount = line[:amount]
@@ -548,7 +560,7 @@ Fenix::App.controllers :orders do
         sections_draft << product_to_section(p.id)
         ol = OrderLine.new({ :product_id => p.id, :amount => line['amount'], :price => p.price, :description => line['comment'] })
         order.total += p.price*ol.amount
-        order.order_lines << ol
+        order.order_lines_ar << ol
       end
       # ol.update_attributes(l)
     end

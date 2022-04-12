@@ -102,7 +102,7 @@ Fenix::App.controllers :stickers do
 
     params[:stickers].each do |line_id, line_v|
       next unless line_id
-      ol = @order.order_lines.find(line_id)
+      ol = @order.order_lines_ar.find(line_id)
       next if ol.ignored || line_v.length == 0
       ols = line_v.to_i rescue 0
       # next if saved_stickers[ol.id] == ols

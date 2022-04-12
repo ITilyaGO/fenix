@@ -2,10 +2,10 @@ class Product < Doppel
   PFX = :thing
 
   PROPS = [:name, :sn, :category_id, :place_id, :sketch_id, :company_id, :barcode, :price, :sku, :art, :g, :bbid,
-    :desc, :dim_weight, :dim_height, :dim_length, :dim_width, :look, :corel
+    :discount, :lotof, :desc, :dim_weight, :dim_height, :dim_length, :dim_width, :look, :corel
   ]
-  FPROPS = %i[art desc dim_weight dim_height dim_length dim_width look corel]
-  SVSPROPS = %i[created_at updated_at dates users history settings]
+  FPROPS = %i[art discount lotof desc dim_weight dim_height dim_length dim_width look corel]
+  SVSPROPS = %i[created_at updated_at ignored dates users history settings]
   PROPS += SVSPROPS
   attr_accessor *PROPS
   attr_accessor :xt
@@ -19,6 +19,7 @@ class Product < Doppel
     city = OrderAssist.known_cities[@place_id]&.model&.name
     a = [name, city, look]
     a = [name, look, city] if nip == 1
+    a.unshift '☠️' if @ignored == 1
     a.compact.join(' ')
   end
 
@@ -35,7 +36,7 @@ class Product < Doppel
   end
 
   def autoart
-    nums = ["%02i" % category.section.sn, category.sequ, "%06i" % sn].join('.')
+    nums = ["%02i" % category.section.sn, category.sequ, "%06i" % sn].join('.') rescue ''
   end
 
   def autobar
@@ -80,6 +81,18 @@ class Product < Doppel
     formiz form
   end
   
+  def backsync
+    oc = Online::Category.find_by(pio_id: @category_id)
+    return false unless oc
+    op = Online::Product.find_by(pio_id: @id) || Online::Product.new({ pio_id: @id })
+    op.price = @price
+    op.name = displayname
+    op.active = @ignored != 1
+    op.category_id = oc.id
+    op.height = @dim_height
+    op.save
+  end
+
   class << self
     def nest
       e = super
@@ -93,7 +106,10 @@ class Product < Doppel
         weight: [:to_i],
         height: [:to_i],
         sn: [:to_i],
-        ni: [:to_i]
+        ni: [:to_i],
+        ignored: [:to_i],
+        discount: [:to_i],
+        lotof: [:to_i]
       }
     end
 

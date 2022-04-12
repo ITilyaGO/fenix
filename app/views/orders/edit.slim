@@ -330,7 +330,7 @@ ul class="nav nav-tabs non-print"
   - displayed_n = 0
   .block
     ul class="nav nav-tabs non-print" id="order_tab"
-      - @sections.sort_by{|o|o.index||0}.each do |tab|
+      - @sections.sort_by(&:ix).each do |tab|
         - cat_enabled = @order.by_sec?(tab.id)
         - displayed_n += 1 if cat_enabled
         - my = @my_section&.id == tab.id
@@ -342,7 +342,7 @@ ul class="nav nav-tabs non-print"
             i.fa.fa-exclamation-triangle 
   
     .tab-content id="for_order_tab"
-      - @sections.sort_by{|o|o.index||0}.each_with_index do |s, i|
+      - @sections.sort_by(&:ix).each_with_index do |s, i|
         - tab_visible = @order.by_sec?(s.id)
         - my = @my_section&.id == s.id
         - unless tab_visible

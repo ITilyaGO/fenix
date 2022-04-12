@@ -9,7 +9,7 @@ module Fenix::App::MigrateHelpers
     backorder = []
     plookup = {}
     products.each do |p|
-      thing = Product.nest
+      thing = SMProduct.nest
       thing.name = p.displayname
       # thing.category_id = p.category_id
       thing.category_id = cats[p.category_id.to_i]
@@ -35,8 +35,12 @@ module Fenix::App::MigrateHelpers
     m013_accounts_up sections
     m013_orders_move
     m013_k1c_move plookup
+    m013_cmplx_move_up plookup, cats
 
+    m013_backmig plookup, cats, sections
     CabiePio.wire.sync(true)
+
+    m013_online plookup, cats
     puts "M013 Complete #{Time.now}"
   end
 
@@ -47,6 +51,12 @@ module Fenix::App::MigrateHelpers
     CabiePio.clear(:product, :archetype)
     arp.each do |k,v|
       CabiePio.set [:product, :archetype], plookup[k], v
+    end
+
+    arpm = CabiePio.folder(:product, :archetype_multi).flat.trans(:to_i)
+    CabiePio.clear(:product, :archetype_multi)
+    arpm.each do |k,v|
+      CabiePio.set [:product, :archetype_multi], plookup[k], v
     end
 
     KSM::Archetype.all.each do |a|
@@ -60,6 +70,44 @@ module Fenix::App::MigrateHelpers
     CabiePio.clear(:products, :sticker)
     stp.each do |k,v|
       CabiePio.set [:products, :sticker], plookup[k], v
+    end
+  end
+
+  def m013_cmplx_move_up plookup, clookup
+    stp = CabiePio.folder(:complexity, :product).flat.trans(:to_i)
+    CabiePio.clear(:complexity, :product)
+    stp.each do |k,v|
+      CabiePio.set [:complexity, :product], plookup[k], v
+    end
+    stc = CabiePio.folder(:complexity, :category).flat.trans(:to_i)
+    CabiePio.clear(:complexity, :category)
+    stc.each do |k,v|
+      CabiePio.set [:complexity, :category], clookup[k], v
+    end
+  end
+
+  def m013_backmig plookup, clookup, slookup
+    bmp = KSM::Backmig.find(:product)
+    bmp.contents = plookup
+    bmp.save
+    bmp = KSM::Backmig.find(:category)
+    bmp.contents = clookup
+    bmp.save
+    bmp = KSM::Backmig.find(:section)
+    bmp.contents = slookup
+    bmp.save
+  end
+
+  def m013_online plookup, clookup
+    plookup.each do |old, newid|
+      op = Online::Product.find old rescue next
+      op.pio_id = newid
+      op.save
+    end
+    clookup.each do |old, newid|
+      oc = Online::Category.find old rescue next
+      oc.pio_id = newid
+      oc.save
     end
   end
 

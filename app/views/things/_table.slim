@@ -2,8 +2,8 @@
   .deepdown-wrap.text-center.mbs.cmar-05
     = link_to 'Последние', url(:things, :table), :class => 'btn btn-sm btn-default'
     select.huge name="categories" riot-tag='selectreload' rname='place' loc=url(:things, :table)
-      = content_tag(:option, 'Россия', { value: 'RU', selected: @place == 'RU' })
-      = content_tag(:option, 'Ярославль', { value: 'RU-YAR-ARO', selected: @place == 'RU-YAR-ARO' })
+      - known_cities.each do |k, city|
+        = content_tag(:option, city.model, { value: city.code, selected: @place == city.code })
       
     select name="categories" class="huge small mh350" riot-tag='selectreload' rname='cat' loc=url(:things, :table)
       = content_tag(:option, 'Выберите категорию')
@@ -77,6 +77,7 @@
           td class='list-column list-row-action'
             div class='list-row-action-wrapper'
               //span class='list-row-action-wrapper-link' 1
+              = link_to tag_icon(:'code-fork'), :href => url(:things, :edit, :id => product.id, clone: 1, cat: @ccat), :rel => :tooltip, :title => "#{pat(:clone)} product", :class => 'list-row-action-wrapper-link'
               = link_to tag_icon(:edit), :href => url(:things, :edit, :id => product.id, cat: @ccat), :rel => :tooltip, :title => "#{pat(:edit)} product", :class => 'list-row-action-wrapper-link'
 
 - content_for :js_assets do

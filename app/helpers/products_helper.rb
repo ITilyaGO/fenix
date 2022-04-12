@@ -52,7 +52,8 @@ module Fenix::App::ProductsHelper
   end
 
   def known_cities
-    Padrino.cache[:known_cities] ||= KatoAPI.batch(%w[RU RU-YAR-ARO])
+    wonderbox_set(:known_cities, 'RU RU-YAR-ARO RU-YAR-ROS') unless wonderbox(:known_cities)
+    Padrino.cache[:known_cities] ||= KatoAPI.batch(wonderbox(:known_cities).split)
   end
 
   def cache_corel_root

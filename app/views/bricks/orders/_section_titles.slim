@@ -1,3 +1,3 @@
-- @sections.each do |s|
+- @sections.sort_by(&:ix).each do |s|
   // - s_st = order.order_parts.find_by(:section_id => s.id)
   = content_tag :span, " #{s.name[0..2]} "

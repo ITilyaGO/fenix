@@ -1,12 +1,12 @@
 Fenix::App.controllers :archetypes do
   get :oindex do
     @title = "Archetypes"
-    @cats = Category.where(category: nil).order(:index => :asc)
+    @cats = KSM::Category.toplevel
     @archetypes = KSM::Archetype.all
-    @categories = Category.all.includes(:category)
+    @categories = KSM::Category.all
     @kc_archs = CabiePio.folder(:product, :archetype).flat
     @archs = KSM::Archetype.all
-    @grouped = @archs.group_by{|a|a.category_id.to_i}
+    @grouped = @archs.group_by{|a|a.category_id}
     pagesize = PAGESIZE
     @page = !params[:page].nil? ? params[:page].to_i : 1
     @r = url(:archetypes, :index)
@@ -15,11 +15,11 @@ Fenix::App.controllers :archetypes do
 
   get :products do
     @title = "Archetypes"
-    @cats = Category.where(category: nil).order(:index => :asc)
+    @cats = KSM::Category.toplevel
     @archetypes = KSM::Archetype.all.map{|a|[a.id, a]}.to_h
-    @categories = Category.all.includes(:category)
-    @kc_archs = CabiePio.folder(:product, :archetype).flat.trans(:to_i)
-    @kc_multi = CabiePio.folder(:product, :archetype_multi).flat.trans(:to_i, :to_i)
+    @categories = KSM::Category.all
+    @kc_archs = CabiePio.folder(:product, :archetype).flat
+    @kc_multi = CabiePio.folder(:product, :archetype_multi).flat.trans(nil, :to_i)
     pagesize = PAGESIZE
     @page = !params[:page].nil? ? params[:page].to_i : 1
     # @archetypes = Archetype.all.includes(:category).order(:updated_at => :desc).offset((@page-1)*pagesize).take(pagesize)
