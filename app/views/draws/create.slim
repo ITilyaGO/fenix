@@ -52,7 +52,7 @@
       fieldset class='control-group'
         = f.label 'Заказы', :class => 'col-md-2 control-label'
         .flex-c.controls.custom-control
-          order-select
+          order-select url='/aux/current_orders.json'
 
       .formactions.hpad-1
         = f.submit :save, class: 'btn btn-default'

@@ -5,7 +5,7 @@
       fieldset.control-group
         = f.label 'Заказы', :class => 'col-md-2 control-label'
         .flex-c.controls.custom-control
-          order-select
+          order-select url='/aux/verse_orders.json'
 
       .formactions.hpad-1.flex-c.vcenter.cmar-05
         = f.submit :'Сформировать', class: 'btn btn-default'

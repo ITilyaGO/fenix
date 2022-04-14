@@ -55,7 +55,7 @@ order-select.wp100
         authenticity_token: rsquad.token()
       }
 
-      fetch('/aux/current_orders.json', {
+      fetch(opts.url, {
         method: "POST",
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams(data).toString()

@@ -54,6 +54,14 @@ Fenix::App.controllers :aux do
     results.to_json
   end
 
+  post :verse_orders, :provides => :json do
+    orders = Order.where("status >= ?", Order.statuses[:draft]).where("status < ?", Order.statuses[:finished]).pluck(:id)
+    @kc_orders = CabiePio.all_keys(orders, folder: [:orders, :towns]).flat
+    @kc_towns = KatoAPI.batch @kc_orders.values.uniq
+    results = orders.map{|a|{id:a, keyword:a.to_s, city: @kc_towns[@kc_orders[a.to_s]]&.model&.name}}
+    results.to_json
+  end
+
   post :deliveries, :provides => :json do
     # usergroups = KSM::UserGroup.all.map(&:to_r)
     usergroups = Order.deliveries.map{|k,v| { id: k, name: tj(:delivery, k)} }
