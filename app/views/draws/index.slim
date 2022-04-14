@@ -31,6 +31,8 @@
   .vcenter.flex-c.wp100
     .pull-left: .h6 Печать
     .flexie
+    = link_to params[:start] || timeline_id, url(:draws, :index, start: params[:start] || timeline_id), class: 'badge badge-default'
+    .flexie
     .pull-right.flex-c.cmar-05
       = link_to tag_icon(:flash), url(:draws, :create), title: 'Создать тираж'
       = link_to tag_icon(:'folder-o'), url(:draws, :orders, :seq => :timeline), title: 'Заказы'

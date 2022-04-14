@@ -2,8 +2,9 @@ Fenix::App.controllers :draws do
   get :index do
     @title = "Все тиражи"
     # @draws = KSM::Draw.all.sort_by{|a|a.sortname}.reverse
+    start = timeline_unf params[:start] rescue Date.today
 
-    @draws = kc_daydraws(Date.today) + kc_daydraws(Date.today - 1) + kc_daydraws(Date.today - 2)
+    @draws = kc_daydraws(start) + kc_daydraws(start - 1) + kc_daydraws(start - 2)
     current = wonderbox(:draws_stack) || []
     @cdraws = KSM::Draw.find_all(current).sort_by{|a|a.sortname}.reverse
     @prday = (Date.today+1).strftime('%d.%m.%Y')
