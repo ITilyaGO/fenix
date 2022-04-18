@@ -154,6 +154,8 @@
           
           td class='list-column list-row-action non-print'
             .list-row-action-wrapper
+              - if current_account.is_admin?
+                = link_to tag_icon(:'file-text-o'), :href => url(:orders, :txtf, :id => order.id), :class => 'list-row-action-wrapper-link', target: '_blank'
               - if os.what?(:anew)
                 = link_to tag_icon(:'exclamation-circle'), :class => 'list-row-action-delete-two list-row-action-wrapper-link'
               - if can_view?(:list, :stickers) || allow_route?(:orders_stickers)
