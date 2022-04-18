@@ -30,7 +30,7 @@ class Product < ActiveRecord::Base
     Product.delete_all
     Product.record_timestamps = false
     Online::Product.all.each do |product|
-      dup = product.attributes.merge({:id => product.id})
+      dup = product.attributes.delete_if{|k|['pio_id','tagname'].include?(k)}.merge({:id => product.id})
       Product.create(dup)
     end
     Product.record_timestamps = true

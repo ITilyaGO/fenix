@@ -54,7 +54,7 @@ class Category < ActiveRecord::Base
     Category.delete_all
     Category.record_timestamps = false
     Online::Category.all.each do |cat|
-      dup = cat.attributes.merge({:id => cat.id})
+      dup = cat.attributes.delete_if{|k|k=='pio_id'}.merge({:id => cat.id})
       dup[:section_id] = sections[dup[:id]]
       Category.create(dup)
     end
