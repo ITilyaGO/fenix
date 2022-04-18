@@ -12,6 +12,8 @@ class Order < ActiveRecord::Base
   scope :in_work, -> { where.not(:status => statuses[:draft]) }
   scope :fin, -> { where(:status => statuses[:finished]) }
 
+  after_save :ksm_apd
+
   # def self.status_name(status)
   #   case status
   #   when 0
@@ -59,6 +61,12 @@ class Order < ActiveRecord::Base
     KSM::OrderLine.find_all KSM::Order.find(id).lines
   end
   
+  def ksm_apd
+    kso = KSM::Order.new(attributes)
+    kso.lines = order_lines_ar_ids
+    kso.save
+  end
+
   def by_cat(id)
     order_lines.select{ |ol| Product.find(ol.product_id).category.category_id == id }
     # order_lines.joins(product: :category)

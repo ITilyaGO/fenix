@@ -125,11 +125,17 @@ module Fenix::App::MigrateHelpers
     ols = OrderLine.all #where('created_at > ?', Date.new(2021,1,1))
     # File.write 'tmp/ol.yaml', YAML.dump(ols.each{|a|a.description = nil if a.description&.empty?}.map(&:attributes).map(&:compact))
     # return
+    ActiveRecord::Base.no_touching do
+      ols.each do |oa|
+        oa.product_id = plookup[oa.product_id.to_i]
+        oa.save
+      end
+    end
     KSM::OrderLine.destroy_all if force
     ols.each do |s|
       thing = KSM::OrderLine.new(id: s.id)
       thing.formiz s.attributes
-      thing.product_id = plookup[s.product_id]
+      # thing.product_id = plookup[s.product_id.to_i]
       thing.save
     end
   end

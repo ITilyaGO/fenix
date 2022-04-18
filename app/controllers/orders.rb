@@ -167,7 +167,7 @@ Fenix::App.controllers :orders do
     @olstickers = CabiePio.all_keys(@order.order_lines.map(&:id), folder: [:m, :order_lines, :sticker_sum]).flat.trans(:to_i)
     kc_amt = CabiePio.get([:orders, :stickers_amount], @order.id).data.to_i
     @sticker_progress = sticker_order_progress(@order.id)
-    @kc_products = CabiePio.folder(:products, :sticker).flat.trans(:to_i)
+    @kc_products = CabiePio.folder(:products, :sticker).flat
 
     kc_town_managers = CabiePio.folder(:towns, :managers).flat
     hier = Kato::Hier.for(@kc_client_hometown).codes
@@ -310,17 +310,14 @@ Fenix::App.controllers :orders do
       order.order_lines_ar << ol
     end
     order.save
-    oids = []
-    plookup = KSM::Backmig.find(:product).contents
-    order.order_lines_ar.each do |line|
-      ol = KSM::OrderLine.nest
-      ol.fill({ :merge => true, :product_id => plookup[line.product_id], :order_id => order.id, :amount => line.amount, :price => line.price, :description => line.description })
-      ol.save
-      oids << ol.id
-    end
-    kso = KSM::Order.new(order.attributes)
-    kso.lines = oids
-    kso.save
+    # oids = []
+    # plookup = KSM::Backmig.find(:product).contents
+    # order.order_lines_ar.each do |line|
+    #   ol = KSM::OrderLine.nest
+    #   ol.fill({ :merge => true, :product_id => plookup[line.product_id], :order_id => order.id, :amount => line.amount, :price => line.price, :description => line.description })
+    #   ol.save
+    #   oids << ol.id
+    # end
 
     o_status = KSM::OrderStatus.find(order.id)
     o_status.setg(:draft)
@@ -334,7 +331,7 @@ Fenix::App.controllers :orders do
       if include_section
         op = OrderPart.new(:section_id => s.ix, :state => :anew)
         order.order_parts << op
-        o_status.sets(s.id, :anew)
+        o_status.sets(s.ix, :anew)
       end
     end
     o_status.save
@@ -407,19 +404,16 @@ Fenix::App.controllers :orders do
       order.order_lines_ar << olar
       # ol.update_attributes(l)
     end
-    # order.save
-    oids = []
-    postlines.each do |line|
-      p = Product.find(line['id'])
-      next unless p.exist?
-      ol = KSM::OrderLine.nest
-      ol.fill({ :merge => true, :product_id => p.id, :order_id => order.id, :amount => line['amount'].to_i, :price => p.price, :description => line['comment'] })
-      ol.save
-      oids << ol.id
-    end
-    kso = KSM::Order.new(order.attributes)
-    kso.lines = oids
-    kso.save
+    order.save
+    # oids = []
+    # postlines.each do |line|
+    #   p = Product.find(line['id'])
+    #   next unless p.exist?
+    #   ol = KSM::OrderLine.nest
+    #   ol.fill({ :merge => true, :product_id => p.id, :order_id => order.id, :amount => line['amount'].to_i, :price => p.price, :description => line['comment'] })
+    #   ol.save
+    #   oids << ol.id
+    # end
 
     o_status = KSM::OrderStatus.find(order.id)
     o_status.setg(:draft)
@@ -807,7 +801,7 @@ Fenix::App.controllers :orders do
     sticker_sum = 0
     saved_stickers = CabiePio.all_keys(@order.order_lines.map(&:id), folder: [:m, :order_lines, :sticker])
       .flat.trans(:to_i).transform_values{|v|v[:v]}
-    kc_products = CabiePio.folder(:products, :sticker).flat.trans(:to_i, :to_f)
+    kc_products = CabiePio.folder(:products, :sticker).flat.trans(nil, :to_f)
     amt = 0
     @order.order_lines.each do |ol|
       sq = kc_products.fetch(ol.product_id, 0)

@@ -1,7 +1,7 @@
 module Fenix::App::ArchetypeHelper
   def create_absent_archetypes
     products = Product.all
-    with_archs = CabiePio.folder(:product, :archetype).flat.trans(:to_i).keys
+    with_archs = CabiePio.folder(:product, :archetype).flat.keys
     products.each do |p|
       next if with_archs.include? p.id
       pcat = category_matrix[products_hash[p.id]]
@@ -28,8 +28,8 @@ module Fenix::App::ArchetypeHelper
     # stickers = CabiePio.all_keys(order.order_lines.map(&:product_id), folder: [:products, :sticker]).flat.trans(:to_i, :to_f)
     # line_stickers = CabiePio.all_keys(order.order_lines.map(&:id), folder: [:m, :order_lines, :sticker_sum])
     #   .flat.map{|k,v|[k.to_i,v[:v]]}.to_h
-    arches = CabiePio.folder(:product, :archetype).flat.trans(:to_i)
-    multi = CabiePio.folder(:product, :archetype_multi).flat.trans(:to_i, :to_i)
+    arches = CabiePio.folder(:product, :archetype).flat
+    multi = CabiePio.folder(:product, :archetype_multi).flat.trans(nil, :to_i)
     order.order_lines.each do |line|
       parch = arches.fetch(line.product_id, nil)
       next unless parch
@@ -62,9 +62,9 @@ module Fenix::App::ArchetypeHelper
 
   def arbal_need_order_edit(order)
     sum_lines = CabiePio.all_keys(order.order_lines.map(&:id), folder: [:m, :order_lines, :sticker_sum])
-      .flat.trans(:to_i).transform_values{|v|v[:v]}
-    arches = CabiePio.folder(:product, :archetype).flat.trans(:to_i)
-    multi = CabiePio.folder(:product, :archetype_multi).flat.trans(:to_i, :to_i)
+      .flat.transform_values{|v|v[:v]}
+    arches = CabiePio.folder(:product, :archetype).flat
+    multi = CabiePio.folder(:product, :archetype_multi).flat.trans(nil, :to_i)
     order.order_lines.each do |line|
       parch = arches.fetch(line.product_id, nil)
       next unless parch
@@ -84,8 +84,8 @@ module Fenix::App::ArchetypeHelper
   def arbal_need_order_start(order)
     old_need = CabiePio.query("p/need/order>.*_#{order.id}", type: :regex).flat
     return if old_need.any?
-    arches = CabiePio.folder(:product, :archetype).flat.trans(:to_i)
-    multi = CabiePio.folder(:product, :archetype_multi).flat.trans(:to_i, :to_i)
+    arches = CabiePio.folder(:product, :archetype).flat
+    multi = CabiePio.folder(:product, :archetype_multi).flat.trans(nil, :to_i)
     order.order_lines.each do |line|
       next if line.ignored
       parch = arches.fetch(line.product_id, nil)
@@ -98,7 +98,7 @@ module Fenix::App::ArchetypeHelper
   end
 
   def arbal_need_order_mid1(order)
-    arches = CabiePio.folder(:product, :archetype).flat.trans(:to_i)
+    arches = CabiePio.folder(:product, :archetype).flat
     order.order_lines.each do |line|
       parch = arches.fetch(line.product_id, nil)
       next unless parch
@@ -123,8 +123,8 @@ module Fenix::App::ArchetypeHelper
   end
 
   def arbal_need_order_st_fin(order)
-    arches = CabiePio.folder(:product, :archetype).flat.trans(:to_i)
-    stickers = CabiePio.all_keys(order.order_lines.map(&:product_id), folder: [:products, :sticker]).flat.trans(:to_i).keys
+    arches = CabiePio.folder(:product, :archetype).flat
+    stickers = CabiePio.all_keys(order.order_lines.map(&:product_id), folder: [:products, :sticker]).flat.keys
     order.order_lines.each do |line|
       parch = arches.fetch(line.product_id, nil)
       next unless parch
@@ -138,9 +138,9 @@ module Fenix::App::ArchetypeHelper
   end
 
   def arbal_need_order_fin(order)
-    arches = CabiePio.folder(:product, :archetype).flat.trans(:to_i)
-    stickers = CabiePio.all_keys(order.order_lines.map(&:product_id), folder: [:products, :sticker]).flat.trans(:to_i).keys
-    multi = CabiePio.folder(:product, :archetype_multi).flat.trans(:to_i, :to_i)
+    arches = CabiePio.folder(:product, :archetype).flat
+    stickers = CabiePio.all_keys(order.order_lines.map(&:product_id), folder: [:products, :sticker]).flat.keys
+    multi = CabiePio.folder(:product, :archetype_multi).flat.trans(nil, :to_i)
     doneday = CabiePio.get([:stock, :order, :done], order.id).data
     order.order_lines.each do |line|
       parch = arches.fetch(line.product_id, nil)
@@ -173,7 +173,7 @@ module Fenix::App::ArchetypeHelper
   end
 
   def arbal_need_order_fin1(order)
-    arches = CabiePio.folder(:product, :archetype).flat.trans(:to_i)
+    arches = CabiePio.folder(:product, :archetype).flat
     order.order_lines.each do |line|
       parch = arches.fetch(line.product_id, nil)
       next unless parch

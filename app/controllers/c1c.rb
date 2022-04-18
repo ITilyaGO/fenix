@@ -52,7 +52,7 @@ Fenix::App.controllers :c1c do
   end
 
   post :products, :provides => :json do
-    links = CabiePio.folder(:product, :k1c).flat.trans(:to_i)
+    links = CabiePio.folder(:product, :k1c).flat
     parents = Product.pluck(:parent_id).compact.uniq
     prs = Product.joins(:category).eager_load(:parent).select(:id, :name, :price)
       .reject{|a| parents.include? a[:id]}

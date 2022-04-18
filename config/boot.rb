@@ -13,7 +13,7 @@ require "./db/map.rb"
 require "./config/scheduler.rb"
 require './config/cabies.rb'
 Padrino.dependency_paths << "#{Padrino.root}/supermodels/**/*.rb"
-Padrino.dependency_paths << "#{Padrino.root}/starlets/**/*.rb"
+# Padrino.dependency_paths << "#{Padrino.root}/starlets/**/*.rb"
 
 
 ##
@@ -53,6 +53,8 @@ Padrino.after_load do
   require 'csv'
   require 'barby/barcode/ean_13'
   require 'barby/outputter/svg_outputter'
+  Padrino.dependency_paths << "#{Padrino.root}/starlets/**/*.rb"
+
 end
 
 Padrino.load!

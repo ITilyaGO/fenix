@@ -116,7 +116,7 @@ Fenix::App.controllers :timeline do
     @glass_stickers = CabiePio.all_keys(@all_ids, folder: [:sticker, :order_glass]).flat.trans(:to_i, :to_f)
     @gweek = calendar_group(@ktm.trans(nil, :to_i))
     @sdate = start_from
-    kc_stickers = CabiePio.folder([:products, :sticker]).flat.trans(:to_i, :to_f)
+    kc_stickers = CabiePio.folder([:products, :sticker]).flat.trans(nil, :to_f)
 
     render 'timeline/stickers'
   end

@@ -22,7 +22,7 @@ Fenix::App.controllers :stickers do
     @transport = CabiePio.all_keys(@orders.map(&:client_id).uniq, folder: [:m, :clients, :transport]).flat
     @kc_timelines = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :timeline]).flat.trans(:to_i)
     @kc_blinks = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :timeline_blink]).flat.trans(:to_i)
-    @kc_stickers = CabiePio.all_keys(@orders.map(&:id), folder: [:sticker, :order_progress]).flat.trans(:to_i, :to_f)
+    @kc_stickers = CabiePio.all_keys(@orders.map(&:id), folder: [:sticker, :order_progress]).flat.trans(nil, :to_f)
     @kc_cash = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :cash]).flat.trans(:to_i).reject{|k,v|v!='t'}
     @orders = @orders.sort_by{|o|@kc_timelines[o.id]}.reverse if params[:seq] == "timeline"
     @r = url(:stickers, :orders)
@@ -89,7 +89,7 @@ Fenix::App.controllers :stickers do
     sticker_sum = 0
     saved_stickers = CabiePio.all_keys(@order.order_lines.map(&:id), folder: [:m, :order_lines, :sticker_sum])
       .flat.trans(:to_i).transform_values{|v|v[:v]}
-    kc_products = CabiePio.folder(:products, :sticker).flat.trans(:to_i, :to_f)
+    kc_products = CabiePio.folder(:products, :sticker).flat.trans(nil, :to_f)
     amt = 0
     @order.order_lines.each do |ol|
       sq = kc_products.fetch(ol.product_id, 0)
@@ -145,7 +145,7 @@ Fenix::App.controllers :stickers do
     @glass_stickers = CabiePio.all_keys(@all_ids, folder: [:sticker, :order_glass]).flat.trans(:to_i, :to_f)
     @gweek = calendar_group(@ktm.trans(nil, :to_i))
     @sdate = start_from
-    kc_stickers = CabiePio.folder([:products, :sticker]).flat.trans(:to_i, :to_f)
+    kc_stickers = CabiePio.folder([:products, :sticker]).flat.trans(nil, :to_f)
     @week_sum = { start_from.beginning_of_month.beginning_of_week => 0 }
     @day_sum = {}
     @glday_sum = {}
