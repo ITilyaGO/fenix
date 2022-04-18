@@ -793,7 +793,7 @@ Fenix::App.controllers :orders do
       # l = line.inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
       # break if l[:id].blank?
       next if l['id'].nil?
-      ol = @order.order_lines.find(l['id'])
+      ol = @order.order_lines_ar.find(l['id'])
       if l['done_amount']
         if l['done_amount'].size < 1
           l.delete('done_amount')
@@ -1010,7 +1010,7 @@ Fenix::App.controllers :orders do
 
   get :pdftorg12, :with => :id do
     @title = pat(:edit_title, :model => "order #{params[:id]}")
-    @order = Order.includes(:order_lines).includes(order_lines: :product).find(params[:id])
+    @order = Order.find(params[:id])
     output = render 'invoices/torg12', :layout => false
 
     Princely.executable = settings.princebin
@@ -1039,7 +1039,7 @@ Fenix::App.controllers :orders do
 
   get :pdfnakl, :with => :id, :provides => :pdf do
     @title = pat(:edit_title, :model => "order #{params[:id]}")
-    @order = Order.includes(:order_lines).includes(order_lines: :product).find(params[:id])
+    @order = Order.find(params[:id])
     @account = params[:account]
     iso = CabiePio.get([:orders, :towns], @order.id).data
     @kc_town = KatoAPI.anything(iso)&.load.model.name || @order.place_name
