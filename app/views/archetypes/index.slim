@@ -33,7 +33,7 @@ ul.nav.nav-tabs
   - @cats.each do |category|
     /h4 #{category.name}
     - category.subs_ordered.each do |sub|
-      - next unless can_view_section?(:sections, :stock, category.section_id)
+      - next unless can_view_section?(:sections, :stock, category.section.ix)
       - next if @grouped[sub.id].nil?
       .row
         collapser titler="#{category.name}. #{sub.name}"

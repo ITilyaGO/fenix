@@ -39,8 +39,8 @@ Fenix::App.controllers :archetypes do
   get :e, :with => :id do
     @title = t 'tit.archetypes.list'
     @arch = KSM::Archetype.find(params[:id])
-    @cats = Category.where(category: nil).order(:index => :asc)
-    @categories = Category.all.includes(:category)
+    @cats = KSM::Category.toplevel
+    @categories = KSM::Category.all
     @squadconf = @arch.serializable_hash
 
     render 'archetypes/listform'
@@ -53,7 +53,7 @@ Fenix::App.controllers :archetypes do
     @title = "New archetype"
     @archetype = KSM::Archetype.nest
     @archetype.save
-    @cats = Category.where(:category_id => nil)
+    @cats = KSM::Category.toplevel
     render 'archetypes/edit'
   end
   
@@ -62,7 +62,7 @@ Fenix::App.controllers :archetypes do
     @archetype = KSM::Archetype.find(params[:id])
     if @archetype.exist?
       @archetype.name = params[:ksm_archetype][:name]
-      @archetype.category_id = params[:ksm_archetype][:category_id].to_i
+      @archetype.category_id = params[:ksm_archetype][:category_id]
       @archetype.g = params[:ksm_archetype][:group] == '1'
       @archetype.save
     end
@@ -81,7 +81,7 @@ Fenix::App.controllers :archetypes do
   get :edit, :with => :id do
     @title = pat(:edit_title, :model => "archetype #{params[:id]}")
     @archetype = KSM::Archetype.find(params[:id])
-    @cats = Category.where(:category_id => nil)
+    @cats = KSM::Category.toplevel
     if @archetype.exist?
       render 'archetypes/edit'
     else
@@ -97,7 +97,7 @@ Fenix::App.controllers :archetypes do
     @multi = CabiePio.get([:product, :archetype_multi], @product.id).data
     @archs = KSM::Archetype.all
     @grouped = @archs.group_by{|a|a.category_id.to_i}
-    @cats = Category.where(:category_id => nil)
+    @cats = KSM::Category.toplevel
     if @product
       render 'archetypes/assign'
     else
@@ -246,7 +246,7 @@ Fenix::App.controllers :archetypes do
   
   post :list, :provides => :json do
     @archs = KSM::Archetype.all
-    cat = params[:cat].to_i
+    cat = params[:cat]
     products = @archs.select{|a|a.category_id == cat}.map(&:to_r)
     products.to_json
   end
