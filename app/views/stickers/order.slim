@@ -173,7 +173,7 @@ br
   - displayed_n = 0
   .block
     ul class="nav nav-tabs non-print" id="order_tab"
-      - @sections.each do |tab|
+      - @sections.sort_by(&:ix).each do |tab|
         - cat_enabled = @order.by_sec?(tab.id)
         - displayed_n += 1 if cat_enabled
         - my = @my_section&.id == tab.id
@@ -185,7 +185,7 @@ br
             i.fa.fa-exclamation-triangle 
   
     div class="tab-content" id="for_order_tab"
-      - @sections.each_with_index do |s, i|
+      - @sections.sort_by(&:ix).each_with_index do |s, i|
         - tab_visible = @order.by_sec?(s.id)
         - my = @my_section&.id == s.id
         - unless tab_visible
