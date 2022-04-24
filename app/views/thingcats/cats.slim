@@ -44,6 +44,14 @@
             display-id=@category&.category_id data-url='aux/topcategories'
             data-sid=@section.id data-name='ksm_category[category_id]' listen='sd'
           ]
+      fieldset.control-group
+        = f.label :index, :class => 'control-label'
+        .controls
+          = f.text_field :windex, :class => 'form-control input-large input-with-feedback'
+      fieldset.control-group
+        = f.label 'кратность', :class => 'control-label'
+        .controls
+          = f.text_field :lotof, :class => 'form-control input-large'
       .form-actions.vmar-2 = f.submit :save, :class => 'btn btn-prime btn-sm btn-wide'
 
 .clearfix

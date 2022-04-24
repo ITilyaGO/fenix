@@ -2,7 +2,7 @@ class Product < Doppel
   PFX = :thing
 
   PROPS = [:name, :sn, :category_id, :place_id, :sketch_id, :company_id, :barcode, :price, :sku, :art, :g, :bbid,
-    :discount, :lotof, :desc, :dim_weight, :dim_height, :dim_length, :dim_width, :look, :corel
+    :discount, :lotof, :desc, :dim_weight, :dim_height, :dim_length, :dim_width, :look, :corel, :windex, :tagname
   ]
   FPROPS = %i[art discount lotof desc dim_weight dim_height dim_length dim_width look corel]
   SVSPROPS = %i[created_at updated_at ignored dates users history settings]
@@ -14,6 +14,10 @@ class Product < Doppel
     @g
   end
 
+  def global?
+    place_id == 'RU'
+  end
+
   def displayname
     nip = settings&.fetch(:ni, 0)
     city = OrderAssist.known_cities[@place_id]&.model&.name
@@ -21,6 +25,10 @@ class Product < Doppel
     a = [name, look, city] if nip == 1
     a.unshift '☠️' if @ignored == 1
     a.compact.join(' ')
+  end
+
+  def simplename
+    [name, look].compact.join(' ')
   end
 
   def fullcorel
@@ -86,11 +94,21 @@ class Product < Doppel
     return false unless oc
     op = Online::Product.find_by(pio_id: @id) || Online::Product.new({ pio_id: @id })
     op.price = @price
-    op.name = displayname
+    op.name = simplename
     op.active = @ignored != 1
     op.category_id = oc.id
     op.height = @dim_height
+    op.tagname = @tagname
+    op.index = @windex
     op.save
+
+    stompsync
+  end
+
+  def stompsync
+    client = Stomp::Client.open 'guest', 'guest', "localhost", 61613
+    client.publish("/topic/web:product:lotof", Marshal.dump({ id: @id, min: @lotof }), { "priority" => 2 })
+    client.close
   end
 
   class << self

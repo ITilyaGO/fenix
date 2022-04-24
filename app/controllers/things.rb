@@ -81,7 +81,7 @@ Fenix::App.controllers :things do
     xproduct = SL::Product.new @product.id
     xproduct.raw = params[:raw]
     xproduct.save_links
-    @product.backsync
+    @product.backsync if @product.global?
     if @product
       if true
         flash[:success] = pat(:update_success, :model => 'Product', :id =>  "#{@product.id}")

@@ -30,8 +30,8 @@ Fenix::App.controllers :archetypes do
   get :index do
     @title = t 'tit.archetypes.list'
     @arch = KSM::Archetype.new(id: -1)
-    @cats = Category.where(category: nil).order(:index => :asc)
-    @categories = Category.all.includes(:category)
+    @cats = KSM::Category.toplevel
+    @categories = KSM::Category.all
     
     render 'archetypes/listform'
   end

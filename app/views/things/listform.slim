@@ -43,8 +43,13 @@
             .controls.wp100 = f.text_field :n1c, value: k1c&.at_path('НаименованиеПолное'), :class => 'form-control input-large'
           - else
             .controls: .form-control: .fa.fa-exclamation-triangle.text-warning
+        
         fieldset.control-group
-          .btn.btn-link riot-tag='shower' data-classy='.plinks' Связи...
+          label.control-label
+          .controls
+            .btn.btn-link riot-tag='shower' data-classy='.plinks' Связи...
+            a.btn.btn-link href=url(:things, :transfer) Excel...
+
         .plinks.hide
           fieldset.control-group
             label.control-label bku
@@ -54,10 +59,6 @@
           fieldset.control-group
             label.control-label 1c
             .controls.wp100 = text_field_tag :'raw[k1c]', value: @xproduct.k1c, :class => 'form-control input-large'
-            
-
-        fieldset.control-group
-          a.btn.btn-link href=url(:things, :transfer) Excel...
         
         .f-actions.tmar-3.text-center
           = f.check_box :ignored, value: 1, :class => 'swap-input', checked: @product.ignored == 1

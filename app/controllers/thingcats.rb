@@ -71,7 +71,7 @@ Fenix::App.controllers :thingcats do
     a = @category
     olcat = a.category_id
 
-    @category.formiz(form)
+    @category.clear_formize(form)
     @category.category_id = nil if form[:category_id].empty?
     @category.section_id = a.category.section_id if a.category_id
     # seed = wonderbox(:categories, :seed) || 0
@@ -80,6 +80,7 @@ Fenix::App.controllers :thingcats do
     @category.sn ||= cate_seed_from(a.category_id)
     @category.sn = cate_seed_from(a.category_id) unless a.category_id == olcat
     @category.save
+    @category.backsync
 
     redirect url(:thingcats, :categories, s: @category.section_id)
   end

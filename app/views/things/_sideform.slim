@@ -78,10 +78,6 @@ fieldset class='control-group#{error ? ' has-error' : ''}'
   .controls.wp100
     = f.text_field :corel, :class => 'form-control input-large'
 fieldset class='control-group#{error ? ' has-error' : ''}'
-  = f.label 'кратность', :class => 'control-label'
-  .controls
-    = f.text_field :lotof, :class => 'form-control input-large'
-fieldset class='control-group#{error ? ' has-error' : ''}'
   = f.label 'скидка', :class => 'control-label'
   .controls
     = f.text_field :discount, :class => 'form-control input-large'
@@ -92,6 +88,7 @@ fieldset.control-group
   label.control-label
   .controls
     .btn.btn-link riot-tag='shower' data-classy='.pdims' Характеристики...
+    .btn.btn-link riot-tag='shower' data-classy='.wsdims' Сайт...
 
 .pdims.hide
   - error = @product.errors.include?(:weight)
@@ -114,9 +111,23 @@ fieldset.control-group
     div class='controls'
       = f.text_field :dim_length, :class => 'form-control input-large input-with-feedback'
 
+.wsdims.hide
+  - error = @product.errors.include?(:weight)
+  fieldset class='control-group#{error ? ' has-error' : ''}'
+    = f.label :index, :class => 'control-label'
+    .controls
+      = f.text_field :windex, :class => 'form-control input-large input-with-feedback'
+  fieldset class='control-group#{error ? ' has-error' : ''}'
+    = f.label 'кратность', :class => 'control-label'
+    .controls
+      = f.text_field :lotof, :class => 'form-control input-large'
+  fieldset class='control-group#{error ? ' has-error' : ''}'
+    = f.label :tag, :class => 'control-label'
+    .controls
+      = f.text_field :tagname, :class => 'form-control input-large input-with-feedback'
 fieldset class='control-group#{error ? ' has-error' : ''}'
   = f.label "описание", :class => 'control-label'
-  div.controls.wp100
+  .controls.wp100
     = f.text_area :desc, :class => 'form-control input-large input-with-feedback'
 
 

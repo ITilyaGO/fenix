@@ -1,7 +1,8 @@
 class KSM::Category < Doppel
   PFX = :category
 
-  PROPS = [:name, :sn, :category_id, :section_id, :created_at]
+  PROPS = [:name, :sn, :category_id, :section_id, :lotof, :windex, :created_at]
+  FPROPS = %i[lotof]
   attr_accessor *PROPS
   
   def category
@@ -51,6 +52,33 @@ class KSM::Category < Doppel
     }
   end
 
+  def clear_formize form
+    FPROPS.each do |prop|
+      form[prop] = nil if pe = form[prop]&.empty?
+      instance_variable_set("@#{prop}", nil) if pe
+    end
+
+    formiz form
+  end
+
+  def backsync
+    oc = Online::Category.find_by(pio_id: @category_id)
+    return if !oc && !top?
+    op = Online::Category.find_by(pio_id: @id) || Online::Category.new({ pio_id: @id })
+    op.name = @name
+    op.category_id = oc&.id
+    op.index = @windex
+    op.save
+
+    stompsync
+  end
+
+  def stompsync
+    client = Stomp::Client.open 'guest', 'guest', "localhost", 61613
+    client.publish("/topic/web:category:lotof", Marshal.dump({ id: @id, min: @lotof }), { "priority" => 2 })
+    client.close
+  end
+
   # def updated_at
   #   @updated_at || Date.new(1970,1,1)
   # end
@@ -71,6 +99,14 @@ class KSM::Category < Doppel
       e = super
       e.fill(created_at: Time.now, name: 'Unknown', merge: true)
       e
+    end
+
+    def schema
+      {
+        sn: [:to_i],
+        windex: [:to_i],
+        lotof: [:to_i]
+      }
     end
 
     def toplevel

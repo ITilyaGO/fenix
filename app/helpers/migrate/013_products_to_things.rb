@@ -13,9 +13,12 @@ module Fenix::App::MigrateHelpers
       thing.name = p.displayname
       # thing.category_id = p.category_id
       thing.category_id = cats[p.category_id.to_i]
+      thing.tagname = p.tagname
+      thing.ignored = 1 if !p.active
       thing.place_id = 'RU'
       thing.art = p.des
       thing.price = p.price
+      thing.windex = p.index
       thing.sn ||= thing_glob_seed
       thing.saved_by @current_account
 
@@ -167,6 +170,7 @@ module Fenix::App::MigrateHelpers
       thing.formiz c.attributes
       thing.sn ||= cate_seed_from
       thing.section_id = slookup[c.section_id]
+      thing.windex = c.index
       thing.save
     end
     cats.reject{ |c| c.category_id.nil? }.each do |c|
@@ -176,6 +180,7 @@ module Fenix::App::MigrateHelpers
       thing.category_id = lookup[c.category_id]
       thing.sn ||= cate_seed_from(thing.category_id)
       thing.section_id = KSM::Category.find(thing.category_id).section_id
+      thing.windex = c.index
       thing.save
     end
     lookup
