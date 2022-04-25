@@ -603,7 +603,7 @@ div class="tabs-content"
         $(".order-table").on("click", ".btn-copy", function() {
           var line = $(this).parents("tr");
           var line_id = $(":input[name*='id']", line).val();
-          _p = $.grep(_products, function(e) { return e.id == +line_id; })[0];
+          _p = $.grep(_products, function(e) { return e.id == line_id; })[0];
           copy_product(line)
         });
 

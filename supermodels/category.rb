@@ -14,15 +14,19 @@ class KSM::Category < Doppel
   end
 
   def subs_ordered
-    KSM::Category.all.select{ |a| a.category_id == id }
+    KSM::Category.all.select{ |a| a.category_id == id }.sort_by(&:wfindex)
   end
 
   def all_products
-    Product.all.select{ |a| a.category_id == id }
+    Product.all.select{ |a| a.category_id == id }.sort_by(&:wfindex)
   end
 
   def top?
     @category_id.nil?
+  end
+
+  def wfindex
+    @windex || 0
   end
 
   def display

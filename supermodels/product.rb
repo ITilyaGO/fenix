@@ -18,6 +18,10 @@ class Product < Doppel
     place_id == 'RU'
   end
 
+  def wfindex
+    @windex || 0
+  end
+
   def displayname
     nip = settings&.fetch(:ni, 0)
     city = OrderAssist.known_cities[@place_id]&.model&.name

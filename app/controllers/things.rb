@@ -30,7 +30,7 @@ Fenix::App.controllers :things do
     # Product.all.includes(:category).order(:updated_at => :desc).offset((@page-1)*pagesize).take(pagesize)
     @pages = 1
 
-    @cats = KSM::Category.toplevel
+    @cats = KSM::Category.toplevel.sort_by(&:wfindex)
 
     @r = url(:products, :index)
     render 'things/table'
@@ -51,7 +51,7 @@ Fenix::App.controllers :things do
     @product = Product.find(params[:id])
     @kc_place = KatoAPI.anything(@product.place_id)
     @xproduct = SL::Product.new @product.id
-    @cats = KSM::Category.toplevel
+    @cats = KSM::Category.toplevel.sort_by(&:wfindex)
     # @categories = Category.all.includes(:category)
 
     ids = wonderbox(:things_by_date).reverse
@@ -82,6 +82,8 @@ Fenix::App.controllers :things do
     xproduct.raw = params[:raw]
     xproduct.save_links
     @product.backsync if @product.global?
+    known_cities_add @product.place_id
+    OrderAssist.reset_products_list
     if @product
       if true
         flash[:success] = pat(:update_success, :model => 'Product', :id =>  "#{@product.id}")

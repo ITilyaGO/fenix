@@ -449,7 +449,7 @@ Fenix::App.controllers :orders do
   get :fullempty do
     @title = "New order"
     # @cats = Category.where(category: nil).order(:index => :asc)
-    @cats = KSM::Category.all.select{ |c| c.category_id.nil? }
+    @cats = KSM::Category.all.select{ |c| c.category_id.nil? }.sort_by(&:wfindex)
     # Padrino.cache['cats'] ||= cats
     # @cats = Padrino.cache['cats']
     @parents = Product.pluck(:parent_id).compact.uniq
@@ -544,7 +544,7 @@ Fenix::App.controllers :orders do
       p = Product.find(line['id']) rescue nil
       next if !p
       next unless p.exist?
-      if col = order.order_lines.detect{|l|l.id == line[:ol].to_i}
+      if col = order.order_lines_ar.detect{|l|l.id == line[:ol].to_i}
         sections_draft << product_to_section(p.id) unless col.amount == line[:amount].to_i
         col.amount = line[:amount]
         col.description = line[:comment]
@@ -573,15 +573,15 @@ Fenix::App.controllers :orders do
         include_section = order.by_cat?(c.id)
         break if include_section
       end
-      found = order.order_parts.detect{|op|op.section_id == s.id}
+      found = order.order_parts.detect{|op|op.section_id == s.ix}
       if include_section
-        state = old_parts[s.id] || :anew
+        state = old_parts[s.ix] || :anew
         state = :anew if sections_draft.include? s.id
         old_state = state == :prepare ? :current : state
-        op = OrderPart.new(:section_id => s.id, :state => old_state)
+        op = OrderPart.new(:section_id => s.ix, :state => old_state)
         order.order_parts << op unless found
         found.update(state: old_state) if found
-        o_status.sets(s.id, state)
+        o_status.sets(s.ix, state)
       elsif found
         found.destroy
       end

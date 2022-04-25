@@ -54,9 +54,15 @@ fieldset class='control-group#{error ? ' has-error' : ''}'
 - error = @product.errors.include?(:price)
 fieldset class='control-group#{error ? ' has-error' : ''}'
   = f.label :price, :class => 'control-label'
-  div class='controls'
+  .controls
     = f.text_field :price, :class => 'form-control input-large input-with-feedback'
-    / span class='help-inline' = error ? f.error_message_on(:price, :class => 'text-error') : pat(:example)
+fieldset.control-group
+  = f.label :sticker, :class => 'control-label'
+  .controls: .form-control.ro.hand riot-tag='shower' data-classy='.stdims'  == rurk @xproduct.sticker
+  .pll.spacer
+  .controls.stdims.hide
+    = text_field_tag :'raw[sticker]', value: @xproduct.sticker, :class => 'form-control input-large input-with-feedback'
+
 - error = @product.errors.include?(:des)
 fieldset class='control-group#{error ? ' has-error' : ''}'
   = f.label "артикул", :class => 'control-label'

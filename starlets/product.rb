@@ -2,7 +2,7 @@ module SL
 end
 
 class SL::Product
-  attr_accessor :id, :arn, :k1c, :multi, :raw
+  attr_accessor :id, :arn, :k1c, :multi, :raw, :sticker
 
   def initialize product
     @id = product
@@ -10,6 +10,7 @@ class SL::Product
     @k1c = CabiePio.get([:product, :k1c], product).data
     m = CabiePio.get([:product, :archetype_multi], product).data
     @multi = m.to_i if m
+    @sticker = CabiePio.get([:products, :sticker], product).data.to_f
   end
 
   def save_links
@@ -26,6 +27,13 @@ class SL::Product
       CabiePio.set([:product, :archetype_multi], @id, @raw[:multi]) unless rmu.eql?(@multi)
     else
       CabiePio.unset [:product, :archetype_multi], @id
+    end
+
+    sti = @raw[:sticker].to_f
+    if sti > 0
+      CabiePio.set [:products, :sticker], @id, @raw[:sticker] unless sti.eql?(@sticker)
+    else
+      CabiePio.unset [:products, :sticker], @id
     end
   end
 
