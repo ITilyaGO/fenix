@@ -58,7 +58,8 @@ fieldset class='control-group#{error ? ' has-error' : ''}'
     = f.text_field :price, :class => 'form-control input-large input-with-feedback'
 fieldset.control-group
   = f.label :sticker, :class => 'control-label'
-  .controls: .form-control.ro.hand riot-tag='shower' data-classy='.stdims'  == rurk @xproduct.sticker
+  .controls: .form-control.ro.hand riot-tag='shower' data-classy='.stdims'
+    == @xproduct.sticker > 0 ? rurk(@xproduct.sticker) : 'нет'
   .pll.spacer
   .controls.stdims.hide
     = text_field_tag :'raw[sticker]', value: @xproduct.sticker, :class => 'form-control input-large input-with-feedback'

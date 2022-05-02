@@ -72,7 +72,6 @@ module Fenix::App::OrdersHelper
 
   def order_sticker(id)
     cabie = CabiePio.get [:sticker, :order], id
-    cabie.data
     cabieglass = CabiePio.get [:sticker, :order_glass], id
     [cabie.data.to_f - cabieglass.data.to_f, cabieglass.data.to_f]
   end
