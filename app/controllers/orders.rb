@@ -456,6 +456,8 @@ Fenix::App.controllers :orders do
     @arp = CabiePio.folder(:product, :archetype).flat
     @kc_stocks = CabiePio.folder(:stock, :archetype).flat.trans(nil, :to_i)
     @kc_needs = CabiePio.folder(:need, :archetype).flat.trans(nil, :to_i)
+    @place = params[:place]
+    @order_place = KatoAPI.anything(@place) if @place
     render 'orders/fullempty'
   end
 
