@@ -1,0 +1,16 @@
+sumline
+  .label.label-default
+    | { s }
+  br
+  .label.label-lightdanger
+    | { d }
+
+  javascript:
+    self.on('mount', function() {
+      let listel = self.root.closest('table')
+      self.s = Array.from(listel.querySelectorAll('td[data-day="' + opts.d +  '"] .vp'))
+        .map(d => +d.innerText).reduce((a, b) => a + b, 0)
+      self.d = Array.from(listel.querySelectorAll('td[data-day="' + opts.d +  '"] elhide'))
+        .map(d => +d.innerText).reduce((a, b) => a + b, 0)
+      self.update()
+    })

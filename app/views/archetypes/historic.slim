@@ -1,0 +1,90 @@
+.col-md-12.pull-left
+  strong = @arch.name
+.col-md-12.text-center
+  = link_to url(:archetypes, :historic, @arch.id, day: timeline_id(@prev)) do
+    .btn.btn-sm.btn-clear: i.fa.fa-arrow-left
+  .btn.btn-sm.btn-clear
+    | #{to_dm @day} – #{to_dm @first_day}
+  = link_to url(:archetypes, :historic, @arch.id, day: timeline_id(@next)) do
+    .btn.btn-sm.btn-clear: i.fa.fa-arrow-right
+  .btn
+  = link_to url(:archetypes, :historic, @arch.id) do
+    i.fa.fa-history
+.clearfix
+
+#work-chart
+#grow-chart
+
+- content_for :js_assets do
+  = javascript_include_tag :riot, :'frappe-charts.min.umd'
+  javascript:
+    (function() {
+      let confobj = #{{@chart.to_json}}
+      
+      const arrAvg = arr => arr.reduce((a,b) => a + b, 0) / arr.length
+      let tchart = new frappe.Chart( "#work-chart", { // or DOM element
+      data: {
+        labels: confobj.days,
+
+        datasets: [
+          {
+            name: "", chartType: 'bar',
+            values: confobj.adds,
+          },
+          {
+            name: "", chartType: 'bar',
+            values: confobj.rems,
+          }
+        ]
+      },
+      barOptions: {
+        stacked: 1   // default 0, i.e. adjacent
+      },
+
+      title: confobj.title,
+      type: 'axis-mixed', // or 'bar', 'line', 'pie', 'percentage'
+      height: 300,
+      colors: ['#a6db90', '#f99ec0'],
+
+      // valuesOverPoints: 1,
+      tooltipOptions: {
+        // formatTooltipX: d => d,
+        formatTooltipY: d => d != 0 ? d : ' ',
+      }
+      })
+
+      let grchart = new frappe.Chart( "#grow-chart", { // or DOM element
+      data: {
+        labels: confobj.days,
+
+        datasets: [
+          {
+            name: "", chartType: null,
+            values: confobj.difdays,
+          },
+          {
+            name: "", chartType: 'line',
+            values: confobj.neus,
+          }
+        ],
+        yMarkers: [
+          { label: "", value: 0, options: { labelPos: 'right' }}
+        ],
+      },
+      axisOptions: {
+        yAxisMode: 'tick' // default: 'span'
+      },
+
+      title: confobj.title,
+      type: 'axis-mixed', // or 'bar', 'line', 'pie', 'percentage'
+      height: 300,
+      colors: ['rgba(203, 203, 203, 0.6)', 'light-blue', 'green'],
+
+      // valuesOverPoints: 1,
+      tooltipOptions: {
+        formatTooltipX: null,
+        formatTooltipY: d => d != 0 ? d : ' ',
+      }
+
+      })
+    })()

@@ -148,6 +148,45 @@ Fenix::App.controllers :archetypes do
     render 'archetypes/detail'
   end
 
+  get :historic, :with => :id do
+    @arch = KSM::Archetype.find(params[:id])
+    @holders = {}
+    @destocks = {}
+    @dayeq = {}
+
+    @day = Date.parse(params[:day]) rescue Date.today - 1.month
+    first_day = @day + 1.month - 1
+    today = @day
+    @first_day = first_day
+    tdays = today.step(first_day, 1)
+    days = []
+    dids = tdays.each_with_index.map{|_, i| archetype_daystock(@arch.id, @day+i) }
+    stockdays = CabiePio.all_keys(dids, folder: [:stock, :common, :a]).flat.trans(nil, :to_i)
+    destockdays = CabiePio.all_keys(dids, folder: [:stock, :common, :d]).flat.trans(nil, :to_i)
+
+    tdays.each_with_index do |_, i|
+      cday = @day+i
+      @holders[cday] = stockdays.fetch(archetype_daystock(@arch.id, cday), nil)
+      @destocks[cday] = destockdays.fetch(archetype_daystock(@arch.id, cday), nil)
+      @dayeq[cday] = (@holders[cday]||0) - (@destocks[cday]||0)
+      days << to_dm(cday)
+    end
+    @holders = @holders.compact
+    @destocks = @destocks.compact
+
+    @prev = @day.day == 1 ? @day - 1.month : Date.new(@day.year, @day.month, 1) + 1.month
+    @next = @day + 1.month
+
+    lines = tdays.map{|d|@dayeq[d]||0}
+    polines = tdays.map{|d|-(@destocks[d]||0)}
+    nelines = lines.each_with_index.map{|_,i|lines[0..i].compact.sum}
+    alines = tdays.map{|d|@holders[d]||0}
+
+    @chart = { days: days, adds: alines, rems: polines, neus: nelines, difdays: lines }
+
+    render 'archetypes/historic'
+  end
+
   get :stock do
     # OrderJobs.stock_job(force: true)
     @title = "Stock"
