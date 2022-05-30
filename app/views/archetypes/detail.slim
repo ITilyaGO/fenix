@@ -24,8 +24,7 @@ table.table.table-hover.table-condensed
     th.header Отправка
     th.header Заказчик
 
-  - @olneed.each do |ol, value|
-    - oid = ol.split('_').last
+  - @olneed.group_by{ |ol, vl| ol.split('_').last }.each do |oid, value|
     - order = @orders.detect{|a|a.id == oid.to_i}
     - ost = @kc_status.detect{|a|a.id == oid} || KSM::OrderStatus.new(id: oid)
     tr.order-line
@@ -34,7 +33,7 @@ table.table.table-hover.table-condensed
       td.list-column
         span.label class="label-#{ost.state}"
           = t :"status.#{ost.state}"
-      td = value
+      td = value.map(&:last).sum
       td.list-column
         - code = @kc_orders[oid]
         - town_name = @kc_towns[code]&.model
