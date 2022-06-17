@@ -85,7 +85,7 @@ module Fenix::App::OrdersHelper
       price = kc_sticker.fetch(line.product_id, 0)
 
       sticker += price*line.amount
-      glass += price*line.amount if products_hash.fetch(line.product_id, nil) == 11
+      glass += price*line.amount if product_is_glass?(line.product_id)
     end
     [sticker.round(1), glass.round(1)]
   end

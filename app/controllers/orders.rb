@@ -538,9 +538,13 @@ Fenix::App.controllers :orders do
     # order = Order.new({:online_id => online.id, :status => :anew, :client_id => client, :online_at => online.created_at, :description => online.description, :total => online.total})
     sections_draft = []
     exst = params[:line].map{|l|l[:ol].to_i}
+    order_rm = Order.new
     order.order_lines_ar.each do |ol|
-      ol.destroy unless exst.include? ol.id
-      sections_draft << product_to_section(ol.product_id) unless exst.include? ol.id
+      next if exst.include? ol.id
+      ol.amount = 0
+      order_rm.order_lines << ol
+      ol.destroy
+      sections_draft << product_to_section(ol.product_id)
     end
     params[:line].each do |line|
       p = Product.find(line['id']) rescue nil

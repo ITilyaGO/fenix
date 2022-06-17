@@ -116,7 +116,7 @@ Fenix::App.controllers :stickers do
       save_sticker_progress(@order.id, operc)
     end
     now_stickers = CabiePio.all_keys(@order.order_lines.map(&:id), folder: [:m, :order_lines, :sticker_sum])
-      .flat.trans(:to_i).transform_values{|v|v[:v]}
+      .flat.transform_values{|v|v[:v]}
     dilines = now_stickers.map{|k,v|[k,v-saved_stickers.fetch(k,0)]}.to_h
     arbal_unstock_order(@order, dilines, now_stickers, day)
 
@@ -161,7 +161,7 @@ Fenix::App.controllers :stickers do
       gd = day.beginning_of_week
       @day_sum[day] ||= 0
       @day_sum[day] += s
-      if products_hash.fetch(ol&.product_id, nil) == 11
+      if product_is_glass?(ol&.product_id)
         @glday_sum[day] ||= 0
         @glday_sum[day] += s
       end
@@ -176,7 +176,7 @@ Fenix::App.controllers :stickers do
       gd = day.beginning_of_week
       @day_sum[day] ||= 0
       @day_sum[day] += s
-      if products_hash.fetch(ol&.product_id, nil) == 11
+      if product_is_glass?(ol&.product_id)
         @glday_sum[day] ||= 0
         @glday_sum[day] += s
       end

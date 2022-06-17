@@ -51,6 +51,23 @@ module Fenix::App::KyotoHelpers
     @wonderbox ||= CabiePio.folder(:m, :wonderbox).flat
   end
 
+  def storebox(cat, prop)
+    all_storebox.dig(cat, prop)
+  end
+
+  def storebox_set(cat, key, value)
+    vls = all_storebox || {}
+    vls[cat] ||= {}
+    vls[cat][key] = value
+    CabiePio.set [:m, :storebox], :all, vls
+    Padrino.cache.delete(:storebox)
+    all_storebox
+  end
+
+  def all_storebox
+    Padrino.cache[:storebox] ||= CabiePio.get([:m, :storebox], :all).data
+  end
+
   def habit(ar, list)
     list = [list] unless list.respond_to? :each
     list.each do |prop|

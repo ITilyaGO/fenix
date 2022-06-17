@@ -232,6 +232,10 @@ module Fenix::App::ProductsHelper
     # bal_need_order_start(order)
   end
 
+  def product_is_glass? id
+    products_hash.fetch(id, nil) == storebox(:product, :glass_cat)
+  end
+
   def products_hash
     @products_hash ||= Product.all.map{ |p| [p.id, p.category_id] }.to_h
   end
