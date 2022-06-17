@@ -164,14 +164,14 @@ Fenix::App.controllers :products do
     @categories = Category.all.includes(:category)
     @parents = Product.pluck(:parent_id).compact.uniq
     @kc_products = CabiePio.folder(:products, :sticker).flat
-    ps = @kc_products.keys.map(&:to_i)
+    ps = @kc_products.keys
     @catind = @categories.map{|c|[c.id, (c.all_products.map(&:id) & ps).size]}.to_h
     # @kc_categories = CabiePio.folder(:complexity, :category).flat
     render 'products/sticker'
   end
 
   put :sticker do
-    kc_products = CabiePio.folder(:products, :sticker).flat.trans(:to_i, :to_f)
+    kc_products = CabiePio.folder(:products, :sticker).flat.trans(nil, :to_f)
     prs = []
     params[:line].each do |k, line|
       prid = line['id'].to_i
@@ -236,8 +236,8 @@ Fenix::App.controllers :products do
     @cats = Category.where(category: nil).order(:index => :asc)
     @categories = Category.all.includes(:category)
     @parents = Product.pluck(:parent_id).compact.uniq
-    @kc_products = CabiePio.folder(:stock, :product).flat.trans(:to_i, :to_i)
-    @kc_needs = CabiePio.folder(:need, :product).flat.trans(:to_i, :to_i)
+    @kc_products = CabiePio.folder(:stock, :product).flat.trans(nil, :to_i)
+    @kc_needs = CabiePio.folder(:need, :product).flat.trans(nil, :to_i)
     catgroup = products_hash.keys.group_by{|k|products_hash[k]}
     @catstock = catgroup.map{|k,v|[k, v.map{|p|@kc_products.fetch(p, 0)}.sum{|x|x<0?x:0}]}.to_h
     @catneed = catgroup.map{|k,v|[k, v.map{|p|@kc_needs.fetch(p, 0)}.sum{|x|x>0?x:0}]}.to_h

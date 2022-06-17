@@ -1,0 +1,11 @@
+selectreload onchange='{sender}' value='{sval}'
+  yield
+  
+  javascript:
+  
+    sender() {
+      var searchParams = new URLSearchParams(window.location.search)
+      searchParams.set(opts.rname, self.root.value)
+
+      window.location = opts.loc + '?' + searchParams.toString()
+    }

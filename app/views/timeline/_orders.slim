@@ -95,9 +95,9 @@ table class="table table-hover table-condensed non-print"
             span = tj :delivery, ds
             .rpr == deli(rur by_deli[ds])
       .pull-left
-      - sections = Section.all
+      - sections = KSM::Section.all
       - sections.each do |s|
-        - next unless can_view_section?(:sections, :sum, s.id)
+        - next unless can_view_section?(:sections, :sum, s.ix)
         - sec_sum = sec_sums.fetch(s.id, 0)
         - sec_done = sec_donea.fetch(s.id, 0)
         - if sec_sum > 0

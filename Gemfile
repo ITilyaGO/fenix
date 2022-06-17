@@ -33,6 +33,7 @@ gem 'libxml-ruby'
 gem 'nokogiri'
 gem 'ox'
 gem 'barby'
+gem 'stomp'
 #gem 'simple_enum'
 #gem 'classy_enum'
 

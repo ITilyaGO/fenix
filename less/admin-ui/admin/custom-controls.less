@@ -115,6 +115,7 @@
     color: #34495e;
     background: rgba(222, 205, 177, 0.17);
     /* background: rgba(127, 255, 0, 0.05); */
+    background: rgba(208, 192, 166, 0.3);
     line-height: 1.7;
     
     // &.main {
@@ -125,6 +126,12 @@
 
     &.ro {
       background: rgba(11, 136, 17, 0.1);
+    }
+  }
+  .dropdown-toggle {
+    .fa {
+      font-size: .8em;
+      color: rgb(131, 133, 118);
     }
   }
   .form-control {
@@ -139,5 +146,25 @@
     color: rgba(11, 107, 112, 0.53);
     line-height: 2.7;
     color: rgba(43, 67, 88, 0.67);
+  }
+}
+
+label.swap-label {
+  min-width: unset;
+  text-align: unset;
+  margin-right: unset;
+  margin-bottom: unset;
+}
+
+.swap-input {
+  position: absolute;
+  left: 0;
+  z-index: -1;
+  width: 1.5rem;
+  height: 2.5rem;
+  opacity: 0;
+
+  &:checked ~ .swap-label .fa {
+    transform:rotate(180deg);
   }
 }

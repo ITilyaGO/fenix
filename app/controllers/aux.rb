@@ -29,10 +29,12 @@ Fenix::App.controllers :aux do
     bcats = KSM::Category.all.select{|a| a.section_id == comp}.map(&:id)
     usergroups = KSM::Category.all.select{|a| a.section_id == comp}.sort_by(&:display).map(&:to_jr)
     grouped = KSM::Category.all.group_by(&:category_id)
-    # usergroups.each do |a|
-    #   a[:childs] = grouped[a[:id]]&.map(&:to_jr)
-    #   # a[:name] = usergroups2.detect{|c|c.id == a[:id]}.display
-    # end
+    usergroups.to_json
+  end
+
+  post :topcategories, :provides => :json do
+    comp = params[:section]
+    usergroups = KSM::Category.all.select{|a| a.category_id.nil? && a.section_id == comp}.sort_by(&:display).map(&:to_jr)
     usergroups.to_json
   end
 
@@ -77,4 +79,11 @@ Fenix::App.controllers :aux do
     st.to_json
   end
 
+  get :autoproduct, :provides => :json do
+    KSM::Dic.find(:autoproduct).contents.to_json
+  end
+
+  get :autolook, :provides => :json do
+    KSM::Dic.find(:autolook).contents.to_json
+  end
 end

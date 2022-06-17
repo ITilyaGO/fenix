@@ -68,14 +68,19 @@ Fenix::App.controllers :thingcats do
     form = params[:ksm_category]
     @category = KSM::Category.nest if params[:id].nil? || params[:id] == '0000' || params[:clone]
     @category ||= KSM::Category.find(params[:id])
+    a = @category
+    olcat = a.category_id
 
-    @category.formiz(form)
+    @category.clear_formize(form)
     @category.category_id = nil if form[:category_id].empty?
+    @category.section_id = a.category.section_id if a.category_id
     # seed = wonderbox(:categories, :seed) || 0
     # seed += 1
     # wonderbox_set(:categories, { seed: seed }) unless @category.sn
-    @category.sn ||= cate_seed_from(@category.category_id)
+    @category.sn ||= cate_seed_from(a.category_id)
+    @category.sn = cate_seed_from(a.category_id) unless a.category_id == olcat
     @category.save
+    @category.backsync
 
     redirect url(:thingcats, :categories, s: @category.section_id)
   end

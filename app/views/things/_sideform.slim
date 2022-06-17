@@ -3,7 +3,21 @@ fieldset class='control-group#{error ? ' has-error' : ''}'
   = f.label :name, :class => 'control-label'
   .controls.wp100
     = f.text_field :name, :class => 'form-control input-large input-with-feedback', :required => true
-    / span class='help-inline' = error ? f.error_message_on(:name, :class => 'text-error') : pat(:example)
+fieldset class='control-group'
+  = f.label "Город", :class => 'control-label'
+  .controls.wp100
+    div class="scrollable-dropdown-menu"
+      = f.hidden_field :place_id
+      = text_field_tag :kato_type, :class => 'form-control', :required => true, value: @kc_place&.model&.name
+fieldset class='control-group#{error ? ' has-error' : ''}'
+  = f.label :view, :class => 'control-label'
+  .controls.wp100
+    = f.text_field :look, :class => 'form-control input-large input-with-feedback'
+  .extra.controls
+    = f.check_box :nit, value: 1, :class => 'swap-input', checked: @product.settings&.fetch(:ni, nil) == 1
+    label.btn.btn-sm.btn-desert.swap-label(for = 'product_nit')
+      .fa.fa-adjust
+
 /fieldset.control-group
   = f.label 'цех', :class => 'control-label'
   .controls
@@ -32,58 +46,100 @@ fieldset class='control-group#{error ? ' has-error' : ''}'
   .controls.wp100
     deepdown-ms[
       display-id=@product.category_id data-url='aux/categories'
-      data-sid=@product.category.section_id data-name='ksm_thing[category_id]' listen='sd'
+      data-sid=@product.category.section_id data-name='product[category_id]' listen='sd'
     ]
   .extra
     a.btn.btn-sm.fa.fa-folder.btn-desert href=url(:thingcats, :categories, s: @product&.category&.section_id)
 
-fieldset class='control-group'
-  = f.label "Город", :class => 'control-label'
-  .controls.wp100
-    div class="scrollable-dropdown-menu"
-      = f.hidden_field :place_id
-      = text_field_tag :kato_type, :class => 'form-control', :required => true, value: @kc_place&.model&.name
-
 - error = @product.errors.include?(:price)
 fieldset class='control-group#{error ? ' has-error' : ''}'
   = f.label :price, :class => 'control-label'
-  div class='controls'
+  .controls
     = f.text_field :price, :class => 'form-control input-large input-with-feedback'
-    / span class='help-inline' = error ? f.error_message_on(:price, :class => 'text-error') : pat(:example)
+fieldset.control-group
+  = f.label :sticker, :class => 'control-label'
+  .controls: .form-control.ro.hand riot-tag='shower' data-classy='.stdims'
+    == @xproduct.sticker > 0 ? rurk(@xproduct.sticker) : 'нет'
+  .pll.spacer
+  .controls.stdims.hide
+    = text_field_tag :'raw[sticker]', value: @xproduct.sticker, :class => 'form-control input-large input-with-feedback'
+
 - error = @product.errors.include?(:des)
 fieldset class='control-group#{error ? ' has-error' : ''}'
   = f.label "артикул", :class => 'control-label'
   div class='controls'
-    = f.text_field :art, :class => 'form-control input-large', readonly: true, value: @product.autoart
+    = f.text_field :art, :class => 'form-control input-large'
     / span class='help-inline' = error ? f.error_message_on(:des, :class => 'text-error') : pat(:example)
 - error = @product.errors.include?(:des)
 fieldset class='control-group#{error ? ' has-error' : ''}'
   = f.label :sku, :class => 'control-label'
   div class='controls'
-    = f.text_field :sku, :class => 'form-control input-large input-with-feedback'
+    = f.text_field :sku, :class => 'form-control input-large', readonly: true, value: @product.autoart
 - error = @product.errors.include?(:des)
 fieldset class='control-group#{error ? ' has-error' : ''}'
   = f.label 'деколь', :class => 'control-label'
   div class='controls'
     = f.text_field :sketch, :class => 'form-control input-large', readonly: true, value: @product.sketch_ext
-- error = @product.errors.include?(:weight)
 fieldset class='control-group#{error ? ' has-error' : ''}'
-  = f.label "#{:weight} (g)", :class => 'control-label'
-  div class='controls'
-    = f.text_field :weight, :class => 'form-control input-large input-with-feedback'
-    / span class='help-inline' = error ? f.error_message_on(:index, :class => 'text-error') : pat(:example)
-- error = @product.errors.include?(:height)
+  = f.label 'собрание', :class => 'control-label'
+  .controls.wp100
+    = f.text_field :corel, :class => 'form-control input-large'
 fieldset class='control-group#{error ? ' has-error' : ''}'
-  = f.label "#{:height} (mm)", :class => 'control-label'
-  div class='controls'
-    = f.text_field :height, :class => 'form-control input-large input-with-feedback'
+  = f.label 'скидка', :class => 'control-label'
+  .controls
+    = f.text_field :discount, :class => 'form-control input-large'
+  .next
+    | &nbsp;%
 
-    / span class='help-inline' = error ? f.error_message_on(:height, :class => 'text-error') : pat(:example)
-        // = sub.id == @product.category_id ? "selected" : ""
 fieldset.control-group
   label.control-label
   .controls
-    .btn.btn-link Характеристики...
+    .btn.btn-link riot-tag='shower' data-classy='.pdims' Характеристики...
+    .btn.btn-link riot-tag='shower' data-classy='.wsdims' Сайт...
+
+.pdims.hide
+  - error = @product.errors.include?(:weight)
+  fieldset class='control-group#{error ? ' has-error' : ''}'
+    = f.label "#{:weight} (g)", :class => 'control-label'
+    div class='controls'
+      = f.text_field :dim_weight, :class => 'form-control input-large input-with-feedback'
+      / span class='help-inline' = error ? f.error_message_on(:index, :class => 'text-error') : pat(:example)
+  - error = @product.errors.include?(:height)
+  fieldset class='control-group#{error ? ' has-error' : ''}'
+    = f.label "#{:height} (mm)", :class => 'control-label'
+    div class='controls'
+      = f.text_field :dim_height, :class => 'form-control input-large input-with-feedback'
+  fieldset class='control-group#{error ? ' has-error' : ''}'
+    = f.label "#{:width} (mm)", :class => 'control-label'
+    div class='controls'
+      = f.text_field :dim_width, :class => 'form-control input-large input-with-feedback'
+  fieldset class='control-group#{error ? ' has-error' : ''}'
+    = f.label "#{:length} (mm)", :class => 'control-label'
+    div class='controls'
+      = f.text_field :dim_length, :class => 'form-control input-large input-with-feedback'
+
+.wsdims.hide
+  - error = @product.errors.include?(:weight)
+  fieldset class='control-group#{error ? ' has-error' : ''}'
+    = f.label :index, :class => 'control-label'
+    .controls
+      = f.text_field :windex, :class => 'form-control input-large input-with-feedback'
+  fieldset class='control-group#{error ? ' has-error' : ''}'
+    = f.label 'кратность', :class => 'control-label'
+    .controls
+      = f.text_field :lotof, :class => 'form-control input-large'
+  fieldset class='control-group#{error ? ' has-error' : ''}'
+    = f.label :tag, :class => 'control-label'
+    .controls
+      = f.text_field :tagname, :class => 'form-control input-large input-with-feedback'
+fieldset class='control-group#{error ? ' has-error' : ''}'
+  = f.label "описание", :class => 'control-label'
+  .controls.wp100
+    = f.text_area :desc, :class => 'form-control input-large input-with-feedback'
+
+
+    / span class='help-inline' = error ? f.error_message_on(:height, :class => 'text-error') : pat(:example)
+        // = sub.id == @product.category_id ? "selected" : ""
 .tmar-2
 
 - error = @product.errors.include?(:height)

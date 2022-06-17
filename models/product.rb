@@ -1,7 +1,8 @@
-class Product < ActiveRecord::Base
+class ARProduct < ActiveRecord::Base
+  self.table_name = 'products'
   belongs_to :category
-  has_many :variants, -> { order(:name) }, :class_name => "Product", :foreign_key => "parent_id"
-  belongs_to :parent, :class_name => "Product", :foreign_key => "parent_id"
+  has_many :variants, -> { order(:name) }, :class_name => "ARProduct", :foreign_key => "parent_id"
+  belongs_to :parent, :class_name => "ARProduct", :foreign_key => "parent_id"
 
   # def min_order
   #   case category_id

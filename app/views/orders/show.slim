@@ -160,7 +160,7 @@ div
             
             - @order.by_cat(tab.id).each do |ol|
               tr
-                = hidden_field_tag "line[#{ol.id}][id]", :value => ol[:id]
+                = hidden_field_tag "line[#{ol.id}][id]", :value => ol.id
                 td class="only-print" &nbsp;
                 td
                   = ol.product.displayname

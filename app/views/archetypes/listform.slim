@@ -11,7 +11,7 @@ ul.nav.nav-tabs
         = content_tag(:option, 'Выберите категорию')
         - @cats.each do |cat|
           optgroup label="#{cat.name}"
-            - cat.subcategories.each do |sub|
+            - cat.subs_ordered.each do |sub|
               - html_attributes = { :value => sub.id }
               - html_attributes[:selected] ||= option_is_selected?(sub.id, sub.name, @arch.category_id)
               = content_tag(:option, sub.name, html_attributes)

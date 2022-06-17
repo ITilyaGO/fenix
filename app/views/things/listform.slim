@@ -7,7 +7,7 @@
         = content_tag(:option, 'Выберите категорию')
         - @cats.each do |cat|
           optgroup label="#{cat.name}"
-            - cat.subcategories.each do |sub|
+            - cat.subs_ordered.each do |sub|
               - html_attributes = { :value => sub.id }
               - html_attributes[:selected] ||= option_is_selected?(sub.id, sub.name, @product.category_id)
               = content_tag(:option, sub.name, html_attributes)
@@ -26,26 +26,48 @@
 
         fieldset.control-group.hame.tmar-3
           .alabel.label bku
-          label.control-label = @xproduct[:arn]
-          - a = KSM::Archetype.find @xproduct[:arn]
-          - if @xproduct[:arn]
+          label.control-label = @xproduct.arn
+          - a = KSM::Archetype.find @xproduct.arn
+          - if @xproduct.arn
             .controls.wp100 = f.text_field :arnt, value: a.name, :class => 'form-control input-large input-with-feedback'
+            - if @xproduct.multi
+              .controls: .btn = @xproduct.multi
           - else
             .controls: .form-control: .fa.fa-exclamation-triangle.text-warning
 
-        - c1c = CabiePio.get([:product, :k1c], @product.id).data
         fieldset.control-group.hame
           .alabel.label 1c
-          label.control-label = @xproduct[:n1c][-12..-1] rescue nil
-          - if c1c
-            - k1c = KSM1C::Cat.find c1c
+          label.control-label = @xproduct.k1c[-12..-1] rescue nil
+          - if @xproduct.k1c
+            - k1c = KSM1C::Cat.find @xproduct.k1c
             .controls.wp100 = f.text_field :n1c, value: k1c&.at_path('НаименованиеПолное'), :class => 'form-control input-large'
           - else
             .controls: .form-control: .fa.fa-exclamation-triangle.text-warning
+        
         fieldset.control-group
-          .btn.btn-link Связи...
+          label.control-label
+          .controls
+            .btn.btn-link riot-tag='shower' data-classy='.plinks' Связи...
+            a.btn.btn-link href=url(:things, :transfer) Excel...
+
+        .plinks.hide
+          fieldset.control-group
+            label.control-label bku
+            .controls.wp100 = text_field_tag :'raw[arn]', value: @xproduct.arn, :class => 'form-control input-large'
+            .pll.spacer
+            .controls = text_field_tag :'raw[multi]', value: @xproduct.multi, :class => 'form-control input-large'
+          fieldset.control-group
+            label.control-label 1c
+            .controls.wp100 = text_field_tag :'raw[k1c]', value: @xproduct.k1c, :class => 'form-control input-large'
+        
         .f-actions.tmar-3.text-center
-          = f.submit pat(:copy).downcase, :class => 'btn btn-sm btn-default', name: 'clone' 
+          = f.check_box :ignored, value: 1, :class => 'swap-input', checked: @product.ignored == 1
+          label.btn.btn-sm.btn-desert.text-danger.swap-label(for = 'product_ignored')
+            | del
+            .fa.fa-toggle-on
+          |&nbsp;&nbsp;&nbsp;&nbsp;
+          - if @product.id != '0000'
+            = f.submit pat(:copy).downcase, :class => 'btn btn-sm btn-default', name: 'clone' 
           |&nbsp;&nbsp;&nbsp;&nbsp;
           = f.submit pat(:save).downcase, :class => 'btn btn-sm btn-prime'
         .tmar-3
@@ -71,6 +93,43 @@
   rscript type="riot/tag" src="/riot/tags/prefs/selectload.tag"  
 
   javascript:
+    (function($) {
+      $(function() {
+
+        var names_adapter = new Bloodhound({
+          datumTokenizer: Bloodhound.tokenizers.whitespace,
+          queryTokenizer: Bloodhound.tokenizers.whitespace,
+          prefetch: {
+            url: '../../aux/autoproduct.json',
+            ttl: - new Date()
+          }
+        });
+        $('#product_name').typeahead({
+          minLength: 2
+        }, {
+          name: 'prtname',
+          source: names_adapter,
+          limit: 150
+        });
+        var look_adapter = new Bloodhound({
+          datumTokenizer: Bloodhound.tokenizers.whitespace,
+          queryTokenizer: Bloodhound.tokenizers.whitespace,
+          prefetch: {
+            url: '../../aux/autolook.json',
+            ttl: - new Date()
+          }
+        });
+        $('#product_look').typeahead({
+          minLength: 2
+        }, {
+          name: 'prtlook',
+          source: look_adapter,
+          limit: 150
+        });
+      });
+    })(jQuery);
+
+  javascript:
     
     document.addEventListener("DOMContentLoaded", function(event) {
       riot.mount('switcher, shower, bottomworks, elhide, list, dualpane, selectload, deepdown-ms')
@@ -79,6 +138,6 @@
 
 
       let order_form = document.querySelector('.main-wrapper-push form')
-      DekolFu.init_kato_blood(order_form, 'kato_type', '"ksm_thing[place_id]"')
+      DekolFu.init_kato_blood(order_form, 'kato_type', '"product[place_id]"')
 
     })

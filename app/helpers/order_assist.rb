@@ -1,6 +1,7 @@
 class OrderAssist
   extend Fenix::App::OrdersHelper
   extend Fenix::App::ProductsHelper
+  extend Fenix::App::KyotoHelpers
 
   def self.calc_complexity_for(order)
     cplx = order_complexity order

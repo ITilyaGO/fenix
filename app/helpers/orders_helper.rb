@@ -72,13 +72,12 @@ module Fenix::App::OrdersHelper
 
   def order_sticker(id)
     cabie = CabiePio.get [:sticker, :order], id
-    cabie.data
     cabieglass = CabiePio.get [:sticker, :order_glass], id
     [cabie.data.to_f - cabieglass.data.to_f, cabieglass.data.to_f]
   end
 
   def sticker_price(order)
-    kc_sticker = CabiePio.folder(:products, :sticker).flat.trans(:to_i, :to_f)
+    kc_sticker = CabiePio.folder(:products, :sticker).flat.trans(nil, :to_f)
     sticker = 0
     glass = 0
     order.order_lines.each do |line|
@@ -86,7 +85,7 @@ module Fenix::App::OrdersHelper
       price = kc_sticker.fetch(line.product_id, 0)
 
       sticker += price*line.amount
-      glass += price*line.amount if products_hash.fetch(line.product_id, nil) == 11
+      glass += price*line.amount if product_is_glass?(line.product_id)
     end
     [sticker.round(1), glass.round(1)]
   end

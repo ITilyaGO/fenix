@@ -36,14 +36,22 @@
       fieldset.control-group
         = f.label 'цех', :class => 'control-label'
         .controls.wp100
-          deepdown display-id=@section.id data-url='aux/sections' data-name='ksm_category[section_id]'
+          deepdown-ms display-id=@section.id data-url='aux/sections' data-name='ksm_category[section_id]' target='sd'
       fieldset.control-group
         = f.label :category, :class => 'control-label'
         .controls.wp100
           deepdown-ms[
-            display-id=@category&.category_id data-url='aux/categories'
-            data-sid=@section.id data-name='ksm_category[category_id]' target='notfound'
+            display-id=@category&.category_id data-url='aux/topcategories'
+            data-sid=@section.id data-name='ksm_category[category_id]' listen='sd'
           ]
+      fieldset.control-group
+        = f.label :index, :class => 'control-label'
+        .controls
+          = f.text_field :windex, :class => 'form-control input-large input-with-feedback'
+      fieldset.control-group
+        = f.label 'кратность', :class => 'control-label'
+        .controls
+          = f.text_field :lotof, :class => 'form-control input-large'
       .form-actions.vmar-2 = f.submit :save, :class => 'btn btn-prime btn-sm btn-wide'
 
 .clearfix

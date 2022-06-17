@@ -1,7 +1,7 @@
 Fenix::App.controllers :kyoto_schema, :map => 'kyoto/schema' do
   get :index do
     @schema = wonderbox(:schema)
-    @avail = 14
+    @avail = 16
     render 'kyoto/schema'
   end
 
@@ -39,6 +39,10 @@ Fenix::App.controllers :kyoto_schema, :map => 'kyoto/schema' do
         products_to_things_013_up(force:force)
       when 14
         stickday_limits_014_up(force:force)
+      when 15
+        m015_ru_isokato_up(force:force)
+      when 16
+        m016_autoproduct_up(force:force)
       end
       
       wonderbox_set(:schema, n)

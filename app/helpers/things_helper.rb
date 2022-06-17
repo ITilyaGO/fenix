@@ -31,4 +31,18 @@ module Fenix::App::ThingsHelper
     wonderbox_set(:cat_seed, bo)
     seed
   end
+
+  def sect_seed_root
+    seed = wonderbox(:sections, :seed) || 0
+    seed += 1
+    wonderbox_set(:sections, { seed: seed })
+    seed
+  end
+
+  def update_autodic thing
+    ap = KSM::Dic.find(:autoproduct)
+    ap.push(thing.name, and_save: true) if thing.name =~ /w+/
+    al = KSM::Dic.find(:autolook)
+    al.push(thing.look, and_save: true) if thing.look =~ /w+/
+  end
 end

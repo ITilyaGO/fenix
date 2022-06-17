@@ -12,7 +12,7 @@ Fenix::App.controllers :orders do
       @filtered_by_user = OrderPart.where(:order_id => orders_query.ids, :section => current_account.section_id).pluck(:order_id)
     end
     @pages = (orders_query.count/pagesize).ceil
-    @sections = Section.includes(:categories).all
+    @sections = KSM::Section.all
     a_managers(@orders.map(&:id), @orders.map(&:client_id))
     @transport = CabiePio.all_keys(@orders.map(&:client_id).uniq, folder: [:m, :clients, :transport]).flat
     @kc_timelines = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :timeline]).flat.trans(:to_i)
@@ -32,7 +32,7 @@ Fenix::App.controllers :orders do
     @orders = Order.all
       .includes(:client, :place, :order_parts)
       .where("status = ?", Order.statuses[:draft]).order(:updated_at => :desc)
-    @sections = Section.includes(:categories).all
+    @sections = KSM::Section.all
     a_towns(@orders.map(&:id), @orders.map(&:client_id))
     calendar_init
     @r = url(:orders, :draft)
@@ -56,7 +56,7 @@ Fenix::App.controllers :orders do
       @orders = @orders.offset((@page-1)*pagesize).take(pagesize)
       @r = url(:orders, :finished, :old => 1)
     end
-    @sections = Section.all
+    @sections = KSM::Section.all
     a_towns(@orders.map(&:id), @orders.map(&:client_id))
     @kc_done = CabiePio.all_keys(@orders.map(&:id), folder: [:stock, :order, :done]).flat.trans(:to_i)
 
@@ -71,7 +71,7 @@ Fenix::App.controllers :orders do
     dir = !params[:sort] && !params[:dir] ? "desc" : params[:dir] || "asc"
     @orders = Order.where("status >= ?", Order.statuses[:shipped]).order(sort => dir).offset((@page-1)*pagesize).take(pagesize)
     @pages = (Order.where("status >= ?", Order.statuses[:shipped]).count/pagesize).ceil
-    @sections = Section.includes(:categories).all
+    @sections = KSM::Section.all
     @kc_orders = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :towns]).flat
     @kc_towns = KatoAPI.batch(@kc_orders.values.uniq)
     @r = url(:orders, :archive)
@@ -87,7 +87,7 @@ Fenix::App.controllers :orders do
     sort = params[:sort] || "updated_at"
     dir = !params[:sort] && !params[:dir] ? "desc" : params[:dir] || "asc"
 
-    @sections = Section.includes(:categories).all
+    @sections = KSM::Section.all
     @kc_orders = CabiePio.folder(:orders, :towns).flat
     @kc_delivery = CabiePio.folder(:orders, :delivery_towns).flat
     @kc_hometowns = CabiePio.folder(:clients, :hometowns).flat
@@ -121,7 +121,7 @@ Fenix::App.controllers :orders do
     sort = params[:sort] || "updated_at"
     dir = !params[:sort] && !params[:dir] ? "desc" : params[:dir] || "asc"
 
-    @sections = Section.includes(:categories).all
+    @sections = KSM::Section.all
     @kc_orders = CabiePio.folder(:orders, :towns).flat
     @kc_delivery = CabiePio.folder(:orders, :delivery_towns).flat
     @kc_hometowns = CabiePio.folder(:clients, :hometowns).flat
@@ -150,11 +150,13 @@ Fenix::App.controllers :orders do
 
   get :edit, :with => :id do
     @title = pat(:edit_title, :model => "order #{params[:id]}")
-    @order = Order.includes(:order_lines).find(params[:id])
-    @sections = Section.includes(:categories).all
-    habits(@sections, :index)
-    @my_section = current_account.section
-    @order_part = @order.order_parts.find_by(:section_id => @my_section)
+    @order = Order.includes(:order_lines_ar).find params[:id]
+    # @order = Order.includes(:order_lines_ar).find(params[:id])
+    @sections = KSM::Section.all
+    # @sections = Section.includes(:categories).all
+    # habits(@sections, :index)
+    @my_section = @sections.detect{ |a| a.id == current_account.section_id }
+    @order_part = @order.order_parts.find_by(:section_id => @my_section&.ix)
     @tabs = Category.where(:category => nil)
 
     @kc_client_hometown = CabiePio.get([:clients, :hometowns], @order.client.id).data
@@ -167,7 +169,7 @@ Fenix::App.controllers :orders do
     @olstickers = CabiePio.all_keys(@order.order_lines.map(&:id), folder: [:m, :order_lines, :sticker_sum]).flat.trans(:to_i)
     kc_amt = CabiePio.get([:orders, :stickers_amount], @order.id).data.to_i
     @sticker_progress = sticker_order_progress(@order.id)
-    @kc_products = CabiePio.folder(:products, :sticker).flat.trans(:to_i)
+    @kc_products = CabiePio.folder(:products, :sticker).flat
 
     kc_town_managers = CabiePio.folder(:towns, :managers).flat
     hier = Kato::Hier.for(@kc_client_hometown).codes
@@ -183,7 +185,7 @@ Fenix::App.controllers :orders do
     calendar_init(Date.today)
     @ps = KSM::OrderImage.all_for(@order.id)
 
-    arches = CabiePio.folder(:product, :archetype).flat.trans(:to_i)
+    arches = CabiePio.folder(:product, :archetype).flat
     parchs = @order.order_lines.map{|l|archetype_order(arches[l.product_id], l.id, @order.id)}
     @rese = CabiePio.all_keys(parchs, folder: [:need, :order]).flat.map{|k,v|[k.split('_')[1].to_i, v.to_i]}.to_h
 
@@ -241,9 +243,9 @@ Fenix::App.controllers :orders do
 
   get :show, :with => :id do
     @title = "Viewing order #{params[:id]}"
-    @order = Order.includes(:order_lines).find(params[:id])
-    @sections = Section.includes(:categories).all
-    @my_section = current_account.section
+    @order = Order.includes(:order_lines_ar).find(params[:id])
+    @sections = KSM::Section.all
+    @my_section = @sections.detect{ |a| a.id == current_account.section }&.ix
     @order_part = @order.order_parts.find_by(:section_id => @my_section)
     @tabs = Category.where(:category => nil)
 
@@ -327,14 +329,22 @@ Fenix::App.controllers :orders do
     order.priority = params[:order][:priority] == "true"
     order.delivery = params[:order][:delivery].to_i
     online.order_lines.each do |line|
-      ol = OrderLine.new(product_id: line.product_id, description: line.description, amount: line.amount, price: line.amount > 0 ? line.sum/line.amount : 0)
-      order.order_lines << ol
+      ol = OrderLine.new(product_id: line.product.pio_id, description: line.description, amount: line.amount, price: line.amount > 0 ? line.sum/line.amount : 0)
+      order.order_lines_ar << ol
     end
     order.save
+    # oids = []
+    # plookup = KSM::Backmig.find(:product).contents
+    # order.order_lines_ar.each do |line|
+    #   ol = KSM::OrderLine.nest
+    #   ol.fill({ :merge => true, :product_id => plookup[line.product_id], :order_id => order.id, :amount => line.amount, :price => line.price, :description => line.description })
+    #   ol.save
+    #   oids << ol.id
+    # end
 
     o_status = KSM::OrderStatus.find(order.id)
     o_status.setg(:draft)
-    sections = Section.all
+    sections = KSM::Section.all
     sections.each do |s|
       include_section = false
       s.categories.each do |c|
@@ -342,9 +352,9 @@ Fenix::App.controllers :orders do
         break if include_section
       end
       if include_section
-        op = OrderPart.new(:section_id => s.id, :state => :anew)
+        op = OrderPart.new(:section_id => s.ix, :state => :anew)
         order.order_parts << op
-        o_status.sets(s.id, :anew)
+        o_status.sets(s.ix, :anew)
       end
     end
     o_status.save
@@ -397,9 +407,11 @@ Fenix::App.controllers :orders do
     order = Order.new(ar)
     order.id = params[:order]["id"] if !params[:order]["id"].blank?
     order.status = :draft
+    order.save
 
     # order = order.attributes.merge({ :status => :anew, :online_at => order.created_at })
     # order = Order.new({:online_id => online.id, :status => :anew, :client_id => client, :online_at => online.created_at, :description => online.description, :total => online.total})
+    postlines = params[:line].reject{ |line| line['amount'].blank? || line['amount'] == '0' }
     params[:line].each do |line|
       # l = line
       # l = line.inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
@@ -409,16 +421,26 @@ Fenix::App.controllers :orders do
       next if line['amount'].blank? || line['amount'] == 0
       p = Product.find(line['id']) rescue nil
       next if !p
-      ol = OrderLine.new({ :product_id => p.id, :amount => line['amount'], :price => p.price, :description => line['comment'] })
-      order.total += p.price*ol.amount
-      order.order_lines << ol
+      next unless p.exist?
+      olar = OrderLine.new({ :product_id => p.id, :amount => line['amount'], :price => p.price, :description => line['comment'] })
+      order.total += p.price*olar.amount
+      order.order_lines_ar << olar
       # ol.update_attributes(l)
     end
     order.save
+    # oids = []
+    # postlines.each do |line|
+    #   p = Product.find(line['id'])
+    #   next unless p.exist?
+    #   ol = KSM::OrderLine.nest
+    #   ol.fill({ :merge => true, :product_id => p.id, :order_id => order.id, :amount => line['amount'].to_i, :price => p.price, :description => line['comment'] })
+    #   ol.save
+    #   oids << ol.id
+    # end
 
     o_status = KSM::OrderStatus.find(order.id)
     o_status.setg(:draft)
-    sections = Section.all
+    sections = KSM::Section.all
     sections.each do |s|
       include_section = false
       s.categories.each do |c|
@@ -426,9 +448,9 @@ Fenix::App.controllers :orders do
         break if include_section
       end
       if include_section
-        op = OrderPart.new(:section_id => s.id, :state => :anew)
+        op = OrderPart.new(:section_id => s.ix, :state => :anew)
         order.order_parts << op
-        o_status.sets(s.id, :anew)
+        o_status.sets(s.ix, :anew)
       end
     end
     o_status.save
@@ -443,18 +465,22 @@ Fenix::App.controllers :orders do
     end
     cash = params[:order][:cash] == 'true' ? 't' : 'f'
     CabiePio.set [:orders, :cash], order.id, cash
+
     redirect(url(:orders, :draft))
   end
 
   get :fullempty do
     @title = "New order"
-    @cats = Category.where(category: nil).order(:index => :asc)
+    # @cats = Category.where(category: nil).order(:index => :asc)
+    @cats = KSM::Category.all.select{ |c| c.category_id.nil? }.sort_by(&:wfindex)
     # Padrino.cache['cats'] ||= cats
     # @cats = Padrino.cache['cats']
     @parents = Product.pluck(:parent_id).compact.uniq
-    @arp = CabiePio.folder(:product, :archetype).flat.trans(:to_i)
+    @arp = CabiePio.folder(:product, :archetype).flat
     @kc_stocks = CabiePio.folder(:stock, :archetype).flat.trans(nil, :to_i)
     @kc_needs = CabiePio.folder(:need, :archetype).flat.trans(nil, :to_i)
+    @place = params[:place]
+    @order_place = KatoAPI.anything(@place) if @place
     render 'orders/fullempty'
   end
 
@@ -536,7 +562,7 @@ Fenix::App.controllers :orders do
     sections_draft = []
     exst = params[:line].map{|l|l[:ol].to_i}
     order_rm = Order.new
-    order.order_lines.each do |ol|
+    order.order_lines_ar.each do |ol|
       next if exst.include? ol.id
       ol.amount = 0
       order_rm.order_lines << ol
@@ -546,7 +572,8 @@ Fenix::App.controllers :orders do
     params[:line].each do |line|
       p = Product.find(line['id']) rescue nil
       next if !p
-      if col = order.order_lines.detect{|l|l.id == line[:ol].to_i}
+      next unless p.exist?
+      if col = order.order_lines_ar.detect{|l|l.id == line[:ol].to_i}
         sections_draft << product_to_section(p.id) unless col.amount == line[:amount].to_i
         col.amount = line[:amount]
         col.description = line[:comment]
@@ -556,7 +583,7 @@ Fenix::App.controllers :orders do
         sections_draft << product_to_section(p.id)
         ol = OrderLine.new({ :product_id => p.id, :amount => line['amount'], :price => p.price, :description => line['comment'] })
         order.total += p.price*ol.amount
-        order.order_lines << ol
+        order.order_lines_ar << ol
       end
       # ol.update_attributes(l)
     end
@@ -568,22 +595,22 @@ Fenix::App.controllers :orders do
     o_status.setg(order.draft? ? :draft : :anew)
     old_parts = o_status.pstate.map{|k,v|[k, o_status.state(k)]}.to_h
     o_status.pstate = {}
-    sections = Section.all
+    sections = KSM::Section.all
     sections.each do |s|
       include_section = false
       s.categories.each do |c|
         include_section = order.by_cat?(c.id)
         break if include_section
       end
-      found = order.order_parts.detect{|op|op.section_id == s.id}
+      found = order.order_parts.detect{|op|op.section_id == s.ix}
       if include_section
-        state = old_parts[s.id] || :anew
+        state = old_parts[s.ix] || :anew
         state = :anew if sections_draft.include? s.id
         old_state = state == :prepare ? :current : state
-        op = OrderPart.new(:section_id => s.id, :state => old_state)
+        op = OrderPart.new(:section_id => s.ix, :state => old_state)
         order.order_parts << op unless found
         found.update(state: old_state) if found
-        o_status.sets(s.id, state)
+        o_status.sets(s.ix, state)
       elsif found
         found.destroy
       end
@@ -681,8 +708,8 @@ Fenix::App.controllers :orders do
 
   put :status, :with => :id do
     order = Order.find(params[:id])
-    s = params[:section].to_i
-    my_section = s > 0 ? s : current_account.section
+    s = params[:section]
+    my_section = KSM::Section.find(s || current_account.section_id).ix
     order_part = order.order_parts.find_by(:section_id => my_section)
     if order_part.anew?
       order_part.state = :current if order_part.anew?
@@ -707,8 +734,8 @@ Fenix::App.controllers :orders do
 
   put :midstatus, :with => :id do
     order = Order.find(params[:id])
-    s = params[:section].to_i
-    my_section = s > 0 ? s : current_account.section
+    s = params[:section]
+    my_section = KSM::Section.find(s || current_account.section_id).ix
     order_part = order.order_parts.find_by(:section_id => my_section)
     status = KSM::OrderStatus.find(order.id)
     status.set_current(my_section)
@@ -790,7 +817,7 @@ Fenix::App.controllers :orders do
       # l = line.inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
       # break if l[:id].blank?
       next if l['id'].nil?
-      ol = @order.order_lines.find(l['id'])
+      ol = @order.order_lines_ar.find(l['id'])
       if l['done_amount']
         if l['done_amount'].size < 1
           l.delete('done_amount')
@@ -804,7 +831,7 @@ Fenix::App.controllers :orders do
     sticker_sum = 0
     saved_stickers = CabiePio.all_keys(@order.order_lines.map(&:id), folder: [:m, :order_lines, :sticker])
       .flat.trans(:to_i).transform_values{|v|v[:v]}
-    kc_products = CabiePio.folder(:products, :sticker).flat.trans(:to_i, :to_f)
+    kc_products = CabiePio.folder(:products, :sticker).flat.trans(nil, :to_f)
     amt = 0
     @order.order_lines.each do |ol|
       sq = kc_products.fetch(ol.product_id, 0)
@@ -922,7 +949,7 @@ Fenix::App.controllers :orders do
   get :price, :with => :id do
     @title = pat(:edit_title, :model => "order #{params[:id]}")
     @order = Order.includes(:order_lines).find(params[:id])
-    @sections = Section.includes(:categories).all
+    @sections = KSM::Section.all
     @tabs = Category.where(:category => nil)
 
     if @order
@@ -1080,7 +1107,7 @@ Fenix::App.controllers :orders do
 
   get :pdftorg12, :with => :id do
     @title = pat(:edit_title, :model => "order #{params[:id]}")
-    @order = Order.includes(:order_lines).includes(order_lines: :product).find(params[:id])
+    @order = Order.find(params[:id])
     output = render 'invoices/torg12', :layout => false
 
     Princely.executable = settings.princebin
@@ -1109,7 +1136,7 @@ Fenix::App.controllers :orders do
 
   get :pdfnakl, :with => :id, :provides => :pdf do
     @title = pat(:edit_title, :model => "order #{params[:id]}")
-    @order = Order.includes(:order_lines).includes(order_lines: :product).find(params[:id])
+    @order = Order.find(params[:id])
     @account = params[:account]
     iso = CabiePio.get([:orders, :towns], @order.id).data
     @kc_town = KatoAPI.anything(iso)&.load.model.name || @order.place_name

@@ -1,12 +1,12 @@
 Fenix::App.controllers :archetypes do
   get :oindex do
     @title = "Archetypes"
-    @cats = Category.where(category: nil).order(:index => :asc)
+    @cats = KSM::Category.toplevel
     @archetypes = KSM::Archetype.all
-    @categories = Category.all.includes(:category)
+    @categories = KSM::Category.all
     @kc_archs = CabiePio.folder(:product, :archetype).flat
     @archs = KSM::Archetype.all
-    @grouped = @archs.group_by{|a|a.category_id.to_i}
+    @grouped = @archs.group_by{|a|a.category_id}
     pagesize = PAGESIZE
     @page = !params[:page].nil? ? params[:page].to_i : 1
     @r = url(:archetypes, :index)
@@ -15,11 +15,11 @@ Fenix::App.controllers :archetypes do
 
   get :products do
     @title = "Archetypes"
-    @cats = Category.where(category: nil).order(:index => :asc)
+    @cats = KSM::Category.toplevel
     @archetypes = KSM::Archetype.all.map{|a|[a.id, a]}.to_h
-    @categories = Category.all.includes(:category)
-    @kc_archs = CabiePio.folder(:product, :archetype).flat.trans(:to_i)
-    @kc_multi = CabiePio.folder(:product, :archetype_multi).flat.trans(:to_i, :to_i)
+    @categories = KSM::Category.all
+    @kc_archs = CabiePio.folder(:product, :archetype).flat
+    @kc_multi = CabiePio.folder(:product, :archetype_multi).flat.trans(nil, :to_i)
     pagesize = PAGESIZE
     @page = !params[:page].nil? ? params[:page].to_i : 1
     # @archetypes = Archetype.all.includes(:category).order(:updated_at => :desc).offset((@page-1)*pagesize).take(pagesize)
@@ -30,8 +30,8 @@ Fenix::App.controllers :archetypes do
   get :index do
     @title = t 'tit.archetypes.list'
     @arch = KSM::Archetype.new(id: -1)
-    @cats = Category.where(category: nil).order(:index => :asc)
-    @categories = Category.all.includes(:category)
+    @cats = KSM::Category.toplevel
+    @categories = KSM::Category.all
     
     render 'archetypes/listform'
   end
@@ -39,8 +39,8 @@ Fenix::App.controllers :archetypes do
   get :e, :with => :id do
     @title = t 'tit.archetypes.list'
     @arch = KSM::Archetype.find(params[:id])
-    @cats = Category.where(category: nil).order(:index => :asc)
-    @categories = Category.all.includes(:category)
+    @cats = KSM::Category.toplevel
+    @categories = KSM::Category.all
     @squadconf = @arch.serializable_hash
 
     render 'archetypes/listform'
@@ -53,7 +53,7 @@ Fenix::App.controllers :archetypes do
     @title = "New archetype"
     @archetype = KSM::Archetype.nest
     @archetype.save
-    @cats = Category.where(:category_id => nil)
+    @cats = KSM::Category.toplevel
     render 'archetypes/edit'
   end
   
@@ -62,7 +62,7 @@ Fenix::App.controllers :archetypes do
     @archetype = KSM::Archetype.find(params[:id])
     if @archetype.exist?
       @archetype.name = params[:ksm_archetype][:name]
-      @archetype.category_id = params[:ksm_archetype][:category_id].to_i
+      @archetype.category_id = params[:ksm_archetype][:category_id]
       @archetype.g = params[:ksm_archetype][:group] == '1'
       @archetype.save
     end
@@ -81,7 +81,7 @@ Fenix::App.controllers :archetypes do
   get :edit, :with => :id do
     @title = pat(:edit_title, :model => "archetype #{params[:id]}")
     @archetype = KSM::Archetype.find(params[:id])
-    @cats = Category.where(:category_id => nil)
+    @cats = KSM::Category.toplevel
     if @archetype.exist?
       render 'archetypes/edit'
     else
@@ -97,7 +97,7 @@ Fenix::App.controllers :archetypes do
     @multi = CabiePio.get([:product, :archetype_multi], @product.id).data
     @archs = KSM::Archetype.all
     @grouped = @archs.group_by{|a|a.category_id.to_i}
-    @cats = Category.where(:category_id => nil)
+    @cats = KSM::Category.toplevel
     if @product
       render 'archetypes/assign'
     else
@@ -220,10 +220,10 @@ Fenix::App.controllers :archetypes do
       end
     end
         
-    @cats = Category.where(category: nil).order(:index => :asc)
-    @categories = Category.all.includes(:category)
-    @ar_grouped = ksm_arch.group_by{|a|a.category_id.to_i}
-    arp = CabiePio.folder(:product, :archetype).flat.trans(:to_i)
+    @cats = KSM::Category.all.select{|c| c.category_id.nil?}.sort_by(&:sn)
+    @categories = KSM::Category.all
+    @ar_grouped = ksm_arch.group_by(&:category_id)
+    arp = CabiePio.folder(:product, :archetype).flat
     @kc_stocks = CabiePio.folder(:stock, :archetype).flat.trans(nil, :to_i)
     @kc_needs = CabiePio.folder(:need, :archetype).flat.trans(nil, :to_i)
     catgroup = products_hash.keys.group_by{|k|products_hash[k]}
@@ -232,7 +232,7 @@ Fenix::App.controllers :archetypes do
     @kc_archs = arp
 
     @products = Product.all
-    @kc_index = arp.map{|p, a| [a, @products.detect{|i|i.id == p}&.index || 0]}.to_h
+    @kc_index = arp.map{|p, a| [a, @products.detect{|i|i.id == p}&.sn || 0]}.to_h
 
     render 'archetypes/stock'
   end
@@ -285,7 +285,7 @@ Fenix::App.controllers :archetypes do
   
   post :list, :provides => :json do
     @archs = KSM::Archetype.all
-    cat = params[:cat].to_i
+    cat = params[:cat]
     products = @archs.select{|a|a.category_id == cat}.map(&:to_r)
     products.to_json
   end

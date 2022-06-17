@@ -6,5 +6,6 @@ h3 Cabies
 - @cabies.values.each do |cb|
   strong #{cb.config[:name]} (aka #{cb.config[:alias]}): #{cb.mode}
   p = cb.inspect
+  p = cb.config
   p = cb.fs auto: 1
   p = cb.fs_prev(ext: Kyoto::BB_EXT)

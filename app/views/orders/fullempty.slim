@@ -1,7 +1,10 @@
-div class="tabs-content"
 = form_for :order, !@id ? url(:orders, :empty) : url(:orders, :save, :id => @id), :class => 'form-horizontal' do |f|
   .row.non-print.flex-c.center
     .col-md-8
+      .text-center: select.huge name="categories" riot-tag='selectreload' rname='place' loc=url(:orders, :fullempty)
+        - known_cities.each do |k, city|
+          = content_tag(:option, city.model, { value: city.code, selected: @place == city.code })
+
       fieldset class='control-group'
         = f.label 'Тип заказа', :class => 'col-md-3 control-label'
         .col-md-3.controls.custom-control
@@ -61,19 +64,21 @@ div class="tabs-content"
 
       /= partial 'timeline/calendar'
 
-      fieldset class='control-group'
+      /fieldset class='control-group'
         = f.label "Город", :class => 'col-md-3 control-label'
         div class='col-md-5 controls'
           div class="scrollable-dropdown-menu"
-            = f.hidden_field :place_id, :value => (@order_place.id if @order_place)
-            = text_field_tag 'pl', :class => 'form-control ', :disabled => true, :id => 'typeahead-place', :value => (@order_place.name if @order_place)
+            = f.hidden_field :place_id, :value => (@order_place.key if @order_place)
+            = text_field_tag 'pl', :class => 'form-control ', :disabled => true, :id => 'typeahead-place', :value => (@order_place.model.name if @order_place)
 
       fieldset class='control-group control-new'
         = f.label "Город", :class => 'col-md-3 control-label'
         div class='col-md-9 controls'
           div class="scrollable-dropdown-menu"
-            = hidden_field_tag :'cabie[kato_place]'
-            = text_field_tag :kato_type, :class => 'form-control', :required => true
+            = hidden_field_tag :'cabie[kato_place]', :value => (@order_place.key if @order_place)
+            = text_field_tag :kato_type, :class => 'form-control', 
+              :value => (@order_place.model.name if @order_place),
+              :required => true
 
       fieldset class='control-group'
         = f.label "Заказчик", :class => 'col-md-3 control-label'
@@ -184,7 +189,8 @@ div class="tabs-content"
               th Цена
               th Сумма
               th &nbsp;
-            - sub.all_products.order(:index => :asc).each do |line|
+            - all_products_for(sub.id).each do |line|
+              - next if !line.global? && line.place_id != @place
               - next if @parents.include?(line.id)
               - i = i + 1
               tr.list-row data-sum="0" data-price="#{line.price}"
@@ -238,9 +244,11 @@ div class="tabs-content"
   = javascript_include_tag 'jquery-ui.min', 'jquery.fancytree-all.min', 'jstree.min'
   = javascript_include_tag :riot
   rscript type="riot/tag" src="/riot/tags/collapser.tag"
+  rscript type="riot/tag" src="/riot/tags/things/selectreload.tag"  
+
   javascript:
     document.addEventListener("DOMContentLoaded", function(event) {
-      riot.mount('collapser, sticker_line')
+      riot.mount('collapser, sticker_line, selectreload')
     });
 
     (function($) {
@@ -603,7 +611,7 @@ div class="tabs-content"
         $(".order-table").on("click", ".btn-copy", function() {
           var line = $(this).parents("tr");
           var line_id = $(":input[name*='id']", line).val();
-          _p = $.grep(_products, function(e) { return e.id == +line_id; })[0];
+          _p = $.grep(_products, function(e) { return e.id == line_id; })[0];
           copy_product(line)
         });
 

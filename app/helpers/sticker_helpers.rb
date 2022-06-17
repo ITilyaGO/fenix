@@ -88,7 +88,7 @@ module Fenix::App::StickerHelper
   # end
 
   def calc_sticker_sum(ol)
-    kc_products = CabiePio.all_keys(ol.map{|e|e.product_id}, folder: [:products, :sticker]).flat.trans(:to_i, :to_f)
+    kc_products = CabiePio.all_keys(ol.map{|e|e.product_id}, folder: [:products, :sticker]).flat.trans(nil, :to_f)
     all = 0
     ol.each do |line|
       sall = CabiePio.all([:m, :order_lines, :sticker], ["#{line.id}_"]).flat
@@ -100,7 +100,7 @@ module Fenix::App::StickerHelper
   end
 
   def calc_sticker_sum_for_day(ol, day)
-    kc_products = CabiePio.all_keys(ol.map{|e|e.product_id}, folder: [:products, :sticker]).flat.trans(:to_i, :to_f)
+    kc_products = CabiePio.all_keys(ol.map{|e|e.product_id}, folder: [:products, :sticker]).flat.trans(nil, :to_f)
     all = 0
     ol.each do |line|
       st = CabiePio.get([:m, :order_lines, :sticker], "#{line.id}_#{timeline_id(day)}").data[:v] rescue 0

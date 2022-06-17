@@ -36,7 +36,7 @@ div class="tabs-content"
           ' Всего:
           rowsummer target='#list' filter='.non-print'
 
-    - abl_view = @sections.map{|s|can_view_section?(:sections, :list, s.id) ? s.id : nil }
+    - abl_view = @sections.map{|s|can_view_section?(:sections, :list, s.ix) ? s.ix : nil }
     - kc_os = KSM::OrderStatus.find_all(@orders.map(&:id))
     tbody
       - @orders.each do |order|
@@ -100,7 +100,7 @@ div class="tabs-content"
             = order.client.comment
           td class='list-column'
             - order.order_parts.each do |op|
-              p = @sections.detect { |s| s.id == op.section_id }.name
+              p = @sections.detect { |s| s.ix == op.section_id }.name
           td class='list-column'
             - order.order_parts.each do |op|
               p

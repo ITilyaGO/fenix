@@ -8,14 +8,14 @@ Fenix::App.controllers :accounts do
   get :new do
     @title = "New account"
     @account = Account.new
-    @sections = Section.all
+    @sections = KSM::Section.all
     render 'accounts/new'
   end
 
   post :create do
     params[:account].delete(:role) if params[:account][:role].empty?
     @account = Account.new(params[:account])
-    @sections = Section.all
+    @sections = KSM::Section.all
     if @account.save
       if params[:save_ac]
         role_hash = combine_rights(params[:account][:role].to_sym, params[:secta]&.keys&.map(&:to_i))
@@ -36,7 +36,7 @@ Fenix::App.controllers :accounts do
     @account = Account.find(params[:id])
     @account.current = current_account.id
     @cats = Account.where(:account_id => nil)
-    @sections = Section.all
+    @sections = KSM::Section.all
     if @account
       render 'accounts/edit'
     else
@@ -48,7 +48,7 @@ Fenix::App.controllers :accounts do
   put :update, :with => :id do
     @title = pat(:update_title, :model => "account #{params[:id]}")
     @account = Account.find(params[:id])
-    @sections = Section.all
+    @sections = KSM::Section.all
     if @account
       params[:account].delete(:role) if params[:account][:role].empty?
       if @account.update_attributes(params[:account])
@@ -72,7 +72,7 @@ Fenix::App.controllers :accounts do
 
   get :control, :with => :id do
     @account = Account.find(params[:id])
-    @sections = Section.all
+    @sections = KSM::Section.all
 
     render 'accounts/control'
   end

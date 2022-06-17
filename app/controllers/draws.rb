@@ -39,11 +39,12 @@ Fenix::App.controllers :draws do
     orders_query = Order.where("status > ?", Order.statuses[:draft]).where("status < ?", Order.statuses[:finished])
     orders_query = orders_query.where(delivery: params[:deli].to_i) if params[:deli]
     @orders = orders_query.includes(:client).order(sort => dir)
+    usersec = KSM::Section.find current_account.section_id
     if current_account.limited_orders?
-      @filtered_by_user = OrderPart.where(:order_id => orders_query.ids, :section => current_account.section_id).pluck(:order_id)
+      @filtered_by_user = OrderPart.where(:order_id => orders_query.ids, :section => usersec.ix).pluck(:order_id)
     end
     @pages = (orders_query.count/pagesize).ceil
-    @sections = Section.includes(:categories).all
+    @sections = KSM::Section.all
     a_managers(@orders.map(&:id), @orders.map(&:client_id))
     @transport = CabiePio.all_keys(@orders.map(&:client_id).uniq, folder: [:m, :clients, :transport]).flat
     @kc_timelines = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :timeline]).flat.trans(:to_i)

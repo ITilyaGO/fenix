@@ -335,7 +335,7 @@ ul class="nav nav-tabs non-print"
   - displayed_n = 0
   .block
     ul class="nav nav-tabs non-print" id="order_tab"
-      - @sections.sort_by{|o|o.index||0}.each do |tab|
+      - @sections.sort_by(&:ix).each do |tab|
         - cat_enabled = @order.by_sec?(tab.id)
         - displayed_n += 1 if cat_enabled
         - my = @my_section&.id == tab.id
@@ -347,27 +347,27 @@ ul class="nav nav-tabs non-print"
             i.fa.fa-exclamation-triangle 
   
     .tab-content id="for_order_tab"
-      - @sections.sort_by{|o|o.index||0}.each_with_index do |s, i|
+      - @sections.sort_by(&:ix).each_with_index do |s, i|
         - tab_visible = @order.by_sec?(s.id)
         - my = @my_section&.id == s.id
         - unless tab_visible
           block.non-print id="cat-#{s.id}"
         - else
           .tab-pane id="cat-#{s.id}" class=[('filled' if tab_visible), ('my' if my), ('non-print' unless tab_visible && my)]
-            - op = @order.order_parts.find_by(section_id: s.id)
+            - op = @order.order_parts.find_by(section_id: s.ix)
             - if op&.finished?
               .non-print.pull-right
                 p Коробок: #{op.boxes}
-            - if can_view_section?(:sections, :complete, s.id)
-              - if @orderstatus.what?(:anew, s.id)
+            - if can_view_section?(:sections, :complete, s.ix)
+              - if @orderstatus.what?(:anew, s.ix)
                 .non-print.text-center
                   .btn.btn-sm.btn-prepare.put-status data-action=url(:orders, :status, id: @order.id, section: s.id)
                     | Подтвердить #{op.section.name}
-              - if @orderstatus.what?(:prepare, s.id)
+              - if @orderstatus.what?(:prepare, s.ix)
                 .non-print.text-center
                   .btn.btn-sm.btn-current.put-status data-action=url(:orders, :midstatus, id: @order.id, section: s.id)
                     | #{t("status.prep.s#{op.section_id}")} #{op.section.name}
-              - if @orderstatus.what?(:current, s.id)
+              - if @orderstatus.what?(:current, s.ix)
                 .non-print
                   fieldset class='control-group'
                     = label_tag "Коробок", :class => 'col-md-3 control-label'
@@ -412,7 +412,7 @@ ul class="nav nav-tabs non-print"
                     - @order.by_cat(tab.id).each do |ol|
                       - catsum += ol.price*ol.amount
                       tr class="order-line"
-                        = hidden_field_tag "line[#{ol.id}][id]", :value => ol[:id]
+                        = hidden_field_tag "line[#{ol.id}][id]", :value => ol.id
                         td.only-print &nbsp;
                         td.col-md-4
                           = ol.product.displayname
@@ -421,7 +421,7 @@ ul class="nav nav-tabs non-print"
                             div = ol.description
                         td.col-md-1
                           = ol.amount
-                          - rsv = @rese.fetch(ol.id, 0)
+                          - rsv = @rese.fetch(ol.id.to_i, 0)
                           - if rsv > 0
                             .non-print.label.label-info = rsv
                         td.col-md-1.non-print
@@ -443,13 +443,13 @@ ul class="nav nav-tabs non-print"
                               '  
                               .label.label-success = to_dm timeline_unf(ols[:t])
                         td.col-md-1.non-print: .controls
-                          - if allow_route?(:orders_infact) && can_view_section?(:sections, :complete, s.id)
+                          - if allow_route?(:orders_infact) && can_view_section?(:sections, :complete, s.ix)
                             = (text_field_tag "line[#{ol.id}][done_amount]", :value => ol.done_amount,
                             :autocomplete => "off", :class => "form-control input-sm")
                           - else
                             .text-center = ol.done_amount
                         td.col-md-1.vert-align.non-print: .controls
-                          - if allow_route?(:orders_infact) && can_view_section?(:sections, :complete, s.id)
+                          - if allow_route?(:orders_infact) && can_view_section?(:sections, :complete, s.ix)
                             = hidden_field_tag "line[#{ol.id}][ignored]", :value => 'false'
                             = check_box_tag "line[#{ol.id}][ignored]", :checked => ol.ignored
                           - else

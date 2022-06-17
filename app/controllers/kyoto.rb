@@ -338,6 +338,13 @@ Fenix::App.controllers :kyoto do
       Cabie.wire(db).close
       Cabie.open(db, :read) if act == :read
       Cabie.open(db, :write) if act == :write
+
+      if act == :nosync
+        conf = Cabie.species(db)
+        conf[:autosync] = false
+        Cabie.room db, **conf
+        Cabie.open(db, :write)
+      end
     end
     @output = [db]
     @output << notice_for_time(time)

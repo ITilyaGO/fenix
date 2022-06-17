@@ -52,7 +52,7 @@ Fenix::App.controllers :c1c do
   end
 
   post :products, :provides => :json do
-    links = CabiePio.folder(:product, :k1c).flat.trans(:to_i)
+    links = CabiePio.folder(:product, :k1c).flat
     parents = Product.pluck(:parent_id).compact.uniq
     prs = Product.joins(:category).eager_load(:parent).select(:id, :name, :price)
       .reject{|a| parents.include? a[:id]}
@@ -141,9 +141,9 @@ Fenix::App.controllers :c1c do
   end
 
   get :full do
-    @cats = Category.where(category: nil).order(:index => :asc)
+    @cats = KSM::Category.all
     @parents = Product.pluck(:parent_id).compact.uniq
-    @c1c_pro = CabiePio.folder(:product, :k1c).flat.trans(:to_i)
+    @c1c_pro = CabiePio.folder(:product, :k1c).flat
     render 'c1c/fulltable'
   end
 end

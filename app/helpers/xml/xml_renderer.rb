@@ -80,7 +80,7 @@ class Xmle
 
       edict << (prods = create_node('Товары'))
       
-      scs = Section.all
+      scs = KSM::Section.all
       habits(scs, :index)
       scs.sort_by{|o|o.index||0}.each do |s|
         s.categories.each do |tab|

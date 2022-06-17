@@ -29,11 +29,11 @@ ul.nav.nav-tabs
 
 br
 hr
-= form_for :product, url(:products, :sticker), :method => :put, :class => 'form-horizontal' do |f|
+= form_for :supermodel, url(:products, :sticker), :method => :put, :class => 'form-horizontal' do |f|
   - @cats.each do |category|
     /h4 #{category.name}
     - category.subs_ordered.each do |sub|
-      - next unless can_view_section?(:sections, :stock, category.section_id)
+      - next unless can_view_section?(:sections, :stock, category.section.ix)
       .row
         collapser titler="#{category.name}. #{sub.name}"
 
@@ -48,7 +48,7 @@ hr
               /th class="non-print" &nbsp;
               th class="non-print" &nbsp;
             
-            - sub.all_products.order(:index => :asc).each do |ol|
+            - all_products_for(sub.id).each do |ol|
               /- next if @parents.include? ol.id
               /- sticker = @kc_products[ol.id.to_s].to_f
               tr class="order-line"

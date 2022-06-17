@@ -35,7 +35,7 @@ module Fenix::App::ProductsHelper
   end
 
   def store_product_section
-    ps = Product.joins(:category).all
+    ps = Product.all
     ps.map{|p|[p.id, p.category.category.section_id]}.to_h
   end
 
@@ -49,6 +49,24 @@ module Fenix::App::ProductsHelper
       # name = [node.name, node.org].reject(&:blank?).join(", ")
       { :name => node.name, :id => node.id, :city => node.place_name }
     end
+  end
+
+  def known_cities
+    wonderbox_set(:known_cities, %w[RU RU-YAR-ARO]) unless wonderbox(:known_cities)
+    Padrino.cache[:known_cities] ||= KatoAPI.batch(wonderbox(:known_cities))
+  end
+
+  def known_cities_add city
+    return if wonderbox(:known_cities).include? city
+    ary = wonderbox(:known_cities)
+    ary << city
+    wonderbox_set(:known_cities, ary) 
+    # Padrino.cache.delete(:known_cities)
+    Padrino.cache[:known_cities] = KatoAPI.batch(ary)
+  end
+
+  def cache_corel_root
+    Padrino.cache[:corel_root] ||= wonderbox(:corel_root)
   end
 
   def json_products_list
@@ -66,22 +84,24 @@ module Fenix::App::ProductsHelper
   end
 
   def json_list
-    parents = Product.pluck(:parent_id).compact.uniq
-    Product.joins(:category).eager_load(:parent).select(:id, :name, :price)
-      .reject{|a| parents.include? a[:id]}
-      .map{|a| {id: a[:id], price: a[:price], name: a.displayname}}
+    Product.all.map{|a| {id: a.id, price: a.price, name: a.displayname}}
+
+    # parents = Product.pluck(:parent_id).compact.uniq
+    # Product.joins(:category).eager_load(:parent).select(:id, :name, :price)
+    #   .reject{|a| parents.include? a[:id]}
+    #   .map{|a| {id: a[:id], price: a[:price], name: a.displayname}}
   end
 
   def json_cats
-    @parents = Product.pluck(:parent_id).compact.uniq
-    nodes = Category.where(:category => nil)
+    @parents = [] #Product.pluck(:parent_id).compact.uniq
+    nodes = KSM::Category.toplevel
     nodes.map do |node|
       { :title => node.name, :key => node.id, :children => json_subs(node).compact }
     end
   end
   
   def json_subs(node)
-    nodes = node.subcategories.order(:index => :asc)
+    nodes = node.subs_ordered
     nodes.map do |node|
       next if !node.all_products.any?
       { :title => node.name, :key => node.id, :lazy => true, :children => json_prods(node).compact }
@@ -89,7 +109,7 @@ module Fenix::App::ProductsHelper
   end
   
   def json_prods(node)
-    nodes = node.all_products.includes(:parent).order(:index => :asc)
+    nodes = node.all_products
     nodes.map do |node|
       next if @parents.include? node.id
       { :title => node.displayname, :key => node.id }
@@ -212,12 +232,16 @@ module Fenix::App::ProductsHelper
     # bal_need_order_start(order)
   end
 
+  def product_is_glass? id
+    products_hash.fetch(id, nil) == storebox(:product, :glass_cat)
+  end
+
   def products_hash
-    @products_hash ||= Product.all.pluck(:id, :category_id).map{|a|[a.first, a.last.to_i]}.to_h
+    @products_hash ||= Product.all.map{ |p| [p.id, p.category_id] }.to_h
   end
 
   def category_matrix
-    @category_matrix ||= Category.all.pluck(:id, :category_id).to_h
+    @category_matrix ||= KSM::Category.all.map{ |c| [c.id, c.category_id] }.to_h
   end
 
   def section_matrix
@@ -234,6 +258,12 @@ module Fenix::App::ProductsHelper
 
   def all_catagories
     @all_catagories ||= Category.all
+  end
+
+  def all_products_for sub
+    @ksm_pro_gr ||= Product.all.group_by(&:category_id)
+    
+    @ksm_pro_gr.fetch(sub, [])
   end
 
   private
