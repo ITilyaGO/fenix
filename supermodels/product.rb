@@ -19,7 +19,11 @@ class Product < Doppel
   end
 
   def wfindex
-    @windex || 0
+    (@windex || :aaaaaaaa).to_s.rjust(8,"0")
+  end
+
+  def cindex
+    [category.wfindex, wfindex].join
   end
 
   def displayname

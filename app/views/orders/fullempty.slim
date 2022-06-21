@@ -189,7 +189,7 @@
               th Цена
               th Сумма
               th &nbsp;
-            - all_products_for(sub.id).each do |line|
+            - all_products_for(sub.id).sort_by(&:wfindex).each do |line|
               - next if !line.global? && line.place_id != @place
               - next if @parents.include?(line.id)
               - i = i + 1
