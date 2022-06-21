@@ -155,7 +155,7 @@ Fenix::App.controllers :orders do
     @sections = KSM::Section.all
     # @sections = Section.includes(:categories).all
     # habits(@sections, :index)
-    @my_section = @sections.detect{ |a| a.id == current_account.section_id }
+    @my_section = @sections.detect{ |a| a.ix == current_account.section_id }
     @order_part = @order.order_parts.find_by(:section_id => @my_section&.ix)
     @tabs = Category.where(:category => nil)
 

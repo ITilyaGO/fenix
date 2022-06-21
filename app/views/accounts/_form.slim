@@ -55,8 +55,8 @@ fieldset class='control-group#{error ? ' has-error' : ''}'
     select name="account[section_id]" class="huge mbl"
       = content_tag(:option, 'Нет', { :value => nil })
       - sections.each do |s|
-        - html_attributes = { :value => s.id }
-        - html_attributes[:selected] ||= option_is_selected?(s.id, s.name, @account.section_id)
+        - html_attributes = { :value => s.ix }
+        - html_attributes[:selected] ||= option_is_selected?(s.ix, s.name, @account.section_id)
         = content_tag(:option, s.name, html_attributes)
 
 - error = @account.errors.include?(:password)
