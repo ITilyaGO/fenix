@@ -4,7 +4,7 @@ module Fenix::App::ThingsHelper
     bo.unshift
     bo.delete id
     bo << id
-    wonderbox_set(:things_by_date, bo)
+    wonderbox_set(:things_by_date, bo.take(100))
   end
 
   def thing_seed_from cat
