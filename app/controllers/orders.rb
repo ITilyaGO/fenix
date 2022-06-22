@@ -984,7 +984,7 @@ Fenix::App.controllers :orders do
     redirect(url(:orders, :price, :id => params[:id]))
   end
 
-  get :bunch do
+  get :buncha do
     render 'orders/bunch'
   end
 

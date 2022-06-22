@@ -13,7 +13,7 @@ br
       .block.cat.hand riot-tag='subclick': p #{category.name}    
 
       - category.subs_ordered.sort_by{|x|-@catneed.fetch(x.id, 0)}.each do |sub|
-        - next unless can_view?(:sys, :stock) || can_view_section?(:sections, :stock, category.section_id)
+        - next unless can_view?(:sys, :stock) || can_view_section?(:sections, :stock, category.section.ix)
         - catstock = @catstock.fetch(sub.id, 0)
         - catneed = @catneed.fetch(sub.id, 0)
         - next if catstock >= 0 && catneed == 0 && !params[:all]
