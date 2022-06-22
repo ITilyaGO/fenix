@@ -38,10 +38,10 @@ Fenix::App.controllers :c1c do
     headers['Content-Disposition'] = "attachment; filename=pio-to-1c.xml"
     headers['Content-Type'] = "application/xml"
     order = Order.find(params[:id])
-    unless params[:force]
-      redirect_to url(:c1c, :absent, id: order.id) if check_absent_1c(order).any?
-    end
-    Xmle.customer_order2(order)
+    # unless params[:force]
+    #   redirect_to url(:c1c, :absent, id: order.id) if check_absent_1c(order).any?
+    # end
+    Xmlfr.customer_order2(order)
   end
 
   get :absent, :with => :id do
