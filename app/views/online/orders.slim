@@ -6,6 +6,7 @@ div class="tabs-content"
         // th class='header' = mat(:order, :name)
         // th class='header' = mat(:order, :amount)
         th class='header' Name
+        th.header
         th class='header' Date
         th class='header' Status
         th class='header list-row-action-header'
@@ -16,6 +17,7 @@ div class="tabs-content"
           td class='list-column' = "#{order.id}"
           // td class='list-column' = order.name
           td class='list-column' = [order.account.name, order.account.org].reject(&:empty?).join(" / ")
+          td.list-column = deli(rur order.total)
           td class='list-column' = to_msk(order.created_at)
           td class='list-column'
             | #{Online::Order.status_name(order.status)}
