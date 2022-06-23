@@ -34,8 +34,8 @@ fieldset class='control-group#{error ? ' has-error' : ''}'
       fieldset.control-group
         - sections.each do |s|
           .col-md-12.controls.custom-control
-            = check_box_tag :"secta[#{s.id}]", id: "secta[#{s.id}]", :value => s.id, :class => 'custom-control-input'
-            label.custom-control-label(for = "secta[#{s.id}]") = s.name
+            = check_box_tag :"secta[#{s.ix}]", id: "secta[#{s.ix}]", :value => s.ix, :class => 'custom-control-input'
+            label.custom-control-label(for = "secta[#{s.ix}]") = s.name
     .col-md-6.text-center
       sub
         ' Чтобы увидеть текущие роли нажмите

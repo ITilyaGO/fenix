@@ -382,7 +382,7 @@ ul class="nav nav-tabs non-print"
                         | Собрать #{op.section.name}
 
             - catsum = 0
-            - s.categories.each do |tab|
+            - s.categories.sort_by(&:wfindex).each do |tab|
               - cat_visible = @order.by_cat?(tab.id)
               - if cat_visible
                 .table-res4ponsive
@@ -409,7 +409,7 @@ ul class="nav nav-tabs non-print"
                       /th.only-print width='5%' Деколи
                       /th.only-print width='5%' Тираж
                     
-                    - @order.by_cat(tab.id).each do |ol|
+                    - @order.by_cat(tab.id).sort_by{|a|a.product.cindex}.each do |ol|
                       - catsum += ol.price*ol.amount
                       tr class="order-line"
                         = hidden_field_tag "line[#{ol.id}][id]", :value => ol.id

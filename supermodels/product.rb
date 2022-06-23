@@ -19,15 +19,19 @@ class Product < Doppel
   end
 
   def wfindex
-    @windex || 0
+    (@windex || :aaaaaaaa).to_s.rjust(8,"0")
   end
 
-  def displayname
+  def cindex
+    [@ignored ? 1 : 0, category.wfindex, wfindex, displayname(text: true)].join
+  end
+
+  def displayname text: false
     nip = settings&.fetch(:ni, 0)
     city = OrderAssist.known_cities[@place_id]&.model&.name
     a = [name, city, look]
     a = [name, look, city] if nip == 1
-    a.unshift '☠️' if @ignored == 1
+    a.unshift '☠️' if @ignored == 1 && !text
     a.compact.join(' ')
   end
 

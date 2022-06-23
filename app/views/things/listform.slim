@@ -17,8 +17,19 @@
                 - html_attributes[:selected] ||= option_is_selected?(a.id, a.name, @archetype)
                 = content_tag(:option, a.name, html_attributes)
       list reload='/things/edit/'
-    .col-md-6.col-md-offset-3
+    .col-md-6.col-md-offset-3.relat
       = form_for :product, url(:things, :update, :id => @product.id), :method => :put, :autocomplete => 'off', :class => 'form-std' do |f|
+        .f-actions.text-center.absol style='right: -15em;'
+          = f.check_box :ignored, value: 1, :class => 'swap-input', checked: @product.ignored == 1
+          label.btn.btn-sm.btn-desert.text-danger.swap-label(for = 'product_ignored')
+            | del
+            .fa.fa-toggle-on
+          |&nbsp;&nbsp;&nbsp;&nbsp;
+          = f.submit pat(:save).downcase, :class => 'btn btn-sm btn-prime'
+          |&nbsp;&nbsp;&nbsp;&nbsp;
+          - if @product.id != '0000'
+            = f.submit pat(:copy).downcase, :class => 'btn btn-sm btn-default', name: 'clone'
+
         fieldset.control-group.emb
           label.control-label = @product.id
           .controls.wp100 = f.text_field :displayname, :class => 'form-control input-large input-with-feedback'
@@ -60,16 +71,6 @@
             label.control-label 1c
             .controls.wp100 = text_field_tag :'raw[k1c]', value: @xproduct.k1c, :class => 'form-control input-large'
         
-        .f-actions.tmar-3.text-center
-          = f.check_box :ignored, value: 1, :class => 'swap-input', checked: @product.ignored == 1
-          label.btn.btn-sm.btn-desert.text-danger.swap-label(for = 'product_ignored')
-            | del
-            .fa.fa-toggle-on
-          |&nbsp;&nbsp;&nbsp;&nbsp;
-          - if @product.id != '0000'
-            = f.submit pat(:copy).downcase, :class => 'btn btn-sm btn-default', name: 'clone' 
-          |&nbsp;&nbsp;&nbsp;&nbsp;
-          = f.submit pat(:save).downcase, :class => 'btn btn-sm btn-prime'
         .tmar-3
 
 

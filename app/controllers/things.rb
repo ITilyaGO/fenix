@@ -17,7 +17,7 @@ Fenix::App.controllers :things do
     ids = wonderbox(:things_by_date).reverse
     @products = Product.find_all(ids).sort_by{|a| ids.index(a.id)}
     if ccat = params[:cat]
-      @products = Product.all.select{ |a| a.category_id == ccat }
+      @products = Product.all.select{ |a| a.category_id == ccat }.sort_by(&:cindex)
       @product = Product.new({ category_id: ccat })
       @ccat = ccat
     end
@@ -57,7 +57,7 @@ Fenix::App.controllers :things do
     ids = wonderbox(:things_by_date).reverse
     @products = Product.find_all(ids).sort_by{|a| ids.index(a.id)}
     if ccat = params[:cat]
-      @products = Product.all.select{ |a| a.category_id == ccat }
+      @products = Product.all.select{ |a| a.category_id == ccat }.sort_by(&:cindex)
       @product.category_id = ccat unless @product.exist?
       @ccat = ccat
     end

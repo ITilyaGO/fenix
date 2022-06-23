@@ -192,7 +192,7 @@ br
           block.non-print id="cat-#{s.id}"
         - else
           .tab-pane id="cat-#{s.id}" class=[('filled' if tab_visible), ('my' if my), ('non-print' unless tab_visible && my)]
-            - s.categories.each do |tab|
+            - s.categories.sort_by(&:wfindex).each do |tab|
               - cat_visible = @order.by_cat?(tab.id)
               - if cat_visible
                 div class="table-res4ponsive"
@@ -210,7 +210,7 @@ br
                       th.non-print Наклеено
                       th.non-print.text-center Факт
                     
-                    - @order.by_cat(tab.id).each do |ol|
+                    - @order.by_cat(tab.id).sort_by{|a|a.product.cindex}.each do |ol|
                       tr class="order-line"
                         = hidden_field_tag "line[#{ol.id}][id]", :value => ol.id
                         td.only-print &nbsp;
