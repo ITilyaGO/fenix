@@ -142,6 +142,7 @@
         = hidden_field_tag 'line[][id]', :value => line[:id]
       td class="col-md-4"
         span class="product"
+      td
       td class="col-md-3"
         = text_field_tag 'line[][comment]', :value => line[:comment], :placeholder => "Комментарий к позиции", :class => "form-control input-sm"
       td class="col-md-1" class="vert-align"
@@ -166,6 +167,7 @@
       tr data-sum="0"
         th Номер
         th Наименование
+        th
         th Коммент
         th Количество
         th Остаток
@@ -183,6 +185,7 @@
             tr data-sum="0"
               th Номер
               th Наименование
+              th
               th Коммент
               th Количество
               th Остаток
@@ -199,6 +202,7 @@
                   = hidden_field_tag 'line[][id]', :value => line.id
                 td class="col-md-4"
                   span class="product" = line.displayname
+                td = line.art
                 td class="col-md-3"
                   = text_field_tag 'line[][comment]', :placeholder => "Комментарий к позиции", :class => "form-control input-sm"
                 td class="col-md-1" class="vert-align"

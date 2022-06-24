@@ -162,14 +162,14 @@ Fenix::App.controllers :things do
     output = "\xEF\xBB\xBF" if params.include? :win
     output << CSV.generate(:col_sep => ';') do |csv|
       csv << %w(id name topcat category type place view price art img corel bb
-        weight height width length sku k1c barcode desc)
+        weight height width length sku barcode desc)
       csv << %w(уин название отдел группа тип город вид цена артикул картинка собрание склад
-        вес высота ширина длина индекс 1с штрихкод описание)
+        вес высота ширина длина индекс штрихкод описание)
       @products.each do |t|
         xt = SL::Product.new t.id
         csv << [t.id, t.displayname, t.category.category.name, cats[t.category_id], t.name,
           t.hierplace(@kc_towns[t.place_id]&.model), t.look, t.price, t.art, t.sketch_ext, t.fullcorel,
-          xt.arn, t.dim_weight, t.dim_height, t.dim_width, t.dim_length, t.autoart, xt.k1c, t.autobar, t.desc
+          xt.arn, t.dim_weight, t.dim_height, t.dim_width, t.dim_length, t.autoart, t.autobar, t.desc
         ]
       end
     end

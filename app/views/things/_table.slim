@@ -43,7 +43,6 @@
         th class='header' = mat(:product, :category)
         th class='header' = mat(:product, :updated)
         th.header bku
-        th.header 1c
         th class='header list-row-action-header'
 
     tbody
@@ -70,9 +69,6 @@
             = to_msk(product.updated_at)
           td.list-column
             - unless xprod.arn
-              .fa.fa-exclamation-triangle.text-warning
-          td.list-column
-            - unless xprod.k1c
               .fa.fa-exclamation-triangle.text-warning
           td class='list-column list-row-action'
             div class='list-row-action-wrapper'

@@ -2,9 +2,9 @@ class Product < Doppel
   PFX = :thing
 
   PROPS = [:name, :sn, :category_id, :place_id, :sketch_id, :company_id, :barcode, :price, :sku, :art, :g, :bbid,
-    :discount, :lotof, :desc, :dim_weight, :dim_height, :dim_length, :dim_width, :look, :corel, :windex, :tagname
+    :discount, :lotof, :lotof_mfg, :desc, :dim_weight, :dim_height, :dim_length, :dim_width, :look, :corel, :windex, :tagname
   ]
-  FPROPS = %i[art discount lotof desc dim_weight dim_height dim_length dim_width look corel]
+  FPROPS = %i[art discount lotof lotof_mfg desc dim_weight dim_height dim_length dim_width look corel]
   SVSPROPS = %i[created_at updated_at ignored dates users history settings]
   PROPS += SVSPROPS
   attr_accessor *PROPS
@@ -110,7 +110,7 @@ class Product < Doppel
     op.index = @windex
     op.save
 
-    stompsync
+    stompsync rescue nil
   end
 
   def stompsync
@@ -135,7 +135,8 @@ class Product < Doppel
         ni: [:to_i],
         ignored: [:to_i],
         discount: [:to_i],
-        lotof: [:to_i]
+        lotof: [:to_i],
+        lotof_mfg: [:to_i]
       }
     end
 

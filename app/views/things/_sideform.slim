@@ -91,47 +91,62 @@ fieldset class='control-group#{error ? ' has-error' : ''}'
   .next
     | &nbsp;%
 
-fieldset.control-group
-  label.control-label
-  .controls
-    .btn.btn-link riot-tag='shower' data-classy='.pdims' Характеристики...
-    .btn.btn-link riot-tag='shower' data-classy='.wsdims' Сайт...
+fieldset.control-group.tmar-2
+  .controls.col-md-12.text-right
+    .col-md-6: .btn.btn-link riot-tag='shower' data-classy='.pdims' Характеристики...
+    .col-md-6: .btn.btn-link riot-tag='shower' data-classy='.wsdims' Сайт...
 
-.pdims.hide
-  - error = @product.errors.include?(:weight)
-  fieldset class='control-group#{error ? ' has-error' : ''}'
-    = f.label "#{:weight} (g)", :class => 'control-label'
-    div class='controls'
-      = f.text_field :dim_weight, :class => 'form-control input-large input-with-feedback'
-      / span class='help-inline' = error ? f.error_message_on(:index, :class => 'text-error') : pat(:example)
-  - error = @product.errors.include?(:height)
-  fieldset class='control-group#{error ? ' has-error' : ''}'
-    = f.label "#{:height} (mm)", :class => 'control-label'
-    div class='controls'
-      = f.text_field :dim_height, :class => 'form-control input-large input-with-feedback'
-  fieldset class='control-group#{error ? ' has-error' : ''}'
-    = f.label "#{:width} (mm)", :class => 'control-label'
-    div class='controls'
-      = f.text_field :dim_width, :class => 'form-control input-large input-with-feedback'
-  fieldset class='control-group#{error ? ' has-error' : ''}'
-    = f.label "#{:length} (mm)", :class => 'control-label'
-    div class='controls'
-      = f.text_field :dim_length, :class => 'form-control input-large input-with-feedback'
+.col-md-12.row
+  .pdims.col-md-6
+    - error = @product.errors.include?(:weight)
+    fieldset class='control-group#{error ? ' has-error' : ''}'
+      = f.label "#{:weight} (g)", :class => 'control-label'
+      div class='controls'
+        = f.text_field :dim_weight, :class => 'form-control input-large input-with-feedback'
+        / span class='help-inline' = error ? f.error_message_on(:index, :class => 'text-error') : pat(:example)
+    - error = @product.errors.include?(:height)
+    fieldset class='control-group#{error ? ' has-error' : ''}'
+      = f.label "#{:height} (mm)", :class => 'control-label'
+      .controls
+        = f.text_field :dim_height, :class => 'form-control input-large input-with-feedback'
+      .extra
+        .fa.fa-compass.text-info.prl
+    fieldset class='control-group#{error ? ' has-error' : ''}'
+      = f.label "#{:width} (mm)", :class => 'control-label'
+      div class='controls'
+        = f.text_field :dim_width, :class => 'form-control input-large input-with-feedback'
+    fieldset class='control-group#{error ? ' has-error' : ''}'
+      = f.label "#{:length} (mm)", :class => 'control-label'
+      div class='controls'
+        = f.text_field :dim_length, :class => 'form-control input-large input-with-feedback'
 
-.wsdims.hide
-  - error = @product.errors.include?(:weight)
-  fieldset class='control-group#{error ? ' has-error' : ''}'
-    = f.label :index, :class => 'control-label'
-    .controls
-      = f.text_field :windex, :class => 'form-control input-large input-with-feedback'
-  fieldset class='control-group#{error ? ' has-error' : ''}'
-    = f.label 'кратность', :class => 'control-label'
-    .controls
-      = f.text_field :lotof, :class => 'form-control input-large'
-  fieldset class='control-group#{error ? ' has-error' : ''}'
-    = f.label :tag, :class => 'control-label'
-    .controls
-      = f.text_field :tagname, :class => 'form-control input-large input-with-feedback'
+  .wsdims.col-md-6
+    - error = @product.errors.include?(:weight)
+    fieldset class='control-group#{error ? ' has-error' : ''}'
+      = f.label :index, :class => 'control-label'
+      .controls
+        = f.text_field :windex, :class => 'form-control input-large input-with-feedback'
+      .extra
+        .fa.fa-compass.text-info.prl
+    fieldset class='control-group#{error ? ' has-error' : ''}'
+      = f.label 'кратность', :class => 'control-label'
+      .controls
+        = f.text_field :lotof, :class => 'form-control input-large'
+      .extra
+        .fa.fa-compass.text-info.prl
+    fieldset class='control-group#{error ? ' has-error' : ''}'
+      = f.label 'производство', :class => 'control-label'
+      .controls
+        = f.text_field :lotof_mfg, :class => 'form-control input-large'
+    fieldset class='control-group#{error ? ' has-error' : ''}'
+      = f.label :tag, :class => 'control-label'
+      .controls
+        = f.text_field :tagname, disabled: true, :class => 'form-control input-large input-with-feedback'
+      .extra
+        .fa.fa-compass.text-info.prl
+.clearfix
+
+.tmar-2
 fieldset class='control-group#{error ? ' has-error' : ''}'
   = f.label "описание", :class => 'control-label'
   .controls.wp100
@@ -140,7 +155,6 @@ fieldset class='control-group#{error ? ' has-error' : ''}'
 
     / span class='help-inline' = error ? f.error_message_on(:height, :class => 'text-error') : pat(:example)
         // = sub.id == @product.category_id ? "selected" : ""
-.tmar-2
 
 - error = @product.errors.include?(:height)
 fieldset class='control-group#{error ? ' has-error' : ''}'

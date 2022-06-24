@@ -175,6 +175,7 @@ module Fenix::App::MigrateHelpers
     end
     cats.reject{ |c| c.category_id.nil? }.each do |c|
       thing = KSM::Category.nest
+      storebox_set(:product, :glass_cat, thing.id) if c.id == 11
       lookup[c.id] = thing.id
       thing.formiz c.attributes
       thing.category_id = lookup[c.category_id]
@@ -182,7 +183,6 @@ module Fenix::App::MigrateHelpers
       thing.section_id = KSM::Category.find(thing.category_id).section_id
       thing.windex = c.index
       thing.save
-      storebox_set(:product, :glass_cat, thing.id) if c.id == 11
     end
     lookup
   end

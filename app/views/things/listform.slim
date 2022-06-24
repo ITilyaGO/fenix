@@ -17,18 +17,9 @@
                 - html_attributes[:selected] ||= option_is_selected?(a.id, a.name, @archetype)
                 = content_tag(:option, a.name, html_attributes)
       list reload='/things/edit/'
-    .col-md-6.col-md-offset-3.relat
-      = form_for :product, url(:things, :update, :id => @product.id), :method => :put, :autocomplete => 'off', :class => 'form-std' do |f|
-        .f-actions.text-center.absol style='right: -15em;'
-          = f.check_box :ignored, value: 1, :class => 'swap-input', checked: @product.ignored == 1
-          label.btn.btn-sm.btn-desert.text-danger.swap-label(for = 'product_ignored')
-            | del
-            .fa.fa-toggle-on
-          |&nbsp;&nbsp;&nbsp;&nbsp;
-          = f.submit pat(:save).downcase, :class => 'btn btn-sm btn-prime'
-          |&nbsp;&nbsp;&nbsp;&nbsp;
-          - if @product.id != '0000'
-            = f.submit pat(:copy).downcase, :class => 'btn btn-sm btn-default', name: 'clone'
+    = form_for :product, url(:things, :update, :id => @product.id), :method => :put, :autocomplete => 'off', :class => 'form-std flex-c' do |f|
+      .col-md-8.col-md-offset-3.relat
+        
 
         fieldset.control-group.emb
           label.control-label = @product.id
@@ -48,12 +39,8 @@
 
         fieldset.control-group.hame
           .alabel.label 1c
-          label.control-label = @xproduct.k1c[-12..-1] rescue nil
-          - if @xproduct.k1c
-            - k1c = KSM1C::Cat.find @xproduct.k1c
-            .controls.wp100 = f.text_field :n1c, value: k1c&.at_path('НаименованиеПолное'), :class => 'form-control input-large'
-          - else
-            .controls: .form-control: .fa.fa-exclamation-triangle.text-warning
+          label.control-label = @product.id
+          .controls.wp100: .form-control
         
         fieldset.control-group
           label.control-label
@@ -67,12 +54,33 @@
             .controls.wp100 = text_field_tag :'raw[arn]', value: @xproduct.arn, :class => 'form-control input-large'
             .pll.spacer
             .controls = text_field_tag :'raw[multi]', value: @xproduct.multi, :class => 'form-control input-large'
-          fieldset.control-group
+          /fieldset.control-group
             label.control-label 1c
             .controls.wp100 = text_field_tag :'raw[k1c]', value: @xproduct.k1c, :class => 'form-control input-large'
         
-        .tmar-3
+        .foot style='height: 40vh;'
 
+      .f-actions.text-center.col-md-3 style='padding: 0;margin-left: 2em;': .white-sticky.cmar-05 style='top: 50vh;'
+        = f.check_box :archive, value: 1, :class => 'swap-input', checked: false
+        /label.btn.btn-sm.btn-camo.wp100.text-danger.cmar-05.flex-c.vcenter.caps.swap-label(for = 'product_archive')
+          .flexie.text-right архив
+          .fa.fa-toggle-on style='font-size: 1.8em;'
+          .flexie.text-left нет
+        = f.check_box :ignored, value: 1, :class => 'swap-input', checked: @product.ignored == 1
+        label.btn.btn-sm.btn-desert.wp100.text-danger.cmar-05.flex-c.vcenter.caps.swap-label(for = 'product_ignored')
+          .flexie.text-right удалено
+          .fa.fa-toggle-on style='font-size: 1.8em;'
+          .flexie.text-left активно
+        = f.submit pat(:save).downcase, :class => 'btn btn-sm btn-prime btn-wide tmar-1'
+        - if @product.id != '0000'
+          = f.submit pat(:copy).downcase, :class => 'btn btn-sm btn-default tmar-1', name: 'clone'
+
+        .tmar-2.wp100.tiny-text
+          - unless !@product.exist? || @xproduct.arn
+            .li.small
+              .fa.fa-exclamation-triangle.text-warning
+              | Нет склада
+ 
 
   .table50.col-md-12.hide = partial 'things/table'
 

@@ -35,8 +35,8 @@ Fenix::App.controllers :stickers do
     @title = pat(:edit_title, :model => "stickers for #{params[:id]}")
     @order = Order.includes(:order_lines_ar).find(params[:id])
     @sections = KSM::Section.all
-    @my_section = current_account.section
-    @order_part = @order.order_parts.find_by(:section_id => @my_section)
+    @my_section = @sections.detect{ |a| a.ix == current_account.section_id }
+    @order_part = @order.order_parts.find_by(:section_id => @my_section&.ix)
     @tabs = Category.where(:category => nil)
 
     @kc_client_hometown = CabiePio.get([:clients, :hometowns], @order.client.id).data

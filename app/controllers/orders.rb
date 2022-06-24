@@ -221,19 +221,19 @@ Fenix::App.controllers :orders do
   # end
 
   get :txtf, :with => :id, :provides => :txt do
-    @order = Order.includes(:order_lines).find(params[:id]) #_ar
+    @order = Order.includes(:order_lines_ar).find(params[:id]) #_ar
     @kc_order_town = CabiePio.get([:orders, :towns], @order.id).data
     @kc_towns = KatoAPI.batch([@kc_order_town])
-    @sections = Section.all #KSM
+    @sections = KSM::Section.all #KSM
     @my_section = @sections.detect{ |a| a.id == current_account.section }&.ix
 
     text = "#{@order.id} #{@kc_towns[@kc_order_town].model.name}\n"
     text << "\n"
 
-    @sections.sort_by(&:id).each_with_index do |s, i|
+    @sections.sort_by(&:ix).each_with_index do |s, i|
       next if i > 1
-      s.categories.each do |tab|
-        @order.by_cat(tab.id).each do |ol|
+      s.categories.sort_by(&:wfindex).each do |tab|
+        @order.by_cat(tab.id).sort_by{|a|a.product.cindex}.each do |ol|
           text << "#{ol.product.displayname}_#{!ol.description&.blank? ? ol.description : ' '}_#{ol.amount}\n"
         end
       end
