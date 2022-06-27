@@ -34,6 +34,7 @@ gem 'nokogiri'
 gem 'ox'
 gem 'barby'
 gem 'stomp'
+gem 'rqrcode'
 #gem 'simple_enum'
 #gem 'classy_enum'
 

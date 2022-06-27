@@ -1,0 +1,34 @@
+doctype 5
+html lang="en"
+  head
+    meta content='text/html; charset=utf-8' http-equiv='Content-Type'
+    meta name='viewport' content='width=device-width,initial-scale=1'
+    title = @title.present? ? "#{@title} | Admin" : "#{pat('login.title')} | Admin"
+    = favicon_tag 'favicon.ico'
+    = stylesheet_link_tag 'bootstrap', 'admin-ui'
+
+  body
+    = form_tag url(:sessions, :power), :class=>'login form-horizontal', autocomplete: 'off', style: 'width: 22em;' do
+        .login-header.modal-header
+          // div class="login-logo" = image_tag('logo.png', :alt => "Padrino's logo", :height => 250, :width => 193)
+        = {:error => 'danger', :warning => 'warning', :success => 'success', :notice => 'info'}.map { |type, class_name| flash_tag(type, :class => "alert alert-#{class_name} fade in") }.join.html_safe
+        .login-body.modal-body
+          
+          .form-group
+            .col-lg-12 = text_field_tag :name, :value => params[:name], :autofocus => true, :class => 'form-control'
+
+          .form-group
+            / label for="email" class='col-lg-2 control-label' = pat('login.email')
+            .col-lg-12 = email_field_tag :email, :value => params[:email], :class => 'form-control'
+
+          .form-group
+            / label for="password" class='col-lg-2 control-label' = pat('login.password')
+            .col-lg-12 = text_field_tag :password, :class => 'form-control'
+
+        .login-footer.modal-footer
+          .pull-left
+            - if Padrino.env == :development
+              .custom-control.custom-switch
+                = check_box_tag :bypass, :id => :bypass, :class => 'custom-control-input'
+                label.custom-control-label(for = 'bypass') = pat('login.bypass')
+          = submit_tag(pat('login.sign_in'), :class => 'btn btn-prime btn-wide lpull-right')

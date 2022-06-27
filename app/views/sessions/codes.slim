@@ -1,0 +1,8 @@
+.item.col-10
+  .text-center
+    img width="300px" src=url(:sessions, :codes, id: @id, format: 'svg')
+  
+  .text-center
+    span #{Secure.since} s
+
+= link_to :login, url(:sessions, :power)
