@@ -257,7 +257,7 @@ module Fenix::App::ProductsHelper
   end
 
   def all_catagories
-    @all_catagories ||= Category.all
+    @all_catagories ||= KSM::Category.all
   end
 
   def all_products_for sub

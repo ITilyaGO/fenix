@@ -26,8 +26,8 @@ ul class="nav nav-tabs non-print" id="weeks_tab"
   .summary.text-center.flex-c.center
     - sections = Section.all
     - sections.each do |s|
-      - sec_sum = @sec_sums.fetch(s.id, 0)
-      - sec_done = @sec_done.fetch(s.id, 0)
+      - sec_sum = @sec_sums.fetch(s.ix, 0)
+      - sec_done = @sec_done.fetch(s.ix, 0)
       - if sec_sum > 0
         .item-all.pull-left
           span

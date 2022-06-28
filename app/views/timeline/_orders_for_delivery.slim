@@ -77,8 +77,8 @@
           - sections = KSM::Section.all
           - sections.each do |s|
             - next unless can_view_section?(:sections, :sum, s.ix)
-            - sec_sum = sec_sums.fetch(s.id, 0)
-            - sec_done = sec_dones.fetch(s.id, 0)
+            - sec_sum = sec_sums.fetch(s.ix, 0)
+            - sec_done = sec_dones.fetch(s.ix, 0)
             - if sec_sum > 0
               .item-all.pull-left
                 span

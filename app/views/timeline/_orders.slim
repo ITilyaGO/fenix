@@ -98,8 +98,8 @@ table class="table table-hover table-condensed non-print"
       - sections = KSM::Section.all
       - sections.each do |s|
         - next unless can_view_section?(:sections, :sum, s.ix)
-        - sec_sum = sec_sums.fetch(s.id, 0)
-        - sec_done = sec_donea.fetch(s.id, 0)
+        - sec_sum = sec_sums.fetch(s.ix, 0)
+        - sec_done = sec_donea.fetch(s.ix, 0)
         - if sec_sum > 0
           .item-all.pull-left
             span

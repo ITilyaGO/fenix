@@ -7,7 +7,7 @@ module Fenix::App::StatHelper
         o.order_lines.map do |ol|
           pcat = category_matrix[products_hash[ol.product_id]]
           csec = all_catagories.detect{|c|c.id == pcat}&.section_id
-          csec == s.ix ? ol.price*ol.amount : 0
+          csec == s.id ? ol.price*ol.amount : 0
         end.sum
       end.sum
     end
@@ -23,7 +23,7 @@ module Fenix::App::StatHelper
           next 0 if ol.ignored
           pcat = category_matrix[products_hash[ol.product_id]]
           csec = all_catagories.detect{|c|c.id == pcat}&.section_id
-          csec == s.ix ? ol.price*(ol.done_amount||0) : 0
+          csec == s.id ? ol.price*(ol.done_amount||0) : 0
         end.sum
       end.sum
     end
