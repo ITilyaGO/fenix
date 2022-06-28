@@ -392,9 +392,9 @@ ul class="nav nav-tabs non-print"
                       tr
                         td = tab.name
                         td colspan=5
-                          - if tab.id == 18
+                          - if tab.id == storebox(:product, :ceram_tcat)
                             = sticker.first
-                          - if tab.id == 21
+                          - if tab.id == storebox(:product, :glass_tcat)
                             = sticker.last
                     tr
                       th.only-print width='20%' Собрано

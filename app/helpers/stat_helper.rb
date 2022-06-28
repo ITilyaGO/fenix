@@ -33,7 +33,7 @@ module Fenix::App::StatHelper
   def sum_by_delivery(orders)
     sums = {}
     Order.deliveries.each do |d, di|
-      sums[d.to_sym] = orders.select{|o|o.delivery.to_sym == d.to_sym}.map(&:total).sum
+      sums[d.to_sym] = orders.select{|o|o.delivery.to_sym == d.to_sym}.map(&:total).compact.sum
     end
     sums
   end

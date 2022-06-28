@@ -6,7 +6,7 @@
   - next if (abl_view & os.pstate.keys).empty?
   - reveals << order
 
-- price_total = @orders.map(&:total).sum
+- price_total = @orders.map(&:total).compact.sum
 - all_ids = @orders.map(&:id)
 - sec_sums = sum_by_sections(all_ids)
 .timeline: .summary
