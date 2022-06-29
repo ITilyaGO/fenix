@@ -996,33 +996,34 @@ Fenix::App.controllers :orders do
   get :bunch, :with => :id, :provides => :html do
     @title = pat(:edit_title, :model => "order #{params[:id]}")
     ids = params[:id].split(',').map(&:to_i)
-    @orders = Order.includes(:order_lines).where(id: ids)
-    @sections = Section.includes(:categories).all
-    habits(@sections, :index)
+    @orders = Order.includes(:order_lines_ar).where(id: ids)
+    @sections = KSM::Section.all
+    # habits(@sections, :index)
+    @my_section = @sections.detect{ |a| a.ix == current_account.section_id }
 
     @order = OrderBunch.new
     @orders.each do |order|
-      order.order_lines.each do |ool|
+      order.order_lines_ar.each do |ool|
         @order.order_lines << OrderLineBun.new(ool.serializable_hash)
       end
       
       @order.total += order.total
       @order.done_total += order.done_total
     end
-    @kc_products = CabiePio.folder(:products, :sticker).flat.trans(:to_i)
+    @kc_products = CabiePio.folder(:products, :sticker).flat
 
     render 'orders/bunch_view'    
   end
 
   get :bunch, :with => :id, :provides => :csv do
     ids = params[:id].split(',').map(&:to_i)
-    @orders = Order.includes(:order_lines).where(id: ids)
-    @sections = Section.includes(:categories).all
-    habits(@sections, :index)
+    @orders = Order.includes(:order_lines_ar).where(id: ids)
+    @sections = KSM::Section.all
+    # habits(@sections, :index)
 
     @order = OrderBunch.new
     @orders.each do |order|
-      order.order_lines.each do |ool|
+      order.order_lines_ar.each do |ool|
         @order.order_lines << OrderLineBun.new(ool.serializable_hash)
       end
       
@@ -1037,12 +1038,12 @@ Fenix::App.controllers :orders do
     output = "\xEF\xBB\xBF" if params.include? :win
     output << CSV.generate(:col_sep => ';') do |csv|
       csv << [:name, ids, :sum].flatten
-      @sections.sort_by{|o|o.index||0}.each_with_index do |s, i|
+      @sections.sort_by(&:ix).each_with_index do |s, i|
         next unless tab_visible = @order.by_sec?(s.id)
-        s.categories.each do |tab|
+        s.categories.sort_by(&:wfindex).each do |tab|
           next unless cat_visible = @order.by_cat?(tab.id)
           cp = nil
-          @order.by_cat(tab.id).each do |ol|
+          @order.by_cat(tab.id).sort_by{|a|a.product.cindex}.each do |ol|
             next if cp == ol.product_id
             cp = ol.product_id
             por = []

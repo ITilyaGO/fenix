@@ -12,7 +12,7 @@
   - displayed_n = 0
   .block
     ul class="nav nav-tabs non-print" id="order_tab"
-      - @sections.sort_by{|o|o.index||0}.each do |tab|
+      - @sections.sort_by(&:ix).each do |tab|
         - cat_enabled = @order.by_sec?(tab.id)
         - displayed_n += 1 if cat_enabled
         - my = @my_section&.id == tab.id
@@ -20,7 +20,7 @@
           = link_to tag_icon('fa fa-ok', "#{tab.name}"), "#cat-#{tab.id}", 'data-toggle' => "tab"
       
     .tab-content id="for_order_tab"
-      - @sections.sort_by{|o|o.index||0}.each_with_index do |s, i|
+      - @sections.sort_by(&:ix).each_with_index do |s, i|
         - tab_visible = @order.by_sec?(s.id)
         - my = @my_section&.id == s.id
         - unless tab_visible
@@ -28,7 +28,7 @@
         - else
           .tab-pane id="cat-#{s.id}" class=[('filled' if tab_visible), ('my' if my), ('non-print' unless tab_visible && my)]
             - catsum = 0
-            - s.categories.each do |tab|
+            - s.categories.sort_by(&:wfindex).each do |tab|
               - cat_visible = @order.by_cat?(tab.id)
               - if cat_visible
                 .table-res4ponsive
@@ -51,7 +51,7 @@
                     - @order.by_cat(tab.id).each do |ol|
                       - catsum += ol.price*ol.amount
                       tr class="order-line"
-                        = hidden_field_tag "line[#{ol.id}][id]", :value => ol[:id]
+                        = hidden_field_tag "line[#{ol.id}][id]", :value => ol.id
                         td.only-print &nbsp;
                         td.col-md-4
                           = ol.product.displayname
