@@ -28,9 +28,11 @@ class Product < Doppel
 
   def displayname text: false
     nip = settings&.fetch(:ni, 0)
+    pip = settings&.fetch(:pi, 0)
     city = OrderAssist.known_cities[@place_id]&.model&.name
     a = [name, city, look]
     a = [name, look, city] if nip == 1
+    a = [name, look] if pip == 1
     a.unshift '☠️' if @ignored == 1 && !text
     a.compact.join(' ')
   end
@@ -85,7 +87,7 @@ class Product < Doppel
 
   def clear_formize form
     @settings ||= {}
-    ht = { :nit => :ni }
+    ht = { :nit => :ni, :pit => :pi }
     ht.values.each do |v|
       settings.store(v, form[ht.key(v)].send(*self.class.schema[v]))
     end
@@ -133,6 +135,7 @@ class Product < Doppel
         height: [:to_i],
         sn: [:to_i],
         ni: [:to_i],
+        pi: [:to_i],
         ignored: [:to_i],
         discount: [:to_i],
         lotof: [:to_i],
