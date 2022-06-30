@@ -18,10 +18,10 @@ class SL::Product
       CabiePio.set [:product, :archetype], @id, @raw[:arn]
       CabiePio.unset([:product, :archetype], @id) if @raw[:arn].empty?
     end
-    if @raw[:k1c] != @k1c
-      CabiePio.set [:product, :k1c], @id, @raw[:k1c]
-      CabiePio.unset([:product, :k1c], @id) if @raw[:k1c].empty?
-    end
+    # if @raw[:k1c] != @k1c
+    #   CabiePio.set [:product, :k1c], @id, @raw[:k1c]
+    #   CabiePio.unset([:product, :k1c], @id) if @raw[:k1c].empty?
+    # end
     rmu = @raw[:multi].to_i
     if rmu > 1
       CabiePio.set([:product, :archetype_multi], @id, @raw[:multi]) unless rmu.eql?(@multi)

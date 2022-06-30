@@ -149,11 +149,15 @@
   }
 }
 
-label.swap-label {
+label.swap-label, label.twice-label {
   min-width: unset;
   text-align: unset;
   margin-right: unset;
   margin-bottom: unset;
+
+  .fa {
+    // transition: all .3s ease-in-out 0s, opacity 1s ease-in-out 0s !important;
+  }
 }
 
 .swap-input {
@@ -166,5 +170,62 @@ label.swap-label {
 
   &:checked + .swap-label .fa {
     transform:rotate(180deg);
+  }
+}
+
+.twice-input {
+  position: absolute;
+  left: 0;
+  z-index: -1;
+  width: 1.5rem;
+  height: 2.5rem;
+  opacity: 0;
+
+
+  &:checked + .twice-label .on.fa {
+    opacity: 1;
+    width: unset;
+
+    &:before {
+      width: unset;
+      display: inline;
+    }
+  }
+  &:checked + .twice-label .off.fa {
+    opacity: 0;
+    width: 0;
+    &:before {
+      width: 0;
+      display: none;
+    }
+  }
+
+  & + .twice-label {
+    position: relative;
+    // padding: 1em;
+    .on, .off {
+      position: absolute;
+      top: 50%;  /* position the top  edge of the element at the middle of the parent */
+      left: 50%; /* position the left edge of the element at the middle of the parent */
+
+      transform: translate(-50%, -50%)
+    }
+  }
+
+  & + .twice-label .on.fa {
+    opacity: 0;
+    width: 0;
+    &:before {
+      width: 0;
+      display: none;
+    }
+  }
+  & + .twice-label .off.fa {
+    opacity: 1;
+    width: unset;
+    &:before {
+      width: unset;
+      display: inline;
+    }
   }
 }
