@@ -65,7 +65,7 @@ module Xmlfr
       replace_node epro, 'Pio', format_cat_1c(sec.id)
       replace_node epro, 'ParentPio', Uidzero
     end
-    cs.each do |cat|
+    cs.sort_by{|c|c.top? ? 0 : 1}.each do |cat|
       ex << epro = Ox.load(TML_CAT)
       replace_node epro, 'Description', cat.name
       replace_node epro, 'ДатаИзменения', tnow
