@@ -948,7 +948,7 @@ Fenix::App.controllers :orders do
 
   get :price, :with => :id do
     @title = pat(:edit_title, :model => "order #{params[:id]}")
-    @order = Order.includes(:order_lines).find(params[:id])
+    @order = Order.includes(:order_lines_ar).find(params[:id])
     @sections = KSM::Section.all
     @tabs = Category.where(:category => nil)
 
@@ -968,13 +968,13 @@ Fenix::App.controllers :orders do
       l = line.second
       i = l['id']
       break if !i
-      ol = @order.order_lines.find(i)
+      ol = @order.order_lines_ar.find(i)
       ol.update_attributes(l)
     end
 
     @order = Order.find(params[:id])
     amount = 0.0
-    @order.order_lines.each do |ol|
+    @order.order_lines_ar.each do |ol|
       next if ol.ignored
       amount += ol.price*(ol.done_amount||0)
     end

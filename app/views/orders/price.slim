@@ -60,7 +60,7 @@ div class="pull-right col-md-3"
                   - @order.by_cat(tab.id).each do |ol|
                     tr class="order-line"
                       td class="col-md-4"
-                        = hidden_field_tag "line[#{ol.id}][id]", :value => ol[:id]
+                        = hidden_field_tag "line[#{ol.id}][id]", :value => ol.id
                         = ol.product.displayname
                       td class="col-md-1"
                         = ol.amount
