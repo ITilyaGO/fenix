@@ -41,7 +41,9 @@ Fenix::App.controllers :c1c do
     # unless params[:force]
     #   redirect_to url(:c1c, :absent, id: order.id) if check_absent_1c(order).any?
     # end
-    Xmlfr.customer_order2(order)
+    output = "\xEF\xBB\xBF"
+    # output = []
+    output << Xmlfr.customer_order2(order).force_encoding('utf-8')
   end
 
   get :absent, :with => :id do

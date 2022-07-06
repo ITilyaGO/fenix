@@ -2,6 +2,7 @@
 
 module Xmlfr
   Uidzero = '00000000-0000-0000-0000-000000000000'
+  Uidone = '00000000-2001-c055-fefe-502022b00000'
   Datezero = '0001-01-01T00:00:00'
 
   extend Fenix::App::KyotoHelpers
@@ -53,6 +54,12 @@ module Xmlfr
     doc = create_doc_xml('V8Exch:_1CV8DtUD')
     doc.root << (ex = create_plain_node('V8Exch:Data'))
     
+    ex << epro = Ox.load(TML_CAT)
+    replace_node epro, 'Description', 'Pio'
+    replace_node epro, 'ДатаИзменения', Datezero
+    replace_node epro, 'Pio', Uidone
+    replace_node epro, 'ParentPio', Uidzero
+
     products = order.order_lines.map(&:product_id).uniq
     ps = Product.find_all(products)
     cats = ps.map{|p|[p.category_id, p.category.category_id]}.flatten.uniq
@@ -61,21 +68,23 @@ module Xmlfr
     sects.each do |sec|
       ex << epro = Ox.load(TML_CAT)
       replace_node epro, 'Description', sec.name
-      replace_node epro, 'ДатаИзменения', tnow
+      replace_node epro, 'ДатаИзменения', Datezero
       replace_node epro, 'Pio', format_cat_1c(sec.id)
-      replace_node epro, 'ParentPio', Uidzero
+      replace_node epro, 'ParentPio', Uidone
     end
     cs.sort_by{|c|c.top? ? 0 : 1}.each do |cat|
       ex << epro = Ox.load(TML_CAT)
       replace_node epro, 'Description', cat.name
-      replace_node epro, 'ДатаИзменения', tnow
+      replace_node epro, 'ДатаИзменения', Datezero
       replace_node epro, 'Pio', format_cat_1c(cat.id)
       replace_node epro, 'ParentPio', format_cat_1c(cat.top? ? cat.section_id : cat.category_id)
     end
     ps.each do |product|
       ex << epro = Ox.load(TML_PRODUCT)
-      replace_node epro, 'НаименованиеПолное', product.displayname
-      replace_node epro, 'Артикул', product.art
+      replace_node epro, 'НаименованиеПолное', product.displayname(text: true)
+      replace_node epro, 'Description', product.displayname(text: true)
+      replace_node epro, 'ДатаИзменения', Datezero
+      replace_node epro, 'Артикул', product.art.to_s
       replace_node epro, 'Pio', format_product_1c(product.id)
       replace_node epro, 'ParentPio', format_cat_1c(product.category_id)
     end
