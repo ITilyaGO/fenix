@@ -2,7 +2,7 @@ class KSM::OrderLine < Doppel
   PFX = :orderline
 
   PROPS = [:description, :order_id, :product_id, :price, :amount, :done_amount, :ignored, :created_at]
-  SVSPROPS = [:created_at, :updated_at, :dates, :users, :history]
+  SVSPROPS = [:created_at, :updated_at, :dates, :users, :history, :del]
   PROPS += SVSPROPS
   attr_accessor *PROPS
   attr_accessor :xt
@@ -13,6 +13,11 @@ class KSM::OrderLine < Doppel
 
   def product
     Product.find product_id
+  end
+
+  def remove
+    @del = true
+    save
   end
 
   # def saved_by account

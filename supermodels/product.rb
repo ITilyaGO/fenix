@@ -1,8 +1,8 @@
 class Product < Doppel
   PFX = :thing
 
-  PROPS = [:name, :sn, :category_id, :place_id, :sketch_id, :company_id, :barcode, :price, :sku, :art, :g, :bbid,
-    :discount, :lotof, :lotof_mfg, :desc, :dim_weight, :dim_height, :dim_length, :dim_width, :look, :corel, :windex, :tagname
+  PROPS = %i[name sn category_id place_id sketch_id company_id origin barcode price sku art g bbid
+    discount lotof lotof_mfg desc dim_weight dim_height dim_length dim_width look corel windex tagname
   ]
   FPROPS = %i[art discount lotof lotof_mfg desc dim_weight dim_height dim_length dim_width look corel]
   SVSPROPS = %i[created_at updated_at ignored dates users history settings]

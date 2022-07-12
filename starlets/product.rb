@@ -14,9 +14,10 @@ class SL::Product
   end
 
   def save_links
-    if @raw[:arn] != @arn
-      CabiePio.set [:product, :archetype], @id, @raw[:arn]
-      CabiePio.unset([:product, :archetype], @id) if @raw[:arn].empty?
+    val = @raw[:arn].downcase
+    if val != @arn
+      CabiePio.set [:product, :archetype], @id, val
+      CabiePio.unset([:product, :archetype], @id) if val.empty?
     end
     # if @raw[:k1c] != @k1c
     #   CabiePio.set [:product, :k1c], @id, @raw[:k1c]

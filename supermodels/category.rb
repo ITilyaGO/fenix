@@ -74,7 +74,7 @@ class KSM::Category < Doppel
     op.index = @windex
     op.save
 
-    stompsync
+    stompsync rescue nil
   end
 
   def stompsync

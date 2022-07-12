@@ -567,6 +567,7 @@ Fenix::App.controllers :orders do
       ol.amount = 0
       order_rm.order_lines << ol
       ol.destroy
+      KSM::OrderLine.find(ol.id).remove
       sections_draft << product_to_section(ol.product_id)
     end
     params[:line].each do |line|
@@ -1063,6 +1064,9 @@ Fenix::App.controllers :orders do
     order = Order.find(params[:id])
     if order && order.draft?
       if order.order_parts.destroy_all && order.order_lines_ar.destroy_all && order.destroy
+        ostatus = KSM::OrderStatus.find(order.id)
+        ostatus.setg(:canceled)
+        ostatus.save
         flash[:success] = pat(:delete_success, :model => 'Order', :id => "#{params[:id]}")
       else
         flash[:error] = pat(:delete_error, :model => 'order')

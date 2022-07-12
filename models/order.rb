@@ -52,13 +52,14 @@ class Order < ActiveRecord::Base
     total
   end
 
+  # TODO: unused
   def order_lines_ids
     KSM::Order.find(id).lines
   end
 
   def order_lines
     # oids = order_lines_ar.ids
-    KSM::OrderLine.find_all KSM::Order.find(id).lines
+    KSM::OrderLine.find_all(KSM::Order.find(id).lines).reject(&:del)
   end
   
   def ksm_apd

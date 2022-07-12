@@ -24,7 +24,7 @@ ul class="nav nav-tabs non-print" id="weeks_tab"
           .rpr == deli(rur by_deli[ds])
   br
   .summary.text-center.flex-c.center
-    - sections = Section.all
+    - sections = KSM::Section.all
     - sections.each do |s|
       - sec_sum = @sec_sums.fetch(s.ix, 0)
       - sec_done = @sec_done.fetch(s.ix, 0)

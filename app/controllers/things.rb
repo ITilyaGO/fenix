@@ -70,8 +70,10 @@ Fenix::App.controllers :things do
   end
 
   put :update, :with => :id do
-    @product = Product.find(params[:id])
-    @product = Product.nest if params[:id] == '0000' || params[:clone]
+    tid = params[:id]
+    @product = Product.find tid
+    @product = Product.nest if tid == '0000' || params[:clone]
+    @product.origin = tid if params[:clone]
     form = params[:product]
     @product.clear_formize(form)
     @product.sn ||= thing_glob_seed
