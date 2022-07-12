@@ -1,7 +1,7 @@
 Fenix::App.controllers :kyoto_schema, :map => 'kyoto/schema' do
   get :index do
     @schema = wonderbox(:schema)
-    @avail = 16
+    @avail = 17
     render 'kyoto/schema'
   end
 
@@ -43,6 +43,8 @@ Fenix::App.controllers :kyoto_schema, :map => 'kyoto/schema' do
         m015_ru_isokato_up(force:force)
       when 16
         m016_autoproduct_up(force:force)
+      when 17
+        m017_nocity_up(force:force)
       end
       
       wonderbox_set(:schema, n)
