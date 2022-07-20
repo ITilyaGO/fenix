@@ -159,8 +159,8 @@ html lang='en'
             li.sidebar-list
               = link_to url(:things, :table) do
                 | Продукция
-                .menu-icon
-                  .label.label-warning new
+                .menu-icon.fa.fa-coffee
+                  / .label.label-warning new
           - if allow_route?(:editors)
             li.sidebar-list
               = link_to url(:clients, :index) do

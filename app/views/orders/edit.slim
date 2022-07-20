@@ -429,7 +429,7 @@ ul class="nav nav-tabs non-print"
                         td.col-md-1.non-print
                           == rur(ol.price*ol.amount)
                         td.col-md-1.non-print.td-sticker-input
-                          - if @kc_products[ol.product_id] && !ol.ignored
+                          - if @kc_products[ol.product.id] && !ol.ignored
                             - ols = @olstickers.fetch(ol.id, nil)
                             /.input-group-sm class=('input-group' if ols)
                             - if allow_route?(:orders_stickers)

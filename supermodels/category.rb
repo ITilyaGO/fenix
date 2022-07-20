@@ -52,7 +52,8 @@ class KSM::Category < Doppel
   def to_jr
     {
       **to_r,
-      name: display
+      name: display,
+      windex: wfindex
     }
   end
 
