@@ -7,7 +7,7 @@ ul class="nav nav-tabs non-print" id="weeks_tab"
       - tempweek = Date.today.beginning_of_week
       - 7.times do |i|
         / .wday = tempweek.strftime('%^A').first
-        .wday = Date::DAYNAMESRU[i]
+        .wday = Date::DAYNAMESRU[(i + Date::BOW) % 7]
         - tempweek += 1
     .fa.fa-btn.fa-circle
     | график
@@ -17,7 +17,7 @@ ul class="nav nav-tabs non-print" id="weeks_tab"
     graphic.collapse
       - 7.times do
         .invisible.day
-    = link_to tag_icon('arrow-left'), url(:timeline, :weeks, start: timeline_id(@prev.prev_month.beginning_of_week))
+    = link_to tag_icon('arrow-left'), url(:timeline, :weeks, start: timeline_id(@prev.prev_month.beginning_of_week + Date::BOW))
     
   - @weeks.each_with_index do |tab, i|
     li
@@ -36,7 +36,7 @@ ul class="nav nav-tabs non-print" id="weeks_tab"
       graphic.collapse
         - 7.times do
           .invisible.day
-      = link_to tag_icon('arrow-right'), url(:timeline, :weeks, start: timeline_id(@prev.next_month.beginning_of_week))
+      = link_to tag_icon('arrow-right'), url(:timeline, :weeks, start: timeline_id(@prev.next_month.beginning_of_week + Date::BOW))
   - if (@prev.month-today.month).abs > 1
     li
       graphic.collapse

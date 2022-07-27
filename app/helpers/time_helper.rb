@@ -54,4 +54,5 @@ end
 
 class Date
   DAYNAMESRU = ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'].freeze
+  BOW = 2
 end

@@ -28,33 +28,13 @@ Fenix::App.controllers :timeline do
     @title = "Timeline"
     @print_btn = 1
     start_from = timeline_unf(params[:start]) rescue Date.today
-    @prev = start_from.beginning_of_week
-    @prev_end = @prev.end_of_week
-    @prev2 = @prev.prev_week
-    @prev2_end = @prev2.end_of_week
-    @next = start_from.next_week
-    @next_end = @next.end_of_week
-    @next2 = @next.next_week
-    @next2_end = @next2.end_of_week
-    @next3 = @next2.next_week
-    @next3_end = @next3.end_of_week
-    @next4 = @next3.next_week
-    @next4_end = @next4.end_of_week
-    @next5 = @next4.next_week
-    @next5_end = @next5.end_of_week
-    @next6 = @next5.next_week
-    @next6_end = @next6.end_of_week
+    @prev = start_from.beginning_of_week + Date::BOW
+    @next = @prev.next_week
     @weeks = []
-
-    @weeks << { :name => "Пред. неделя", :date => @prev2, :end => @prev2_end }
-    @weeks << { :name => "Эта неделя", :date => @prev, :end => @prev_end }
-    @weeks << { :name => "Следующая неделя", :date => @next, :end => @next_end }
-    @weeks << { :name => "Через одну неделю", :date => @next2, :end => @next2_end }
-    @weeks << { :name => "", :date => @next3, :end => @next3_end }
-    @weeks << { :name => "", :date => @next4, :end => @next4_end }
-    @weeks << { :name => "", :date => @next5, :end => @next5_end }
-    @weeks << { :name => "", :date => @next6, :end => @next6_end }
-
+    8.times do |i|
+      @weeks << { :date => (pr = @prev + (i -2)*7), :end => pr.next_week }
+    end
+    
     calendar_init(start_from)
 
     render 'timeline/weeks'
@@ -253,11 +233,8 @@ end
 Fenix::App.controllers :dr_timeline, :map => 'timeline/driven' do
   patch :orders do
     @title = "Timeline"
-    @sdate = timeline_unf(params[:period])
-    start_from = timeline_unf(params[:start]) rescue Date.today
-    start_from = @sdate
-    @prev = start_from.beginning_of_week
-
+    start_from = timeline_unf(params[:period])
+    
     ky_month_1 = start_from.strftime('%y%m')
     ky_month_2 = start_from.next_month.strftime('%y%m')
     @ktm = CabiePio.all([:timeline, :order], [ky_month_1]).flat
@@ -265,7 +242,7 @@ Fenix::App.controllers :dr_timeline, :map => 'timeline/driven' do
     @gtm = timeline_group(@ktm.trans(nil, :to_i))
 
     @sections = KSM::Section.all
-    @week_orders = @gtm.fetch(@sdate, [])
+    @week_orders = @gtm.fetch(start_from, [])
     @all_ids = @week_orders.map(&:last).map(&:to_i)
     @orders = Order.where(id: @all_ids).in_work.order(:client_id)
     a_managers(@all_ids, @orders.map(&:client_id).uniq)

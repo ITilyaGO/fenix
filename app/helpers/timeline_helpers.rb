@@ -30,9 +30,9 @@ module Fenix::App::TimelineHelper
   end  
 
   def timeline_group(hash, dates = nil)
-    prev = Date.today.beginning_of_week
-    prev_end = prev.end_of_week
-    hash.group_by {|x| timeline_unf(x.first).beginning_of_week }
+    # prev = Date.today.beginning_of_week
+    # prev_end = prev.end_of_week
+    hash.group_by {|x| (timeline_unf(x.first) - Date::BOW).beginning_of_week + Date::BOW }
   end
 
   def calendar_group(hash, dates = nil)
