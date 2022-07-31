@@ -116,7 +116,7 @@ Fenix::App.controllers :stickers do
       save_sticker_progress(@order.id, operc)
     end
     now_stickers = CabiePio.all_keys(@order.order_lines.map(&:id), folder: [:m, :order_lines, :sticker_sum])
-      .flat.transform_values{|v|v[:v]}
+      .flat.trans(:to_i).transform_values{|v|v[:v]}
     dilines = now_stickers.map{|k,v|[k,v-saved_stickers.fetch(k,0)]}.to_h
     arbal_unstock_order(@order, dilines, now_stickers, day)
 

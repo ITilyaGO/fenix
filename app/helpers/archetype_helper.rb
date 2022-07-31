@@ -34,7 +34,7 @@ module Fenix::App::ArchetypeHelper
       parch = arches.fetch(line.product_id, nil)
       next unless parch
       m = multi.fetch(line.product_id, 1)
-      real_done = (di_lines[line.id] || 0)*m
+      real_done = (di_lines[line.id.to_i] || 0)*m
       if real_done != 0
         ssum = CabiePio.get([:stock, :archetype], parch).data.to_i || 0
         CabiePio.set [:stock, :archetype], parch, ssum-real_done
@@ -45,7 +45,7 @@ module Fenix::App::ArchetypeHelper
         prev_ex = CabiePio.get([:need, :order], archetype_order(parch, line.id, order.id))
         unless prev_ex.blank?
           prev = prev_ex.data.to_i || 0
-          whole_done = (sum_lines[line.id] || 0)*m
+          whole_done = (sum_lines[line.id.to_i] || 0)*m
           now = whole_done >= line.amount*m ? 0 : line.amount*m - whole_done
           if now == 0
             CabiePio.unset [:need, :order], archetype_order(parch, line.id, order.id)
