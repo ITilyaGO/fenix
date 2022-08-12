@@ -152,10 +152,12 @@ html lang='en'
                   | Связи на складе
                   span class="menu-icon fa fa-inbox"
 
-          - if allow_route?(:editors)
+            / - if allow_route?(:editors)
+          - if true
             li.sidebar-title.separator
               span Редакторы
-          - if current_account.is_admin?
+            / - if current_account.is_admin?
+            / - if allow_route?(:editors)
             li.sidebar-list
               = link_to url(:things, :table) do
                 | Продукция

@@ -23,7 +23,7 @@ class Product < Doppel
   end
 
   def cindex
-    [@ignored ? 1 : 0, category.wfindex, wfindex, displayname(text: true)].join
+    [@ignored == 1 ? 1 : 0, category.wfindex, wfindex, displayname(text: true)].join
   end
 
   def displayname text: false

@@ -12,7 +12,7 @@ fieldset class='control-group'
   .extra.controls
     = f.check_box :pit, value: 1, :class => 'twice-input', checked: @product.settings&.fetch(:pi, 0) == 1
     label.btn.btn-sm.btn-desert.twice-label(for = 'product_pit')
-      .hol.fa.fa-circle-o.invisible
+      .hold.fa.fa-circle-o.invisible
       .off.fa.fa-eye
       .on.fa.fa-circle-o
 fieldset class='control-group#{error ? ' has-error' : ''}'
