@@ -1,0 +1,104 @@
+wnode
+  
+  .level.hand class='{ global: nodeglobal1, selection: data.active, rootnode: data.root, mix: data.mix }'
+    .captain.wp100.flex-c.vcenter onclick='{ fd ? collapsy : loadie }'
+      .ol.sm.fas.arrow.fa-long-arrow-alt-right class='{ invisible: !data.active }'
+      .ol.md.claptain
+        .i.fa.kind class="{ fa-folder: fd && hdn,
+          fa-folder-open: fd && !hdn, fa-folder-o: !fd && !is_product,
+          hide: data.root,
+          text-warning: touched
+        }"
+      
+      .flexible.flex-c.vcenter
+        '&nbsp;{ opts.titles || name }
+        .label.btn-thru.btn-xs if='{data.q > 1}'
+          .fa.fa-times
+          |&nbsp;{ data.q }
+
+        .flexible
+      
+      .sp if='{!hdn && fd && !data.root}'
+      
+    .childs.flex-v class='{ hide: hdn }'
+      yield
+
+  javascript:
+    self.fd = opts.full == 'true'
+    self.name = null
+    self.id = null
+    self.tech = document.querySelector('wtree').getAttribute('tech')
+    self.href_string = "/technologies/cube/" + self.tech
+    self.hdn = true
+    self.touched = false
+    self.is_product = self.root.tagName === 'PNODE'
+
+    collapsy(event) {
+      self.hdn = !self.hdn
+      self.touched = true
+      event.preventDefault()
+      event.stopPropagation()
+
+      riot.mount(self.root.querySelector('.childs').querySelectorAll(':scope > pnode'), 'wnode')
+    }
+
+    loadie(event) {
+      rcontrol.trigger('MASS_LOAD_' + opts.wid, { place: self.root.closest('wtree').getAttribute('place') })
+      if (self.is_product) self.product_req()
+      self.touched = true
+    }
+
+    product_req() {
+      var data = {
+        authenticity_token: rsquad.token(),
+        id: opts.wid
+      }
+
+      fetch('/products/one.json', {
+        method: "POST",
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(data).toString()
+      })
+      .then(function(response) { return response.json() })
+      .then(function(data) {
+        rcontrol.trigger('ORDER_COPY_PRODUCT', data)
+      })
+    }
+
+    fld_click(a) {
+      rcontrol.trigger('LOAD_1C_LIST', opts.wid, self.name)
+      event.preventDefault()
+      event.stopPropagation()
+    }
+
+    set_href_string() {
+      var param = self.data.com || self.data.root ? '' : '?fit=' + self.real
+      var s = "technologies/cube/" + self.tech + param
+      self.href_string = "/technologies/cube/" + self.tech + param
+    }
+
+    self.on('mount', function() {
+      self.id = '---'
+      self.name = 'Неизвестно'
+      rcontrol.trigger('WTREE_CHILD', opts.wid)
+
+      var prt = self.root.closest('wtree') && self.root.closest('wtree')._tag._riot_id
+      rsquad.ondm('WTREE_CHILD_RETURN', prt, opts.wid, self.chreturn)
+    })
+
+    chreturn(data) {
+      if (data.id !== opts.wid) return
+      self.name = data.name
+      self.id = opts.wid
+      self.real = opts.wid
+      self.data = data
+      if (data.nut) self.data.virtual = true
+      if (data.root) self.data.virtual = true
+      self.nodeglobal = data.global
+      if (data.com) {
+        self.tech = data.id
+        self.real = '000'
+      }
+      self.set_href_string()
+      self.update()
+    }

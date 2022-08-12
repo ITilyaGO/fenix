@@ -1,539 +1,221 @@
-.tabs-content
-= form_for :order, !@id ? url(:orders, :empty) : url(:orders, :save, :id => @id), :class => 'form-horizontal' do |f|
-  div class="table non-print row"
-    .col-md-8 style='border: 2px solid rgb(221, 221, 221);border-radius: 6px;'
-      - if @id 
+.page.emptyorder-page.flex-c
+  .hoverbtn.flex-c
+    .btn.btn-camo riot-tag='switcher' t1='THINGS_LIST_OFF' t2='THINGS_LIST_ON'
+      .icn.fa.fa-folder-open-o
+    .content
+    .rim.table50.hide
+      .trees.white-sticky
+        - unless @place == 'RU'
+          / .level.tree: h4 = @order_place.model.name
+          wtree.tree name='Категории' place=@place
+            == @cattree
+          .tmar-1
+          wtree.tree name='Продукция'
+            == otree_cats3 pro_olist(@place)
+          .tmar-1
+
+        wtree.tree name='Категории - Россия' place='RU'
+          == @cattree
+        .tmar-1
+        wtree.tree name='Продукция - Россия'
+          == otree_cats3 pro_olist('RU')
+        .tmar-1
+
+  .col-md-12.content00
+    = form_for :order, !@id ? url(:orders, :empty) : url(:orders, :save, :id => @id),
+      :autocomplete => :off, :class => 'form-std' do |f|
+      - if @id
         .form-actions.text-center style='position: absolute;right: 30px;top: 10px;'
-          = f.submit pat('Изменить'), :class => 'btn btn-sm btn-wide btn-default', :name => :light_edit
-      fieldset class='control-group'
-        = f.label 'Тип заказа', :class => 'col-md-3 control-label'
-        .col-md-3.controls.custom-control
-          = f.radio_button :delivery, :value => Order.deliveries[:vernissage], :checked => @form.vernissage?, :class => 'custom-control-input'
-          label.custom-control-label(for = 'order_delivery_3') = t :'delivery.vernissage'
-        .col-md-3.controls.custom-control
-          = f.radio_button :delivery, :value => Order.deliveries[:postage], :checked => @form.postage?, :class => 'custom-control-input'
-          label.custom-control-label(for = 'order_delivery_0') = t :'delivery.postage'
-        .clearfix
-        label.col-md-3.control-label
-        .col-md-3.controls.custom-control
-          = f.radio_button :delivery, :value => Order.deliveries[:roundtrip], :checked => @form.roundtrip?, :class => 'custom-control-input'
-          label.custom-control-label(for = 'order_delivery_1') = t :'delivery.roundtrip'
-        .col-md-3.controls.custom-control
-          = f.radio_button :delivery, :value => Order.deliveries[:pickup], :checked => @form.pickup?, :class => 'custom-control-input'
-          label.custom-control-label(for = 'order_delivery_2') = t :'delivery.pickup'
-
-      fieldset class='control-group'
-        = f.label 'Приоритетный', :class => 'col-md-3 control-label'
-        .col-md-3.controls.custom-control
-          = f.radio_button :priority, :value => :false, :checked => !@form.priority, :class => 'custom-control-input'
-          label.custom-control-label(for = 'order_priority_false') Нет
-        .col-md-3.controls.custom-control
-          = f.radio_button :priority, :value => :true, :checked => @form.priority, :class => 'custom-control-input'
-          label.custom-control-label(for = 'order_priority_true') Да
-      
-      fieldset.control-group
-        = f.label 'Оплата', :class => 'col-md-3 control-label'
-        .col-md-3.controls.custom-control
-          = f.radio_button :cash, :value => :false, :checked => !@cash, :required => true, :class => 'custom-control-input'
-          label.custom-control-label(for = 'order_cash_false') Безнал
-        .col-md-3.controls.custom-control
-          = f.radio_button :cash, :value => :true, :checked => @cash, :required => true, :class => 'custom-control-input'
-          label.custom-control-label(for = 'order_cash_true') Нал
-
-      /- if @force_timeline
+          = f.submit :'^ save ^', :class => 'btn btn-sm btn-wide btn-default', :name => :light_edit
+        
+      .col-md-10
+        
         fieldset class='control-group'
-          = f.label 'Дата отправки', :class => 'col-md-3 control-label'
-          div class='col-md-4 controls'
-            .scrollable-dropdown-menu
-              = text_field_tag :'cabie[timeline_at]', :class => 'form-control', :placeholder => "2016-07-23 or Y/m/d", :value => timeline_form(@kc_timeline), :required => true
-          
-          .btn.btn-sm.btn-default.btn-timeline
-            .fa.fa-calendar.fa-btn
-            | график
+          = f.label 'Тип заказа', :class => 'col-md-3 control-label'
+          .col-md-2.controls.custom-control
+            = f.radio_button :delivery, :value => Order.deliveries[:vernissage], :checked => @form.vernissage?, :class => 'custom-control-input'
+            label.custom-control-label(for = 'order_delivery_3') = t :'delivery.vernissage'
+          .col-md-2.controls.custom-control
+            = f.radio_button :delivery, :value => Order.deliveries[:postage], :checked => @form.postage?, :class => 'custom-control-input'
+            label.custom-control-label(for = 'order_delivery_0') = t :'delivery.postage'
+          .col-md-2.controls.custom-control
+            = f.radio_button :delivery, :value => Order.deliveries[:roundtrip], :checked => @form.roundtrip?, :class => 'custom-control-input'
+            label.custom-control-label(for = 'order_delivery_1') = t :'delivery.roundtrip'
+          .col-md-2.controls.custom-control
+            = f.radio_button :delivery, :value => Order.deliveries[:pickup], :checked => @form.pickup?, :class => 'custom-control-input'
+            label.custom-control-label(for = 'order_delivery_2') = t :'delivery.pickup'
+        
+        fieldset class='control-group'
+          = f.label 'Приоритетный', :class => 'col-md-3 control-label'
+          .col-md-3.controls.custom-control
+            = f.radio_button :priority, :value => :false, :checked => !@form.priority, :class => 'custom-control-input'
+            label.custom-control-label(for = 'order_priority_false') Нет
+          .col-md-3.controls.custom-control
+            = f.radio_button :priority, :value => :true, :checked => @form.priority, :class => 'custom-control-input'
+            label.custom-control-label(for = 'order_priority_true') Да
 
-        = partial 'timeline/calendar'
+        fieldset.control-group
+          = f.label 'Оплата', :class => 'col-md-3 control-label'
+          .col-md-3.controls.custom-control
+            = f.radio_button :cash, :value => :false, :checked => !@cash, :required => true, :class => 'custom-control-input'
+            label.custom-control-label(for = 'order_cash_false') Безнал
+          .col-md-3.controls.custom-control
+            = f.radio_button :cash, :value => :true, :checked => @cash, :required => true, :class => 'custom-control-input'
+            label.custom-control-label(for = 'order_cash_true') Нал
 
-      fieldset class='control-group'
-        = f.label "Город", :class => 'col-md-3 control-label'
-        div class='col-md-5 controls'
-          div class="scrollable-dropdown-menu"
-            = f.hidden_field :place_id, :value => (@order_place.id if @order_place)
-            = text_field_tag 'pl', :class => 'form-control ', :disabled => true, :id => 'typeahead-place', :value => (@order_place.name if @order_place)
+        fieldset.control-group
+          = f.label 'Дата заказа', :class => 'col-md-3 control-label'
+          .col-md-4.controls
+            = f.text_field :created_at, :class => 'form-control', readonly: !@id.nil?,
+              value: @id ? @form.created_at.to_date : Date.today
 
-      fieldset class='control-group control-new'
-        = f.label "Город", :class => 'col-md-3 control-label'
-        div class='col-md-9 controls'
-          div class="scrollable-dropdown-menu"
-            = hidden_field_tag :'cabie[kato_place]', :value => @kc_town
-            = text_field_tag :kato_type, :class => 'form-control', :value => @kc_town, :required => true
+        fieldset class='control-group'
+          = f.label "Город", :class => 'col-md-3 control-label'
+          div class='col-md-9 controls'
+            div class="scrollable-dropdown-menu"
+              = hidden_field_tag :'cabie[kato_place]', :value => (@order_place.key.public if @order_place)
+              = text_field_tag :kato_type, :class => 'form-control',
+                :value => (@order_place.model.name if @order_place), :required => true
 
-      fieldset class='control-group'
-        = f.label "Заказчик", :class => 'col-md-3 control-label'
-        div class='col-md-9 controls'
-          div class="scrollable-dropdown-menu"
-            = f.hidden_field :client_id, :value => (@order_client.id if @order_client)
-            = text_field_tag 'cl', :class => 'form-control ', :id => 'typeahead-client', :value => (@order_client.name if @order_client)
-      .control-group &nbsp;
+        fieldset class='control-group'
+          = f.label "Заказчик", :class => 'col-md-3 control-label'
+          div class='col-md-9 controls'
+            div class="scrollable-dropdown-menu"
+              = f.hidden_field :client_id, :value => (@order_client.id if @order_client)
+              = text_field_tag 'cl', :class => 'form-control ', :id => 'typeahead-client', :value => (@order_client.name if @order_client)
 
-    // div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true"
-    //   div class="modal-dialog modal-sm"
-    //     div class="modal-header"
-    //       button type="button" class="close" data-dismiss="modal" aria-label="Close"
-    //         span aria-hidden="true" &times;
-    //       h4 class="modal-title" id="myModalLabel" Modal title
-    //     div class="modal-content"
+      div class="modal" tabindex="-1" role="dialog" 
+        div class="modal-dialog"
+          div class='modal-content'
+            div class="modal-header"
+              h4 class="modal-title" Добавляем продукт в заказ
+            div class='modal-body'
+              p class="product"
+              fieldset class='control-group'
+                = label_tag "Количество", :class => 'col-md-3 control-label'
+                div class='col-md-2 controls'
+                  = text_field_tag "amount", :autocomplete => "off", :class => "form-control"
+            div class='modal-footer'
+              // = form_tag url(:categories, :destroy, :id => category.id), :method => :delete do
+              //   = submit_tag pat(:delete), :class =>'list-row-action-popover-delete-one-btn btn btn-danger btn-wide'
+              div class='btn btn-glue btn-wide cancel' data-dismiss="modal" Добавить
 
-    div class="col-md-4"
-      div class='controls' id='products_tree'
-    .col-md-8.col-md-offset-1
-      div class='controls' id='products2_tree'
-      .control-group &nbsp;
-      fieldset.control-group
-        = f.label "Позиция", :class => 'col-md-3 control-label'
-        div class='col-md-6 controls'
-          div class="scrollable-dropdown-menu"
-            = text_field_tag 'pr', :class => 'form-control', :value => '', :id => 'typeahead-product'
-        div class='col-md-1 controls'
-          div class='btn btn-sm btn-default' id='add-product' Добавить
-
-  div class="modal" tabindex="-1" role="dialog" 
-    div class="modal-dialog"
-      div class='modal-content'
-        div class="modal-header"
-          h4 class="modal-title" Добавляем продукт в заказ
-        div class='modal-body'
-          p class="product"
-          fieldset class='control-group'
-            = label_tag "Количество", :class => 'col-md-3 control-label'
-            div class='col-md-2 controls'
-              = text_field_tag "amount", :autocomplete => "off", :class => "form-control"
-        div class='modal-footer'
-          // = form_tag url(:categories, :destroy, :id => category.id), :method => :delete do
-          //   = submit_tag pat(:delete), :class =>'list-row-action-popover-delete-one-btn btn btn-danger btn-wide'
-          div class='btn btn-glue btn-wide cancel' data-dismiss="modal" Добавить
-
-  - @product_names = []
-  - @total = 0 if !@total
-  - line = { :id => 0, :amount => 0, :price => 0, :comment => "" }
-  // - @order_lines << line
-  
-  table id='sample_table' style="visibility:hidden"
-    tr.list-row data-sum="0" data-price="0"
-      td class="col-md-1"
-        span class="num"
-        = hidden_field_tag 'line[][id]', :value => line[:id]
-        = hidden_field_tag 'line[][ol]', :value => ''
-      td class="col-md-4"
-        span class="product"
-      td class="col-md-3"
-        = text_field_tag 'line[][comment]', :value => line[:comment], :placeholder => "Комментарий к позиции", :class => "form-control input-sm"
-      td class="col-md-1" class="vert-align"
-        = text_field_tag 'line[][amount]', :value => line[:amount], :class => "form-control form-amount input-sm"
-      td class="col-md-1 price" class="vert-align"
-        = line[:price]
-        | &nbsp;&#x20B7
-      td class="col-md-1" class="form-sum"
-        = line[:price]*line[:amount]
-        | &nbsp;&#x20B7
-      td class='col-md-1 list-column list-row-action'
-        .list-row-action-wrapper
-          a.btn-copy.list-row-action-wrapper-link title="#{pat(:copy)}"
-            = tag_icon(:'plus-square-o')
-          a.btn-del.list-row-action-wrapper-link title="#{pat(:delete)}"
-            = tag_icon("trash-o")
-    
-  div class="table-responsive"
-    table class="table table-hover order-table"
-      tr data-sum="0"
-        th Номер
-        th Наименование
-        th Коммент
-        th Количество
-        th Цена
-        th Сумма
-        th &nbsp;
-      - @order_lines.each_with_index do |line, i|
-        / HACK: for empty or broken lines
-        - next unless line.product
-        tr.list-row data-sum="#{line.amount*line.price}" data-price="#{line.price}"
+      - @product_names = []
+      - @total = 0 if !@total
+      - line = { :id => 0, :amount => 0, :price => 0, :comment => "" }
+      
+      table id='sample_table' style="visibility:hidden"
+        tr.list-row data-sum="0" data-price="0"
           td class="col-md-1"
-            span class="num" = i + 1
-            = hidden_field_tag 'line[][id]', :value => line.product.id
-            = hidden_field_tag 'line[][ol]', :value => line.id
+            span class="num"
+            = hidden_field_tag 'line[][id]', :value => line[:id]
+            = hidden_field_tag 'line[][ol]', :value => ''
           td class="col-md-4"
-            span class="product" = line.product.displayname
+            span class="product"
           td class="col-md-3"
-            = text_field_tag 'line[][comment]', :value => line.description, :placeholder => "Комментарий к позиции", :class => "form-control input-sm"
+            = text_field_tag 'line[][comment]', :value => line[:comment], :placeholder => "Комментарий к позиции", :class => "form-control input-sm"
           td class="col-md-1" class="vert-align"
-            = text_field_tag 'line[][amount]', :value => line.amount, :autocomplete => "off", :class => "form-control form-amount input-sm"
+            = text_field_tag 'line[][amount]', :value => line[:amount], :class => "form-control form-amount input-sm"
+          td
           td class="col-md-1 price" class="vert-align"
-            = line.price
+            = line[:price]
             | &nbsp;&#x20B7
           td class="col-md-1" class="form-sum"
-            = line.price*line.amount
+            = line[:price]*line[:amount]
             | &nbsp;&#x20B7
           td class='col-md-1 list-column list-row-action'
             .list-row-action-wrapper
               a.btn-copy.list-row-action-wrapper-link title="#{pat(:copy)}"
                 = tag_icon(:'plus-square-o')
               a.btn-del.list-row-action-wrapper-link title="#{pat(:delete)}"
-                = tag_icon(:'trash-o')
+                = tag_icon("trash-o")
+        
+      .table-responsive.tmar-2
+        table.table.table-hover.order-table.manual
+          tr data-sum="0"
+            th Номер
+            th Наименование
+            th Коммент
+            th Количество
+            th Остаток
+            th Цена
+            th Сумма
+            th &nbsp;
+          - @order_lines.each_with_index do |line, i|
+            / HACK: for empty or broken lines
+            - next unless line.product
+            tr.list-row data-sum="#{line.amount*line.price}" data-price="#{line.price}"
+              td class="col-md-1"
+                span class="num" = i + 1
+                = hidden_field_tag 'line[][id]', :value => line.product.id
+                = hidden_field_tag 'line[][ol]', :value => line.id
+              td class="col-md-4"
+                span class="product" = line.product.displayname
+              td class="col-md-3"
+                = text_field_tag 'line[][comment]', :value => line.description, :placeholder => "Комментарий к позиции", :class => "form-control input-sm"
+              td class="col-md-1" class="vert-align"
+                = text_field_tag 'line[][amount]', :value => line.amount, :autocomplete => "off", :class => "form-control form-amount input-sm"
+              td
+              td class="col-md-1 price" class="vert-align"
+                = line.price
+                | &nbsp;&#x20B7
+              td class="col-md-1" class="form-sum"
+                = line.price*line.amount
+                | &nbsp;&#x20B7
+              td class='col-md-1 list-column list-row-action'
+                .list-row-action-wrapper
+                  a.btn-copy.list-row-action-wrapper-link title="#{pat(:copy)}"
+                    = tag_icon(:'plus-square-o')
+                  a.btn-del.list-row-action-wrapper-link title="#{pat(:delete)}"
+                    = tag_icon(:'trash-o')
+      
+      fieldset.control-group
+        = f.label "Позиция", :class => 'col-md-1 control-label'
+        .col-md-9.controls
+          .scrollable-dropdown-menu
+            = text_field_tag 'pr', :class => 'form-control', :value => '', :id => 'typeahead-product'
+        .col-md-1.controls.hidden
+          .btn.btn-sm.btn-default id='add-product' Добавить
+      hr
+      .pull-right.col-md-3.flex-v.vcenter
+        fieldset.control-group.cmar-05
+          .control-label Итого:
+          #total.controls data-sum="#{@total}" #{"%0.f" % @total} &#x20B7
+        .form-actions
+          = f.submit pat(:save), :class => 'btn btn-sm btn-prime btn-wide'
 
-  h4 id="total" data-sum="#{@total}" Итого: #{"%0.f" % @total} &#x20B7
+      fieldset.control-group
+        = f.label "Комментарий к заказу", :class => 'col-md-1 control-label'
+        .col-md-10.controls
+          = f.text_area :description, rows: 3, :class => 'form-control', :value => (@descr if @descr)
 
-  fieldset class='control-group'
-    = f.label "Комментарий к заказу", :class => 'col-md-3 control-label'
-    div class='col-md-6 controls'
-      = f.text_area :description, :class => 'form-control', :value => (@descr if @descr)
-
-
-  div class="form-actions"
-    = f.submit pat(:save), :class => 'btn btn-sm btn-prime'
+      .tmar-2.clearfix
+      .tmar-2
+      - @cats.each do |category|
+        - category.subs_ordered.each do |sub|
+          catlist cid=sub.id titles=sub.name place=@place
+          catlist cid=sub.id titles=sub.name place=@place glob=1
     
+    / .foot style='height: 20vh;'
+
+page cityload=true
+
 - content_for :js_assets do
-  = stylesheet_link_tag 'ui.fancytree', 'jstree'
-  = javascript_include_tag 'jquery-ui.min', 'jquery.fancytree-all.min', 'jstree.min'
+  = javascript_include_tag :riot
+  rscript type="riot/tag" src="/riot/tags/collapser.tag"
+  rscript type="riot/tag" src="/riot/tags/switcher.tag"
+  rscript type="riot/tag" src="/riot/tags/things/selectreload.tag"  
+  rscript type="riot/tag" src="/riot/tags/empty-order/catlist.tag"  
+  rscript type="riot/tag" src="/riot/tags/empty-order/page.tag"
+  rscript type="riot/tag" src="/riot/tags/cat-tree/wtree.tag"  
+  rscript type="riot/tag" src="/riot/tags/cat-tree/wnode.tag"  
+
   javascript:
-    (function($) {
-      $(function() {
-        var _p, _products;
-        
-        // $("#products2_tree").jstree({
-        //   'core' : {
-        //     'data' : {
-        //       "url" : "/products/tree2"
-        //     }
-        //   }
-        // });
-        
-        $("#products_tree").fancytree({
-          source: {
-            url: "/products/tree"
-          },
-          activate: function(event, data) {
-            //logEvent(event, data);
-            //var node = data.node;
-            // acces node attributes
-            
-            //$(".modal .modal-content").text(node.title);
-            //$(".modal").modal();
-            // if( !$.isEmptyObject(node.data) ){
-            // }
-          },
-          click: function(event, data) {
-            if (data.node.children) {
-              data.node.toggleExpanded();
-              return false
-            }
-            $(".modal .modal-content .product").text(data.node.title);
-            $(".modal").modal();
-            $(".modal").data('id', data.node.key);
-            $(".modal :input").val('');
-            $(".modal :input").focus();
-            return false;
-          },
-          keydown: function(event, data) {
-            switch (event.which) {
-              case 13:
-                if (data.node.children) return false;
-                $(".modal .modal-content .product").text(data.node.title);
-                $(".modal").modal();
-                $(".modal").data('id', data.node.key);
-                $(".modal :input").val('');
-                $(".modal :input").focus();
-                //data.node.toggleSelected();
-                return false;
-            }
-          },
-        });
-        
-        function add_product() {
-          var id = $(".modal").data('id');
-          _p = $.grep(_products, function(e) { return e.id == id; })[0];
-          var tr = $("#sample_table tr:first").clone();
-          tr.data('sum', 0);
-          tr.data('price', _p.price);
-          $(".price", tr).text($(".price", tr).text().replace(/\d+/g, _p.price));
-          $(".product", tr).text(_p.name);
-          $(":input[name*='id']", tr).val(_p.id);
-          var amount = +$(".modal :input").val();
-          $(":input[name*='amount']", tr).val(amount);
-          var n = $(".order-table tbody tr span.num").length;
-          $(".num", tr).text(n + 1);
-          tr.appendTo($(".order-table tbody"));
-          
-          var line = tr;
-          var newsum = Math.abs(line.data("price") * amount);
-          var newtotal = $("#total").data("sum") - +line.data("sum") + newsum;
-          $(".form-sum", line).text($(".form-sum", line).text().replace(/\d+/g, newsum));
-          line.data("sum", newsum);
-          $("#total").text($("#total").text().replace(/\d+/g, newtotal));
-          $("#total").data("sum", newtotal);
-          
-          $(".modal").modal('hide');
-          // $("#typeahead-product").focus();
-          // var scrollTop = $('#typeahead-product').offset().top;
-          // $(document).scrollTop(0);
-        }
-        
-        $(".modal .btn").on("click", function(e) {
-          add_product();
-        });
-        
-        $(".modal :input").on("keydown", function(e) {
-          if (e.which == 13) {
-            add_product();
-          }
-          if (e.which == 27 || e.which == 13) {
-            $(".modal").modal('hide');
-            $("#products_tree ul").focus();
-            return false;
-          }
-        });
+    document.addEventListener("DOMContentLoaded", function(event) {
+      riot.mount('page, collapser, switcher, selectreload, catlist, wtree')
+      riot.mount('catlist')
 
-        var bloodhound_clients = new Bloodhound({
-          datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
-          queryTokenizer: Bloodhound.tokenizers.whitespace,
-          // sufficient: 10,
-          // limit: 30,
-          remote: {
-            url: '/orders/clients2',
-            replace: function(url, query) {
-              return url + "#" + query;
-            },
-            transport: function (opts, onSuccess, onError) {
-              var url = opts.url.split("#")[0];
-              var query = opts.url.split("#")[1];
-              $.ajax({
-                  url: url,
-                  data: $.param({
-                    q: query,
-                    authenticity_token: $("form:first :input[name^='auth']").val()
-                  }),
-                  type: "POST",
-                  success: onSuccess,
-                  error: onError
-              })
-            }
-          }
-        });
-        bloodhound_clients.initialize();
-        $('#typeahead-client').typeahead({
-          minLength: 3
-        }, {
-          name: 'clients',
-          displayKey: 'name',
-          source: bloodhound_clients.ttAdapter(),
-          limit: Number.MAX_VALUE,
-          templates: {
-            suggestion: Handlebars.compile('<p><strong>[{{id}}]</strong> {{name}} ({{city}})</p>'),
-          }
-        }).on('typeahead:selected', function (e, suggestion) {
-          document.querySelector("form input[name*=client_id]").value = suggestion.id
-        });
-        
-
-        // var bestPictures = new Bloodhound({
-        //   datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
-        //   queryTokenizer: Bloodhound.tokenizers.whitespace,
-        //   remote: {
-        //     url: '/orders/clients',
-        //     replace: function(url, query) {
-        //       return url + "#" + query;
-        //     },
-        //     ajax : {
-        //       beforeSend: function(jqXhr, settings){
-        //         
-        //         settings.data = $.param({
-        //           q: $('#typeahead-client').val(),
-        //           authenticity_token: $("form:first :input[name^='auth']").val()
-        //         })
-        //       },
-        //       contentType: "application/x-www-form-urlencoded; charset=UTF-8",
-        //       type: "POST"
-        //     }
-        //   }
-        // });
-        // 
-        // bestPictures.initialize();
-        // $('#typeahead-client').typeahead(null, {
-        //   name: 'clients',
-        //   displayKey: 'name',
-        //   source: bestPictures.ttAdapter()
-        // });
-        
-        // $.ajax({
-        //     type: "POST",
-        //     data: "authenticity_token=" + encodeURIComponent($("form:first :input[name^='auth']").val()) + "&q=яро",
-        //     url: "/orders/cities"
-        // }).done(function(response) {
-        //   var substringMatcher = function(strs) {
-        //     return function findMatches(q, cb) {
-        //       var matches, substrRegex;
-        //       matches = [];
-        //       substrRegex = new RegExp(q, 'i');
-              
-        //       $.each(strs, function(i, str) {
-        //         if (substrRegex.test(str.name))
-        //           matches.push({ value: str.name, id: str.id });
-        //       });
-              
-        //       cb(matches);
-        //     };
-        //   };
-          
-        //   $('#typeahead-place').typeahead({
-        //     hint: true,
-        //     highlight: true,
-        //     minLength: 2
-        //   },
-        //   {
-        //     name: 'cities',
-        //     displayKey: 'value',
-        //     source: substringMatcher(response)
-            
-        //   }).on('typeahead:selected', function (obj, data) {
-        //     $(":input[name*='place']").val(data.id);
-        //   });
-        // });
-
-        $.ajax({
-            type: "POST",
-            data: "authenticity_token=" + encodeURIComponent($("form:first :input[name^='auth']").val()),
-            url: "/orders/products"
-        }).done(function(response) {
-          _products = response;
-          var substringMatcher = function(strs) {
-            return function findMatches(q, cb) {
-              var matches, substrRegex;
-              matches = [];
-              q = q.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
-              substrRegex = new RegExp(q, 'i');
-              
-              $.each(strs, function(i, str) {
-                if (+q === +str.id)
-                  matches.push({ name: str.name, id: str.id, price: str.price });
-                if (substrRegex.test(str.name))
-                  matches.push({ name: str.name, id: str.id, price: str.price });
-              });
-              
-              cb(matches);
-            };
-          };
-          
-          $('#typeahead-product').typeahead({
-            hint: true,
-            highlight: true,
-            minLength: 2
-          },
-          {
-            name: 'states',
-            displayKey: 'name',
-            limit: 15,
-            source: substringMatcher(response)
-            
-          }).on('typeahead:selected', function (obj, data) {
-            _p = data;
-            $("#add-product").click();
-          });
-        });
-
-        
-        $("form").on("keypress keydown", "input", function(e) {
-          if (e.which == 13 || e.keyCode == 13) {
-            $(this).change();
-            return false;
-          }
-        });
-        $("form").on("submit", function(e) {
-          $(":input[name=cl]").parents(".control-group").removeClass("has-error");
-          $(":input[name=pl]").parents(".control-group").removeClass("has-error");
-          var valid = true;
-          if ($(":input[name*=client_id]").val().length == 0) {
-            $(":input[name=cl]").parents(".control-group").addClass("has-error");
-            valid = false;
-          }
-          // if ($(":input[name*=place_id]").val().length == 0) {
-          //   $(":input[name=pl]").parents(".control-group").addClass("has-error");
-          //   valid = false;
-          // }
-          return valid;
-        });
-        
-        $("#add-product").on("click", function() {
-          var tr = $("#sample_table tr:first").clone();
-          tr.data('sum', 0);
-          tr.data('price', _p.price);
-          $(".price", tr).text($(".price", tr).text().replace(/\d+/g, _p.price));
-          $(".product", tr).text(_p.name);
-          $(":input[name*='id']", tr).val(_p.id);
-          var n = $(".order-table tbody tr span.num").length;
-          $(".num", tr).text(n + 1);
-          tr.appendTo($(".order-table tbody"));
-          $("#typeahead-product").focus();
-          var scrollTop = $('#typeahead-product').offset().top;
-          $(document).scrollTop(0);
-        });
-        
-        $(".order-table").on("change", ":input.form-amount", function() {
-          var amount = +$(this).val();
-          var line = $(this).parents("tr");
-          // var datamin = +line.data('min') || 10;
-          // if (isNaN(amount) || amount < datamin) {
-          //     $(this).val('');
-          //     $("#min-alert .modal-content p span").text(datamin)
-          //     $("#min-alert").modal();
-          //     return false;
-          // }
-          var newsum = Math.abs(line.data("price") * amount);
-          var newtotal = $("#total").data("sum") - +line.data("sum") + newsum;
-          // updateCart(newtotal);
-          $(".form-sum", line).text($(".form-sum", line).text().replace(/\d+/g, newsum));
-          line.data("sum", newsum);
-          $("#total").text($("#total").text().replace(/\d+/g, newtotal));
-          $("#total").data("sum", newtotal);
-          //var data = "id=" + $(":input:first", line).val() + "&amount=" + amount + "&authenticity_token=" + $("form:first :input[name^='auth']").val();
-          // $.ajax({ type: "POST", url: "/order/cartupd", data: {} });
-        });
-        
-        $(".order-table").on("click", ".btn-del", function() {
-          var line = $(this).parents("tr");
-          line.fadeOut(function() {
-            var newtotal = $("#total").data("sum") - +line.data("sum");
-            line.remove();
-            $(".order-table tbody tr span.num").each(function(i, el) {
-              $(el).text(i + 1);
-            });
-            // updateCart(newtotal, +$("#cart-label").text() - 1);
-            $("#total").text($("#total").text().replace(/\d+/g, newtotal));
-            $("#total").data("sum", newtotal);
-          });
-          //var data = "id=" + $(":input:first", line).val() + "&authenticity_token=" + $("form:first :input[name^='auth']").val();
-          // $.ajax({ type: "POST", url: "/order/cartdel", data: {} });
-        });
-
-        function copy_product(target) {
-          var tr = $("#sample_table tr:first").clone();
-          tr.data('sum', 0);
-          tr.data('price', _p.price);
-          $(".price", tr).text($(".price", tr).text().replace(/\d+/g, _p.price));
-          $(".product", tr).text(_p.name);
-          $(":input[name*='id']", tr).val(_p.id);
-          var n = $(".order-table tbody tr span.num").length;
-          $(".num", tr).text(n + 1);
-          target.after(tr)
-        }
-
-        $(".order-table").on("click", ".btn-copy", function() {
-          var line = $(this).parents("tr");
-          var line_id = $(":input[name*='id']", line).val();
-          _p = $.grep(_products, function(e) { return e.id == line_id; })[0];
-          copy_product(line)
-        });
-
-        let order_form = document.querySelector('.main-wrapper-push form')
-        DekolFu.init_kato_blood(order_form, 'kato_type', '"cabie[kato_place]"')
-
-        
-      });
-    })(jQuery);
+      // setTimeout(function() {
+      //   rcontrol.trigger('MASS_LOAD', rsquad.loaded[0])
+      // }, 1000)
+    })

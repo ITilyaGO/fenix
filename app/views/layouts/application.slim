@@ -31,7 +31,7 @@ html lang='en'
                 span class="menu-icon fa fa-cloud-download"
           - if can_view?(:order, :create) || allow_route?(:orders_create)
             li.sidebar-list
-              = link_to url(:orders, :fullempty) do
+              = link_to url(:orders, :preempty) do
                 | Создать заказ
                 span class="menu-icon fa fa-flash"
 

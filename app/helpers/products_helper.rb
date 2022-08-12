@@ -69,8 +69,9 @@ module Fenix::App::ProductsHelper
     Padrino.cache[:corel_root] ||= wonderbox(:corel_root)
   end
 
-  def json_products_list
-    Padrino.cache[:products_list] ||= json_list.to_json
+  def json_products_list place
+    # Padrino.cache[:products_list]
+    json_list(place)
   end
 
   def json_products_tree
@@ -83,14 +84,21 @@ module Fenix::App::ProductsHelper
     Padrino.cache.delete(:products_section)
   end
 
-  def json_list
-    Product.all.map{|a| {id: a.id, price: a.price, name: a.displayname}}
+  def json_list place
+    Product.all
+      .select{ |a| a.global? || a.place_id == place }
+      .map{|a| {id: a.id, price: a.price, name: a.displayname, cat: a.category_id}}
 
     # parents = Product.pluck(:parent_id).compact.uniq
     # Product.joins(:category).eager_load(:parent).select(:id, :name, :price)
     #   .reject{|a| parents.include? a[:id]}
     #   .map{|a| {id: a[:id], price: a[:price], name: a.displayname}}
   end
+
+  def json_cats_list
+    KSM::Category.all.map{ |a| {id: a.id, name: a.display} }
+  end
+
 
   def json_cats
     @parents = [] #Product.pluck(:parent_id).compact.uniq

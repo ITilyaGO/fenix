@@ -11,4 +11,25 @@ Fenix::App.controllers :products do
     # @archs.select{|a|a.category_id == cat}.map(&:to_r)
     products.to_json
   end
+
+  post :clist, :provides => :json do
+    cat = params[:cat]
+    place = params[:place]
+    pro = Product.all.select{ |p| p.place_id == place && p.category_id == cat }.sort_by(&:wfindex)
+    @arp = CabiePio.folder(:product, :archetype).flat
+    @kc_stocks = CabiePio.folder(:stock, :archetype).flat.trans(nil, :to_i)
+
+    products = pro.map(&:to_r).map{|r|r.slice(:id, :name, :art, :price)}
+    products.each do |p|
+      pm = pro.detect{|a|a.id == p[:id]}
+      p[:name] = pm&.displayname
+      p[:arn] = @kc_stocks[@arp[p[:id]]]
+    end
+    products.to_json
+  end
+
+  post :one, :provides => :json do
+    id = params[:id]
+    Product.find(id).to_jr.to_json
+  end
 end

@@ -74,6 +74,12 @@ class Product < Doppel
     [place_id, kato].join(':')
   end
 
+  def to_jr
+    {
+      name: displayname
+    }.merge to_r.slice(*%i[id price category_id place_id price art])
+  end
+
   def saved_by account
     @dates ||= []
     @created_at ||= Time.now

@@ -148,6 +148,21 @@ Fenix::App.controllers :orders do
     render 'orders/index'
   end
 
+  get :choosie, :with => :id do
+    @order = params[:id]
+    render 'orders/choosie'
+  end
+
+  get :preempty do
+    @order = params[:id]
+    @kc_towns = KatoAPI.batch([@kc_client_hometown, @kc_client_delivery, @kc_order_town, @kc_order_delivery].compact)
+    render 'orders/preempty'
+  end
+
+  post :preempty do
+    redirect url(:orders, :fullempty, place: params[:cabie][:kato_place])
+  end
+
   get :edit, :with => :id do
     @title = pat(:edit_title, :model => "order #{params[:id]}")
     @order = Order.includes(:order_lines_ar).find params[:id]
@@ -402,6 +417,7 @@ Fenix::App.controllers :orders do
     # order.delete(:account_id)
     # h.save
     params[:order][:delivery] = params[:order][:delivery].to_i
+    params[:order][:priority] = params[:order][:priority] == 'true'
     ar = params[:order].dup
     ar.delete(:cash)
     order = Order.new(ar)
@@ -466,16 +482,17 @@ Fenix::App.controllers :orders do
     cash = params[:order][:cash] == 'true' ? 't' : 'f'
     CabiePio.set [:orders, :cash], order.id, cash
 
-    redirect(url(:orders, :draft))
+    redirect url(:orders, :choosie, id: order.id)
   end
 
   get :fullempty do
     @title = "New order"
-    # @cats = Category.where(category: nil).order(:index => :asc)
     @cats = KSM::Category.all.select{ |c| c.category_id.nil? }.sort_by(&:wfindex)
     # Padrino.cache['cats'] ||= cats
     # @cats = Padrino.cache['cats']
     @parents = Product.pluck(:parent_id).compact.uniq
+    @cattree = otree_cats3 cats_olist
+    # @protree = otree_cats3 pro_olist(params[:place])
     @arp = CabiePio.folder(:product, :archetype).flat
     @kc_stocks = CabiePio.folder(:stock, :archetype).flat.trans(nil, :to_i)
     @kc_needs = CabiePio.folder(:need, :archetype).flat.trans(nil, :to_i)
@@ -486,19 +503,25 @@ Fenix::App.controllers :orders do
 
   get :copy, :with => :id do
     @title = "Copy order #{params[:id]}"
+    @cats = KSM::Category.all.select{ |c| c.category_id.nil? }.sort_by(&:wfindex)
     order = Order.find(params[:id])
     @order_lines = order.order_lines
     @total = order.total
     @order_client = order.client
     @kc_town = CabiePio.get([:orders, :towns], order.id).data
     @kc_timeline = CabiePio.get([:orders, :timeline], order.id).data
+    place = CabiePio.get([:orders, :towns], order.id).data
+    @order_place = KatoAPI.anything(place) if place
     @form = order
+    @cattree = otree_cats3 cats_olist
+    @protree = otree_cats3 pro_olist(place)
     @force_timeline = true
     render 'orders/empty'
   end
 
   get :addition, :with => :id do
     @title = "Create additional order for #{params[:id]}"
+    @cats = KSM::Category.all.select{ |c| c.category_id.nil? }.sort_by(&:wfindex)
     order = Order.find(params[:id])
     @order_lines = []
     order.order_lines.each do |ol|
@@ -515,23 +538,30 @@ Fenix::App.controllers :orders do
     @total = order.total_price
     @kc_town = CabiePio.get([:orders, :towns], order.id).data
     @kc_timeline = CabiePio.get([:orders, :timeline], order.id).data
+    place = CabiePio.get([:orders, :towns], order.id).data
+    @order_place = KatoAPI.anything(place) if place
     @form = order
+    @cattree = otree_cats3 cats_olist
+    @protree = otree_cats3 pro_olist(place)
     @force_timeline = true
     render 'orders/empty'
   end
 
   get :correct, :with => :id do
-    @title = "Edit order #{params[:id]}"
+    @title = "Correct order #{params[:id]}"
+    @cats = KSM::Category.all.select{ |c| c.category_id.nil? }.sort_by(&:wfindex)
     order = Order.find(params[:id])
     @order_lines = order.order_lines
     @total = order.total
     @id = order.id
     @order_client = order.client
-    @order_place = order.place
+    place = CabiePio.get([:orders, :towns], order.id).data
+    @order_place = KatoAPI.anything(place) if place
     @descr = order.description
     @form = order
     @cash = CabiePio.get([:orders, :cash], order.id).data == 't'
-    @kc_town = CabiePio.get([:orders, :towns], order.id).data
+    @cattree = otree_cats3 cats_olist
+    @protree = otree_cats3 pro_olist(place)
     render 'orders/empty'
   end
 
@@ -626,7 +656,7 @@ Fenix::App.controllers :orders do
     arbal_need_order_edit(order) unless order.draft?
     arbal_need_order_edit(order_rm) unless order.draft?
     
-    redirect(url(:orders, :draft))
+    redirect url(:orders, :choosie, id: order.id)
   end
 
   put :anew do
@@ -1156,7 +1186,7 @@ Fenix::App.controllers :orders do
   end
 
   post :products, :provides => :json do
-    json_products_list
+    { products: json_products_list(params[:place]), categories: json_cats_list }.to_json
   end
 
   post :cities, :provides => :json do

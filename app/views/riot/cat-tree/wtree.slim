@@ -1,0 +1,47 @@
+wtree
+  yield
+
+  javascript:
+    self.childs = []
+
+    rcontrol.on('THINGS_LIST_ON', function(data) {
+      document.querySelector('.page .content').classList.add('hide')
+      document.querySelector('.page .table50').classList.remove('hide')
+      document.querySelector('.page .rim').classList.add('open')
+    })
+
+    rcontrol.on('THINGS_LIST_OFF', function(data) {
+      document.querySelector('.page .content').classList.remove('hide')
+      document.querySelector('.page .table50').classList.add('hide')
+      document.querySelector('.page .rim').classList.remove('open')
+    })
+
+    loadlist() {
+      var data = {
+        authenticity_token: rsquad.token()
+      }
+
+      fetch('/categories/plainlist.json', {
+        method: "POST",
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(data).toString()
+      })
+      .then(function(response) { return response.json() })
+      .then(function(data) {
+        self.products = self.cache = data
+        self.childs.forEach(function(c) {
+          var ch = self.products.find(el => el.id == c) || { id: '0000', name: opts.name, root: true }
+          var chdup = Object.assign({ nid: c }, ch)
+          rsquad.dm('WTREE_CHILD_RETURN', self._riot_id, chdup.id, chdup)
+        })
+        self.update()
+      })
+    }
+
+    self.on('mount', function() {
+      self.loadlist()
+    })
+
+    rcontrol.on('WTREE_CHILD', function(string) {
+      self.childs.push(string)
+    })

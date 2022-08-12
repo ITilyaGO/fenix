@@ -1,0 +1,90 @@
+catlist
+  .tmar-1 hide='{toload}'
+  h4 hide='{toload}' {titles}
+  table.table.table-hover.order-table hide='{toload}'
+    tr data-sum="0"
+      th.col-md-5 Наименование
+      th.col-md-3 Коммент
+      th.col-md-1 Количество
+      th Остаток
+      th Цена
+      th Сумма
+      th &nbsp;
+    tr.list-row data-sum="0" data-price="{line.price}" each="{ line in products }"
+      td
+        = hidden_field_tag 'line[][id]', :value => "{line.id}"
+        .product.flex-c.vcenter
+          .wp100
+            | { line.name } &nbsp;
+          .label.label-default if='{line.art}'
+            | { line.art }
+      td
+        .form-control.input-sm readonly=true
+      td class="vert-align"
+        = text_field_tag 'b[][amount]', :autocomplete => :off, :class => "form-control form-amount input-sm",
+          onchange: '{ readd }'
+      td
+        .fa.fa-exclamation-triangle.text-warning if='{!line.arn}'
+        .label.label-danger if='{line.arn < 0}'
+          | { -line.arn }
+        .label.label-default if='{line.arn == 0}' нет
+        .label.label-success if='{line.arn > 0}'
+          | { line.arn }
+      td.price.vert-align
+        | { line.price } &nbsp;&#x20B7
+      td.form-sum
+        | 0&nbsp;&#x20B7
+      td.list-column.list-row-action
+        .list-row-action-wrapper
+          a.btn-copy.list-row-action-wrapper-link title="#{pat(:copy)}"
+            = tag_icon(:'plus-square-o')
+          a.btn-del.list-row-action-wrapper-link title="#{pat(:delete)}"
+            = tag_icon(:'trash-o')
+
+
+  javascript:
+    self.toload = true
+    self.titles = opts.titles + (opts.glob ? ' – Россия' : '')
+
+    viewscroll() {
+      var al = self.root
+      if (al && al.previousElementSibling) al = al.previousElementSibling
+      if (al) al.scrollIntoView(true)
+    }
+
+    loadlist(place) {
+      var data = {
+        authenticity_token: rsquad.token(),
+        cat: opts.cid,
+        place: place
+      }
+  
+      fetch('/products/clist.json', {
+        method: "POST",
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(data).toString()
+      })
+      .then(function(response) { return response.json() })
+      .then(function(data) {
+        self.toload = false
+        self.products = self.cache = data
+        self.update()
+        self.viewscroll()
+      })
+    }
+
+    readd(a) {
+      let data = a.item.line
+      data.amount = a.target.value
+      rcontrol.trigger('ORDER_COPY_PRODUCT', data)
+    }
+
+    rcontrol.on('MASS_LOAD_' + opts.cid, function(data) {
+      if ((data.place === 'RU' && !opts.glob) || (data.place != 'RU' && opts.glob)) return;
+      if (self.toload) self.loadlist(data.place)
+      else self.viewscroll()
+    })
+
+    self.on('mount', function() {
+      rsquad.loaded.push(opts.cid)
+    })

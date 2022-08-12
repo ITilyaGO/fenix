@@ -1,0 +1,211 @@
+page
+  javascript:
+
+    self.products = []
+    self.tbody = $(".order-table.manual tbody")[0]
+
+    desubmit() {
+      $("form").on("keypress keydown", "input", function(e) {
+        if (e.which == 13 || e.keyCode == 13) {
+          $(this).change()
+          return false;
+        }
+      })
+    }
+
+    on_copy_btn() {
+      $(".order-table").on("click", ".btn-copy", function() {
+        var line = $(this).parents("tr")
+        var line_id = $(":input[name*='id']", line).val()
+        self._p = $.grep(self.products, function(e) { return e.id == line_id; })[0]
+        self.copy_product(self._p, line)
+      })
+    }
+
+    copy_product(data, target) {
+      let lp = data || self._p
+      var tr = $("#sample_table tr:first").clone()
+      var newsum = Math.abs(lp.price * +lp.amount || 0)
+      tr.data('sum', newsum)
+      tr.data('price', lp.price)
+      $(".price", tr).text($(".price", tr).text().replace(/\d+/g, lp.price))
+      $(".product", tr).text(lp.name)
+      $(":input[name*='id']", tr).val(lp.id)
+      $(":input[name*='amount']", tr).val(+lp.amount||0)
+      $(".form-sum", tr).text($(".form-sum", tr).text().replace(/\d+/g, newsum))
+      self.difftotal(newsum)
+      var n = $(".order-table tbody tr span.num").length
+      $(".num", tr).text(n + 1)
+      tr[0].style.opacity = 0
+      if (target.tagName === 'TBODY') tr.appendTo(target)
+      else target.after(tr)
+      Visual.fadeIn(tr[0], 350)
+    }
+
+    rcontrol.on('ORDER_COPY_PRODUCT', function(data, cmp) {
+      self.copy_product(data, self.tbody)
+    })
+
+    type_refocus() {
+      $("#typeahead-product").focus()
+      $("#typeahead-product").select()
+      var scrollTop = $('#typeahead-product').offset().top
+      // $(document).scrollTop(0);
+    }
+
+    difftotal(newdiff) {
+      var newtotal = +$("#total").data("sum") + newdiff
+      $("#total").text($("#total").text().replace(/\d+/g, newtotal))
+      $("#total").data("sum", newtotal)
+    }
+
+    change_del_lsn() {
+      $(".order-table").on("change", ":input.form-amount", function() {
+        var amount = +$(this).val()
+        var line = $(this).parents("tr")
+        
+        var newsum = Math.abs(line.data("price") * amount)
+        self.difftotal(newsum - +line.data("sum"))
+        $(".form-sum", line).text($(".form-sum", line).text().replace(/\d+/g, newsum))
+        line.data("sum", newsum)
+      })
+
+      $(".order-table").on("click", ".btn-del", function() {
+        var line = $(this).parents("tr")
+        var linejs = this.closest('tr')
+        self.difftotal(- +line.data("sum"))
+        Visual.fadeOut(linejs, 320, function() {
+          line.remove()
+          $(".order-table tbody tr span.num").each(function(i, el) {
+            $(el).text(i + 1)
+          })
+        })
+      })
+    }
+
+    type_product() {
+      Handlebars.registerHelper("catname", function(options) {
+        var dc = self.categories.find(el => el.id == this.cat)
+        return dc && dc.name
+      })
+
+      var data = {
+        authenticity_token: rsquad.token(),
+        place: document.querySelector("form input[name*=kato_place]").value 
+      }
+      $.ajax({
+        type: "POST",
+        data: data,
+        url: "/orders/products"
+      }).done(function(response) {
+        self.products = response.products
+        self.categories = response.categories
+        var substringMatcher = function(strs) {
+          return function findMatches(q, cb) {
+            var matches, substrRegex, substr;
+            matches = []
+            var req = q.replace(/[\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|\"\']/g, "\\$&")
+            substrRegex = new RegExp(req, 'i')
+            substr = new RegExp('^' + q, 'i')
+
+            $.each(self.products, function(i, str) {
+              if (+q === +str.id)
+                matches.push(str)
+              var cs = str.name.replace(/[\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|\"\']/g, "")
+              if (substrRegex.test(cs) || substr.test(str.name))
+                matches.push(str)
+            })
+
+            cb(matches)
+          }
+        }
+
+        $('#typeahead-product').typeahead({
+          hint: true,
+          highlight: true,
+          minLength: 2
+        },
+        {
+          name: 'states',
+          displayKey: 'name',
+          limit: 15,
+          source: substringMatcher(response),
+          templates: {
+            suggestion: Handlebars.compile('\
+              <p>\
+                <span class="label label-arning">{{id}}</span>\
+                {{name}}\
+                <span class="pull-right">{{catname}}</span>\
+              </p>\
+            ')
+          }
+
+        }).on('typeahead:selected', function (obj, data) {
+          self.copy_product(data, $(".order-table.manual tbody")[0])
+          self.type_refocus()
+        })
+      })
+    }
+
+    type_client() {
+      var bloodhound_clients = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        // sufficient: 10,
+        // limit: 30,
+        remote: {
+          url: '/orders/clients2',
+          replace: function(url, query) {
+            return url + "#" + query;
+          },
+          transport: function (opts, onSuccess, onError) {
+            var url = opts.url.split("#")[0]
+            var query = opts.url.split("#")[1]
+            $.ajax({
+              url: url,
+              data: $.param({
+                q: query,
+                authenticity_token: rsquad.token()
+              }),
+              type: "POST",
+              success: onSuccess,
+              error: onError
+            })
+          }
+        }
+      })
+      bloodhound_clients.initialize()
+      $('#typeahead-client').typeahead({
+        minLength: 3
+      }, {
+        name: 'clients',
+        displayKey: 'name',
+        source: bloodhound_clients.ttAdapter(),
+        limit: Number.MAX_VALUE,
+        templates: {
+          suggestion: Handlebars.compile('\
+            <p>\
+              <span class="label label-arning">{{id}}</span>\
+              {{name}}\
+              <span class="pull-right">{{city}}</span>\
+            </p>\
+          '),
+        }
+      }).on('typeahead:selected', function (e, suggestion) {
+        document.querySelector("form input[name*=client_id]").value = suggestion.id
+      })
+    }
+
+    type_city() {
+      let order_form = document.querySelector('.main-wrapper-push form')
+      DekolFu.init_kato_blood(order_form, 'kato_type', '"cabie[kato_place]"')
+    }
+    
+    this.on('mount', function() {
+      this.desubmit()
+      this.on_copy_btn()
+      this.change_del_lsn()
+      this.type_product()
+      this.type_client()
+      if (opts.cityload) self.type_city()
+    })

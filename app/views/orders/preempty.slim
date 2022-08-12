@@ -1,0 +1,39 @@
+.main-wrapper-push.flex-v style="flex-direction: column; justify-content: space-between; align-items: center; height: 80vh;"
+  .block.timeline.col-md-12.clearfix
+    .text-center: h6 Новый заказ
+    = form_for :order, url(:orders, :preempty), :class => 'form-std' do |f|
+      .col-md-10
+        fieldset.control-group
+          = f.label "Город", :class => 'col-md-3 control-label'
+          .col-md-8.controls
+            .scrollable-dropdown-menu
+              .hidden = text_field_tag :'cabie[kato_place]', required: true
+              = text_field_tag :kato_type, :class => 'form-control', required: true
+
+      .form-actions
+        = submit_tag :'выбрать', class: 'btn btn-default btn-wide'
+  .block.flex-wrap.flex-c.cmar-1
+    / TODO: figure out how to limit
+    - known_cities.each do |k, city|
+
+      a.btn.btn-desert-rim.item-all.flex-v.tmar-1 href=url(:orders, :fullempty, place: k)
+        .flex-c.vcenter
+          .ico.fa.fa-plane
+          = city.model.name
+        .cap.small = city.model.region&.data
+
+  .spacer style='flex-basis: 50%;'
+
+- content_for :js_assets do
+  = javascript_include_tag :riot
+
+  javascript:
+
+    (function($) {
+      $(function() {
+
+        let order_form = document.querySelector('.main-wrapper-push form')
+        DekolFu.init_kato_blood(order_form, 'kato_type', '"cabie[kato_place]"')
+        
+      })
+    })(jQuery);
