@@ -20,6 +20,7 @@ class Product < Doppel
 
   def wfindex
     (@windex || :aaaaaaaa).to_s.rjust(8,"0")
+    displayname text: true
   end
 
   def cindex

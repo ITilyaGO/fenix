@@ -115,7 +115,7 @@
           td class="col-md-3"
             = text_field_tag 'line[][comment]', :value => line[:comment], :placeholder => "Комментарий к позиции", :class => "form-control input-sm"
           td class="col-md-1" class="vert-align"
-            = text_field_tag 'line[][amount]', :value => line[:amount], :class => "form-control form-amount input-sm"
+            = text_field_tag 'line[][amount]', :class => "form-control form-amount input-sm"
           td
           td class="col-md-1 price" class="vert-align"
             = line[:price]
@@ -198,7 +198,7 @@
     
     / .foot style='height: 20vh;'
 
-page cityload=true
+page cityload=1
 
 - content_for :js_assets do
   = javascript_include_tag :riot

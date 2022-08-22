@@ -32,6 +32,7 @@ page
       $(".product", tr).text(lp.name)
       $(":input[name*='id']", tr).val(lp.id)
       $(":input[name*='amount']", tr).val(+lp.amount||0)
+      if (+$(":input[name*='amount']", tr).val() == 0) $(":input[name*='amount']", tr).val('')
       $(".form-sum", tr).text($(".form-sum", tr).text().replace(/\d+/g, newsum))
       self.difftotal(newsum)
       var n = $(".order-table tbody tr span.num").length

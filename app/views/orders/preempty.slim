@@ -14,7 +14,7 @@
         = submit_tag :'выбрать', class: 'btn btn-default btn-wide'
   .block.flex-wrap.flex-c.cmar-1
     / TODO: figure out how to limit
-    - known_cities.each do |k, city|
+    - known_cities.reject{|x|x.eql? 'RU'}.each do |k, city|
 
       a.btn.btn-desert-rim.item-all.flex-v.tmar-1 href=url(:orders, :fullempty, place: k)
         .flex-c.vcenter
