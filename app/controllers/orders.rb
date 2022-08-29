@@ -1027,14 +1027,14 @@ Fenix::App.controllers :orders do
   get :bunch, :with => :id, :provides => :html do
     @title = pat(:edit_title, :model => "order #{params[:id]}")
     ids = params[:id].split(',').map(&:to_i)
-    @orders = Order.includes(:order_lines_ar).where(id: ids)
+    @orders = Order.where(id: ids)
     @sections = KSM::Section.all
     # habits(@sections, :index)
     @my_section = @sections.detect{ |a| a.ix == current_account.section_id }
 
     @order = OrderBunch.new
     @orders.each do |order|
-      order.order_lines_ar.each do |ool|
+      order.order_lines.each do |ool|
         @order.order_lines << OrderLineBun.new(ool.serializable_hash)
       end
       
@@ -1048,13 +1048,13 @@ Fenix::App.controllers :orders do
 
   get :bunch, :with => :id, :provides => :csv do
     ids = params[:id].split(',').map(&:to_i)
-    @orders = Order.includes(:order_lines_ar).where(id: ids)
+    @orders = Order.where(id: ids)
     @sections = KSM::Section.all
     # habits(@sections, :index)
 
     @order = OrderBunch.new
     @orders.each do |order|
-      order.order_lines_ar.each do |ool|
+      order.order_lines.each do |ool|
         @order.order_lines << OrderLineBun.new(ool.serializable_hash)
       end
       
