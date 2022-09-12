@@ -151,6 +151,11 @@ html lang='en'
                 = link_to url(:archetypes, :index) do
                   | Связи на складе
                   span class="menu-icon fa fa-inbox"
+            - if can_btn_view?(:stock, :archetypes) || allow_route?(:online)
+              li.sidebar-list
+                = link_to url(:archetypes, :reserve) do
+                  | Резерв
+                  span class="menu-icon fa fa-signal"
 
             / - if allow_route?(:editors)
           - if true

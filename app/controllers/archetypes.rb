@@ -297,4 +297,37 @@ Fenix::App.controllers :archetypes do
     arch.save
     {}.to_json
   end
+
+  get :reserve do
+    @title = "Timeline"
+    @print_btn = 1
+    start_from = timeline_unf(params[:start]) rescue Date.today
+    @prev = start_from.beginning_of_week + Date::BOW
+    @next = @prev.next_week
+    @weeks = []
+    8.times do |i|
+      @weeks << { :date => (pr = @prev + (i -2)*7), :end => pr.next_week }
+    end
+    @orneed = @prev.step(@next).map do |day|
+      CabiePio.query("p/anewdate/order>#{timeline_id day}_", type: :prefix).flat.trans(nil, :to_i).values
+    end.flatten.uniq
+    @orders = Order.where(id: @orneed)
+
+    arches = CabiePio.folder(:product, :archetype).flat
+    parchs = @orneed.map do |oid|
+      order = Order.find oid
+      order.order_lines.map{|l|archetype_order(arches[l.product_id], l.id, order.id)}
+    end.flatten
+    @rese = CabiePio.all_keys(parchs, folder: [:need, :order]).flat.map{|k,v|[k.split('_')[1].to_i, v.to_i]}.to_h
+    @olneed = CabiePio.all_keys(parchs, folder: [:need, :order]).flat.trans(nil, :to_i)
+    @kc_status = {}
+    @kc_orders = {}
+    @kc_towns = {}
+    @kc_timelines = {}
+    # @olneed = @orneed.map do |order|
+    #   CabiePio.query("p/need/order>*._#{order}", type: :regex).flat.trans(nil, :to_i)
+    # end.flatten
+
+    render 'archetypes/reserve'
+  end
 end
