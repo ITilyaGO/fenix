@@ -56,7 +56,7 @@ br
                     / TODO: parent dishes with no price
                     / == rur(p.price) rescue '?'
                     - if stock != 0
-                      .label class=[('label-danger' if stock < 0), ('label-success' if stock > 0)]
+                      .label.text-nowrap class=[('label-danger' if stock < 0), ('label-success' if stock > 0)]
                         == deli stock.abs
                     - else
                       .label.label-default нет
@@ -66,7 +66,7 @@ br
                         == deli need
                     - else
                       .label.label-default нет
-                    - if need != @olneed[p.id]
+                    / - if need != @olneed[p.id]
                       .label.label-purple = @olneed[p.id]
                   td
                     / - if !can_view?(:sys, :prefs)
@@ -101,28 +101,36 @@ br
                   - 5.times do |i|
                     - day = @day - 6 + i
                     td.text-center data-day=day
-                      - if @holders[p.id].fetch(day, nil)
-                        .label.label-default.vp = @holders[p.id][day]
-                        - if @destocks[p.id].fetch(day, nil)
-                        | &nbsp;
+                      - hamount = @holders[p.id].fetch(day, 0)
+                      - damount = @destocks[p.id].fetch(day, 0)
+                      - if hamount > 0 or damount > 0
+                        .label.label-default.vp
+                          = hamount
+                          elhide th='DESTOCK_HIDE' ts='DESTOCK_SHOW' hide='true'
+                            |&nbsp;/&nbsp;
+                            strong = damount
+                        /- if @destocks[p.id].fetch(day, nil)
+                        /| &nbsp;
                       /.text-center
-                      - if @destocks[p.id].fetch(day, nil)
+                      /- if @destocks[p.id].fetch(day, nil)
                         elhide th='DESTOCK_HIDE' ts='DESTOCK_SHOW' hide='true'
                           .label.label-lightdanger = @destocks[p.id][day]
-                      - else
+                      /- else
                         br
 
                   - 2.times do |i|
                     - day = @day - 1 + i
                     td.text-center.col-md-1 data-day=day
                       .vp.hidden = @holders[p.id].fetch(day, nil)
-                      .col.flex-v.center
+                      .col.flex-c.vcenter
                         = text_field_tag "lines[#{p.id}][#{day}]", class: 'form-control input-large',
                         placeholder: @holders[p.id].fetch(day, nil)
                         - if @destocks[p.id].fetch(day, nil)
                           .text-center
                           elhide th='DESTOCK_HIDE' ts='DESTOCK_SHOW' hide='true'
-                            .label.label-lightdanger = @destocks[p.id][day]
+                            .label.label-default
+                              |/&nbsp;
+                              = @destocks[p.id][day]
 
               tr.order-line
                 td colspan=5
