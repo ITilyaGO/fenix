@@ -16,8 +16,8 @@ Fenix::App.controllers :products do
     cat = params[:cat]
     place = params[:place]
     pro = Product.all.select{ |p| p.place_id == place && p.category_id == cat }.sort_by(&:wfindex)
-    @arp = CabiePio.folder(:product, :archetype).flat
-    @kc_stocks = CabiePio.folder(:stock, :archetype).flat.trans(nil, :to_i)
+    @arp = Stock::Linkage.all.flatless
+    @kc_stocks = Stock.free.flatless
 
     products = pro.map(&:to_r).map{|r|r.slice(:id, :name, :art, :price)}
     products.each do |p|

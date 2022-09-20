@@ -9,7 +9,7 @@ pbutton onclick='{sender}'
       var data = {
         day: pday,
         draws: draws,
-        authenticity_token: rsquad.token()
+        authenticity_token: rsquad.token
       }
       fetch('/draws/to_print.json', {
         method: "POST",

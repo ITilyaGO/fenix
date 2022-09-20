@@ -91,7 +91,7 @@ page
       })
 
       var data = {
-        authenticity_token: rsquad.token(),
+        authenticity_token: rsquad.token,
         place: document.querySelector("form input[name*=kato_place]").value 
       }
       $.ajax({
@@ -166,7 +166,7 @@ page
               url: url,
               data: $.param({
                 q: query,
-                authenticity_token: rsquad.token()
+                authenticity_token: rsquad.token
               }),
               type: "POST",
               success: onSuccess,

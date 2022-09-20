@@ -17,7 +17,7 @@ dwl
     loadlist() {
       var data = {
         order: opts.order,
-        authenticity_token: rsquad.token()
+        authenticity_token: rsquad.token
       }
       fetch('/draws/for_order.json', {
         method: "POST",

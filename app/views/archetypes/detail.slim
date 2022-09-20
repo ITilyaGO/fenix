@@ -4,11 +4,11 @@
 .col-md-6
   .flex-c
     span Склад&nbsp;
-    .info: .label.label-success = @stock.data
+    .info: .label.label-success = @stock.body
     | &nbsp;&nbsp;&nbsp;
     span Заказы&nbsp;
-    .info: .label.label-info = @need.data
-    - if @need.data.to_i != @olneed.values.sum
+    .info: .label.label-info = @need.body
+    - if @need.body != @olneed.values.sum
       .info: .label.label-purple = @olneed.values.sum
 .clearfix
 br
@@ -20,6 +20,7 @@ table.table.table-hover.table-condensed
     th
     th.header Резерв
     th.header Город
+    th.header Дата
     th.header Дата
     th.header Отправка
     th.header Заказчик
@@ -39,6 +40,7 @@ table.table.table-hover.table-condensed
         - town_name = @kc_towns[code]&.model
         = partial 'bricks/kato/label_print', :locals => { town_name: town_name, el: order }
       td.list-column = to_dm(order&.created_at) rescue nil
+      td = to_dm timeline_unf CabiePio.get(%i[orders anewdate], order.id).data rescue nil
       td.list-column
         - odate = @kc_timelines[order&.id]
         = to_dm(timeline_unf(odate)) if odate

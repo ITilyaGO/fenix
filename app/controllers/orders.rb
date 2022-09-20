@@ -493,9 +493,9 @@ Fenix::App.controllers :orders do
     @parents = Product.pluck(:parent_id).compact.uniq
     @cattree = otree_cats3 cats_olist
     # @protree = otree_cats3 pro_olist(params[:place])
-    @arp = CabiePio.folder(:product, :archetype).flat
-    @kc_stocks = CabiePio.folder(:stock, :archetype).flat.trans(nil, :to_i)
-    @kc_needs = CabiePio.folder(:need, :archetype).flat.trans(nil, :to_i)
+    @arp = Stock::Linkage.all.flatless
+    @kc_stocks = Stock.free.flatless
+    @kc_needs = Stock.need.flatless
     @place = params[:place]
     @order_place = KatoAPI.anything(@place) if @place
     render 'orders/fullempty'

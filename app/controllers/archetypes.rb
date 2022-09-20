@@ -133,10 +133,10 @@ Fenix::App.controllers :archetypes do
   end
 
   get :detail, :with => :id do
-    @arch = KSM::Archetype.find(params[:id])
-    @olneed = CabiePio.query("p/need/order>#{@arch.id}_", type: :prefix).flat.trans(nil, :to_i)
-    @need = CabiePio.get([:need, :archetype], @arch.id)
-    @stock = CabiePio.get([:stock, :archetype], @arch.id)
+    @arch = KSM::Archetype.find params[:id]
+    @olneed = KSM::OrderNeed.query("#{@arch.id}_", type: :prefix).flatless
+    @need = Stock.need @arch.id
+    @stock = Stock.free @arch.id
     oids = @olneed.keys.map{|ol|ol.split('_').last}
     @orders = Order.where(id: oids)
     @kc_orders = CabiePio.all_keys(oids, folder: [:orders, :towns]).flat
@@ -161,8 +161,8 @@ Fenix::App.controllers :archetypes do
     tdays = today.step(first_day, 1)
     days = []
     dids = tdays.each_with_index.map{|_, i| archetype_daystock(@arch.id, @day+i) }
-    stockdays = CabiePio.all_keys(dids, folder: [:stock, :common, :a]).flat.trans(nil, :to_i)
-    destockdays = CabiePio.all_keys(dids, folder: [:stock, :common, :d]).flat.trans(nil, :to_i)
+    stockdays = Stock::In.find_all(dids).flatless
+    destockdays = Stock::Out.find_all(dids).flatless
 
     tdays.each_with_index do |_, i|
       cday = @day+i
@@ -194,29 +194,28 @@ Fenix::App.controllers :archetypes do
     @holders = {}
     @destocks = {}
     @olneed = {}
-    ksm_arch = KSM::Archetype.all
+    ksm_arch = KSM::Archetype.all.select { |a| a.category_id == params[:cat] }
+    ksm_arch = KSM::Archetype.all if params[:all]
     ar_hash = ksm_arch.map(&:id)
     ar_hash.each do |sk|
       @holders[sk] ||= {}
       @destocks[sk] ||= {}
-
-      ol_need = CabiePio.query("p/need/order>#{sk}_", type: :prefix).flat.trans(nil, :to_i)
-      @olneed[sk] = ol_need.values.sum
+      @olneed[sk] = KSM::OrderNeed.query("#{sk}_", type: :prefix).flatless.values.sum
     end
     7.times do |i|
       dt = (@day-i).strftime('%y%m%d')
       all_ids = ar_hash.map{|p|archetype_daystock(p, @day-i)}
-      stockday = CabiePio.all_keys(all_ids, folder: [:stock, :common, :a]).flat
+      stockday = Stock::In.find_all(all_ids).flatless
       stockday.each do |sk, sv|
         p = sk.split('_').first
         @holders[p] ||= {}
-        @holders[p][@day-i] = sv.to_i
+        @holders[p][@day-i] = sv
       end
-      destockday = CabiePio.all_keys(all_ids, folder: [:stock, :common, :d]).flat
+      destockday = Stock::Out.find_all(all_ids).flatless
       destockday.each do |sk, sv|
         p = sk.split('_').first
         @destocks[p] ||= {}
-        @destocks[p][@day-i] = sv.to_i
+        @destocks[p][@day-i] = sv
       end
     end
         
@@ -224,15 +223,17 @@ Fenix::App.controllers :archetypes do
     @categories = KSM::Category.all
     @ar_grouped = ksm_arch.group_by(&:category_id)
     arp = CabiePio.folder(:product, :archetype).flat
-    @kc_stocks = CabiePio.folder(:stock, :archetype).flat.trans(nil, :to_i)
-    @kc_needs = CabiePio.folder(:need, :archetype).flat.trans(nil, :to_i)
-    catgroup = products_hash.keys.group_by{|k|products_hash[k]}
-    @catstock = catgroup.map{|k,v|[k, v.map{|p|@kc_stocks.fetch(arp[p], 0)}.sum{|x|x<0?x:0}]}.to_h
-    @catneed = catgroup.map{|k,v|[k, v.map{|p|@kc_needs.fetch(arp[p], 0)}.sum{|x|x>0?x:0}]}.to_h
+    @kc_stocks = Stock.free.flatless
+    @kc_needs = Stock.need.flatless
+    # catgroup = products_hash.keys.group_by{|k|products_hash[k]}
+    # @catstock = catgroup.map{|k,v|[k, v.map{|p|@kc_stocks.fetch(arp[p], 0)}.size{|x|x<0?x:0}]}.to_h
+    # @catneed = catgroup.map{|k,v|[k, v.map{|p|@kc_needs.fetch(arp[p], 0)}.size{|x|x>0?x:0}]}.to_h
+    @catneed = @catstock = { params[:cat] => 1 }
     @kc_archs = arp
 
-    @products = Product.all
-    @kc_index = arp.map{|p, a| [a, @products.detect{|i|i.id == p}&.sn || 0]}.to_h
+    # @products = Product.all
+    # @kc_index = arp.map{|p, a| [a, @products.detect{|i|i.id == p}&.sn || 0]}.to_h
+    @cattree = otree_cats3 cats_olist
 
     render 'archetypes/stock'
   end
@@ -240,29 +241,25 @@ Fenix::App.controllers :archetypes do
   put :stock do
     params[:lines]&.each do |k, line|
       line.each do |date, stock_in|
-
         # stock_in = line['in']
         # stock_out = line['out']
         id = k
         day = Time.parse date
         next if stock_in.size == 0
         # stock_in = date.last
-        # id = k
 
-        prev_day = CabiePio.get([:stock, :common, :a], archetype_daystock(id, day)).data.to_i
-        CabiePio.set [:stock, :common, :a], archetype_daystock(id, day), stock_in.to_i if stock_in.size > 0
-        # CabiePio.set [:stock, :common, :n], product_daystock(id), stock_out.to_i if stock_out.size > 0
+        prev_day = Stock::In.find id, day
+        prev_day.save stock_in.to_i
 
-        # diff = stock_in.to_i - stock_out.to_i
-        # if diff != 0
-        sum = CabiePio.get [:stock, :archetype], id
-        CabiePio.set [:stock, :archetype], id, sum.data.to_i + stock_in.to_i - prev_day
+        stock = Stock::Free.find id
+        stock.diff prev_day.gap
       end
     end
 
     redirect url(:archetypes, :stock)
   end
   
+  # Obsolete
   get :stock_clean do
     ol_need = CabiePio.folder(:need, :order).flat
     oids = ol_need.keys.map{|r|r.split('_').last}.uniq
@@ -273,6 +270,7 @@ Fenix::App.controllers :archetypes do
     render 'archetypes/stock_clean'
   end
   
+  # Obsolete
   put :stock_clean do
     ol_need = CabiePio.folder(:need, :order).flat
     oids = ol_need.keys.map{|r|r.split('_').last}.uniq

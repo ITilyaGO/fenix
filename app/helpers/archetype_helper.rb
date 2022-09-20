@@ -28,33 +28,27 @@ module Fenix::App::ArchetypeHelper
     # stickers = CabiePio.all_keys(order.order_lines.map(&:product_id), folder: [:products, :sticker]).flat.trans(:to_i, :to_f)
     # line_stickers = CabiePio.all_keys(order.order_lines.map(&:id), folder: [:m, :order_lines, :sticker_sum])
     #   .flat.map{|k,v|[k.to_i,v[:v]]}.to_h
-    arches = CabiePio.folder(:product, :archetype).flat
-    multi = CabiePio.folder(:product, :archetype_multi).flat.trans(nil, :to_i)
+    arches = Stock::Linkage.all.flatless
+    multi = Stock::Multi.all.flatless
     order.order_lines.each do |line|
       parch = arches.fetch(line.product_id, nil)
       next unless parch
       m = multi.fetch(line.product_id, 1)
       real_done = (di_lines[line.id.to_i] || 0)*m
       if real_done != 0
-        ssum = CabiePio.get([:stock, :archetype], parch).data.to_i || 0
-        CabiePio.set [:stock, :archetype], parch, ssum-real_done
-        daysum = CabiePio.get([:stock, :common, :d], archetype_daystock(parch, day)).data.to_i || 0
-        CabiePio.set [:stock, :common, :d], archetype_daystock(parch, day), daysum+real_done
-        CabiePio.unset [:stock, :common, :d], archetype_daystock(parch, day) if daysum+real_done == 0
+        Stock::Free.find(parch).diff -real_done
+        daysum = Stock::Out.find parch, day
+        daysum.diff real_done
+        daysum.remove if daysum.body.zero?
 
-        prev_ex = CabiePio.get([:need, :order], archetype_order(parch, line.id, order.id))
-        unless prev_ex.blank?
-          prev = prev_ex.data.to_i || 0
+        prev_ex = KSM::OrderNeed.find parch, line.id, order.id
+        if prev_ex.exist?
           whole_done = (sum_lines[line.id.to_i] || 0)*m
           now = whole_done >= line.amount*m ? 0 : line.amount*m - whole_done
-          if now == 0
-            CabiePio.unset [:need, :order], archetype_order(parch, line.id, order.id)
-          else
-            CabiePio.set [:need, :order], archetype_order(parch, line.id, order.id), now
-          end
+          prev_ex.save now
+          prev_ex.remove if prev_ex.body.zero?
   
-          psum = CabiePio.get([:need, :archetype], parch).data.to_i || 0
-          CabiePio.set [:need, :archetype], parch, psum-prev+now
+          Stock::Need.find(parch).diff now-prev_ex.body
         end
       end
     end
@@ -63,56 +57,49 @@ module Fenix::App::ArchetypeHelper
   def arbal_need_order_edit(order)
     sum_lines = CabiePio.all_keys(order.order_lines.map(&:id), folder: [:m, :order_lines, :sticker_sum])
       .flat.transform_values{|v|v[:v]}
-    arches = CabiePio.folder(:product, :archetype).flat
-    multi = CabiePio.folder(:product, :archetype_multi).flat.trans(nil, :to_i)
+    arches = Stock::Linkage.all.flatless
+    multi = Stock::Multi.all.flatless
     order.order_lines.each do |line|
       parch = arches.fetch(line.product_id, nil)
       next unless parch
       m = multi.fetch(line.product_id, 1)
-      prev = CabiePio.get([:need, :order], archetype_order(parch, line.id, order.id)).data.to_i || 0
+      prev_ex = KSM::OrderNeed.find parch, line.id, order.id
       whole_done = (sum_lines[line.id] || 0)*m
       now = whole_done >= line.amount*m ? 0 : line.amount*m - whole_done
-      if now != prev
-        if now == 0
-          CabiePio.unset [:need, :order], archetype_order(parch, line.id, order.id)
-        else
-          CabiePio.set [:need, :order], archetype_order(parch, line.id, order.id), now
-        end
-
-        psum = CabiePio.get([:need, :archetype], parch).data.to_i || 0
-        CabiePio.set [:need, :archetype], parch, psum-prev+now
+      if now != prev_ex.body
+        prev_ex.save now
+        prev_ex.remove if prev_ex.body.zero?
+        
+        Stock::Need.find(parch).diff now-prev_ex.body
       end
     end
   end
 
   def arbal_need_order_start(order)
-    old_need = CabiePio.query("p/need/order>.*_#{order.id}", type: :regex).flat
-    return if old_need.any?
-    arches = CabiePio.folder(:product, :archetype).flat
-    multi = CabiePio.folder(:product, :archetype_multi).flat.trans(nil, :to_i)
+    return if KSM::OrderNeed.query(".*_#{order.id}", type: :regex).any?
+    arches = Stock::Linkage.all.flatless
+    multi = Stock::Multi.all.flatless
     order.order_lines.each do |line|
       next if line.ignored
       parch = arches.fetch(line.product_id, nil)
       next unless parch
       m = multi.fetch(line.product_id, 1)
-      CabiePio.set [:need, :order], archetype_order(parch, line.id, order.id), line.amount*m
-      psum = CabiePio.get([:need, :archetype], parch).data.to_i || 0
-      CabiePio.set [:need, :archetype], parch, psum+(line.amount*m||0)
+      KSM::OrderNeed.find(parch, line.id, order.id).save line.amount*m
+      Stock::Need.find(parch).diff (line.amount*m||0)
     end
   end
 
   def arbal_need_order_mid1(order)
-    arches = CabiePio.folder(:product, :archetype).flat
+    arches = Stock::Linkage.all.flatless
     order.order_lines.each do |line|
       parch = arches.fetch(line.product_id, nil)
       next unless parch
       # next if line.done_nil? amount
-      item = archetype_order(parch, line.id, order.id)
-      prev = CabiePio.get([:need, :order], item).data.to_i || 0
+      prev = KSM::OrderNeed.find parch, line.id, order.id
       # real_done = line.ignored ? 0 : line.done_amount.to_i
       processing = false
       if line.ignored
-        CabiePio.unset [:need, :order], item
+        prev.remove
         processing = true
       # elsif real_done > 0
       #   CabiePio.set [:need, :order], item, real_done
@@ -121,30 +108,28 @@ module Fenix::App::ArchetypeHelper
       next unless processing
       # CabiePio.set [:need, :order], product_order(line.product_id, order.id), real_done
 
-      psum = CabiePio.get([:need, :archetype], parch).data.to_i || 0
-      CabiePio.set [:need, :archetype], parch, psum-prev
+      Stock::Need.find(parch).diff -prev.body
     end
   end
 
   def arbal_need_order_st_fin(order)
-    arches = CabiePio.folder(:product, :archetype).flat
+    arches = Stock::Linkage.all.flatless
     stickers = CabiePio.all_keys(order.order_lines.map(&:product_id), folder: [:products, :sticker]).flat.keys
     order.order_lines.each do |line|
       parch = arches.fetch(line.product_id, nil)
       next unless parch
       next unless stickers.include? line.product_id
-      prev = CabiePio.get([:need, :order], archetype_order(parch, line.id, order.id)).data.to_i || 0
-      CabiePio.unset [:need, :order], archetype_order(parch, line.id, order.id)
-
-      psum = CabiePio.get([:need, :archetype], parch).data.to_i || 0
-      CabiePio.set [:need, :archetype], parch, psum-prev
+      
+      prev = KSM::OrderNeed.find parch, line.id, order.id
+      prev.remove
+      Stock::Need.find(parch).diff -prev.body
     end
   end
 
   def arbal_need_order_fin(order)
-    arches = CabiePio.folder(:product, :archetype).flat
+    arches = Stock::Linkage.all.flatless
     stickers = CabiePio.all_keys(order.order_lines.map(&:product_id), folder: [:products, :sticker]).flat.keys
-    multi = CabiePio.folder(:product, :archetype_multi).flat.trans(nil, :to_i)
+    multi = Stock::Multi.all.flatless
     doneday = CabiePio.get([:stock, :order, :done], order.id).data
     order.order_lines.each do |line|
       parch = arches.fetch(line.product_id, nil)
@@ -154,19 +139,17 @@ module Fenix::App::ArchetypeHelper
         m = multi.fetch(line.product_id, 1)
         real_done = (line.ignored ? 0 : line.done_amount||line.amount)*m
         if real_done > 0
-          ssum = CabiePio.get([:stock, :archetype], parch).data.to_i || 0
-          CabiePio.set [:stock, :archetype], parch, ssum-real_done
-          daysum = CabiePio.get([:stock, :common, :d], archetype_daystock(parch, Date.parse(doneday))).data.to_i || 0
-          CabiePio.set [:stock, :common, :d], archetype_daystock(parch, Date.parse(doneday)), daysum+real_done
-          CabiePio.unset [:stock, :common, :d], archetype_daystock(parch, Date.parse(doneday)) if daysum+real_done == 0
+          Stock::Free.find(parch).diff -real_done
+
+          daysum = Stock::Out.find parch, Date.parse(doneday)
+          daysum.diff real_done
+          daysum.remove if daysum.body.zero?
         end
       end
 
-      prev = CabiePio.get([:need, :order], archetype_order(parch, line.id, order.id)).data.to_i || 0
-      CabiePio.unset [:need, :order], archetype_order(parch, line.id, order.id)
-
-      psum = CabiePio.get([:need, :archetype], parch).data.to_i || 0
-      CabiePio.set [:need, :archetype], parch, psum-prev
+      prev = KSM::OrderNeed.find parch, line.id, order.id
+      prev.remove
+      Stock::Need.find(parch).diff -prev.body
     end
     arbal_need_order_rep(order)
   end
@@ -177,20 +160,16 @@ module Fenix::App::ArchetypeHelper
   end
 
   def arbal_need_order_fin1(order)
-    arches = CabiePio.folder(:product, :archetype).flat
+    arches = Stock::Linkage.all.flatless
     order.order_lines.each do |line|
       parch = arches.fetch(line.product_id, nil)
       next unless parch
-      prev = CabiePio.get([:need, :order], archetype_order(parch, line.id, order.id)).data.to_i || 0
+      prev = KSM::OrderNeed.find parch, line.id, order.id
       real_done = line.ignored ? 0 : line.done_amount||line.amount
-      CabiePio.unset [:need, :order], archetype_order(parch, line.id, order.id)
-      # CabiePio.set [:need, :order], product_order(line.product_id, order.id), real_done
+      prev.remove
 
-      psum = CabiePio.get([:need, :archetype], parch).data.to_i || 0
-      CabiePio.set [:need, :archetype], parch, psum-prev
-
-      ssum = CabiePio.get([:stock, :archetype], parch).data.to_i || 0
-      CabiePio.set [:stock, :archetype], parch, ssum-real_done
+      Stock::Need.find(parch).diff -prev.body
+      Stock::Free.find(parch).diff -real_done
     end
     arbal_need_order_rep(order)
 
@@ -198,14 +177,11 @@ module Fenix::App::ArchetypeHelper
   end
 
   def arbal_need_order_rep(order)
-    old_need = CabiePio.query("p/need/order>.*_#{order.id}", type: :regex).flat
-    old_need.each do |k, v|
-      p = k.split('_').first
+    KSM::OrderNeed.query(".*_#{order.id}", type: :regex).flatless.each do |k, v|
+      p = k.split('_')
 
-      psum = CabiePio.get([:need, :archetype], p).data.to_i || 0
-      CabiePio.set [:need, :archetype], p, psum-v.to_i
-
-      CabiePio.unset [:need, :order], k
+      Stock::Need.find(p.first).diff -v
+      KSM::OrderNeed.find(*p).remove
     end
 
     # bal_need_order_start(order)

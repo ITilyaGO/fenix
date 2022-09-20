@@ -4,18 +4,6 @@ wtree
   javascript:
     self.childs = []
 
-    rcontrol.on('THINGS_LIST_ON', function(data) {
-      document.querySelector('.page .content').classList.add('hide')
-      document.querySelector('.page .table50').classList.remove('hide')
-      document.querySelector('.page .rim').classList.add('open')
-    })
-
-    rcontrol.on('THINGS_LIST_OFF', function(data) {
-      document.querySelector('.page .content').classList.remove('hide')
-      document.querySelector('.page .table50').classList.add('hide')
-      document.querySelector('.page .rim').classList.remove('open')
-    })
-
     loadlist() {
       var data = {
         authenticity_token: rsquad.token

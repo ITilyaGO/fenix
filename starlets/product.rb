@@ -1,5 +1,4 @@
-module SL
-end
+module SL end
 
 class SL::Product
   attr_accessor :id, :arn, :k1c, :multi, :raw, :sticker

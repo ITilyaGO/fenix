@@ -117,3 +117,7 @@ module Fenix::App::TimelineHelper
     orderstill.keys.last + gap
   end
 end
+
+class TimelineAssist
+  extend Fenix::App::TimelineHelper
+end

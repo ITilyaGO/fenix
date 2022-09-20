@@ -1006,12 +1006,18 @@ calendar {
   }
   .order-line {
     .label {
-      min-width: 8ch;
-      width: 1em;
-      display: block;
+      min-width: 7ch;
+      width: 2em;
+      display: flex;
+      justify-content: center;
       
       strong {
         font-size: 1.15em;
+        color: darkorange;
+      }
+      &.vp {
+        width: auto;
+        align-items: baseline;
       }
     }
     .label-success {
@@ -1031,7 +1037,12 @@ calendar {
     }
 
     .form-control {
-      max-width: 7ch;
+      max-width: 8ch;
+      width: auto;
+      height: unset;
+      padding: 2px 1px;
+      font-size: 1.3rem;
+      text-align: center;
     }
   }
   .table > tbody > tr > td {
