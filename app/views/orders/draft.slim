@@ -68,7 +68,7 @@
             = partial 'bricks/kato/label', :locals => { town_name: town_name, el: order }
           
           td.list-column.minirur.text-nowrap == deli(rur (order.total/1000.0).floor)
-          td class='list-column' = order.client.name
+          td class='list-column' = order.client&.name
           td.list-column.non-print.switches.text-nowrap
             draftswitches items=dfsmax locale=dfsru bw=os.draftbw order=order.id allow='change'
           td.list-column.text-nowrap.text-right = to_dm(order.created_at)
