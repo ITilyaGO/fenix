@@ -72,14 +72,14 @@ Fenix::App.controllers :statistic do
 
     @orders = @res.fetch(params[:city], [])
     stat = OrderLine.where(order_id: @orders)
-      .joins(:product, :product => :category)
-      .group(:product_id, "products.'index'", "categories.'index'")
-      .order("categories_index", "products_index")
+      .group(:product_id)
       .sum(:done_amount)
+      .sort_by { |line| Product.find(line.first).wfindex }
+
     @pretty_stat = []
     stat.each do |item|
-      pid = item[0][0]
-      p = Product.find(item[0][0])
+      pid = item.first
+      p = Product.find pid
       @pretty_stat << { :id => pid, :category => p.category.name, :price => p.price, :name => p.displayname, :sum => item[1] }
     end
     render 'statistic/bycity'
@@ -112,14 +112,14 @@ Fenix::App.controllers :statistic do
 
     @orders = @res.fetch(params[:city], [])
     stat = OrderLine.where(order_id: @orders)
-      .joins(:product, :product => :category)
-      .group(:product_id, "products.'index'", "categories.'index'")
-      .order("categories_index", "products_index")
+      .group(:product_id)
       .sum(:done_amount)
+      .sort_by { |line| Product.find(line.first).wfindex }
+    
     @pretty_stat = []
     stat.each do |item|
-      pid = item[0][0]
-      p = Product.find(item[0][0])
+      pid = item.first
+      p = Product.find pid
       @pretty_stat << { :id => pid, :category => p.category.name, :price => p.price, :name => p.displayname, :sum => item[1] }
     end
     render 'statistic/byclient'
@@ -198,14 +198,14 @@ Fenix::App.controllers :statistic do
     end
     @orders = Order.where(id: oids)
     stat = OrderLine.where(order_id: @orders)
-      .joins(:product, :product => :category)
-      .group(:product_id, "products.'index'", "categories.'index'")
-      .order("categories_index", "products_index")
+      .group(:product_id)
       .sum(:amount)
+      .sort_by { |line| Product.find(line.first).wfindex }
+    
     @pretty_stat = []
     stat.each do |item|
-      pid = item[0][0]
-      p = Product.find(item[0][0])
+      pid = item.first
+      p = Product.find pid
       @pretty_stat << { :id => pid, :category => p.category.name, :name => p.displayname, :sum => item[1] }
     end
     
@@ -281,6 +281,7 @@ Fenix::App.controllers :statistic do
     end
   end
 
+  # Non-functional
   get :finished do
     @title = "Statistics - готовые заказы"
     @cats = Category.where(:category_id => nil)
@@ -333,14 +334,15 @@ Fenix::App.controllers :statistic do
     end
   end
 
+  # Non-functional
   get :finished_yearly do
     @title = "Statistics - готовые заказы"
     @cats = Category.where(:category_id => nil)
     @years = []
-    start_date = Date.new(Date.today.year, 1, 1)
+    start_date = Date.today
 
     STAT_YEARLY_GAP.times do |i|
-      @years << start_date.prev_year(STAT_YEARLY_GAP-1-i).strftime("%Y")
+      @years << start_date.year - i
     end
     render 'statistic/index_finished_yearly'
   end
@@ -432,10 +434,10 @@ Fenix::App.controllers :statistic do
     @title = "Statistics - суммы готовых за год"
     # @cats = Category.where(:category_id => nil)
     @years = []
-    start_date = Date.new(Date.today.year, Date.today.month, 1)
+    start_date = Date.today
 
-    5.times do |i|
-      @years << start_date.prev_year(4-i).strftime("%Y")
+    STAT_YEARLY_GAP.times do |i|
+      @years << start_date.year - i
     end
     render 'statistic/index_done'
   end

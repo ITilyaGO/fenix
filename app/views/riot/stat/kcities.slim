@@ -1,5 +1,5 @@
 kcities
-  .btn.btn-link.btn-sm if='{opts.dataName}' show='{!loaded}' onclick='{backsend}'
+  .btn.btn-link.btn-sm if='{opts.dataName}' onclick='{opener}'
     | {opts.dataName}&nbsp;
     i.fa.fa-angle-down
 
@@ -10,15 +10,21 @@ kcities
       br
       span.url
 
-  .output
+  .output hide='{nocont}'
 
   javascript:
     self.loaded = false
+    self.nocont = true
     self.aurl = opts.url
+
+    opener() {
+      if (!self.loaded) self.backsend()
+      self.nocont = !self.nocont
+      self.update()
+    }
 
     backsend() {
       self.requestsend = true
-      b = this
       var o = self.root.querySelector('.output')
       var palo = self.root.querySelector('.page-loading')
       loint = self.root.querySelector('.indicator .url')

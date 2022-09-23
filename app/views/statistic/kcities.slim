@@ -1,5 +1,7 @@
-kcities data-name='Города 2021' url=url(:statistic, :kcities, year: 2021)
-kcities data-name='Города 2020' url=url(:statistic, :kcities, year: 2020)
+.flex-v
+  - STAT_YEARLY_GAP.times do |gap|
+    - year = Date.today.year - gap
+    kcities data-name='Города #{year}' url=url(:statistic, :kcities, year: year)
 
 - content_for :js_assets do
   = javascript_include_tag :riot, :appa
