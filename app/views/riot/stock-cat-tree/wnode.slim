@@ -92,6 +92,10 @@ wnode
       if (data.id !== opts.wid) return
       self.name = data.name
       self.id = opts.wid
+      if (rsquad.config['openstack'].includes(self.id)) {
+        self.hdn = false
+        self.touched = true
+      }
       self.real = opts.wid
       self.data = data
       if (data.nut) self.data.virtual = true

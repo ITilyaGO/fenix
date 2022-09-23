@@ -1,0 +1,55 @@
+datemodal.rmodal class='{ open_class }'
+  
+  .modal class='{ open_class }' onclick='{close_drop}'
+    .modal-dialog class='{ modal-80ty: sideon }'
+      .modal-content
+
+        .modal-header: .modal-title.captain
+          | { opts.dataTitle }
+        .modal-body.flex-c
+          yield
+
+      .modal-footer
+        .pull-right
+          .btn.btn-sm.btn-steel onclick='{close_drop}'
+            | Закрыть
+
+  javascript:
+    this.title = opts.dataTitle
+
+    rcontrol.on("DATEMODAL_OPEN", function(data) {
+      self.open(data)
+      self.update()
+    })
+
+    rcontrol.on("DATEMODAL_CLOSE", function(data) {
+      self.close()
+    })
+
+    this.preventer = function(e) {
+      e.preventDefault()
+    }
+
+    close_drop(a) {
+      if (a.target !== a.currentTarget) return true;
+      self.close()
+    }
+
+    close() {
+      document.querySelector('.modal-backdrop').classList.add('hide')
+      document.body.classList.remove('modal-open')
+      self.open_class = ''
+      document.removeEventListener('touchmove', self.preventer)
+
+      self.root.querySelector('.modal').style.display = ''
+    }
+
+    open(data) {
+      document.body.classList.add('modal-open')
+      document.querySelector('.modal-backdrop').classList.remove('hide')
+      self.open_class = 'flex in'
+      document.addEventListener('touchmove', self.preventer)
+
+      self.root.querySelector('.modal').style.display = 'block'
+    }
+

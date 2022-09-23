@@ -195,7 +195,15 @@ Fenix::App.controllers :archetypes do
     @destocks = {}
     @olneed = {}
     ksm_arch = KSM::Archetype.all.select { |a| a.category_id == params[:cat] }
-    ksm_arch = KSM::Archetype.all if params[:all]
+    ksm_arch = KSM::Archetype.all if params[:all] or !params[:cat]
+    @openstack = []
+    if cat = params[:cat]
+      @openstack << cat
+      ksmc = KSM::Category.find cat
+      @openstack << ksmc.category.id
+      @openstack << ksmc.category.section.id
+    end
+    @squadconf = { openstack: @openstack }
     ar_hash = ksm_arch.map(&:id)
     ar_hash.each do |sk|
       @holders[sk] ||= {}
@@ -220,11 +228,29 @@ Fenix::App.controllers :archetypes do
     end
         
     @cats = KSM::Category.all.select{|c| c.category_id.nil?}.sort_by(&:sn)
+    @cat = cat
     @categories = KSM::Category.all
     @ar_grouped = ksm_arch.group_by(&:category_id)
     arp = CabiePio.folder(:product, :archetype).flat
     @kc_stocks = Stock.free.flatless
     @kc_needs = Stock.need.flatless
+
+    if params[:start]
+      start_from = timeline_unf(params[:start]) rescue Date.today
+      @prev = start_from
+      @next = @prev + 6
+      @orneed = @prev.step(@next).map do |day|
+        CabiePio.query("p/anewdate/order>#{timeline_id day}_", type: :prefix).flat.trans(nil, :to_i).values
+      end.flatten.uniq
+      arches = Stock::Linkage.all.flatless
+      parchs = @orneed.map do |oid|
+        order = Order.find oid
+        order.order_lines.map{|l|archetype_order(arches[l.product_id], l.id, order.id)}
+      end.flatten
+      olneeda = KSM::OrderNeed.find_all(parchs).group_by { |kon| kon.splitted[:arch] }
+      @olneed = olneeda.map { |p,ary| [p, ary.sum(&:body)] }.to_h
+    end
+
     # catgroup = products_hash.keys.group_by{|k|products_hash[k]}
     # @catstock = catgroup.map{|k,v|[k, v.map{|p|@kc_stocks.fetch(arp[p], 0)}.size{|x|x<0?x:0}]}.to_h
     # @catneed = catgroup.map{|k,v|[k, v.map{|p|@kc_needs.fetch(arp[p], 0)}.size{|x|x>0?x:0}]}.to_h
@@ -256,7 +282,7 @@ Fenix::App.controllers :archetypes do
       end
     end
 
-    redirect url(:archetypes, :stock)
+    redirect url(:archetypes, :stock, cat: params[:cat])
   end
   
   # Obsolete

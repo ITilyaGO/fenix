@@ -3,16 +3,13 @@
     .btn.btn-camo riot-tag='switcher' t1='THINGS_LIST_OFF' t2='THINGS_LIST_ON'
       .icn.fa.fa-folder-open-o
     .content
-    .rim.table50.hide
+    .rim.table50 class=[(:hide if @cat), (:open unless @cat)]
       .trees.white-sticky
 
         .white-sticky: .text-center
           switcher.btn.btn-sm.btn-clear t2='DESTOCK_SHOW' t1='DESTOCK_HIDE' Списания
           '
-          - if params[:all]
-            = link_to :'скрыть склад', url(:archetypes, :stock), class: 'btn btn-sm btn-glue'
-          - else
-            = link_to :'весь склад', url(:archetypes, :stock, all: 1), class: 'btn btn-sm btn-glue'
+          switcher.btn.btn-sm.btn-glue t2='NULLSTOCK_SHOW' t1='NULLSTOCK_HIDE' Нет на складе
 
         .tmar-1
         wtree.tree name='Категории'
@@ -20,28 +17,42 @@
         
         .tmar-1
 
-  .content.col-md-12
+  .content.col-md-12 style='min-height:80vh;'
     = form_for 'product', url(:archetypes, :stock), :method => :put, :class => 'form-std stock-page' do |f|
-      - @cats.each do |category|
-        
-        .flex-wrap.wp100
-          .block.cat.hand riot-tag='subclick': p #{category.name}    
+      = hidden_field_tag :cat, value: @cat
+      .c
+        - category = KSM::Category.find(@cat).category
+        - sub = KSM::Category.find @cat
 
-          - category.subs_ordered.sort_by{|x|-@catneed.fetch(x.id, 0)}.each do |sub|
+        .flex-wrap.wp100
             - next unless can_view?(:sys, :stock) || can_view_section?(:sections, :stock, category.section.ix)
             - catstock = @catstock.fetch(sub.id, 0)
             - catneed = @catneed.fetch(sub.id, 0)
             - next if catstock >= 0 && catneed == 0 && !params[:all]
             / .block
-            idcollapser titler="#{sub.name}" stock=deli(catstock) need=deli(catneed) for="#c#{sub.id}"
+            / idcollapser titler="#{sub.name}" stock=deli(catstock) need=deli(catneed) for="#c#{sub.id}"
 
-            .col-md-12.hidden id="c#{sub.id}"
-                //.row.hide
-
+            .col-md-12 id="c#{sub.id}"
+              .row
+                
                 .flex-c.vcenter
                   h4 = sub.name
+                  - unless params[:cat]
+                    .tiny-text.small Выберите склад
                   .flexie
-                  .label.label-default = catstock
+                  - if @prev
+                    .tiny-text.small Резерв на даты: #{to_msk @prev} – #{to_msk @next}
+                    |&nbsp;&nbsp;&nbsp;
+                    = link_to 'сбросить', url(:archetypes, :stock, cat: params[:cat]), class: 'btn btn-xs btn-glue'
+                  .flexie
+                  - unless params[:all]
+                    #stocknote.tiny-text.small Пустые склады скрыты
+                  .btn
+                  .btn.btn-sm.btn-default
+                    .fa.fa-clipboard
+                    span Excel
+              
+              - if params[:cat]
                 table.table.table-hover.td-middle
                   thead: tr
                     th class="only-print" Отметка
@@ -49,6 +60,8 @@
                     th Склад
                     th class="non-print" Заказы
                     th
+                      clicker action='DATEMODAL_OPEN'
+                        .hand.fa.fa-calendar
                     th
                     th class="non-print" Остаток
                     / th class="non-print" Добавить
@@ -56,7 +69,7 @@
                     - 7.times do |i|
                       - day = @day - 6 + i
                       th.col: .header-control.w
-                        a.tiny-text href=url(:archetypes, :stock, all: params[:all], day: day)
+                        a.tiny-text href=url(:archetypes, :stock, all: params[:all], cat: params[:cat], day: day)
                           = to_dm day
                         .wd = Date::DAYNAMESRU[day.wday-1]
                     /th class="non-print" &nbsp;
@@ -65,8 +78,9 @@
                     /- next if @parents.include? p.id
                     - stock = @kc_stocks.fetch(p.id, 0)
                     - need = @kc_needs.fetch(p.id, 0)
-                    - next if need == 0 && stock == 0 && !params[:all]
-                    tr.list-row.order-line
+                    - need = @olneed.fetch(p.id, 0) if @olneed
+                    / - next if need == 0 && stock == 0 && !params[:all]
+                    tr.list-row.order-line class=(:hidden if need == 0 && stock == 0 && !params[:all])
                       / = hidden_field_tag "line[#{p.id}][id]", :value => p.id
                       td class="only-print" &nbsp;
                       td
@@ -182,7 +196,15 @@
                           input type="hidden" name="cs[]" value="{ id }" if="{ category }"
             /hr
 
-      .form-actions = f.submit pat(:save), :class => 'btn btn-prime'
+      - if params[:cat]
+        .form-actions = f.submit pat(:save), :class => 'btn btn-prime'
+
+page
+
+datemodal data-title='Резерв за даты'
+  = partial 'archetypes/calendar'
+
+.modal-backdrop.hide
 
 - content_for :js_assets do
   = javascript_include_tag :riot
@@ -191,12 +213,17 @@
   rscript type="riot/tag" src="/riot/tags/subclick.tag"
   rscript type="riot/tag" src="/riot/tags/switcher.tag"
   rscript type="riot/tag" src="/riot/tags/elhide.tag"
+  rscript type="riot/tag" src="/riot/tags/clicker.tag"
   rscript type="riot/tag" src="/riot/tags/archetypes/sumline.tag"
+  rscript type="riot/tag" src="/riot/tags/archetypes/page.tag"
+  rscript type="riot/tag" src="/riot/tags/archetypes/datemodal.tag"
   rscript type="riot/tag" src="/riot/tags/stock-cat-tree/wtree.tag"  
   rscript type="riot/tag" src="/riot/tags/stock-cat-tree/wnode.tag"  
 
   javascript:
     
     document.addEventListener("DOMContentLoaded", function(event) {
-      riot.mount('idcollapser, subclick, switcher, elhide, sumline, wtree')
-    });
+      riot.mount('idcollapser, subclick, clicker, switcher, elhide, sumline, wtree, page, datemodal')
+      let confobj = #{{@squadconf.to_json}}
+      rsquad.saveConfig(confobj)
+    })
