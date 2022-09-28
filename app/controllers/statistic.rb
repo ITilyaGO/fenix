@@ -281,10 +281,9 @@ Fenix::App.controllers :statistic do
     end
   end
 
-  # Non-functional
   get :finished do
     @title = "Statistics - готовые заказы"
-    @cats = Category.where(:category_id => nil)
+    @cats = KSM::Category.toplevel
     @months = []
     start_date = Date.new(Date.today.year, Date.today.month, 1)
 
@@ -305,17 +304,20 @@ Fenix::App.controllers :statistic do
     @orders = Order.where(status: Order.statuses[:finished])
       .where('updated_at >= ?', @start_date).where('updated_at < ?', end_date)
       .where.not(client_id: ignored)
-    stat = OrderLine.where(order_id: @orders, ignored: false).where('"categories"."category_id" = %s', id)
-      .joins(:product, :product => :category)
-      .group(:product_id, "products.'index'", "categories.'index'")
-      .order("categories_index", "products_index").sum(:done_amount)
+    
+    stat = OrderLine.where(order_id: @orders, ignored: false)
+      .group(:product_id)
+      .sum(:done_amount)
+      .sort_by { |line| Product.find(line.first).wfindex }
+      .select { |line| Product.find(line.first).category.category_id == id }
+
     @pretty_stat = []
     stat.each do |item|
-      pid = item[0][0]
+      pid = item.first
       p = Product.find(pid)
       @pretty_stat << { :id => pid, :category => p.category.name, :name => p.displayname, :sum => item[1] }
     end
-    @category = Category.find(id)
+    @category = KSM::Category.find(id)
     
     case content_type
       when :html then render 'statistic/finished'
@@ -334,10 +336,9 @@ Fenix::App.controllers :statistic do
     end
   end
 
-  # Non-functional
   get :finished_yearly do
     @title = "Statistics - готовые заказы"
-    @cats = Category.where(:category_id => nil)
+    @cats = KSM::Category.toplevel
     @years = []
     start_date = Date.today
 
@@ -351,24 +352,26 @@ Fenix::App.controllers :statistic do
     @title = "Statistics - готовые заказы"
     id = params[:id]
     gap = params[:gap].to_i
-    today = Date.today.year-gap
+    today = Date.today.year-STAT_YEARLY_GAP+1+gap
     @start_date = Date.new(today, 1, 1)
     end_date = @start_date.next_year
     ignored = YAML.load_file('./stat_ignore.yml') rescue []
     @orders = Order.where(status: Order.statuses[:finished])
       .where('updated_at >= ?', @start_date).where('updated_at < ?', end_date)
       .where.not(client_id: ignored)
-    stat = OrderLine.where(order_id: @orders, ignored: false).where('"categories"."category_id" = %s', id)
-      .joins(:product, :product => :category)
-      .group(:product_id, "products.'index'", "categories.'index'")
-      .order("categories_index", "products_index").sum(:done_amount)
+    stat = OrderLine.where(order_id: @orders)
+      .group(:product_id)
+      .sum(:done_amount)
+      .sort_by { |line| Product.find(line.first).wfindex }
+      .select { |line| Product.find(line.first).category.category_id == id }
+
     @pretty_stat = []
     stat.each do |item|
-      pid = item[0][0]
-      p = Product.find(pid)
+      pid = item.first
+      p = Product.find pid
       @pretty_stat << { :id => pid, :category => p.category.name, :name => p.displayname, :sum => item[1], :price => p.price }
     end
-    @category = Category.find(id)
+    @category = KSM::Category.find(id)
     
     case content_type
       when :html then render 'statistic/finished_yearly'
