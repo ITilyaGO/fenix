@@ -359,7 +359,7 @@ Fenix::App.controllers :statistic do
     @orders = Order.where(status: Order.statuses[:finished])
       .where('updated_at >= ?', @start_date).where('updated_at < ?', end_date)
       .where.not(client_id: ignored)
-    stat = OrderLine.where(order_id: @orders)
+    stat = OrderLine.where(order_id: @orders, ignored: false)
       .group(:product_id)
       .sum(:done_amount)
       .sort_by { |line| Product.find(line.first).wfindex }
