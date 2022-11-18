@@ -512,6 +512,7 @@ Fenix::App.controllers :orders do
     @kc_timeline = CabiePio.get([:orders, :timeline], order.id).data
     place = CabiePio.get([:orders, :towns], order.id).data
     @order_place = KatoAPI.anything(place) if place
+    @place = place
     @form = order
     @cattree = otree_cats3 cats_olist
     @protree = otree_cats3 pro_olist(place)
@@ -540,6 +541,7 @@ Fenix::App.controllers :orders do
     @kc_timeline = CabiePio.get([:orders, :timeline], order.id).data
     place = CabiePio.get([:orders, :towns], order.id).data
     @order_place = KatoAPI.anything(place) if place
+    @place = place
     @form = order
     @cattree = otree_cats3 cats_olist
     @protree = otree_cats3 pro_olist(place)
@@ -557,6 +559,7 @@ Fenix::App.controllers :orders do
     @order_client = order.client
     place = CabiePio.get([:orders, :towns], order.id).data
     @order_place = KatoAPI.anything(place) if place
+    @place = place
     @descr = order.description
     @form = order
     @cash = CabiePio.get([:orders, :cash], order.id).data == 't'

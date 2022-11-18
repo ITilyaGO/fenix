@@ -7,6 +7,7 @@
       
     select name="categories" class="huge small mh350" riot-tag='selectreload' rname='cat' loc=url(:things, :table)
       = content_tag(:option, 'Выберите категорию')
+      = content_tag(:option, 'Без категории', { :value => :nothing })
       - @cats.each do |cat|
         optgroup label="#{cat.name}"
           - cat.subs_ordered.each do |sub|

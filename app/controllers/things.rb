@@ -17,6 +17,7 @@ Fenix::App.controllers :things do
     ids = wonderbox(:things_by_date).reverse
     @products = Product.find_all(ids).sort_by{|a| ids.index(a.id)}
     if ccat = params[:cat]
+      ccat = nil if ccat.to_sym.eql? :nothing
       @products = Product.all.select{ |a| a.category_id == ccat }.sort_by(&:cindex)
       @product = Product.new({ category_id: ccat })
       @ccat = ccat
