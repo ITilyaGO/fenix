@@ -1,7 +1,16 @@
-class OrderAssist
+module OrderAssist
   extend Fenix::App::OrdersHelper
   extend Fenix::App::ProductsHelper
   extend Fenix::App::KyotoHelpers
+
+  # TODO: pls halp
+  def self.cold_start
+    @products_hash = nil
+    @category_matrix = nil
+    @section_matrix = nil
+    @all_catagories = nil
+    @wonderbox = nil
+  end
 
   def self.calc_complexity_for(order)
     cplx = order_complexity order

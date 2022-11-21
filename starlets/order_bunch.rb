@@ -4,6 +4,7 @@ class OrderBunch < Order
   def initialize(*opts)
     super
     @order_lines ||= []
+    OrderAssist.cold_start
     self
   end
 
