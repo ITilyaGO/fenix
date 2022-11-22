@@ -10,11 +10,16 @@ table.table
   tr
     th.non-print Печать
     th Город
+    th Регион
     th Количество
+    th Заказы
+    th Клиенты
   
   - @pretty_stat.each do |s|
     tr.list-row
       td class='list-column list-selectable non-print' = check_box_tag 'stats[]', :checked => true, :autocomplete => "off", :class => 'list-selectable-checkbox'
       td = s[:name]
+      td = s[:region]
       td = s[:sum]
-
+      td = s[:orders]
+      td = s[:clients]

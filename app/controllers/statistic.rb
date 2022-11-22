@@ -459,7 +459,13 @@ Fenix::App.controllers :statistic do
 
     @pretty_stat = []
     @stat.each do |item, ary|
-      @pretty_stat << { :name => @kc_towns[item]&.model || item, :sum => "%0.f" % ary.map(&:done_total).sum }
+      @pretty_stat << {
+        :name => @kc_towns[item]&.model&.name || item,
+        :region => @kc_towns[item]&.model&.region&.data,
+        :sum => "%0.f" % ary.map(&:done_total).sum,
+        :orders => ary.size,
+        :clients => ary.map(&:client_id).uniq.size
+      }
     end
     
     case content_type
@@ -471,7 +477,7 @@ Fenix::App.controllers :statistic do
         output = "\xEF\xBB\xBF" if params.include? :win
         output << CSV.generate(:col_sep => ';') do |csv|
           @pretty_stat.each do |item|
-            csv << [item[:name], item[:sum]]
+            csv << item.values
           end
         end
       end
