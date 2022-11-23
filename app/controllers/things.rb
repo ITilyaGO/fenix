@@ -52,6 +52,8 @@ Fenix::App.controllers :things do
     @product = Product.find(params[:id])
     @kc_place = KatoAPI.anything(@product.place_id)
     @xproduct = SL::Product.new @product.id
+    linkage = Stock::Linkage.find(@product.id)
+    @arch = KSM::Archetype.find linkage.body
     @cats = KSM::Category.toplevel.sort_by(&:wfindex)
     # @categories = Category.all.includes(:category)
 

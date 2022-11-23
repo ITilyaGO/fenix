@@ -30,7 +30,7 @@
           .alabel.label bku
           label.control-label = @xproduct.arn
           - a = KSM::Archetype.find @xproduct.arn
-          - if @xproduct.arn
+          - if @xproduct.arn and @arch.exist?
             .controls.wp100 = f.text_field :arnt, value: a.name, :class => 'form-control input-large input-with-feedback'
             - if @xproduct.multi
               .controls: .btn = @xproduct.multi

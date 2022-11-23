@@ -69,7 +69,7 @@
           td class='list-column'
             = to_msk(product.updated_at)
           td.list-column
-            - unless xprod.arn
+            - unless KSM::Archetype.find(xprod.arn).exist?
               .fa.fa-exclamation-triangle.text-warning
           td class='list-column list-row-action'
             div class='list-row-action-wrapper'
