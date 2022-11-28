@@ -1,7 +1,7 @@
 module Fenix::App::ThingsHelper
   def thing_to_top id
     bo = wonderbox(:things_by_date)
-    bo.shift
+    bo.shift if bo.size == 100
     bo.delete id
     bo << id
     wonderbox_set(:things_by_date, bo.take(100))
