@@ -201,7 +201,7 @@
 
 page
 
-datemodal data-title='Резерв за даты'
+datemodal data-title='Резерв за даты' data-url=url(:archetypes, :stock, :cat => params[:cat])
   = partial 'archetypes/calendar'
 
 .modal-backdrop.hide
@@ -217,6 +217,8 @@ datemodal data-title='Резерв за даты'
   rscript type="riot/tag" src="/riot/tags/archetypes/sumline.tag"
   rscript type="riot/tag" src="/riot/tags/archetypes/page.tag"
   rscript type="riot/tag" src="/riot/tags/archetypes/datemodal.tag"
+  rscript type="riot/tag" src="/riot/tags/archetypes/daybtn.tag"
+
   rscript type="riot/tag" src="/riot/tags/stock-cat-tree/wtree.tag"  
   rscript type="riot/tag" src="/riot/tags/stock-cat-tree/wnode.tag"  
 

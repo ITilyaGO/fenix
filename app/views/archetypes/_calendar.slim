@@ -21,10 +21,12 @@ calendar#multiCollapseExample1: .inner
     
     - busy ||= false
     - if cdate.wday - 1 != Date::BOW
-      .day.past
-        = cdate.strftime '%d'
-    - else
+    daybtn n=timeline_id(cdate) : .day-inner class=(:past if cdate > today_marker)
+      = cdate.strftime '%d'
+    / - else
       = link_to url(:archetypes, :stock, cat: params[:cat], start: timeline_id(cdate))
         .day = cdate.strftime '%d'
       
     - cdate += 1
+
+  .the-end

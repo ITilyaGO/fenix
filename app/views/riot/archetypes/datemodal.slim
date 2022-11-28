@@ -1,25 +1,114 @@
 datemodal.rmodal class='{ open_class }'
   
+  - today = Date.today
+  - bow = today.beginning_of_week + Date::BOW
   .modal class='{ open_class }' onclick='{close_drop}'
-    .modal-dialog class='{ modal-80ty: sideon }'
+    .modal-dialog class='{ modal-80ty: true }' style='width:750px;'
       .modal-content
 
         .modal-header: .modal-title.captain
           | { opts.dataTitle }
         .modal-body.flex-c
-          yield
+          .calendar3: yield
+
+          .flexie
+          .rline: .summary.flex-v.cmar-05
+            .btn.btn-default.btn-sm.item-orders.hand.tmar-1 d1=timeline_id(today-1) onclick='{predefined_day}'
+              span Вчера
+            .btn.btn-default.btn-sm.item-orders.hand.tmar-1 d1=timeline_id(today) onclick='{predefined_day}'
+              span Сегодня
+            .btn.btn-default.btn-sm.item-orders.hand.tmar-1 d1=timeline_id(today) d2=timeline_id(today-2) onclick='{predefined_week}'
+              span 3 дня
+            .btn.btn-default.btn-sm.item-orders.hand.tmar-1 d1=timeline_id(bow-14) d2=timeline_id(bow-7-1) onclick='{predefined_week}'
+              span Прошлая неделя
+            .btn.btn-default.btn-sm.item-orders.hand.tmar-1 d1=timeline_id(bow-7) d2=timeline_id(bow-1) onclick='{predefined_week}'
+              span Текущая неделя
 
       .modal-footer
+        .pull-left
+          .btn.btn-primary.btn-sm onclick='{process}'
+            | Выбрать
         .pull-right
           .btn.btn-sm.btn-steel onclick='{close_drop}'
             | Закрыть
 
   javascript:
     this.title = opts.dataTitle
+    self.selected = []
+
+    timeline() {
+      return self.selected.map((e) => e.opts.n).sort()
+    }
+
+    predefined(a, text) {
+      self.clear_days()
+      self.find_day(text).fn()
+    }
+
+    predefined_day(a) {
+      let day = a.currentTarget.getAttribute('d1')
+      self.clear_days()
+      self.find_day(day).fn()
+    }
+
+    predefined_week(a) {
+      self.clear_days()
+      self.find_day(a.currentTarget.getAttribute('d1')).fn()
+      self.find_day(a.currentTarget.getAttribute('d2')).fn()
+    }
+
+    find_day(text) {
+      return self.tags.daybtn.find(function(el) {
+        return el.opts.n == text
+      })
+    }
+
+    add_day(tag) {
+      if (self.selected.length == 2) {
+        self.selected[0].unfn()
+        self.selected = self.selected.slice(1)
+      }
+      self.selected.push(tag)
+      self.mark()
+    }
+
+    clear_days(tag) {
+      self.selected.forEach(function(day) {
+        if (tag != day) day.unfn()
+      })
+      self.selected = []
+      self.mark()
+      if (tag) self.selected.push(tag)
+    }
+
+    mark() {
+      let short = Array.from(self.selected).sort((a,b) => a.opts.n - b.opts.n)
+      let modeon = false
+      self.tags.daybtn.forEach(function(child) {
+        if (modeon) child.flash()
+        else child.flash(false)
+        
+        if (short.length == 2) {
+          if (child == short[0])
+            modeon = true
+          if (child == short[1])
+            modeon = false
+        }
+      })
+    }
+
+    process() {
+      location.href = self.opts.dataUrl + '&segment=' + self.timeline()
+    }
+
+    unscroll() {
+      self.root.querySelector('calendar .the-end').scrollIntoView(false)
+    }
 
     rcontrol.on("DATEMODAL_OPEN", function(data) {
       self.open(data)
       self.update()
+      self.unscroll()
     })
 
     rcontrol.on("DATEMODAL_CLOSE", function(data) {

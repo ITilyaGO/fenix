@@ -215,15 +215,15 @@ Fenix::App.controllers :archetypes do
       all_ids = ar_hash.map{|p|archetype_daystock(p, @day-i)}
       stockday = Stock::In.find_all(all_ids).flatless
       stockday.each do |sk, sv|
-        p = sk.split('_').first
-        @holders[p] ||= {}
-        @holders[p][@day-i] = sv
+        ap = sk.split('_').first
+        @holders[ap] ||= {}
+        @holders[ap][@day-i] = sv
       end
       destockday = Stock::Out.find_all(all_ids).flatless
       destockday.each do |sk, sv|
-        p = sk.split('_').first
-        @destocks[p] ||= {}
-        @destocks[p][@day-i] = sv
+        ap = sk.split('_').first
+        @destocks[ap] ||= {}
+        @destocks[ap][@day-i] = sv
       end
     end
         
@@ -235,10 +235,13 @@ Fenix::App.controllers :archetypes do
     @kc_stocks = Stock.free.flatless
     @kc_needs = Stock.need.flatless
 
-    if params[:start]
+    if params[:start] or params[:segment]
       start_from = timeline_unf(params[:start]) rescue Date.today
       @prev = start_from
       @next = @prev + 6
+      segment = params[:segment].split(',') if params[:segment]
+      @prev = timeline_unf segment.first if segment
+      @next = timeline_unf segment.last if segment
       @orneed = @prev.step(@next).map do |day|
         CabiePio.query("p/anewdate/order>#{timeline_id day}_", type: :prefix).flat.trans(nil, :to_i).values
       end.flatten.uniq

@@ -1,0 +1,23 @@
+daybtn.btn-smg.day class='{ btn-warning: enabled, btn-warning: flash_mode }' onclick='{ fn }'
+  yield
+
+  javascript:
+    self.enabled = false
+    self.flash_mode = false
+
+    fn() {
+      let touched = !self.enabled
+      self.enabled = true
+
+      if (touched) self.parent.add_day(self)
+      else self.parent.clear_days(self)
+    }
+
+    unfn() {
+      self.enabled = false
+    }
+
+    flash(value) {
+      if (value === undefined) value = true
+      self.flash_mode = value
+    }
