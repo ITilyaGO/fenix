@@ -44,7 +44,10 @@ wnode
     }
 
     loadie(event) {
-      window.location = '/archetypes/stock?cat=' + self.id
+      let params = (new URL(document.location)).searchParams
+      let st = '', sparam = params.get('segment')
+      if (sparam) st = '&segment=' + sparam
+      window.location = '/archetypes/stock?cat=' + self.id + st
       rcontrol.trigger('MASS_LOAD_' + opts.wid, { place: self.root.closest('wtree').getAttribute('place') })
       if (self.is_product) self.product_req()
       self.touched = true
