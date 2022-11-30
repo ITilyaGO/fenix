@@ -190,7 +190,7 @@ Fenix::App.controllers :archetypes do
   get :stock do
     # OrderJobs.stock_job(force: true)
     @title = "Stock"
-    @day = Date.parse(params[:day]) rescue Date.today
+    @day = Date.parse params[:segment].split(',').last rescue Date.today
     @holders = {}
     @destocks = {}
     @olneed = {}

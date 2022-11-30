@@ -69,7 +69,7 @@
                     - 7.times do |i|
                       - day = @day - 6 + i
                       th.col: .header-control.w
-                        a.tiny-text href=url(:archetypes, :stock, all: params[:all], cat: params[:cat], day: day)
+                        .tiny-text
                           = to_dm day
                         .wd = Date::DAYNAMESRU[day.wday-1]
                     /th class="non-print" &nbsp;
