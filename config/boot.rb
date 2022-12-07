@@ -12,6 +12,7 @@ require "./db/lib/main.rb"
 require "./db/map.rb"
 require "./config/scheduler.rb"
 require './config/cabies.rb'
+require './config/stomp.rb'
 Padrino.dependency_paths << "#{Padrino.root}/supermodels/**/*.rb"
 # Padrino.dependency_paths << "#{Padrino.root}/starlets/**/*.rb"
 

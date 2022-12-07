@@ -123,7 +123,7 @@ class Product < Doppel
   end
 
   def stompsync
-    client = Stomp::Client.open 'guest', 'guest', "localhost", 61613
+    client = Stomp::Client.open Stomp::DETAILS
     client.publish("/topic/web:product:lotof", Marshal.dump({ id: @id, min: @lotof }), { "priority" => 2 })
     client.close
   end
