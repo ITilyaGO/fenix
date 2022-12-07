@@ -285,7 +285,7 @@ Fenix::App.controllers :archetypes do
       end
     end
 
-    redirect url(:archetypes, :stock, cat: params[:cat])
+    redirect url(:archetypes, :stock, cat: params[:cat], segment: params[:segment])
   end
   
   # Obsolete
