@@ -67,6 +67,21 @@ fieldset class='control-group control-new'
     = hidden_field_tag :'cabie[kato_delivery]', :value => @kc_delivery&.code
     = text_field_tag :type_delivery, :class => 'form-control input-large input-with-feedback', :value => (@kc_delivery&.model&.name)
 
+fieldset.control-group
+  = f.label :manager, :class => 'col-md-3 control-label'
+  .controls.col-md-6.flex-c
+    .inner-controls
+      = f.select :manager_id, class: 'huge', options: @managers.pluck(:name, :id).unshift(['Без менеджера', '']), :selected => @client.manager_id
+    .flexie
+    - if role_is?(:manager) && current_account.id != @client.manager_id
+      .col-md-2
+        = check_box_tag :manager_check, id: 'manager_check', value: current_account.id, :class => 'text-twice-input', checked: @client.manager_id == current_account.id
+        label.btn.btn-sm.btn-desert.flex-c.twice-label(for = 'manager_check')
+          .desc я
+          .off.fa.fa-circle-o
+          .on.fa.fa-check-circle
+  .col-md-3
+
 - error = @client.errors.include?(:org)
 fieldset class='control-group#{error ? ' has-error' : ''}'
   = f.label :org, :class => 'col-md-3 control-label'
@@ -96,6 +111,7 @@ fieldset class='control-group control-new'
   div class='col-md-6 controls'
     = select_tag :'cabie[transport]', class: 'huge', options: transport_dic.unshift(:none), :selected => @kc_transport || :none
     = link_to tag_icon(:edit), url(:clients, :transport), class: 'btn btn-sm btn-default'
+
 br 
 - error = @client.errors.include?(:comment)
 fieldset class='control-group#{error ? ' has-error' : ''}'

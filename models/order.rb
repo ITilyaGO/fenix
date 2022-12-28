@@ -106,6 +106,21 @@ class Order < ActiveRecord::Base
     # v
   end
 
+  def sumsec id, which = :total
+    s = KSM::Section.find(id)
+    s.categories.sum do |cat|
+      by_cat(cat.id).sum(&which)
+    end
+  end
+
+  def sumsecd id, which = :total, deli = nil
+    return 0 unless deli || deli == delivery
+    s = KSM::Section.find(id)
+    s.categories.sum do |cat|
+      by_cat(cat.id).sum(&which)
+    end
+  end
+
   def by_section?(id)
     order_lines
       .joins(product: :category)

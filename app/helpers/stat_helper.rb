@@ -38,6 +38,14 @@ module Fenix::App::StatHelper
     sums
   end
 
+  def sum_by_delivery_2(orders)
+    sums = {}
+    Order.deliveries.each do |d, di|
+      sums[d.to_sym] = orders.select{|o|o.delivery.to_sym == d.to_sym}.sum{|o| o.sumsecd } (&:total).compact.sum
+    end
+    sums
+    sum_by_sections orders.select{|o|o.delivery.to_sym == d.to_sym}.map(&:id)
+  end
 
   def orders_to_cities_by_year y
     start_date = Date.new y, 1, 1

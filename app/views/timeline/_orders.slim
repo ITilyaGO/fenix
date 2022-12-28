@@ -42,16 +42,17 @@ table class="table table-hover table-condensed non-print"
           - town_name = @kc_towns[code]&.model
           = partial 'bricks/kato/label_print', :locals => { town_name: town_name, el: order }
           td.list-column.minirur.text-nowrap
-            == deli(rur (order.total/1000.0).floor)
+            == deli(rur ((my_order_total order)/1000.0).floor)
             |&nbsp;&nbsp;
             - if @current_account.is_admin?
               .icash.fa class=(@kc_cash.fetch(order.id, nil) ? 'fa-money' : 'fa-credit-card')
         td class='list-column non-print'
           = partial 'bricks/orders/transport', :locals => { client_id: order.client_id }
         td class='list-column non-print' = order.client.contract
-        td class='list-column non-print'
-          - kc_man = @kc_managers[@kc_hometowns[order.client_id.to_s]]
-          = @managers[kc_man.to_i] if kc_man
+        td class='list-column text-center non-print'
+          = order.client&.manager&.name
+          - unless order.client&.manager_id
+            .fa.fa-briefcase.text-danger
         td.list-column.text-center.text-nowrap = to_dm(order.created_at)
         td.list-column.text-center.text-nowrap class=('date-warning' if @kc_blinks.fetch(order.id, nil))
           = to_dm(timeline_unf(odate))

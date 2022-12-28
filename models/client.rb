@@ -1,6 +1,7 @@
 class Client < ActiveRecord::Base
   has_many :orders
   belongs_to :place
+  belongs_to :manager, class_name: 'Account'
 
   # Validations
   # validates_presence_of     :email, :tel, :message => 'не может быть пустым'

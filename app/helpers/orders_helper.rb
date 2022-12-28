@@ -111,4 +111,16 @@ module Fenix::App::OrdersHelper
   def dfsru
     wonderbox(:draftstatus_ru).values
   end
+
+  def my_order_total order
+    return order.total unless current_account.limited_orders?
+    section = KSM::Section.all.detect{|s|s.ix == current_account.section_id}.id
+    order.sumsec section
+  end
+
+  def my_done_total order
+    return order.done_total unless current_account.limited_orders?
+    section = KSM::Section.all.detect{|s|s.ix == current_account.section_id}.id
+    order.sumsec section, :done_total
+  end
 end

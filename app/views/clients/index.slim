@@ -2,9 +2,15 @@
   div class="alert alert-warning" role="alert"
     p Этим клиентам не прописан город. Назначьте его вручную, потому что клиенты без города могут вызывать ошибки.
 
+- if @noname
+  .alert.alert-warning role="alert"
+    p Клиенты без имени
+
 ul class="nav nav-tabs"
   li class="active" = link_to tag_icon(:list, 'Список'), url(:clients, :index)
   li = link_to tag_icon(:list, 'без города'), url(:clients, :broken)
+  li = link_to tag_icon(:list, 'без имени'), url(:clients, :noname)
+  li = link_to tag_icon(:briefcase, 'без менеджера'), url(:clients, :index, manager: 0)
   li = link_to tag_icon(:plus, 'Создать'), url(:clients, :new)
   li.pull-right = link_to tag_icon(:'file-excel-o', 'экспорт'), url(:clients, :export, :win => '')
   - if allow_route?(:kyoto)
@@ -49,6 +55,7 @@ div class="tabs-content"
         th class='header' Город
         th class='header' Город доставки
         th class='header' Тр.ком
+        th.header Менеджер
         th class='header'
         th class='header list-row-action-header'
 
@@ -68,6 +75,9 @@ div class="tabs-content"
             = partial 'bricks/kato/label', :locals => { town_name: town_name, el: nil }
           td class='list-column'
             = partial 'bricks/orders/transport', :locals => { client_id: client.id }
+          td.list-column
+            - unless client.manager_id
+              .fa.fa-briefcase.text-danger
           td class='list-column'
             = link_to :href => url(:clients, :orders, :id => client.id), :class => "btn btn-xs btn-glue"
               | Заказы | 

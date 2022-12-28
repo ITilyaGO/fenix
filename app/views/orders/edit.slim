@@ -40,9 +40,9 @@ ul class="nav nav-tabs non-print"
       - if @current_account.is_admin? && @cash
         .icash.fa class=(@cash == 1 ? 'fa-credit-card' : 'fa-money')
         |&nbsp;
-      == deli(rur @order.total)
+      == deli rur (my_order_total @order)
     - if @order.finished? || @order.shipped?
-      h5 == deli(rur @order.done_total)
+      h5 == deli rur (my_done_total @order)
     br
     .btns
       = link_to 'Печать', 'javascript:print()', :class => 'btn btn-sm btn-glue'

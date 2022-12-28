@@ -17,7 +17,12 @@ ul class="nav nav-tabs"
             = submit_tag pat(:delete), :class =>'list-row-action-popover-delete-one-btn btn btn-danger btn-wide'
             div class='btn btn-default btn-wide cancel' data-dismiss="modal" = pat(:cancel)
 
-.center.flex-c
+.center.flex-c.cmar-05
+  - unless @client.manager_id
+    .label.label-default.label-transport
+      i.fa.fa-briefcase.text-danger
+      ' &nbsp; нет менеджера
+
   = partial 'bricks/kc/transport', :locals => { :name => @kc_transport }
 
 .tabs-content
@@ -30,3 +35,5 @@ ul class="nav nav-tabs"
       .fa.fa-star
       = " Online Id: #{@client.online_id}"
 
+- content_for :js_assets do
+  = javascript_include_tag :appa, :riot

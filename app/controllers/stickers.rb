@@ -5,7 +5,13 @@ Fenix::App.controllers :stickers do
     @page = !params[:page].nil? ? params[:page].to_i : 1
     sort = params[:sort] || "updated_at"
     dir = !params[:sort] && !params[:dir] ? "desc" : params[:dir] || "asc"
-    orders_query = Order.where("status > ?", Order.statuses[:draft]).where("status < ?", Order.statuses[:finished])
+    if role_is? :manager
+      orders_base = Order.in_work.pluck(:client_id)
+      search_clients = Client.where(id: orders_base, manager_id: current_account.id).pluck(:id)
+      orders_query = Order.where(client_id: search_clients).in_work
+    else
+      orders_query = Order.in_work
+    end
     orders_query = orders_query.where(delivery: params[:deli].to_i) if params[:deli]
     
     mnths = timeline_months Date.today.next_month(-1)
@@ -15,6 +21,7 @@ Fenix::App.controllers :stickers do
     if current_account.limited_orders?
       @filtered_by_user = OrderPart.where(:order_id => orders_query.ids, :section => current_account.section_id).pluck(:order_id)
     end
+    last_stickers = last_stickers & orders_query.ids
     @orders = Order.where(id: last_stickers).sort_by{|o|last_stickers.index(o.id)}
     @pages = (orders_query.count/pagesize).ceil
     @sections = KSM::Section.all
