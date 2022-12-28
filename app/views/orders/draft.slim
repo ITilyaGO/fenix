@@ -6,11 +6,11 @@
   - next if (abl_view & os.pstate.keys).empty?
   - reveals << order
 
-- price_total = @orders.map(&:total).compact.sum
+- price_total = my_total_sum_for @orders
 - all_ids = @orders.map(&:id)
 - sec_sums = sum_by_sections(all_ids)
 .timeline: .summary
-  - by_deli = sum_by_delivery_2(@orders)
+  - by_deli = my_sum_by_delivery(@orders)
   - [:postage, :vernissage, :roundtrip, :pickup].each do |ds|
     - if by_deli[ds] > 0
       .item-orders.pull-left

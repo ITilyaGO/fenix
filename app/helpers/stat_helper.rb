@@ -38,13 +38,22 @@ module Fenix::App::StatHelper
     sums
   end
 
-  def sum_by_delivery_2(orders)
+  def my_sum_by_delivery(orders)
+    return sum_by_delivery orders unless current_account.section_id
+    cas = KSM::Section.all.detect{ |s| s.ix == current_account.section_id }
     sums = {}
     Order.deliveries.each do |d, di|
-      sums[d.to_sym] = orders.select{|o|o.delivery.to_sym == d.to_sym}.sum{|o| o.sumsecd } (&:total).compact.sum
+      sums[d.to_sym] = orders
+        .select{|o|o.delivery.to_sym == d.to_sym}
+        # .sum{|o| o.sumsecd(cas.id, :total, d.to_sym) }
+        .sum{ |o| my_order_total(o) || 0 }
     end
     sums
-    sum_by_sections orders.select{|o|o.delivery.to_sym == d.to_sym}.map(&:id)
+  end
+
+  def my_total_sum_for orders
+    return orders.map(&:total).compact.sum unless current_account.limited_orders?
+    orders.map{ |order| my_order_total order }.compact.sum
   end
 
   def orders_to_cities_by_year y

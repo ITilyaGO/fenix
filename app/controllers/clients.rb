@@ -72,9 +72,6 @@ Fenix::App.controllers :clients do
   end
 
   post :create do
-    # params[:client][:manager_id] = nil if params[:client][:manager_id].blank?
-    # params[:client][:manager_id] = nil if params[:client][:manager_id].to_i.zero?
-    # params[:client][:manager_id] = params[:manager_check] unless params[:manager_check].to_i.zero?
     @client = Client.new(client_form params)
     @cats = Client.where(:client_id => nil)
     if @client.save
@@ -122,9 +119,6 @@ Fenix::App.controllers :clients do
     @client = Client.find(params[:id])
     if @client
       params[:client][:online_place] = nil if !params[:client][:place_id].blank?
-      # params[:client][:manager_id] = nil if params[:client][:manager_id].blank?
-      # params[:client][:manager_id] = nil if params[:client][:manager_id].to_i.zero?
-      # params[:client][:manager_id] = params[:manager_check] unless params[:manager_check].to_i.zero?
       if @client.update_attributes(client_form params)
         code = params[:cabie][:kato_place]
         if Kato.valid? code

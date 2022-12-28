@@ -89,7 +89,7 @@ table class="table table-hover table-condensed non-print"
     - sec_sums = sum_by_sections(all_ids)
     - sec_donea = sum_done_by_sections(all_ids)
     tfoot: tr: td.summary colspan=20
-      - by_deli = sum_by_delivery(@orders)
+      - by_deli = my_sum_by_delivery(@orders)
       - [:postage, :vernissage, :roundtrip, :pickup].each do |ds|
         - if by_deli[ds] > 0
           .item-orders.pull-left

@@ -11,12 +11,12 @@
 
 - if @r == url(:orders, :index) && can_view_any_section?(:sections, :sum)
   - @orders = reveals
-  - price_total = @orders.map(&:total).sum
+  - price_total = my_total_sum_for @orders
   - all_ids = @orders.map(&:id)
   - sec_sums = sum_by_sections(all_ids)
 
   .timeline: .summary
-    - by_deli = sum_by_delivery(@orders)
+    - by_deli = my_sum_by_delivery(@orders)
     - [:postage, :vernissage, :roundtrip, :pickup].each do |ds|
       - if by_deli[ds] > 0
         .item-orders.pull-left
@@ -110,9 +110,6 @@
             - town_name = @kc_towns[code]&.model
             = partial 'bricks/kato/label_print', :locals => { town_name: town_name, el: order }
           td.list-column.minirur.text-nowrap
-            / = order.sumsec KSM::Section.all.detect{|s|s.ix == current_account.section_id}.id
-            / = current_account.section_id
-            / | jjj 
             == deli(rur ((my_order_total order)/1000.0).floor)
             |&nbsp;&nbsp;
             - if @current_account.is_admin?
