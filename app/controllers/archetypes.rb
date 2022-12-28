@@ -226,7 +226,7 @@ Fenix::App.controllers :archetypes do
         @destocks[ap][@day-i] = sv
       end
     end
-        
+
     @cats = KSM::Category.all.select{|c| c.category_id.nil?}.sort_by(&:sn)
     @cat = cat
     @categories = KSM::Category.all
@@ -239,6 +239,7 @@ Fenix::App.controllers :archetypes do
       start_from = timeline_unf(params[:start]) rescue Date.today
       @prev = start_from
       @next = @prev + 6
+      params[:segment] = nil if params[:segment]&.empty?
       segment = params[:segment].split(',') if params[:segment]
       @prev = timeline_unf segment.first if segment
       @next = timeline_unf segment.last if segment
