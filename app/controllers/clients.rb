@@ -10,10 +10,14 @@ Fenix::App.controllers :clients do
     @kc_towns = KatoAPI.batch(@kc_clients.values.uniq + @kc_delivery.values.uniq)
     city = params[:city]
     kc_filtered = (kc_clients.flatout[city] || []) + (kc_delivery.flatout[city] || [])
+    all_clients = Client.includes(:place)
+    pm = params[:manager]
+    pm = nil if pm.to_i.zero?
+    all_clients = all_clients.where(manager_id: pm) if params[:manager]
     @clients = if !city
-      Client.includes(:place).order(:updated_at => :desc).offset((@page-1)*pagesize).take(pagesize)
+      all_clients.order(:updated_at => :desc).offset((@page-1)*pagesize).take(pagesize)
     else
-      Client.includes(:place).order(:updated_at => :desc).where(id: kc_filtered.uniq)
+      all_clients.where(id: kc_filtered.uniq).order(:updated_at => :desc)
     end
     @transport = CabiePio.all_keys(@clients.map(&:id), folder: [:m, :clients, :transport]).flat
     @pages = (Client.count/pagesize).ceil
@@ -29,6 +33,18 @@ Fenix::App.controllers :clients do
     @broken = true
     @kc_delivery = CabiePio.folder(:clients, :delivery_towns).flat
     @kc_towns = KatoAPI.batch(@kc_clients.values.uniq + @kc_delivery.values.uniq)
+    @transport = CabiePio.all_keys(@clients.map(&:id), folder: [:m, :clients, :transport]).flat
+    render 'clients/index'
+  end
+
+  get :noname do
+    @title = "Clients"
+    @kc_clients = CabiePio.folder(:clients, :hometowns).flat
+    @clients = Client.where('name LIKE ""')
+    @noname = true
+    @kc_delivery = CabiePio.folder(:clients, :delivery_towns).flat
+    @kc_towns = KatoAPI.batch(@kc_clients.values.uniq + @kc_delivery.values.uniq)
+    @transport = CabiePio.all_keys(@clients.map(&:id), folder: [:m, :clients, :transport]).flat
     render 'clients/index'
   end
 
@@ -50,11 +66,13 @@ Fenix::App.controllers :clients do
   get :new do
     @title = "New client"
     @client = Client.new
+    @managers = Account.managers
+
     render 'clients/new'
   end
 
   post :create do
-    @client = Client.new(params[:client])
+    @client = Client.new(client_form params)
     @cats = Client.where(:client_id => nil)
     if @client.save
       code = params[:cabie][:kato_place]
@@ -86,6 +104,7 @@ Fenix::App.controllers :clients do
     kc_delivery = CabiePio.get([:clients, :delivery_towns], @client.id).data
     @kc_delivery = KatoAPI.anything(kc_delivery)
     @kc_transport = CabiePio.get([:m, :clients, :transport], @client.id).data
+    @managers = Account.managers
     
     if @client
       render 'clients/edit'
@@ -100,7 +119,7 @@ Fenix::App.controllers :clients do
     @client = Client.find(params[:id])
     if @client
       params[:client][:online_place] = nil if !params[:client][:place_id].blank?
-      if @client.update_attributes(params[:client])
+      if @client.update_attributes(client_form params)
         code = params[:cabie][:kato_place]
         if Kato.valid? code
           CabiePio.set [:clients, :hometowns], @client.id, code

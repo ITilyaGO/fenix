@@ -244,7 +244,13 @@ Fenix::App.controllers :dr_timeline, :map => 'timeline/driven' do
     @sections = KSM::Section.all
     @week_orders = @gtm.fetch(start_from, [])
     @all_ids = @week_orders.map(&:last).map(&:to_i)
-    @orders = Order.where(id: @all_ids).in_work.order(:client_id)
+    @manager = Manager.find 4
+    the_managers
+    manager_places = @kc_managers.to_a.group_by(&:last).transform_values{|v|v.flat_map(&:first)}[@manager.id.to_s] || []
+    search_clients = @kc_hometowns.select{|k,v|manager_places.include? v}.keys.map(&:to_i)
+    search_clients = []
+    @orders = Order.where(id: @all_ids).in_work.where.not(client_id: search_clients).order(:client_id)
+    @all_ids = @orders.map(&:id)
     a_managers(@all_ids, @orders.map(&:client_id).uniq)
 
     @stickers = CabiePio.all_keys(@all_ids, folder: [:sticker, :order]).flat.trans(:to_i, :to_f)
@@ -261,7 +267,8 @@ Fenix::App.controllers :dr_timeline, :map => 'timeline/driven' do
       @by_manager = @orders.map(&:id).group_by do |oid|
         fo = @orders.detect{|o| o.id == oid}
         next unless fo
-        @kc_managers[@kc_hometowns[fo.client_id.to_s]]
+        fo.client&.manager_id
+        # @kc_managers[@kc_hometowns[fo.client_id.to_s]]
       end
       partial 'timeline/orders_for_manager'
     elsif params[:sort].to_sym == :delivery

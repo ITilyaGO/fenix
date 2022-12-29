@@ -20,6 +20,15 @@ class KSM::OrderLine < Doppel
     save
   end
 
+  def total
+    price * amount
+  end
+
+  def done_total
+    return 0 if ignored
+    price * done_amount
+  end
+
   # def saved_by account
   #   @dates ||= []
   #   @created_at ||= Time.now

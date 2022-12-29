@@ -11,12 +11,12 @@
 
 - if @r == url(:orders, :index) && can_view_any_section?(:sections, :sum)
   - @orders = reveals
-  - price_total = @orders.map(&:total).sum
+  - price_total = my_total_sum_for @orders
   - all_ids = @orders.map(&:id)
   - sec_sums = sum_by_sections(all_ids)
 
   .timeline: .summary
-    - by_deli = sum_by_delivery(@orders)
+    - by_deli = my_sum_by_delivery(@orders)
     - [:postage, :vernissage, :roundtrip, :pickup].each do |ds|
       - if by_deli[ds] > 0
         .item-orders.pull-left
@@ -74,7 +74,7 @@
           a href=local(sort: params[:sort] ? nil : :created_at) Дата
         th.header
           a href=local(seq: params[:seq] ? nil : :timeline) Отправка
-        th class='header' Менеджер
+        th.header.text-center Менеджер
         th class='header' Тр.ком
         th class='header only-print' Сумма
         th.header.non-print width='80px'
@@ -110,7 +110,7 @@
             - town_name = @kc_towns[code]&.model
             = partial 'bricks/kato/label_print', :locals => { town_name: town_name, el: order }
           td.list-column.minirur.text-nowrap
-            == deli(rur (order.total/1000.0).floor)
+            == deli(rur ((my_order_total order)/1000.0).floor)
             |&nbsp;&nbsp;
             - if @current_account.is_admin?
             .icash.fa class=(@kc_cash.fetch(order.id, nil) ? 'fa-money' : 'fa-credit-card')
@@ -119,9 +119,10 @@
           td.list-column.text-center.text-nowrap class=('date-warning' if @kc_blinks.fetch(order.id, nil))
             - odate = @kc_timelines[order.id]
             = to_dm(timeline_unf(odate)) if odate
-          td class='list-column'
-            - kc_man = @kc_managers[@kc_hometowns[order.client_id.to_s]]
-            = @managers[kc_man.to_i] if kc_man
+          td.list-column.text-center
+            = order.client&.manager&.name
+            - unless order.client&.manager_id
+              .fa.fa-briefcase.text-danger
           td class='list-column'
             = partial 'bricks/orders/transport', :locals => { client_id: order.client_id }
           td class='list-column only-print' = "%0.f" % order.done_total

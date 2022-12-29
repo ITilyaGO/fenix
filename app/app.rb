@@ -110,6 +110,7 @@ module Fenix
         role.project_module :categories, '/categories'
         role.project_module :products, '/products'
         role.project_module :places, '/places'
+        role.project_module :editors, '/clients'
       end
     end
 

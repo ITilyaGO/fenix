@@ -1,5 +1,5 @@
 - @by_manager.each do |man_id|
-  - man_name = (@managers[man_id.first.to_i] rescue nil) || 'Без менеджера'
+  - man_name = (Account.find(man_id.first).name rescue nil) || 'Без менеджера'
   .wrapper: table class="table table-hover table-condensed non-print"
     thead
       tr
@@ -40,7 +40,7 @@
             - town_name = @kc_towns[code]&.model
             = partial 'bricks/kato/label_print', :locals => { town_name: town_name, el: order }
           td.list-column.minirur.text-nowrap
-              == deli(rur (order.total/1000.0).floor)
+              == deli(rur ((my_order_total order)/1000.0).floor)
               |&nbsp;&nbsp;
               - if @current_account.is_admin?
                 .icash.fa class=(@kc_cash.fetch(order.id, nil) ? 'fa-money' : 'fa-credit-card')

@@ -2,6 +2,8 @@ class Account < ActiveRecord::Base
   attr_accessor :password, :password_confirmation
   attr_accessor :current
   belongs_to :section
+  scope :managers, -> { where(:role => :manager) }
+
 
   # Validations
   validates_presence_of     :email, :role, :message => 'не может быть пустым'
@@ -53,8 +55,13 @@ class Account < ActiveRecord::Base
     # Order.where("status >= ?", Order.statuses[:draft])).where(:)
   end
 
+  def role_is?(name)
+    (role.to_sym rescue :any).equal? name
+  end
+
   def limited_orders?
-    (role == 'user' || role == 'editor') && (2..5).include?(section.id)
+    !role_is?(:admin) && section_id
+    # (role == 'user' || role == 'editor') && (2..5).include?(section.id)
   end
 
   private

@@ -71,5 +71,12 @@ module Fenix::App::ClientsHelper
     YAML.dump o
   end
 
-
+  def client_form params
+    client = params[:client]
+    client[:manager_id] = nil if client[:manager_id].blank?
+    client[:manager_id] = nil if client[:manager_id].to_i.zero?
+    client[:manager_id] = params[:manager_check] unless params[:manager_check].to_i.zero?
+    client
+    # client[:manager_id] = nil if params[:manager_check].to_i.zero? && client[:manager_id].to_i == current_account
+  end
 end

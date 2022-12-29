@@ -229,3 +229,22 @@ label.swap-label, label.twice-label {
     }
   }
 }
+
+.text-twice-input {
+  .twice-input;
+
+  & + .twice-label {
+    position: unset;
+
+    .desc {
+      margin-right: 3em;
+    }
+    .on, .off {
+      position: unset;
+      top: unset;
+      left: unset;
+      transform: unset;
+      font-size: 1.2em;
+    }
+  }
+}

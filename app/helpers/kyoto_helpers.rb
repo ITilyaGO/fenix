@@ -36,6 +36,22 @@ module Fenix::App::KyotoHelpers
     end.to_h.compact
   end
 
+  def the_managers
+    @kc_orders = CabiePio.folder(:orders, :towns).flat
+    @kc_delivery = CabiePio.folder(:orders, :delivery_towns).flat
+    @kc_hometowns = CabiePio.folder(:clients, :hometowns).flat
+    @kc_client_delivery = CabiePio.folder(:clients, :delivery_towns).flat
+    codes = @kc_orders.values.uniq + @kc_delivery.values.uniq + @kc_client_delivery.values.uniq + @kc_hometowns.values.uniq
+    @kc_towns = KatoAPI.batch(codes)
+    kc_town_managers = CabiePio.folder(:towns, :managers).flat
+    @managers = Manager.all.pluck(:id, :name).to_h
+    @kc_managers = codes.map do |code|
+      hier = Kato::Hier.for(code).codes
+      manager = hier.detect{|c| kc_town_managers[c]}
+      [code, kc_town_managers[manager]]
+    end.to_h.compact
+  end
+
   def wonderbox(key, prop=nil)
     return all_wonderbox.fetch(key.to_s, nil) unless prop
     all_wonderbox.dig(key.to_s, prop)

@@ -6,11 +6,11 @@
   - next if (abl_view & os.pstate.keys).empty?
   - reveals << order
 
-- price_total = @orders.map(&:total).compact.sum
+- price_total = my_total_sum_for @orders
 - all_ids = @orders.map(&:id)
 - sec_sums = sum_by_sections(all_ids)
 .timeline: .summary
-  - by_deli = sum_by_delivery(@orders)
+  - by_deli = my_sum_by_delivery(@orders)
   - [:postage, :vernissage, :roundtrip, :pickup].each do |ds|
     - if by_deli[ds] > 0
       .item-orders.pull-left
@@ -42,7 +42,8 @@
         th.header width='50px'
         th class='header' Заказчик
         th.header.non-print.text-center Стадии
-        th class='header' Дата
+        th.header.text-center Дата
+        th.header Менеджер
         th.header
         th class='header non-print'
           = partial 'bricks/orders/section_titles'
@@ -67,11 +68,15 @@
             - town_name = @kc_towns[code]&.model
             = partial 'bricks/kato/label', :locals => { town_name: town_name, el: order }
           
-          td.list-column.minirur.text-nowrap == deli(rur (order.total/1000.0).floor)
+          td.list-column.minirur.text-nowrap == deli rur ((my_order_total order)/1000.0).floor
           td class='list-column' = order.client&.name
           td.list-column.non-print.switches.text-nowrap
             draftswitches items=dfsmax locale=dfsru bw=os.draftbw order=order.id allow='change'
-          td.list-column.text-nowrap.text-right = to_dm(order.created_at)
+          td.list-column.text-nowrap.text-center = to_dm(order.created_at)
+          td.list-column.text-center
+            = order.client&.manager&.name
+            - unless order.client&.manager_id
+              .fa.fa-briefcase.text-danger
           td.list-column.non-print
             /span.label class="label-#{os.state}" = t :"status.#{os.state}"
           td class='list-column text-nowrap non-print'

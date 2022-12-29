@@ -11,11 +11,9 @@ ul.nav.nav-tabs
 .row
   - if @points.size > 0
     .col-md-6.col-md-offset-3: table.table.table-condensed
-      - @points.each do |p|
-        - town = @kc_towns[p]
-        tr: td
-          = partial 'bricks/kato/label', :locals => { town_name: town&.model, el: nil }
+      - @points.each do |point|
+        - area = @kc_towns[point]
+        tr
+          td = area.kind
+          td = partial 'bricks/kato/label_full', :locals => { town_name: area.model.to_s }
   .clearfix
-
-.row
-  = @manager.regions.order(:name).map{ |r| "#{r.name} (#{r.code})" }.join(', ')

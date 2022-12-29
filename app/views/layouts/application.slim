@@ -46,6 +46,13 @@ html lang='en'
               = link_to url(:orders, :draft) do
                 | Непроверенные
                 span class="menu-icon fa fa-exclamation-circle"
+          - orders_route = :index
+          - if role_is? :manager
+            - orders_route = :my
+            li.sidebar-list
+              = link_to url(:orders, :my) do
+                | Мои
+                span class="menu-icon fa fa-folder-o"
           - if can_view?(:list, :current) || can_view_any_section?(:sections, :list)
             li.sidebar-list
               = link_to url(:orders, :index) do
@@ -54,19 +61,19 @@ html lang='en'
                 span class="badge" = current_account.new_orders
                 span class="menu-icon fa fa-folder-o"
             li.sidebar-list
-              = link_to url(:orders, :index, :deli => Order.deliveries[:postage]) do
+              = link_to url(:orders, orders_route, :deli => Order.deliveries[:postage]) do
                 | Отправки
                 span class="menu-icon fa fa-folder-o"
             li.sidebar-list
-              = link_to url(:orders, :index, :deli => Order.deliveries[:roundtrip]) do
+              = link_to url(:orders, orders_route, :deli => Order.deliveries[:roundtrip]) do
                 | Поездки
                 span class="menu-icon fa fa-folder-o"
             li.sidebar-list
-              = link_to url(:orders, :index, :deli => Order.deliveries[:vernissage]) do
+              = link_to url(:orders, orders_route, :deli => Order.deliveries[:vernissage]) do
                 = t :'delivery.vernissage'
                 span class="menu-icon fa fa-folder-o"
             li.sidebar-list
-              = link_to url(:orders, :index, :deli => Order.deliveries[:pickup]) do
+              = link_to url(:orders, orders_route, :deli => Order.deliveries[:pickup]) do
                 = t :'delivery.pickup'
                 span class="menu-icon fa fa-folder-o"
           - if can_view?(:list, :finished) || can_view_any_section?(:sections, :list)
@@ -189,7 +196,7 @@ html lang='en'
                 = link_to url(:accounts, :index) do
                   | Юзеры
                   span class="menu-icon fa fa-user"
-            li.sidebar-list
+            / li.sidebar-list
               = link_to url(:managers, :index) do
                 | Менеджеры
                 span class="menu-icon fa fa-briefcase"

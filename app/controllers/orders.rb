@@ -27,6 +27,44 @@ Fenix::App.controllers :orders do
     render 'orders/index'
   end
 
+  get :my do
+    @manager = current_account
+    @title = "Все текущие рабочие заказы"
+    pagesize = PAGESIZE
+    @page = !params[:page].nil? ? params[:page].to_i : 1
+    sort = params[:sort] || "updated_at"
+    dir = !params[:sort] && !params[:dir] ? "desc" : params[:dir] || "asc"
+    # @pages = (orders_query.count/pagesize).ceil
+    @sections = KSM::Section.all
+    # a_managers(@orders.map(&:id), @orders.map(&:client_id))
+    the_managers
+    # manager_places = @kc_managers.to_a.group_by(&:last).transform_values{|v|v.flat_map(&:first)}[@manager.id.to_s] || []
+    # search_clients = @kc_hometowns.select{|k,v|manager_places.include? v}.keys.map(&:to_i)
+    orders_base = Order.in_work.pluck(:client_id)
+    search_clients = Client.where(id: orders_base, manager_id: @manager.id).pluck(:id)
+    orders_query = Order
+      .where(client_id: search_clients)
+      .where("status > ?", Order.statuses[:draft])
+      .where("status < ?", Order.statuses[:finished])
+    orders_query = orders_query.where(delivery: params[:deli].to_i) if params[:deli]
+    @orders = orders_query.includes(:client).order(sort => dir)
+    if current_account.limited_orders?
+      @filtered_by_user = OrderPart.where(:order_id => orders_query.ids, :section => current_account.section_id).pluck(:order_id)
+    end
+
+    @transport = CabiePio.all_keys(@orders.map(&:client_id).uniq, folder: [:m, :clients, :transport]).flat
+    @kc_timelines = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :timeline]).flat.trans(:to_i)
+    @kc_blinks = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :timeline_blink]).flat.trans(:to_i)
+    @kc_stickers = CabiePio.all_keys(@orders.map(&:id), folder: [:sticker, :order_progress]).flat.trans(:to_i, :to_f)
+    @orders = @orders.sort_by{|o|@kc_timelines[o.id]||''} if params[:seq] == "timeline"
+    @orders = @orders.sort_by{|o|@kc_towns[@kc_orders[o.id.to_s]]&.model&.name||''} if params[:seq] == "city"
+    @kc_cash = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :cash]).flat.trans(:to_i).reject{|k,v|v!='t'}
+    @r = url(:orders, :index)
+    @ra = [:orders, :index]
+    @rah = { deli: params[:deli] } if params[:deli]
+    render 'orders/index'
+  end
+
   get :draft do
     @title = "Непроверенные заказы"
     @orders = Order.all
@@ -88,19 +126,7 @@ Fenix::App.controllers :orders do
     dir = !params[:sort] && !params[:dir] ? "desc" : params[:dir] || "asc"
 
     @sections = KSM::Section.all
-    @kc_orders = CabiePio.folder(:orders, :towns).flat
-    @kc_delivery = CabiePio.folder(:orders, :delivery_towns).flat
-    @kc_hometowns = CabiePio.folder(:clients, :hometowns).flat
-    @kc_client_delivery = CabiePio.folder(:clients, :delivery_towns).flat
-    codes = @kc_orders.values.uniq + @kc_delivery.values.uniq + @kc_client_delivery.values.uniq + @kc_hometowns.values.uniq
-    @kc_towns = KatoAPI.batch(codes)
-    kc_town_managers = CabiePio.folder(:towns, :managers).flat
-    @kc_managers = codes.map do |code|
-      hier = Kato::Hier.for(code).codes
-      manager = hier.detect{|c| kc_town_managers[c]}
-      [code, kc_town_managers[manager]]
-    end.to_h.compact
-    @managers = Manager.all.pluck(:id, :name).to_h
+    the_managers
     manager_places = @kc_managers.to_a.group_by(&:last).transform_values{|v|v.flat_map(&:first)}[@manager.id.to_s] || []
     # search_orders = @kc_orders.select{|k,v|manager_places.include? v}.keys.map(&:to_i)
     search_clients = @kc_hometowns.select{|k,v|manager_places.include? v}.keys.map(&:to_i)
@@ -111,6 +137,8 @@ Fenix::App.controllers :orders do
     @transport = CabiePio.all_keys(@orders.map(&:client_id).uniq, folder: [:m, :clients, :transport]).flat
     @kc_timelines = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :timeline]).flat.trans(:to_i)
     @kc_stickers = CabiePio.all_keys(@orders.map(&:id), folder: [:sticker, :order_progress]).flat.trans(:to_i, :to_f)
+    @kc_cash = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :cash]).flat.trans(:to_i).reject{|k,v|v!='t'}
+    @kc_blinks = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :timeline_blink]).flat.trans(:to_i)
     render 'orders/index'
   end
 
@@ -122,19 +150,7 @@ Fenix::App.controllers :orders do
     dir = !params[:sort] && !params[:dir] ? "desc" : params[:dir] || "asc"
 
     @sections = KSM::Section.all
-    @kc_orders = CabiePio.folder(:orders, :towns).flat
-    @kc_delivery = CabiePio.folder(:orders, :delivery_towns).flat
-    @kc_hometowns = CabiePio.folder(:clients, :hometowns).flat
-    @kc_client_delivery = CabiePio.folder(:clients, :delivery_towns).flat
-    codes = @kc_orders.values.uniq + @kc_delivery.values.uniq + @kc_client_delivery.values.uniq + @kc_hometowns.values.uniq
-    @kc_towns = KatoAPI.batch(codes)
-    kc_town_managers = CabiePio.folder(:towns, :managers).flat
-    @kc_managers = codes.map do |code|
-      hier = Kato::Hier.for(code).codes
-      manager = hier.detect{|c| kc_town_managers[c]}
-      [code, kc_town_managers[manager]]
-    end.to_h.compact
-    @managers = Manager.all.pluck(:id, :name).to_h
+    the_managers
     manager_places = @kc_managers.to_a.group_by(&:last).transform_values{|v|v.flat_map(&:first)}.values.flatten
     # search_orders = @kc_orders.select{|k,v|manager_places.include? v}.keys.map(&:to_i)
     search_clients = @kc_hometowns.select{|k,v|manager_places.include? v}.keys.map(&:to_i)
@@ -145,6 +161,8 @@ Fenix::App.controllers :orders do
     @transport = CabiePio.all_keys(@orders.map(&:client_id).uniq, folder: [:m, :clients, :transport]).flat
     @kc_timelines = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :timeline]).flat.trans(:to_i)
     @kc_stickers = CabiePio.all_keys(@orders.map(&:id), folder: [:sticker, :order_progress]).flat.trans(:to_i, :to_f)
+    @kc_cash = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :cash]).flat.trans(:to_i).reject{|k,v|v!='t'}
+    @kc_blinks = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :timeline_blink]).flat.trans(:to_i)
     render 'orders/index'
   end
 
