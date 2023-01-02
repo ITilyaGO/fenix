@@ -76,6 +76,7 @@ div class="tabs-content"
           td class='list-column'
             = partial 'bricks/orders/transport', :locals => { client_id: client.id }
           td.list-column
+            = client.manager&.name
             - unless client.manager_id
               .fa.fa-briefcase.text-danger
           td class='list-column'
