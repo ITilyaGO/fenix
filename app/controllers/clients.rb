@@ -208,7 +208,7 @@ Fenix::App.controllers :clients do
   end
 
   put :transport_update do
-    company = params[:form][:company]
+    company = params[:form][:company].downcase
     if company.match? /\A[a-z]{3,10}\z/
       unless params[:clear]
         CabiePio.set([:m, :dic, :transport], company, {})
