@@ -14,6 +14,7 @@ Fenix::App.controllers :accounts do
 
   post :create do
     params[:account].delete(:role) if params[:account][:role].empty?
+    params[:account][:section_id] = nil if params[:account][:section_id].empty?
     @account = Account.new(params[:account])
     @sections = KSM::Section.all
     if @account.save
@@ -49,6 +50,7 @@ Fenix::App.controllers :accounts do
     @title = pat(:update_title, :model => "account #{params[:id]}")
     @account = Account.find(params[:id])
     @sections = KSM::Section.all
+    params[:account][:section_id] = nil if params[:account][:section_id].empty?
     if @account
       params[:account].delete(:role) if params[:account][:role].empty?
       if @account.update_attributes(params[:account])
