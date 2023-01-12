@@ -77,6 +77,11 @@ module Fenix
       role.project_module :health, '/health'
     end
 
+    access_control.roles_for :manager do |role|
+      role.project_module :online, '/online'
+      role.project_module :orders_create, '/orders/fullempty'
+    end
+
     access_control.roles_for :editor do |role|
       role.project_module :orders, '/orders'
       role.project_module :orders_create, '/orders/fullempty'

@@ -89,7 +89,7 @@
           td class='list-column list-row-action non-print'
             .list-row-action-wrapper
               .list-row-action-wrapper-link &nbsp;
-              - if current_account.is_admin?
+              - if allow_route?(:orders_create)
                 = link_to tag_icon(:paw), :rel => :tooltip, :title => "Edit order", :href => url(:orders, :correct, :id => order.id), :class => 'list-row-action-wrapper-link'
               - if order.draft? && current_account.is_admin?
                 = link_to tag_icon(:save), :href => url(:c1c, :create, :id => order.id), :class => 'list-row-action-wrapper-link'
