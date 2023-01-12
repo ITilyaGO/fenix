@@ -45,7 +45,6 @@ module Fenix::App::StatHelper
     Order.deliveries.each do |d, di|
       sums[d.to_sym] = orders
         .select{|o|o.delivery.to_sym == d.to_sym}
-        # .sum{|o| o.sumsecd(cas.id, :total, d.to_sym) }
         .sum{ |o| my_order_total(o) || 0 }
     end
     sums
