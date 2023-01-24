@@ -45,8 +45,9 @@ ul class="nav nav-tabs non-print"
       h5 == deli rur (my_done_total @order)
     br
     .btns
-      = link_to 'Печать', 'javascript:print()', :class => 'btn btn-sm btn-glue'
-      - if current_account.is_admin?
+      - if current_account.section_id
+        = link_to 'Печать', 'javascript:print()', :class => 'btn btn-sm btn-glue'
+      - if can_view?(:order, :modify)
         '
         = link_to 'Все', :class => 'btn btn-sm print-all btn-glue'
         '
