@@ -73,6 +73,9 @@
 .btn-shipped {
   .button-variant(@btn-default-color, @brand-info, @btn-info-hover-bg, @btn-info-active-bg);
 }
+.btn-shipready {
+  .button-variant(@btn-default-color, @brand-shipready, @btn-info-hover-bg, @btn-info-active-bg);
+}
 
 .btn-prime {
   .button-variant(@btn-default-color, @dekolglue, darken(@dekolglue, 10%), mix(@dekolglue, black, 85%));
@@ -201,6 +204,24 @@
 .btn-section {
   .btn-border;
   padding: 6px 12px;
+
+  &.with-digits {
+    .relat;
+    font-size: 11px;
+    // padding: 0 8px;
+    line-height: 1.2;
+
+    > .dgt {
+      .absol;
+      top: 0;
+      left: 0;
+      right: 0;
+    }
+
+    &:hover {
+      color: white;
+    }
+  }
 }
 .btn-prepare {
   .btn-border;

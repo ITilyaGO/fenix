@@ -1,0 +1,10 @@
+print_selectable onchange='{ reprint }'
+
+  javascript:
+    reprint() {
+      let row = self.root.closest(".list-row")
+      let rownext = row.nextElementSibling
+      row.classList.toggle('non-print')
+      rownext.classList.toggle('hide')
+      rownext.classList.toggle('only-print')
+    }

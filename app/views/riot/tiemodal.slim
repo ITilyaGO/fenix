@@ -1,0 +1,44 @@
+tiemodal.modal class='{open_class}'
+  
+  yield
+
+  javascript:
+    this.title = opts.dataTitle
+
+    rcontrol.on("TIEMODAL_OPEN", function(data) {
+      self.open(data)
+      self.update()
+    })
+
+    rcontrol.on("TIEMODAL_CLOSE", function(data) {
+      self.close()
+      self.update()
+    })
+
+    this.preventer = function(e) {
+      e.preventDefault()
+    }
+
+    close_drop(a) {
+      if (a.target !== a.currentTarget) return true;
+      self.close()
+    }
+
+    close() {
+      document.querySelector('.modal-backdrop').classList.add('hide')
+      document.body.classList.remove('modal-open')
+      self.open_class = ''
+      document.removeEventListener('touchmove', self.preventer)
+    }
+
+    open(data) {
+      self.title = data.title
+      self.oid.value = data.tie
+      self.num = data.tie
+      self.update()
+
+      document.body.classList.add('modal-open')
+      document.querySelector('.modal-backdrop').classList.remove('hide')
+      self.open_class = 'modal flex-c in'
+      document.addEventListener('touchmove', self.preventer)
+    }

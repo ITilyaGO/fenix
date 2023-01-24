@@ -11,7 +11,8 @@ class KSM::OrderStatus < Doppel
     shipped: 4,
     canceled: 5,
     draft: 6,
-    prepare: 21
+    prepare: 21,
+    shipready: 22
   }.freeze
 
   BIT_FLAGS = {

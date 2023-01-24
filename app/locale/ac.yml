@@ -9,6 +9,7 @@ en:
       sectioner: Секционер
       limsectioner: Лимитированный секционер
       director: Директор
+      shipper: Сборщик
       stickerman: Клейщик
       stager: Работник
       supplier: Снабжение
@@ -32,6 +33,7 @@ en:
       finished: Готовые
       archive: Архив
       stickers: Наклеенные
+      shipready: К отправке
     timeline:
       all: График
       stickers: График клейки

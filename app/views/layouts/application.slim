@@ -81,16 +81,23 @@ html lang='en'
               = link_to url(:orders, :finished) do
                 | Готовые
                 span class="menu-icon fa fa-check-square-o"
-          - if can_view?(:list, :stickers)
+          - if can_view?(:list, :shipready)
             li.sidebar-list
-              = link_to url(:stickers, :orders) do
-                | Наклеенные
-                span class="menu-icon fa fa-ticket"
+              = link_to url(:orders, :shipready) do
+                | Готовые к отправке
+                | &nbsp;&nbsp;
+                - if (shipcount = storebox(:counters, :shipready).count) > 0
+                  span class="badge" = shipcount
           - if can_view?(:list, :archive)
             li.sidebar-list
               = link_to url(:orders, :archive) do
                 | Архив
                 span class="menu-icon fa fa-archive"
+          - if can_view?(:list, :stickers)
+            li.sidebar-list
+              = link_to url(:stickers, :orders) do
+                | Наклеенные
+                span class="menu-icon fa fa-ticket"
           - if can_view?(:list, :archive)
             li.sidebar-list
               = link_to url(:orders, :buncha) do

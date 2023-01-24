@@ -108,7 +108,7 @@ module Fenix
       role.project_module :places, '/places'
     end
 
-    [:sectioner, :limsectioner, :director, :manager, :supplier].each do |r|
+    [:sectioner, :limsectioner, :director, :manager, :shipper, :supplier].each do |r|
       access_control.roles_for r do |role|
         role.project_module :orders, '/orders'
         role.project_module :orders_infact, '/orders/infact'

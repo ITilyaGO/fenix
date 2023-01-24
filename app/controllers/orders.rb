@@ -60,7 +60,7 @@ Fenix::App.controllers :orders do
     @orders = @orders.sort_by{|o|@kc_towns[@kc_orders[o.id.to_s]]&.model&.name||''} if params[:seq] == "city"
     @kc_cash = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :cash]).flat.trans(:to_i).reject{|k,v|v!='t'}
     @r = url(:orders, :index)
-    @ra = [:orders, :index]
+    @ra = [:orders, :my]
     @rah = { deli: params[:deli] } if params[:deli]
     render 'orders/index'
   end
@@ -99,6 +99,31 @@ Fenix::App.controllers :orders do
     @kc_done = CabiePio.all_keys(@orders.map(&:id), folder: [:stock, :order, :done]).flat.trans(:to_i)
 
     render 'orders/finished'
+  end
+
+
+  get :shipready do
+    @title = "К отправке"
+    # @print_btn = 1
+    @orders = Order.all
+      .includes(:client, :place, :order_parts)
+      .preload(:client => :place)
+      .where("status = ?", Order.statuses[:shipready]).order(:updated_at => :desc)
+    @old = params[:old].present?
+    if !@old
+      @orders = @orders.where('updated_at > ?', Date.today - 1.month)
+    else
+      pagesize = PAGESIZE
+      @page = !params[:page].nil? ? params[:page].to_i : 1
+      @pages = (@orders.count/pagesize).ceil
+      @orders = @orders.offset((@page-1)*pagesize).take(pagesize)
+      @r = url(:orders, :shipready, :old => 1)
+    end
+    @sections = KSM::Section.all
+    a_towns(@orders.map(&:id), @orders.map(&:client_id))
+    @kc_done = CabiePio.all_keys(@orders.map(&:id), folder: [:stock, :order, :done]).flat.trans(:to_i)
+
+    render 'orders/shipready'
   end
 
   get :archive do
@@ -732,6 +757,47 @@ Fenix::App.controllers :orders do
       arbal_need_order_rep(order)
     end
     redirect url(:orders, :index)
+  end
+
+  put :toship do
+    oids = params[:oid].split(',').map(&:to_i)
+    oids.each do |oi|
+      order = Order.find oi
+      o_status = KSM::OrderStatus.find oi
+      
+      order.status = :shipready
+      order.save
+
+      o_status.setg(:shipready)
+      o_status.save
+    end
+    n = (storebox(:counters, :shipready) || []) - oids + oids
+    storebox_set(:counters, :shipready, n)
+    redirect url(:orders, :finished)
+  end
+
+  put :ship do
+    oids = params[:oid].split(',').map(&:to_i)
+    oids.each do |oi|
+      order = Order.find oi
+      o_status = KSM::OrderStatus.find oi
+      
+      order.status = :shipped
+      order.save
+
+      o_status.setg(:shipped)
+      o_status.save
+    end
+    n = (storebox(:counters, :shipready) || []) - oids
+    storebox_set(:counters, :shipready, n)
+    redirect url(:orders, :shipready)
+  end
+
+  patch :readship, :provides => :json do
+    oids = params[:oid].split(',').map(&:to_i)
+    n = (storebox(:counters, :shipready) || []) - oids
+    storebox_set(:counters, :shipready, n)
+    {}.to_json
   end
 
   get :ship, :with => :id do

@@ -64,19 +64,19 @@
               li class='list-menu-wrapper list-menu-wrapper-disabled' = link_to 'deselect_all', '#', :id => 'deselect-all', :class => 'list-menu-link list-menu-link-disabled'
               li class='list-menu-divider divider'
         th class='header' Номер
-        th.header
-        th.header
-          a href=local(seq: params[:seq] ? nil : :city) Город
-        th class='header' Куда едет
-        th.header width='50px'
-        th.header Заказчик
-        th.header
+        th.header: .hidden-md.hidden-lg Доставка
+        th.header.text-center
           a href=local(sort: params[:sort] ? nil : :created_at) Дата
         th.header
           a href=local(seq: params[:seq] ? nil : :timeline) Отправка
+        th.header
+          a href=local(seq: params[:seq] ? nil : :city) Город
+        th class='header' Куда едет
+        th.header Заказчик
         th.header.text-center Менеджер
-        th class='header' Тр.ком
+        / th class='header' Тр.ком
         th class='header only-print' Сумма
+        th.header width='50px'
         th.header.non-print width='80px'
         th class='header non-print'
           = partial 'bricks/orders/section_titles'
@@ -100,6 +100,10 @@
           td.list-column
             = tja :delivery, order.delivery
             | &nbsp;&nbsp;
+          td.list-column.text-center.text-nowrap = to_dm(order.created_at)
+          td.list-column.text-center.text-nowrap class=('date-warning' if @kc_blinks.fetch(order.id, nil))
+            - odate = @kc_timelines[order.id]
+            = to_dm(timeline_unf(odate)) if odate
           // td class='list-column' = order.name
           td.list-column
             - code = @kc_orders[order.id.to_s]
@@ -109,23 +113,19 @@
             - code = @kc_delivery[order.id.to_s] || @kc_client_delivery[order.client_id.to_s]
             - town_name = @kc_towns[code]&.model
             = partial 'bricks/kato/label_print', :locals => { town_name: town_name, el: order }
+          td class='list-column' = order.client&.name
+          td.list-column.text-center
+            = order.client&.manager&.name
+            - unless order.client&.manager_id
+              .fa.fa-briefcase.text-danger
+          / td class='list-column'
+            = partial 'bricks/orders/transport', :locals => { client_id: order.client_id }
+          td class='list-column only-print' = "%0.f" % order.done_total
           td.list-column.minirur.text-nowrap
             == deli(rur ((my_order_total order)/1000.0).floor)
             |&nbsp;&nbsp;
             - if @current_account.is_admin?
             .icash.fa class=(@kc_cash.fetch(order.id, nil) ? 'fa-money' : 'fa-credit-card')
-          td class='list-column' = order.client&.name
-          td.list-column.text-center.text-nowrap = to_dm(order.created_at)
-          td.list-column.text-center.text-nowrap class=('date-warning' if @kc_blinks.fetch(order.id, nil))
-            - odate = @kc_timelines[order.id]
-            = to_dm(timeline_unf(odate)) if odate
-          td.list-column.text-center
-            = order.client&.manager&.name
-            - unless order.client&.manager_id
-              .fa.fa-briefcase.text-danger
-          td class='list-column'
-            = partial 'bricks/orders/transport', :locals => { client_id: order.client_id }
-          td class='list-column only-print' = "%0.f" % order.done_total
           td.list-column.non-print
             span.label class="label-#{os.state}"
               = t :"status.#{os.state}"
@@ -161,7 +161,7 @@
                 = link_to tag_icon(:'exclamation-circle'), :class => 'list-row-action-delete-two list-row-action-wrapper-link'
               - if can_view?(:list, :stickers) || allow_route?(:orders_stickers)
                 = link_to tag_icon(:ticket), :rel => :tooltip, :title => "Stickers", :href => url(:stickers, :order, :id => order.id), :class => 'list-row-action-wrapper-link'
-              - if current_account.is_admin?
+              - if can_view?(:order, :modify)
                 = link_to tag_icon(:save), :href => url(:c1c, :create, :id => order.id), :class => 'list-row-action-wrapper-link'
               / - if current_account.is_admin? || can_view_section?(:sections, :complete, k,r, ars.id)
               / TODO: AC Rights

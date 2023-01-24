@@ -58,6 +58,7 @@ module Fenix::App::ProductsHelper
 
   def known_cities_add city
     return if wonderbox(:known_cities).include? city
+    return unless Kato::Key.new(city).valid?
     ary = wonderbox(:known_cities)
     ary << city
     wonderbox_set(:known_cities, ary) 

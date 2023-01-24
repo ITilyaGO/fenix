@@ -1,7 +1,7 @@
 .main-wrapper-push.flex-v style="flex-direction: column; justify-content: space-between; align-items: center; height: 80vh;"
   .block.timeline.col-md-12.clearfix
     .text-center: h6 Новый заказ
-    = form_for :order, url(:orders, :preempty), :class => 'form-std' do |f|
+    = form_for :order, url(:orders, :preempty), :class => 'form-std clearfix' do |f|
       .col-md-10
         fieldset.control-group
           = f.label "Город", :class => 'col-md-3 control-label'
@@ -12,7 +12,7 @@
 
       .form-actions
         = submit_tag :'выбрать', class: 'btn btn-default btn-wide'
-  .block.flex-wrap.flex-c.cmar-1
+  .block.flex-wrap.flex-c.cmar-1 style='max-height: 70%; overflow-y: scroll;'
     / TODO: figure out how to limit
     - known_cities.reject{|x|x.eql? 'RU'}.each do |k, city|
 
@@ -22,7 +22,6 @@
           = city.model.name
         .cap.small = city.model.region&.data
 
-  .spacer style='flex-basis: 50%;'
 
 - content_for :js_assets do
   = javascript_include_tag :riot

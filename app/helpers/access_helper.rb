@@ -1,7 +1,7 @@
 Fenix::App.helpers do
   LEVEL0_NAMES = %i[order draw list timeline sys].freeze
   LEVEL0_ROLES = %i[
-    admin user editor manager director
+    admin user editor manager director shipper
     stickerman supplier sectioner limsectioner stager].freeze
 
   LEVEL1_ACCESS = {
@@ -16,7 +16,8 @@ Fenix::App.helpers do
       current: 2,
       finished: 4,
       archive: 8,
-      stickers: 16
+      stickers: 16,
+      shipready: 32
     },
     timeline: {
       all: 1,
@@ -78,6 +79,7 @@ Fenix::App.helpers do
     btn: { stock: 3, draw: 1 }
   }.freeze
   AH_ROLE_MNG = { order: 9, list: 31, timeline: 7, sys: 15, sections: (1..6).sum{|d|2**d}, btn: { stock: 7 } }.freeze
+  AH_ROLE_SHP = { order: 9, list: 43, timeline: 7, sys: 15, sections: (1..6).sum{|d|2**d}, btn: { stock: 7 } }.freeze
   AH_ROLE_LSC = { order: 0, list: 0, timeline: 0, sys: 0, btn: { stock: 3 } }.freeze
   AH_ROLE_FSC = { order: 1, list: 0, timeline: 1, sys: 9, btn: { stock: 7, list: 1 } }.freeze
   AH_ROLE_STG = { sections: 0, btn: {} }.freeze
@@ -161,7 +163,7 @@ Fenix::App.helpers do
   def combine_rights(role, sections = nil)
     achash = {
       sectioner: AH_ROLE_FSC, limsectioner: AH_ROLE_LSC, admin: ac_admin_template,
-      stickerman: AH_ROLE_STICKER, manager: AH_ROLE_MNG, stager: AH_ROLE_STG
+      stickerman: AH_ROLE_STICKER, manager: AH_ROLE_MNG, shipper: AH_ROLE_SHP, stager: AH_ROLE_STG
     }
     wonderbox_set(:ac, achash)
     template = wonderbox(:ac, role) || {}

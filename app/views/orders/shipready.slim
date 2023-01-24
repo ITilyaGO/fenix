@@ -1,8 +1,6 @@
-// ul class="nav nav-tabs"
-//   li class="active" = link_to tag_icon(:list, pat(:list)), url(:orders, :index)
-//   li = link_to tag_icon(:plus, pat(:new)), url(:orders, :create)
-// 
-
+.pull-right
+  clicker.btn.btn-xs.btn-prepare action='READ_SHIPREADY' Просмотреть
+  
 div class="tabs-content"
   table class="table table-hover table-condensed" id="list"
     thead
@@ -25,7 +23,6 @@ div class="tabs-content"
         th class='header only-print' Тр.ком
         th class='header' Телефон
         th.header Накладная
-        // th class='header only-print' Сумма
         th class='header only-print' ИНН (паспорт)
         th.header width='50px'
         th.header.non-print
@@ -42,7 +39,7 @@ div class="tabs-content"
       - @orders.each do |order|
         - os = kc_os.detect{|kc|kc.id.to_i == order.id} || KSM::OrderStatus.new(id: order.id)
         - next if (abl_view & os.pstate.keys).empty?
-        tr class='list-row non-print'
+        tr class=['list-row non-print', ('warning' if storebox(:counters, :shipready).include? order.id)]
           td class='list-column list-selectable non-print'
             = check_box_tag 'order_ids[]', :autocomplete => "off", :value => order.id, 'riot-tag': 'print_selectable', :class => 'list-selectable-checkbox'
           td class='list-column' = order.id
@@ -61,19 +58,18 @@ div class="tabs-content"
           // td class='list-column' = to_msk(order.created_at)
           td class='list-column' = order.client.tel
           td.list-column = order.track
-          // td class='list-column only-print' = "%0.f" % order.done_total
           td class='list-column only-print' = order.client.inn
           td.list-column.minirur.text-nowrap == deli(rur (order.total/1000.0).floor)
           td.list-column.non-print
             span.label class="label-#{os.state}"
               = t :"status.#{os.state}"
           td class='list-column text-nowrap non-print'
-            = partial 'orders/squares', :locals => { :order => order }
+            = partial 'orders/squares_boxes', :locals => { :order => order }
           td class='list-column non-print'
-            - if can_view?(:order, :modify) && order.finished?
-              clicker.btn.btn-xs.btn-shipready tie=order.id action="TIEMODAL_OPEN" = t :"status.shipready"
+            - if can_view?(:list, :shipready) && order.shipready?
+              clicker.btn.btn-xs.btn-shipped tie=order.id action="TIEMODAL_OPEN" = t :"action.ship"
             - if order.draft?
-              = link_to "Подтвердить", :href => url(:orders, :anew, :id => order.id), :class => "btn btn-xs btn-anew"
+              = link_to (t 'action.confirm'), :href => url(:orders, :anew, :id => order.id), :class => "btn btn-xs btn-anew"
           td class='list-column list-row-action non-print'
             div class='list-row-action-wrapper'
               = link_to tag_icon(:edit), :href => url(:orders, :edit, :id => order.id), :class => 'list-row-action-wrapper-link'
@@ -114,19 +110,20 @@ div class="tabs-content"
 tiemodal.modal
   .modal-dialog
     .modal-content
-      = form_tag url(:orders, :toship), :method => :put do
+      = form_tag url(:orders, :ship), :method => :put do
         .modal-header.flex-c
-          h4.modal-title = t :'status.shipready'
+          h4.modal-title = t :'action.ship'
           .flexie
         .modal-body
           = hidden_field_tag :oid
           span
-            | Заказ { num } будет подготовлен к отправке
+            | Заказ { num } будет отправлен
         .modal-footer
-          button.btn.btn-shipready.btn-wide type='submit' Подтвердить
+          button.btn.btn-shipped.btn-wide type='submit' Подтвердить
           clicker.btn.btn-default.btn-wide.cancel action='TIEMODAL_CLOSE' = pat(:cancel)
 
 .modal-backdrop.in.hide
+page
 
 - content_for :js_assets do
   = javascript_include_tag :riot
@@ -138,8 +135,9 @@ tiemodal.modal
   rscript type="riot/tag" src="/riot/tags/clicker.tag"
   rscript type="riot/tag" src="/riot/tags/tiemodal.tag"
   rscript type="riot/tag" src="/riot/tags/print_selectable.tag"
+  rscript type="riot/tag" src="/riot/tags/shipready-order/page.tag"
 
   javascript:
     document.addEventListener("DOMContentLoaded", function(event) {
-      riot.mount('idcollapser, subclick, switcher, elhide, rowsummer, clicker, tiemodal, print_selectable')
+      riot.mount('idcollapser, subclick, switcher, elhide, rowsummer, clicker, tiemodal, print_selectable, page')
     })

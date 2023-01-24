@@ -4,6 +4,7 @@ en:
     anew: Новый
     current: В работе
     finished: Собран
+    shipready: К отправке
     shipped: Отправлен
     canceled: Отменен
     none: Неизвестно    
@@ -15,6 +16,9 @@ en:
       s4: Готова к работе
       s5: Готова к работе
       s6: Готова к работе
+  action:
+    ship: Отправить
+    confirm: Подтвердить
   duration:
     day: Точная дата
     halfweek: Полнедели

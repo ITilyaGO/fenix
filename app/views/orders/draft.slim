@@ -38,11 +38,10 @@
         th class='header list-menu non-print'
         th class='header' Номер
         th.header: .hidden-md.hidden-lg Доставка
+        th.header.text-center Дата
         th class='header' Город
-        th.header width='50px'
         th class='header' Заказчик
         th.header.non-print.text-center Стадии
-        th.header.text-center Дата
         th.header Менеджер
         th.header
         th class='header non-print'
@@ -59,40 +58,39 @@
           td class='list-column list-selectable non-print' = check_box_tag 'order_ids[]', :autocomplete => "off", :value => order.id, :class => 'list-selectable-checkbox'
           td class='list-column'
             = link_to order.id, :href => url(:orders, :edit, :id => order.id)
-          // td class='list-column' = order.name
           td.list-column
             = tja :delivery, order.delivery
             | &nbsp;&nbsp;
+          td.list-column.text-nowrap.text-center = to_dm(order.created_at)
           td class='list-column'
             - code = @kc_orders[order.id.to_s]
             - town_name = @kc_towns[code]&.model
             = partial 'bricks/kato/label', :locals => { town_name: town_name, el: order }
           
-          td.list-column.minirur.text-nowrap == deli rur ((my_order_total order)/1000.0).floor
           td class='list-column' = order.client&.name
           td.list-column.non-print.switches.text-nowrap
             draftswitches items=dfsmax locale=dfsru bw=os.draftbw order=order.id allow='change'
-          td.list-column.text-nowrap.text-center = to_dm(order.created_at)
           td.list-column.text-center
             = order.client&.manager&.name
             - unless order.client&.manager_id
               .fa.fa-briefcase.text-danger
-          td.list-column.non-print
+          td.list-column.minirur.text-nowrap == deli rur ((my_order_total order)/1000.0).floor
+          / td.list-column.non-print
             /span.label class="label-#{os.state}" = t :"status.#{os.state}"
           td class='list-column text-nowrap non-print'
             = partial 'orders/squares', :locals => { :order => order, status: os }
           td class='list-column non-print'
             - if order.draft?
               = hidden_field_tag 'tid[]', :value => order.id
-              .btn.btn-xs.btn-anew.list-menu-draft-link Подтвердить
-
+              .btn.btn-xs.btn-anew.list-menu-draft-link = t 'action.confirm'
           td class='list-column list-row-action non-print'
             .list-row-action-wrapper
               .list-row-action-wrapper-link &nbsp;
               - if allow_route?(:orders_create)
                 = link_to tag_icon(:paw), :rel => :tooltip, :title => "Edit order", :href => url(:orders, :correct, :id => order.id), :class => 'list-row-action-wrapper-link'
-              - if order.draft? && current_account.is_admin?
+              - if order.draft? && can_view?(:order, :modify)
                 = link_to tag_icon(:save), :href => url(:c1c, :create, :id => order.id), :class => 'list-row-action-wrapper-link'
+              - if current_account.is_admin?
                 = link_to tag_icon("trash-o"), :rel => :tooltip, :title => "#{pat(:delete)} order", :class => 'list-row-action-delete-one list-row-action-wrapper-link'
             div class='modal'
               div class="modal-dialog"

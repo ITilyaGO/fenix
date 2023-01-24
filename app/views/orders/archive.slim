@@ -11,11 +11,12 @@ div class="tabs-content"
               li class='list-menu-wrapper list-menu-wrapper-disabled' = link_to 'deselect_all', '#', :id => 'deselect-all', :class => 'list-menu-link list-menu-link-disabled'
               li class='list-menu-divider divider'
         th class='header' Номер
+        th class='header' Дата
         // th class='header' = mat(:order, :name)
         // th class='header' = mat(:order, :amount)
         th class='header' Заказчик
         th class='header' Город
-        th class='header' Дата
+        th.header
         th class='header'
           = partial 'bricks/orders/section_titles'
         th class='header list-row-action-header'
@@ -25,17 +26,18 @@ div class="tabs-content"
         tr class='list-row'
           td class='list-column list-selectable' = check_box_tag 'order_ids[]', :value => order.id, :class => 'list-selectable-checkbox'
           td class='list-column' = "#{order.id}"
+          td class='list-column' = to_msk(order.created_at)
           // td class='list-column' = order.name
           td class='list-column' = order.client.name
           td class='list-column'
             - code = @kc_orders[order.id.to_s]
             - town_name = @kc_towns[code]&.model
             = partial 'bricks/kato/label_print', :locals => { town_name: town_name, el: order }
-          td class='list-column' = to_msk(order.created_at)
-          td class='list-column'
-            = partial 'orders/squares', :locals => { :order => order }
+          td.list-column
             span class="label label-#{order.status}"
               = t :"status.#{order.status}"
+          td.list-column
+            = partial 'orders/squares', :locals => { :order => order }
             // - per = to_percent(order.all_parts, order.done_parts)
             // <div class="progress" data-toggle="tooltip" data-placement="top" title="#{per}% сделано">
             //   <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="#{per}" aria-valuemin="0" aria-valuemax="100" style="width: #{per}%">

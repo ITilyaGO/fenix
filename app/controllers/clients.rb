@@ -9,7 +9,7 @@ Fenix::App.controllers :clients do
     @kc_delivery = kc_delivery.flat
     @kc_towns = KatoAPI.batch(@kc_clients.values.uniq + @kc_delivery.values.uniq)
     city = params[:city]
-    kc_filtered = (kc_clients.flatout[city] || []) + (kc_delivery.flatout[city] || [])
+    kc_filtered = (kc_clients.flatout[city] || [])
     all_clients = Client.includes(:place)
     pm = params[:manager]
     pm = nil if pm.to_i.zero?

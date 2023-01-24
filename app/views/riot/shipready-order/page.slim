@@ -1,0 +1,21 @@
+page
+  
+  javascript:
+    rcontrol.on('READ_SHIPREADY', function(data) {
+      let ids = Array.from(document.querySelectorAll('.list-row .list-selectable-checkbox:checked'), e => e.value)
+
+      var data = {
+        authenticity_token: rsquad.token,
+        oid: ids
+      }
+
+      fetch('/orders/readship.json', {
+        method: "PATCH",
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(data).toString()
+      })
+      .then(function(response) { return response.json() })
+      .then(function(data) {
+        self.update()
+      })
+    })
