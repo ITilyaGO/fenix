@@ -1682,6 +1682,88 @@ deepdown, deepdown-ms {
 
 }
 
+.typedown {
+  .relat();
+  display: block;
+  user-select: none;
+
+  .deepdown-float {
+    max-height: 124px;
+    overflow-y: scroll;
+    margin-top: -2px;
+    border: 2px solid rgb(227, 227, 227);
+    border-radius: 0 0 6px 6px;
+    padding: 2px 4px;
+    border-top: 0;
+    .item {
+      margin-bottom: 0px;
+      .btn {
+        text-align: left;
+        padding: 6px 6px;
+      }
+      &:first-child {
+        margin-top: 4px;
+      }
+    }
+  }
+  
+  &.detach .deepdown-float{
+    margin-top: 0;
+    position: absolute;
+    background: white;
+    width: 100%;
+    z-index: 100;
+    display: block;
+    top: 100%;
+    height: auto;
+    max-height: 50vh;
+  }
+
+  .bootstrap-select .dropdown-toggle:focus {
+    outline: none;
+  }
+
+  .del-btn {
+    .hand;
+    position: absolute;
+    right: 0;
+    top: 0;
+    color: rgb(92, 106, 93);
+    opacity: .4;
+    padding: 10px 1em 10px .5em;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+  .tiny-text {
+    font-size: 0.8em;
+    font-weight: 600;
+    color: rgba(111, 125, 111, 0.75);
+  }
+}
+
+.type-control {
+  .hand;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.467;
+  padding: 8px 12px;
+  width: 100%;
+  -webkit-appearance: none;
+  border-radius: 4px;
+  border: 0;
+  background-color: rgba(92, 112, 130, 0.25);
+  color: #5c6a5d;
+  &.fksd {
+    border-radius: 4px 4px 0 0;
+  }
+  
+  &:focus {
+    outline: none;
+  }
+}
+
 order-select {
   .xcross {
     position: absolute;
@@ -2024,5 +2106,59 @@ background: rgba(111, 98, 98, 0.25);
   .controls + .extra {
     position: absolute;
     right: -2em;
+  }
+}
+
+// Reports
+.reports-orders {
+  a {
+    &.filter-url {
+      color: dimgray;
+      &:hover {
+        color: steelblue;
+      }
+    }
+    &.sorted {
+      color: forestgreen;
+    }
+  }
+  .section-button {
+    padding: 0;
+    margin: 3px 0 3px 0;
+    min-width: 4ch;
+  }
+  .sec-sums {
+    justify-content: flex-end;
+    align-items: center;
+  }
+  .header {
+    padding: 2px;
+  }
+  .cell {
+    .date {
+      .year-num {
+        color: gray;
+        font-size: 0.7em;
+      }
+    }
+  }
+  .filter {
+    margin-top: 10px;
+    .btn {
+      padding: 6px;
+    }
+    .page-count {
+      color: gray;
+      font-size: 0.8em;
+      margin: auto auto auto 5px;
+    }
+    .page-select-field {
+      padding-left: 10px;
+      min-width: max-content;
+    }
+  }
+  .col-md-2,.col-md-4 {
+    padding-right: 5px;
+    padding-left: 5px;
   }
 }

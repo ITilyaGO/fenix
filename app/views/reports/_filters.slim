@@ -1,0 +1,89 @@
+= form_for :supermodel, url(:reports, :orders) do |f|
+  - query.each do |k, v|
+    = hidden_field_tag k.to_s, value: v.to_s
+
+  .col-md-2.filter
+    .text-center Менеджер
+    typedown.hide data-name='manager' showchanges=1 enough=1 display-id=params.fetch(:manager, :all)
+      = content_tag(:dv, 'Все', { value: :all, class: 'item' })
+      - @managers_list.each do |man|
+        - html_attributes = { :value => man.id, class: 'item' }
+        = content_tag(:dv, "#{ @oc_managers[man.id] } - #{ man&.name }", html_attributes)
+
+  .col-md-2.filter
+    .text-center Город
+    typedown.hide data-name='town' showchanges=1 enough=1 display-id=params.fetch(:town, :all)
+      = content_tag(:dv, 'Все', { value: :all, class: 'item' })
+      - @towns_list.each do |id, name|
+        - html_attributes = { :value => id, class: 'item' }
+        = content_tag(:dv, "#{ @oc_towns[id] } - #{ name }", html_attributes)
+
+  .col-md-2.filter
+    .text-center Клиент
+    typedown.hide data-name='client' showchanges=1 enough=1 display-id=params.fetch(:client, :all)
+      = content_tag(:dv, 'Все', { value: :all, class: 'item' })
+      - @clients_list.each do |client|
+        - html_attributes = { :value => client.id, class: 'item' }
+        / - html_attributes[:selected] ||= option_is_selected?(client.id, client.id, params[:client])
+        = content_tag(:dv, "#{ @oc_clients[client.id] } - #{ client&.name }", html_attributes)
+
+  .col-md-2.filter
+    .text-center Доставка
+    typedown.hide data-name='delivery' showchanges=1 enough=1 display-id=params.fetch(:delivery, :all)
+      = content_tag(:dv, 'Все', { value: :all, class: 'item' })
+      - @delivery_list.each do |del|
+        - html_attributes = { :value => del, class: 'item' }
+        / - html_attributes[:selected] ||= option_is_selected?(del, del, params[:delivery])
+        = content_tag(:dv, tj(:delivery, del), html_attributes)
+
+  .col-md-2.filter
+    .text-center Стадия заказа
+    typedown.hide data-name='state' showchanges=1 enough=1 display-id=params.fetch(:state, :all)
+      = content_tag(:dv, 'Все', { value: :all, class: 'item' })
+      - @states_list.each do |state|
+        - html_attributes = { :value => state, class: 'item' }
+        / - html_attributes[:selected] ||= option_is_selected?(state, state, params[:client])
+        = content_tag(:dv, (t :"status.#{ state }"), html_attributes)
+
+  .col-md-2.filter
+    .text-center Цех
+    typedown.hide data-name='section' showchanges=1 enough=1 display-id=params.fetch(:section, :all)
+      = content_tag(:dv, 'Все', { value: :all, class: 'item' })
+      - @sections.each do |sec|
+        - html_attributes = { :value => sec.ix, class: 'item' }
+        / - html_attributes[:selected] ||= option_is_selected?(sec.ix, sec.ix, params[:client])
+        = content_tag(:dv, sec.name, html_attributes)
+
+  .col-md-2.filter
+    typedown.flex-c.hide data-name='date_sel' showchanges=1 enough=1 display-id=params.fetch(:date_sel, :created_at)
+      = content_tag(:dv, 'Создан', { value: :created_at, class: 'item' })
+      / = content_tag(:dv, 'Обновлен', { value: :update, class: 'item' })
+      = content_tag(:dv, 'Отправлен', { value: :send, class: 'item' })
+      = content_tag(:dv, 'Собран', { value: :done, class: 'item' })
+
+  .col-md-2.filter
+    = date_field_tag :start_date, :class => 'form-control input-large', :autocomplete => 'off', value: @start_date
+
+  .col-md-2.filter
+    = date_field_tag :end_date, :class => 'form-control input-large', :autocomplete => 'off', value: @end_date
+
+  .col-md-2.filter.flex-c
+    typedown.flex-c.hide data-name='page_size' showchanges=1 enough=1 display-id=params.fetch(:page_size, 50)
+      = content_tag(:dv, '10', { value: 10, class: 'item' })
+      = content_tag(:dv, '20', { value: 20, class: 'item' })
+      = content_tag(:dv, '50', { value: 50, class: 'item' })
+      = content_tag(:dv, '100', { value: 100, class: 'item' })
+      = content_tag(:dv, '200', { value: 200, class: 'item' })
+      = content_tag(:dv, '500', { value: 500, class: 'item' })
+      = content_tag(:dv, '1000', { value: 1000, class: 'item' })
+    .page-select-field.flex-c
+      = number_field_tag :page , :class => 'form-control input-large', :autocomplete => 'off', value: @page, min: 0, max: @page_count
+      .page-count.text-nowrap = " из #{ @page_count }"
+
+  .col-md-2.filter
+    = submit_tag 'Показать', :class => 'btn btn-prime btn-block', :name => :show_button
+
+  .col-md-2.filter
+    = submit_tag 'Сброс', :class => 'btn btn-prime btn-block', :name => :reset_button
+
+  .clearfix

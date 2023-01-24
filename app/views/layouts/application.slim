@@ -137,13 +137,19 @@ html lang='en'
                   | График поездок
                   span class="menu-icon fa fa-car"
 
-          - if allow_route?(:online)
+          - if allow_route?(:online) || allow_route?(:reports)
             li.sidebar-title.separator
               span Разное
+          - if allow_route?(:online)
             li.sidebar-list
               = link_to url(:statistic, :index) do
                 | Статистика
                 span class="menu-icon fa fa-bar-chart"
+          - if allow_route?(:reports)
+            li.sidebar-list
+              = link_to url(:reports, :index) do
+                | Отчёты
+                span class="menu-icon fa fa-table"
             / li.sidebar-list
               = link_to url(:online, :sync_status) do
                 | Sync

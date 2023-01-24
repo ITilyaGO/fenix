@@ -1,0 +1,27 @@
+tdrop
+  .modal-transdrop.hide name='tdr' onclick='{close_drop}'
+
+  javascript:
+    preventer(e) {
+      e.preventDefault()
+    }
+
+    close_drop(a) {
+      if (a.target !== a.currentTarget) return true;
+      self.close()
+      self.root._tag._parent.close()
+    }
+
+    close() {
+      self.tdr.classList.add('hide')
+      document.body.classList.remove('modal-open')
+      self.open_class = ''
+      document.removeEventListener('touchmove', self.preventer)
+    }
+
+    open(data) {
+      document.body.classList.add('modal-open')
+      self.tdr.classList.remove('hide')
+      self.open_class = 'flex in'
+      document.addEventListener('touchmove', self.preventer)
+    }

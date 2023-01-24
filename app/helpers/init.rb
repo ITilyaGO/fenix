@@ -7,6 +7,7 @@ module Fenix
     helpers ProductsHelper
     helpers ClientsHelper
     helpers OrdersHelper
+    helpers ReportsHelper
     helpers TimelineHelper
     helpers StickerHelper
     helpers StatHelper

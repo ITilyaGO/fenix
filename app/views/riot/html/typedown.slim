@@ -1,0 +1,214 @@
+typedown.typedown.detach
+  .bootstrap-sel
+  input.type-control.dropdown-toggle.bt.btn-xs[
+    onclick='{toggle}' onkeydown='{keycontrol}' oninput='{type_search}'
+    class='{ fksd: opened }' placeholder='{display}' name='serch_input'
+  ]
+  input.form-control[
+    type='hidden' value='{selected_id}' id='{opts.dataId}' name='{opts.dataName}'
+  ]
+  .del-btn.fa.fa-times onclick='{del_select}' style='{showChanges && selected_id != idOnLoad ? 'color:blue;' : ''}'
+
+  .deepdown-float class='{hide: !opened}'
+    .text-center.tiny-text.wp100.input-hg show='{common.length == 0}'
+      | Ничего не найдено
+    .item each='{ f in common }'
+      .btn.btn-xs.btn-thru.wp100[
+        class='{btn-steel:hovered.id==f.id, btn-info:selected_id==f.id}'
+        onclick='{ w_select }'
+      ]
+        | { f.name }
+
+  .hidden name='punkts'
+    yield
+
+  tdrop
+
+  javascript:
+    this.title = opts.title
+    self.opened = false
+    self.src = opts.src
+    self.common = []
+    self.hovered = {}
+    self.selected_id = opts.displayId
+    self.idOnLoad = opts.displayId
+    self.showChanges = opts.showchanges == '1'
+    self.autosub = opts.nosub != '1'
+
+    type_search(a) {
+      let string = a.target.value
+      if (string.length > 0)
+        self.common = self.index.search(string)
+      else self.common = self.cache
+      self.update()
+    }
+
+    type_next() {
+      var fel = self.common.find(el => el.id == self.hovered.id)
+      var ina = self.common.indexOf(fel)
+      self.in_select(self.common[ina+1] ?? self.common[0])
+    }
+
+    type_prev() {
+      var fel = self.common.find(el => el.id == self.hovered.id)
+      var ina = self.common.indexOf(fel)
+      self.in_select(self.common[ina-1] ?? self.common[self.common.length-1])
+    }
+
+    keycontrol(a) {
+      if (a.which == 38)
+        self.type_prev()
+      if (a.which == 40)
+        self.type_next()
+      if (a.which == 13) {
+        self.w_select({ item: { f: self.hovered } })
+      }
+      return true
+    }
+
+    del_select() {
+      self.w_select({ item: { f: {} } })
+    }
+
+    w_select(a) {
+      let item = a.item.f
+      self.selected_id = item.id
+      self.display = item.name
+      self.serch_input.value = ""
+      self.common = self.cache
+      // self.in_select(a.item.f)
+      self.close()
+      if (self.autosub) self.root.closest('form').submit()
+    }
+
+    in_select(item) {
+      self.selected_id = item.id
+      self.backel.innerText = item.name
+      if (self.backinp) self.backinp.value = self.selected_id
+      if (self.back_text) {
+        var btext = document.getElementById(self.back_text)
+        if (btext && btext.value.length == 0) btext.value = item.name
+      }
+      self.refocus()
+    }
+
+    in_select(item) {
+      if (item)
+        self.hovered = item
+      self.refocus()
+    }
+
+    reinit() {
+      self.backel = document.getElementById(self.back_id)
+      self.backinp = self.backel.parentNode.querySelector('input')
+      if (self.backinp) self.selected_id = self.backinp.value
+      self.refocus()
+    }
+
+    refocus() {
+      self.update()
+      var al = self.root.querySelector('.item .btn-info')
+      //if (al && al.nextElementSibling) al = al.nextElementSibling
+      if (al && al.scrollIntoViewIfNeeded) al.scrollIntoViewIfNeeded()
+    }
+
+    toggle() {
+      self.opened = !self.opened
+      let opened = self.opened
+      self.refocus()
+      self.transdropper()
+    }
+
+    transdropper(force) {
+      if (!self.tags.tdrop) return true
+      if (self.opened || force) self.tags.tdrop.open()
+      else self.tags.tdrop.close()
+    }
+
+    close() {
+      self.opened = false
+      self.transdropper(false)
+      self.update()
+    }
+
+    open(data) {
+      self.title = data.title
+      self.src = data.src
+      self.back_id = data.scomp
+      self.selected_id = null
+      self.back_text = data.dcomp
+      self.reinit()
+
+      document.body.classList.add('modal-open')
+      document.querySelector('.modal-backdrop').classList.remove('hide')
+      self.open_class = 'flex in'
+      document.addEventListener('touchmove', self.preventer)
+    }
+
+    rcontrol.on("DEEPDOWN_OPEN", function(data) {
+      self.open(data)
+      self.update()
+    })
+
+    rcontrol.on("DEEPDOWN_CLOSE", function(data) {
+      self.close()
+    })
+
+    loadlist() {
+      var data = {
+        authenticity_token: rsquad.token
+      }
+
+      fetch('/' + opts.dataUrl + '.json', {
+        method: "POST",
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(data).toString()
+      })
+      .then(function(response) { return response.json() })
+      .then(function(data) {
+        self.common = self.cache = data.sort((a, b) => a.name.localeCompare(b.name))
+        if (opts.enough != '1') self.common.push({ name: 'Нет'})
+        var fel = self.common.find(el => el.id == self.selected_id)
+        if (!fel) fel = self.common.find(el => el.id == null)
+        self.display = fel.name
+        self.init_products()
+        self.update()
+      })
+    }
+
+    loadhtml() {
+      self.punkts.querySelectorAll('.item').forEach(function(el) {
+        self.common.push({ name: el.innerText, id: el.getAttribute('value'), sel: el.getAttribute('selected') })
+      })
+      self.cache = self.common
+      if (opts.enough != '1') self.common.push({ name: 'Нет'})
+      var fel = self.common.find(el => el.id == self.selected_id)
+        || self.common.find(el => el.sel)
+      if (!fel)
+        self.display = "Элемент не существует"
+      else
+        self.display = fel.name
+      self.init_products()
+      self.update()
+    }
+
+    self.on('mount', function() {
+      if (opts.dataUrl) self.loadlist()
+      else self.loadhtml()
+    })
+
+    init_products() {
+      self.index = new FlexSearch({
+        tokenize: "forward",
+        split: /\s+/,
+        depth: 2,
+        doc: {
+          id: "id",
+          field: [
+            "name",
+            "keyword"
+          ]
+        }
+      })
+      self.index.add(self.common)
+    }
