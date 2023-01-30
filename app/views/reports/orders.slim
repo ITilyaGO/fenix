@@ -4,14 +4,16 @@
 / - @orders.each do |order|
 /   - os = @kc_os_hash[order.id] || KSM::OrderStatus.new(id: order.id)
 /   - reveals << order
-- params_sort = params.clone
+- params_sym = params.map{ |k, v| [k.to_sym, v] }.to_h
+- params_sort = params_sym.clone
 - params_sort[:seq] = nil
-- params_seq = params.clone
+- params_seq = params_sym.clone
 - params_seq[:sort] = nil
-- params_excel = params.clone
+- params_excel = params_sym.clone
 - params_excel[:export] = 1
-- params_pay_type = params.clone
+- params_pay_type = params_sym.clone
 - params_pay_type[:pay_type] = nil
+
 - show_done_column = params[:date_sel] == 'done'
 
 .reports-orders.non-print
