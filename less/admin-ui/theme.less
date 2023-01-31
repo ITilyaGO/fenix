@@ -2110,17 +2110,12 @@ background: rgba(111, 98, 98, 0.25);
 }
 
 // Reports
-.reports-orders {
-  a {
-    &.filter-url {
-      color: dimgray;
-      &:hover {
-        color: steelblue;
-      }
-    }
-    &.sorted {
-      color: forestgreen;
-    }
+.reports {
+  .filters-z {
+    z-index: 60;
+  }
+  .typedown .deepdown-float {
+    overscroll-behavior: contain;
   }
   .section-button {
     padding: 0;
@@ -2133,14 +2128,6 @@ background: rgba(111, 98, 98, 0.25);
   }
   .header {
     padding: 2px;
-  }
-  .cell {
-    .date {
-      .year-num {
-        color: gray;
-        font-size: 0.7em;
-      }
-    }
   }
   .filter {
     margin-top: 10px;
@@ -2157,8 +2144,131 @@ background: rgba(111, 98, 98, 0.25);
       min-width: max-content;
     }
   }
+  .toggleable {
+    padding: 0px 5px;
+    color: gray;
+    &:hover {
+      color: limegreen;
+      &.grouping {
+        color: red;
+      }
+    }
+    &.actived {
+      color: forestgreen;
+      &:hover {
+        color: darkgreen;
+      }
+      &.grouping {
+        color: orangered;
+        &:hover {
+          color: darkred;
+        }
+      }
+    }
+  }
   .col-md-2,.col-md-4 {
+    padding: 0px 5px;
+  }
+  .p-r-5 {
     padding-right: 5px;
-    padding-left: 5px;
+  }
+
+  // Orders page
+  &.orders-page {
+    min-height: 85vh;
+    a {
+      &.filter-url {
+        padding: 0;
+        &.actived {
+          color: dodgerblue;
+        }
+        &:hover {
+          color: steelblue;
+        }
+      }
+    }
+    .cell {
+      .date {
+        .year-num {
+          color: gray;
+          font-size: 0.7em;
+        }
+      }
+    }
+  }
+
+  // Products page
+  &.products-page {
+    .scrolling {
+      width: auto;
+      overflow-x: scroll;
+      padding: 0;
+      height: 85vh;
+    }
+    .sticky-left {
+      position: sticky;
+      left: 0;
+    }
+    .headcol {
+      &.headrow-color {
+        background: rgb(225, 227, 234);
+      }
+      position: sticky;
+      left: 0;
+      top: auto;
+      border-top-width: 1px;
+      margin-top: -1px;
+      min-width: 30ch;
+      background: white;
+      z-index: 1;
+    }
+    .columns-border {
+      .list-column {
+        padding: 0px 4px;
+        border-right: 1px solid @table-border-color;
+      }
+      .list-column:nth-child(1) {
+        border-left: 1px solid @table-border-color;
+      }
+      .list-row {
+        border-bottom: 2px solid @table-border-color;
+      }
+      .list-column.border-right-zero {
+        border-right: 0;
+      }
+    }
+    .table-field {
+      margin-top: 10px;
+    }
+    .cell {
+      &.num {
+        text-align: right;
+        white-space: nowrap;
+        &.sum-all {
+          color: black;
+        }
+      }
+      &.arch-amount {
+        display: flex;
+        justify-content: flex-end
+      }
+      .any-ignored {
+        color: lightcoral;
+      }
+      .date {
+        font-size: 0.8em;
+        color: dimgray;
+        &.prev-date {
+          color: darkgray;
+          .year-num {
+            color: darkgray;
+          }
+        }
+        .year-num {
+          color: gray;
+          font-size: 0.7em;
+        }
+      }
+    }
   }
 }

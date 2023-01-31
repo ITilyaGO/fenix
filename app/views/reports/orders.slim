@@ -1,266 +1,230 @@
-/ - filter = @filtered_by_user.is_a? Array
-/ - abl_view = @sections.map{ |s|can_view_section?(:sections, :list, s.ix) ? s.ix : nil }
-/ - reveals = []
-/ - @orders.each do |order|
-/   - os = @kc_os_hash[order.id] || KSM::OrderStatus.new(id: order.id)
-/   - reveals << order
-- params_sort = params.clone
-- params_sort[:seq] = nil
-- params_seq = params.clone
-- params_seq[:sort] = nil
-- params_excel = params.clone
-- params_excel[:export] = 1
-- params_pay_type = params.clone
-- params_pay_type[:pay_type] = nil
+- params_sym = params.map{ |k, v| [k.to_sym, v] }.to_h
 - show_done_column = params[:date_sel] == 'done'
 
-.reports-orders.non-print
-  = partial 'reports/filters', :locals => { :query => params }
+.reports.orders-page
+  .non-print
+    = partial 'reports/filters', :locals => { :query => params }
 
-  - if @r == url(:reports, :orders) && can_view_any_section?(:sections, :sum)
-    / - @orders = reveals
-    / - price_total = my_total_sum_for @orders
-    - all_ids = @orders.map(&:id)
-    / - sec_sumss = sum_by_sections(all_ids)
-    / - sec_sums = @section_sums
+    - if @r == url(:reports, :orders) && can_view_any_section?(:sections, :sum)
+      - all_ids = @orders.map(&:id)
 
-    .timeline: .summary
-      / - by_deli = my_sum_by_delivery(@orders)
-      - [:postage, :vernissage, :roundtrip, :pickup].each do |ds|
-        - if @deliveries_sum[ds].sum > 0
-          .item-orders.pull-left
-            span = t :"delivery.#{ ds.to_s }"
-            .rpr == deli(rur @deliveries_sum[ds][0])
-            .rpr == deli(rur @deliveries_sum[ds][1])
+      .timeline: .summary
+        - [:postage, :vernissage, :roundtrip, :pickup].each do |ds|
+          - if @deliveries_sum[ds].sum > 0
+            .item-orders.pull-left
+              span = t :"delivery.#{ ds.to_s }"
+              .rpr == deli(rur @deliveries_sum[ds][0])
+              .rpr == deli(rur @deliveries_sum[ds][1])
 
-      .pull-left
-      - @sections.each do |s|
-        - next unless can_view_section?(:sections, :sum, s.ix)
-        - sec_sum = @section_sums.fetch(s.ix, 0)
-        - sec_sum_fact = @section_sums_fact.fetch(s.ix, 0)
-        / - qqq = sec_sumss.fetch(s.ix, 0)
-        - if sec_sum > 0
-          .item-all.pull-left
-            span = s.name
-            .rpr == deli(rur sec_sum)
-            .rpr == deli(rur sec_sum_fact)
-            / .rpr == deli(rur qqq)
-
-      .item-all.pull-right
-        span = "Сумма #{ @orders_count } заказов"
-        .rpr == deli(rur @section_sums.map{ |k, v| v }.sum)
-        .rpr == deli(rur @section_sums_fact.map{ |k, v| v }.sum)
-        / .rpr == deli(rur price_total)
-      - if can_view_stickers?
-        - @stickers = CabiePio.all_keys(all_ids, folder: [:sticker, :order]).flat.trans(:to_i, :to_f)
-        - @kc_stickers = CabiePio.all_keys(all_ids, folder: [:sticker, :order_progress]).flat.trans(:to_i, :to_f)
-        - @kc_sumstickers = @stickers.map{ |k, v| [k, v * @kc_stickers.fetch(k, 0) / 100] }.to_h
-        - stickers_done = @kc_sumstickers.values.sum
-        - stickers_total = @stickers.values.sum
-        .item-sticker.pull-right
-          span Клейка
-          .rpr == deli(rur stickers_total)
-        .item-sticker.pull-right
-          span Сделано #{ ((stickers_done.to_f / stickers_total) * 100).ceil rescue 0 }%
-          .rpr == deli(rur stickers_done)
-
-
-.tabs-content.reports-orders
-  table.table.table-hover.table-condensed id='list'
-    thead
-      tr
-        / td class='list-column list-selectable non-print' = check_box_tag 'toggle-all', :autocomplete => "off", :value => "all", :class => 'toggle-all-checkbox'
-        th.header.list-menu.non-print
-          div.dropdown
-            a.list-menu-toggle.dropdown-toggle.dropdown-toggle href='#' data-toggle='dropdown'
-            ul.list-menu.dropdown-menu role='dropdown'
-              li.list-menu-wrapper = link_to('select_all', '#', :id => 'select-all', :class => 'list-menu-link')
-              li.list-menu-wrapper.list-menu-wrapper-disabled = link_to('deselect_all', '#', :id => 'deselect-all', :class => 'list-menu-link list-menu-link-disabled')
-              li.list-menu-divider.divider
-        th.header Номер
-        th.header
-
-        th.header.text-center
-          - params_sort[:sort] = params[:sort] == 'created_at' ? nil : :created_at
-          a.non-print href=local(params_sort) class=('sorted' if params[:sort] == 'created_at') title='Сортировка по дате создания' Соз.
-          .only-print Соз.
-
-        th.header.text-center
-          - params_seq[:seq] = params[:seq] == 'send' ? nil : :send
-          a.non-print href=local(params_seq) class=('sorted' if params[:seq] == 'send') title='Сортировка по дате отправки' Отп.
-          .only-print Отп.
-        / th.header.text-center
-          - params_sort[:sort] = params[:sort] == 'updated_at' ? nil : :updated_at
-          a href=local(params_sort) Обн.
-
-        - if show_done_column
-          th.header.text-center
-            - params_seq[:seq] = params[:seq] == 'done' ? nil : :done
-            a.non-print href=local(params_seq) class=('sorted' if params[:seq] == 'done') title='Сортировка по дате сборки' Соб.
-            .only-print Соб.
-
-        th.header.text-center
-          - params_seq[:seq] = params[:seq] == 'diff' ? nil : :diff
-          a.non-print href=local(params_seq) class=('sorted' if params[:seq] == 'diff') title='Сортировка по разности фактической и ожидаемой отправки' Разн.
-
-        th.header
-          - params_seq[:seq] = params[:seq] == 'city' ? nil : :city
-          a.non-print href=local(params_seq) class=('sorted' if params[:seq] == 'city') title='Сортировка по городу' Город
-          .only-print Город
-
-        th.header Заказчик
-        th.header.text-center Менеджер
-        / th.header Тр.ком
-        th.header.non-print width='50px'
-
-        th.header.text-center width='10px'
-          .non-print
-            - params_pay_type[:pay_type] = params[:pay_type] == 'f' ? nil : :f
-            a.filter-url.fa.fa-credit-card href=local(params_pay_type) class=('sorted' if params[:pay_type] == 'f') title='Оставить только заказы по карте'
-            |&nbsp;
-            - params_pay_type[:pay_type] = params[:pay_type] == 't' ? nil : :t
-            a.filter-url.fa.fa-money href=local(params_pay_type) class=('sorted' if params[:pay_type] == 't') title='Оставить только заказы за наличные'
-          .only-print.text-center Сумма
-
+        .pull-left
         - @sections.each do |s|
-          th.header.text-center width='42px'
-            = content_tag :span, s.name[0..2]
+          - next unless can_view_section?(:sections, :sum, s.ix)
+          - sec_sum = @section_sums.fetch(s.ix, 0)
+          - sec_sum_fact = @section_sums_fact.fetch(s.ix, 0)
+          - if sec_sum > 0
+            .item-all.pull-left
+              span = s.name
+              .rpr == deli(rur sec_sum)
+              .rpr == deli(rur sec_sum_fact)
 
-        th.header.text-center.text-nowrap
-          .non-print
-            ' Всего:
-            rowsummer target='#list'
-          .only-print Вып.
+        .item-all.pull-right
+          span = "Сумма #{ @orders_count } заказов"
+          .rpr == deli(rur @section_sums.map{ |k, v| v }.sum)
+          .rpr == deli(rur @section_sums_fact.map{ |k, v| v }.sum)
+        - if can_view_stickers?
+          - @stickers = CabiePio.all_keys(all_ids, folder: [:sticker, :order]).flat.trans(:to_i, :to_f)
+          - @kc_stickers = CabiePio.all_keys(all_ids, folder: [:sticker, :order_progress]).flat.trans(:to_i, :to_f)
+          - @kc_sumstickers = @stickers.map{ |k, v| [k, v * @kc_stickers.fetch(k, 0) / 100] }.to_h
+          - stickers_done = @kc_sumstickers.values.sum
+          - stickers_total = @stickers.values.sum
+          .item-sticker.pull-right
+            span Клейка
+            .rpr == deli(rur stickers_total)
+          .item-sticker.pull-right
+            span Сделано #{ ((stickers_done.to_f / stickers_total) * 100).ceil rescue 0 }%
+            .rpr == deli(rur stickers_done)
 
-    tbody
-      - @orders_in_page.each do |order|
-        - os = @kc_os.detect{ |kc|kc.id.to_i == order.id } || KSM::OrderStatus.new(id: order.id)
-        - sections_sums = @sections_order_sum[order.id]
-        - order_sum = sections_sums.map{ |k, v| v[0] }.sum
-        - order_sum_f = sections_sums.map{ |k, v| v[1] }.sum
-        / # - next if (abl_view & os.pstate.keys).empty?
-        / # - next if filter && !@filtered_by_user&.include?(order.id)
-        tr class="list-row non-print #{ order.priority ? 'warning' : '' }"
-          td class='list-column list-selectable non-print' = check_box_tag 'order_ids[]', :autocomplete => 'off', :value => order.id, :class => 'list-selectable-checkbox'
 
-          td.list-column
-            - if !order.draft?
-              .non-print = link_to order.id, :href => url(:orders, :edit, :id => order.id)
-              .only-print = order.id
-            - else
-              = "#{ order.id }"
+  .tabs-content
+    table.table.table-hover.table-condensed id='list'
+      thead
+        tr
+          th.list-column.list-selectable.non-print = check_box_tag 'toggle-all', :autocomplete => 'off', :value => 'all', :class => 'toggle-all-checkbox'
+          th.header Номер
+          th.header
 
-          td.list-column
-            = tja :delivery, order.delivery
-            | &nbsp;&nbsp;
+          th.header.text-center
+            a.toggleable.non-print href=local(params_toggle(params_sym, :sort, :created_at, seq:nil)) class=('actived' if params[:sort] == 'created_at') title='Сортировка по дате создания' Соз.
+            .only-print Соз.
 
-          td.list-column.text-center.text-nowrap
-            .cell: .date
-              span = order.created_at.strftime('%d.%m')
-              span.year-num = order.created_at.strftime('.%y')
+          th.header.text-center
+            a.toggleable.non-print href=local(params_toggle(params_sym, :seq, :send, sort:nil)) class=('actived' if params[:seq] == 'send') title='Сортировка по дате отправки' Отп.
+            .only-print Отп.
 
-          / td.list-column.text-center.text-nowrap
-          /   .cell: .date
-          /     span = order.updated_at.strftime('%d.%m')
-          /     span.year-num = order.updated_at.strftime('.%y')
-
-          - odate = @kc_timelines[order.id]
-          - done_date = @kc_done[order.id]
-          td.list-column.text-center.text-nowrap class=('date-warning' if @kc_blinks.fetch(order.id, nil))
-            - if odate
-              .cell: .date
-                span = odate.strftime('%d.%m')
-                span.year-num = odate.strftime('.%y')
+          / th.header.text-center
+            - params_sort[:sort] = params[:sort] == 'updated_at' ? nil : :updated_at
+            a href=local(params_sort) Обн.
 
           - if show_done_column
-            td.list-column.text-center.text-nowrap
-              - if done_date
-                .cell: .date
-                  span = done_date.strftime('%d.%m')
-                  span.year-num = done_date.strftime('.%y')
+            th.header.text-center
+              a.toggleable.non-print href=local(params_toggle(params_sym, :seq, :done, sort:nil)) class=('actived' if params[:seq] == 'done') title='Сортировка по дате сборки' Соб.
+              .only-print Соб.
 
-          td.list-column
-            - if done_date && odate
-              - diff = done_date.mjd - odate.mjd
-              .diff.text-center style="color:#{ diff > 0 ? 'darkred' : 'darkgreen' };"
-                = (diff > 0 ? '+' : '') + diff.to_s
+          th.header.text-center
+            a.toggleable.non-print href=local(params_toggle(params_sym, :seq, :diff, sort:nil)) class=('actived' if params[:seq] == 'diff') title='Сортировка по разности фактической и ожидаемой отправки' Разн.
 
-          td.list-column
-            - code = @kc_orders[order.id.to_s]
-            - town_name = @kc_towns[code]&.model
-            = partial 'bricks/kato/label_print', :locals => { town_name: town_name, el: order }
+          th.header
+            a.toggleable.non-print href=local(params_toggle(params_sym, :seq, :city, sort:nil)) class=('actived' if params[:seq] == 'city') title='Сортировка по городу' Город
+            .only-print Город
 
-          td.list-column = order.client&.name
+          th.header Заказчик
+          th.header.text-center Менеджер
+          / th.header Тр.ком
+          th.header.non-print width='50px'
 
-          td.list-column.text-center
-            = order.client&.manager&.name
-            - unless order.client&.manager_id
-              .fa.fa-briefcase.text-danger
+          th.header.text-center width='10px'
+            .non-print.text-nowrap
+              a.toggleable.filter-url.fa.fa-credit-card href=local(params_toggle(params_sym, :pay_type, :f)) class=('actived' if params[:pay_type] == 'f') title='Оставить только заказы по карте'
+              |&nbsp;
+              a.toggleable.filter-url.fa.fa-money href=local(params_toggle(params_sym, :pay_type, :t)) class=('actived' if params[:pay_type] == 't') title='Оставить только заказы за наличные'
+            .only-print.text-center Сумма
 
-          / td.list-column.
-            = partial 'bricks/orders/transport', :locals => { client_id: order.client_id }
-          / td.list-column.only-print = "%0.f" % order.done_total
-
-          td.list-column.non-print
-            span.label class="label-#{ os.state }"
-              = t :"status.#{ os.state }"
-
-          td.list-column.minirur.text-nowrap
-            .flex-c.sec-sums.non-print
-              .in-col
-                .in-row == rur (order_sum/1000.0).round
-                .in-row == rur (order_sum_f/1000.0).round
-              |&nbsp;&nbsp;
-              - if @current_account.is_admin?
-              .icash.fa class=(@kc_cash[order.id] == 't' ? 'fa-money' : 'fa-credit-card')
-            .only-print
-              .in-col
-                .in-row = order_sum
-                .in-row = order_sum_f
-
-          - status ||= KSM::OrderStatus.find(order.id)
           - @sections.each do |s|
-            - color = status.state(s.ix)
-            td.list-column.text-nowrap.text-center
-              button.btn.btn-sm.btn-section.non-print.section-button class=[("btn-#{ color }")]
-                - cat_sum = (sections_sums[s.ix][0] || 0)
-                - cat_sum_fact = sections_sums[s.ix][1]
-                - if cat_sum_fact != 0 || cat_sum != 0
-                  .summ = (cat_sum / 1000.to_f).round
-                  .summ = (cat_sum_fact / 1000.to_f).round
-              span.only-print
+            th.header.text-center width='42px'
+              = content_tag :span, s.name[0..2]
+
+          th.header.text-center.text-nowrap
+            .non-print
+              ' Всего:
+              rowsummer target='#list'
+            .only-print Вып.
+
+      tbody
+        - @orders_in_page.each do |order|
+          - os = @kc_os.detect{ |kc| kc.id.to_i == order.id } || KSM::OrderStatus.new(id: order.id)
+          - sections_sums = @sections_order_sum[order.id]
+          - order_sum = sections_sums.map{ |k, v| v[0] }.sum
+          - order_sum_f = sections_sums.map{ |k, v| v[1] }.sum
+          tr.non-print class="list-row #{ order.priority ? 'warning' : '' }"
+            td.list-column.list-selectable.non-print = check_box_tag 'order_ids[]', :autocomplete => 'off', :value => order.id, :class => 'list-selectable-checkbox'
+
+            td.list-column
+              - if !order.draft?
+                .non-print = link_to order.id, :href => url(:orders, :edit, :id => order.id)
+                .only-print = order.id
+              - else
+                = "#{ order.id }"
+
+            td.list-column
+              = tja :delivery, order.delivery
+              | &nbsp;&nbsp;
+
+            td.list-column.text-center.text-nowrap
+              .cell: .date
+                span = order.created_at.strftime('%d.%m')
+                span.year-num = order.created_at.strftime('.%y')
+
+            / td.list-column.text-center.text-nowrap
+            /   .cell: .date
+            /     span = order.updated_at.strftime('%d.%m')
+            /     span.year-num = order.updated_at.strftime('.%y')
+
+            - odate = @kc_timelines[order.id]
+            - done_date = @kc_done[order.id]
+            td.list-column.text-center.text-nowrap class=('date-warning' if @kc_blinks.fetch(order.id, nil))
+              - if odate
+                .cell: .date
+                  span = odate.strftime('%d.%m')
+                  span.year-num = odate.strftime('.%y')
+
+            - if show_done_column
+              td.list-column.text-center.text-nowrap
+                - if done_date
+                  .cell: .date
+                    span = done_date.strftime('%d.%m')
+                    span.year-num = done_date.strftime('.%y')
+
+            td.list-column
+              - if done_date && odate
+                - diff = done_date.mjd - odate.mjd
+                .diff.text-center style="color:#{ diff > 0 ? 'darkred' : 'darkgreen' };"
+                  = (diff > 0 ? '+' : '') + diff.to_s
+
+            td.list-column
+              - code = @kc_orders[order.id.to_s]
+              - town_name = @kc_towns[code]&.model
+              = partial 'bricks/kato/label_print', :locals => { town_name: town_name, el: order }
+
+            td.list-column = order.client&.name
+
+            td.list-column.text-center
+              = order.client&.manager&.name
+              - unless order.client&.manager_id
+                .fa.fa-briefcase.text-danger
+
+            / td.list-column.
+              = partial 'bricks/orders/transport', :locals => { client_id: order.client_id }
+            / td.list-column.only-print = "%0.f" % order.done_total
+
+            td.list-column.non-print
+              span.label class="label-#{ os.state }"
+                = t :"status.#{ os.state }"
+
+            td.list-column.minirur.text-nowrap
+              .flex-c.sec-sums.non-print
                 .in-col
-                  .in-row = cat_sum
-                  .in-row = cat_sum_fact
+                  .in-row == rur (order_sum / 1000.0).round
+                  .in-row == rur (order_sum_f / 1000.0).round
+                |&nbsp;&nbsp;
+                - if @current_account.is_admin?
+                .icash.fa class=(@kc_cash[order.id] == 't' ? 'fa-money' : 'fa-credit-card')
+              .only-print
+                .in-col
+                  .in-row = order_sum
+                  .in-row = order_sum_f
 
-          td.list-column
+            - status ||= KSM::OrderStatus.find(order.id)
+            - @sections.each do |s|
+              - color = status.state(s.ix)
+              td.list-column.text-nowrap.text-center
+                button.btn.btn-sm.btn-section.non-print.section-button class=[("btn-#{ color }")]
+                  - cat_sum = (sections_sums[s.ix][0] || 0)
+                  - cat_sum_fact = sections_sums[s.ix][1]
+                  - if cat_sum_fact != 0 || cat_sum != 0
+                    .summ = (cat_sum / 1000.to_f).round
+                    .summ = (cat_sum_fact / 1000.to_f).round
+                span.only-print
+                  .in-col
+                    .in-row = cat_sum
+                    .in-row = cat_sum_fact
 
-            = "#{ (order_sum_f / order_sum.to_f * 100).round }%" if order_sum > 0
+            td.list-column
 
-  .non-print
-    a href=url(:reports, :orders, params_excel)
-      span.label.label-info
-        span.fa.fa-file.menu-icon style='padding-right:10px;'
-        ' CSV
-    - params_excel[:win] = 1
-    a href=url(:reports, :orders, params_excel)
-      span.label.label-success
-        span.fa.fa-file.menu-icon style='padding-right:10px;'
-        ' Excel
+              = "#{ (order_sum_f / order_sum.to_f * 100).round }%" if order_sum > 0
+
+    .non-print
+      a.p-r-5 href=url(:reports, :orders, params.merge(export: 1))
+        span.label.label-info
+          span.fa.fa-file.p-r-5
+          ' CSV
+      a.p-r-5 href=url(:reports, :orders, params.merge(export: 1, win: 1))
+        span.label.label-success
+          span.fa.fa-file.p-r-5
+          ' Excel
+      a href=url(:reports, :products, params)
+        span.label.label-border
+          span.fa.fa-share.menu-icon.p-r-5
+          ' Перейти в отчёт по позициям
 
 
   = javascript_include_tag :riot, :flexsearch_min
-  rscript type="riot/tag" src="/riot/tags/idcollapser.tag"
-  rscript type="riot/tag" src="/riot/tags/subclick.tag"
-  rscript type="riot/tag" src="/riot/tags/switcher.tag"
-  rscript type="riot/tag" src="/riot/tags/elhide.tag"
   rscript type="riot/tag" src="/riot/tags/rowsummer.tag"
   rscript type="riot/tag" src="/riot/tags/html/typedown.tag"
   rscript type="riot/tag" src="/riot/tags/html/tdrop.tag"
 
   javascript:
     document.addEventListener("DOMContentLoaded", function(event) {
-      riot.mount('idcollapser, subclick, switcher, elhide, rowsummer, typedown, tdrop')
+      riot.mount('rowsummer, typedown, tdrop')
     })
 
 - content_for :js_assets do
@@ -268,13 +232,15 @@
     (function($) {
       $(function() {
 
-        $(".list-selectable-checkbox").on("change", function() {
-          $(this).parents(".list-row").toggleClass('non-print');
+        $(".toggle-all-checkbox").on("change", function() {
+          var list_checkbox = $(".list-selectable-checkbox");
+          var checked = $(this).is(':checked');
+          list_checkbox.prop('checked', checked);
+          list_checkbox.parents(".list-row").toggleClass('non-print', !checked);
         });
 
-        $('.list-row-action-delete-two').on('click', function(ev) {
-          ev.preventDefault();
-          $(this).parent().next().next().modal();
+        $(".list-selectable-checkbox").on("change", function() {
+          $(this).parents(".list-row").toggleClass('non-print');
         });
 
       });

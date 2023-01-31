@@ -2,7 +2,7 @@ typedown.typedown.detach
   .bootstrap-sel
   input.type-control.dropdown-toggle.bt.btn-xs[
     onclick='{toggle}' onkeydown='{keycontrol}' oninput='{type_search}'
-    class='{ fksd: opened }' placeholder='{display}' name='serch_input'
+    class='{ fksd: opened }' placeholder='{display}' name='search_input'
   ]
   input.form-control[
     type='hidden' value='{selected_id}' id='{opts.dataId}' name='{opts.dataName}'
@@ -74,7 +74,7 @@ typedown.typedown.detach
       let item = a.item.f
       self.selected_id = item.id
       self.display = item.name
-      self.serch_input.value = ""
+      self.search_input.value = ""
       self.common = self.cache
       // self.in_select(a.item.f)
       self.close()
