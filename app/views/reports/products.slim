@@ -43,7 +43,7 @@
             a.toggleable.non-print.fa.fa-legal href=local(params_toggle(params_sym, :seq, :done_amount)) class=('actived' if params[:seq] == 'done_amount')
             .only-print.fa.fa-legal
 
-          - if params[:col] == 'orders'
+          - if @load_orders && params[:col] == 'orders'
             - prev_d = Time.now
             - @orders.each do |ord|
               - ca = ord.created_at
@@ -81,7 +81,7 @@
               td.list-column.cell.num = deli hide_zero_value dtpi.map{ |p_id, dts| dts.sum(&:multi_stick) }.sum
               td.list-column.cell.num = deli hide_zero_value dtpi.map{ |p_id, dts| dts.sum(&:multi_done) }.sum
 
-              - if params[:col] == 'orders'
+              - if @load_orders && params[:col] == 'orders'
                 - @orders.each do |ord|
                   - o_id = ord.id
                   - ord_dts = []
@@ -105,7 +105,7 @@
               td.list-column.cell.num = deli hide_zero_value dts.sum(&:stick_amount)
               td.list-column.cell.num = deli hide_zero_value dts.sum(&:done_amount)
 
-              - if params[:col] == 'orders'
+              - if @load_orders && params[:col] == 'orders'
                 - @orders.each do |ord|
                   - o_id = ord.id
                   - ord_dts = dts.select{ |dt| dt.ord_id == o_id }
@@ -118,23 +118,26 @@
                         .fa.fa-times.any-ignored title=title_ignored
                       - else
                         .done_amount title=title_ignored class=('any-ignored' if ord_dts_ignored.size > 0) = hide_zero_value ord_dts.sum(&:done_amount), "\u00a0"
+        - if @load_orders
+          tr.list-row
+            td.list-column.headcol.cell.num.sum-all Общая сумма:
+            td.list-column.cell.num.sum-all == deli rur @data_table_p_id.map{ |p_id, dts| dts.sum(&:ap_sum) }.sum
+            - if !params[:gp]
+              td.list-column.cell.num
+            td.list-column.cell.num
+            - stick_sum = @data_table_p_id.map{ |p_id, dts| dts.sum(&:stick_sum) }.sum
+            - done_sum = @data_table_p_id.map{ |p_id, dts| dts.sum(&:done_sum) }.sum
+            td.list-column.cell.num.sum-all == deli rur hide_zero_value stick_sum if stick_sum > 0
+            td.list-column.cell.num.sum-all == deli rur hide_zero_value done_sum if done_sum > 0
+            - (((@load_orders && params[:col] == 'orders') ? @orders.size : 0)).times
+              td.list-column.border-right-zero
 
-        tr.list-row
-          td.td.list-column.headcol.cell.num.sum-all Общая сумма:
-          td.td.list-column.cell.num.sum-all == deli rur @data_table_p_id.map{ |p_id, dts| dts.sum(&:ap_sum) }.sum
-          - if !params[:gp]
-            td.td.list-column.cell.num
-          td.td.list-column.cell.num
-          - stick_sum = @data_table_p_id.map{ |p_id, dts| dts.sum(&:stick_sum) }.sum
-          - done_sum = @data_table_p_id.map{ |p_id, dts| dts.sum(&:done_sum) }.sum
-          td.td.list-column.cell.num.sum-all == deli rur hide_zero_value stick_sum if stick_sum > 0
-          td.td.list-column.cell.num.sum-all == deli rur hide_zero_value done_sum if done_sum > 0
-          - ((params[:col] == 'orders' ? @orders.size : 0)).times
-            td.list-column.border-right-zero
-
-        tr.list-row
-          - (5 + (params[:gp] ? 0 : 1)).times
-            td.list-column
+          tr.list-row
+            - (5 + (params[:gp] ? 0 : 1)).times
+              td.list-column
+        - else
+          tr.list-row
+            td = "Найдено #{@orders.size} нажмите показать, чтобы посмотреть"
 
   .non-print.sticky-left
     a.p-r-5 href=url(*@ra, params.merge(export: 1))

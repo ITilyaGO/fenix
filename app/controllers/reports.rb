@@ -32,6 +32,9 @@ Fenix::App.controllers :reports do
     @page = (params[:page] || 1).to_i
     @page = 1 if @page < 1
 
+    @load_orders = params[:load_orders] == '1' || params[:export] == '1'
+    # params[:load_orders] = nil
+
     @path = []
     @path += params[:path]&.to_s&.split('_') || [] if params[:path] != :all
 
@@ -101,23 +104,33 @@ Fenix::App.controllers :reports do
       break if pll.size != 1
       @path << [pll.last.id, get_category_childs(pll.last.id)]
     end if @path.size > 0
-
-    data_table = []
     cat_show_list = get_category_all_childs(@path.last[0]) if @path.size > 0
 
-    @orders.each do |ord|
-      ord.order_lines.each do |ol|
-        ol_p = ol.product
-        p_cat_id = ol_p.category_id
-        p_dn = ol_p.displayname
-        name_words = p_dn.downcase.split(/[\s,.'"()-]/).compact
-        if (cat_show_list.nil? || cat_show_list.include?(p_cat_id)) && search_list.all?{ |w| name_words.include?(w) }
-          data_table << OrderLineData.new(ord, ol, p_dn, p_cat_id)
+    no_search = search_list.size == 0
+    data_table = []
+    if @load_orders
+      @orders.each do |ord|
+        ord.order_lines.each do |ol|
+          ol_p = ol.product
+          p_cat_id = ol_p.category_id
+          p_dn = ol_p.displayname
+          name_words = no_search ? [] : p_dn.downcase.split(/[\s,.'"()-]/).compact
+          if (cat_show_list.nil? || cat_show_list.include?(p_cat_id)) && (no_search || search_list.all?{ |w| name_words.include?(w) })
+            data_table << OrderLineData.new(ord, ol, p_dn, p_cat_id)
+          end
+        end
+      end
+
+      @orders = data_table.map(&:ord).uniq.sort_by(&:id)
+    elsif @path.size > 1 || !no_search
+      @orders.select! do |ord|
+        ord.order_lines.any? do |ol|
+          ol_p = ol.product
+          name_words = no_search ? [] : ol_p.displayname.downcase.split(/[\s,.'"()-]/).compact
+          (cat_show_list.nil? || cat_show_list.include?(ol_p.category_id)) && (no_search || search_list.all?{ |w| name_words.include?(w) })
         end
       end
     end
-
-    @orders = data_table.map(&:ord).uniq.sort_by(&:id)
 
     @kc_orders = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :towns]).flat if have_orders
     @kc_towns = KatoAPI.batch(@kc_orders.values.uniq) if have_orders
@@ -224,6 +237,7 @@ Fenix::App.controllers :reports do
       params_hash[:s_date] = params[:start_date]
       params_hash[:e_date] = params[:end_date]
     end
+    params_hash[:load_orders] = 1 if params[:load_orders_button]
 
     params_hash[:seq] = nil if params[:seq] == 'done' && params[:date_sel] != 'done'
     params_hash[:path] = path.join('_')
@@ -235,6 +249,8 @@ Fenix::App.controllers :reports do
 
   get :orders do
     @title = 'Все заказы'
+    @r = url(:reports, :orders)
+    @ra = [:reports, :orders]
 
     params.each{ |k, v| params[k] = v&.empty? ? :all : v == 'all' ? :all : v }
 
@@ -260,9 +276,11 @@ Fenix::App.controllers :reports do
     @page = (params[:page] || 1).to_i
     @page = 1 if @page < 1
 
+    @load_orders = params[:load_orders] == '1' || params[:export] == '1'
+    params[:load_orders] = nil
+
     orders_query = Order.where('status > ?', Order.statuses[:draft])
     orders_query = orders_query.where("#{ date_sel } < ?", @end_date + 1.day).where("#{ date_sel } > ?", @start_date) if date_sel == :created_at
-
     @orders = orders_query.includes(:client).order(sort => dir).to_a
 
     if date_sel == :send
@@ -287,10 +305,11 @@ Fenix::App.controllers :reports do
     @orders.select!{ |o| @kc_towns[@kc_orders[o.id.to_s]]&.key&.public == town } if town != :all
 
     @clients_list = @orders.map{ |o| o.client }.compact.uniq
-    @managers_list = @clients_list.map{ |c| c&.manager }.compact.uniq
+    managers_ids = @clients_list.map{ |c| c.manager_id }.compact.uniq
+    @managers_list = Account.managers.select{ |m| managers_ids.include?(m.id) }
 
     @orders.select!{ |o| o.client_id == client } if client != :all
-    @orders.select!{ |o| o.client&.manager&.id == manager } if manager != :all
+    @orders.select!{ |o| o.client.manager_id == manager } if manager != :all
     @orders.select!{ |o| o.delivery == delivery } if delivery != :all
 
     @kc_os = KSM::OrderStatus.find_all(@orders.map(&:id))
@@ -311,8 +330,10 @@ Fenix::App.controllers :reports do
     @kc_towns = KatoAPI.batch(@kc_orders.values.uniq) if client != :all || manager != :all if have_orders
     @towns_list = @kc_towns.map{ |k, v| [k, v&.model.name] }
     @clients_list = @orders.map{ |o| o.client }.uniq.compact if manager != :all || town != :all if have_orders
-    @managers_list = @clients_list.map{ |c| c&.manager }.uniq.compact if town != :all || client != :all if have_orders
-
+    if have_orders && (town != :all || client != :all)
+      managers_ids = @clients_list.map{ |c| c.manager_id }.compact.uniq
+      @managers_list = Account.managers.select{ |m| managers_ids.include?(m.id) }
+    end
     @oc_clients = Hash.new(0)
     @oc_managers = Hash.new(0)
     @oc_towns = Hash.new(0)
@@ -321,45 +342,48 @@ Fenix::App.controllers :reports do
       oc = o.client
       @oc_towns[@kc_towns[@kc_orders[o.id.to_s]]&.key&.public] += 1
       @oc_clients[oc.id] += 1
-      @oc_managers[oc&.manager&.id] += 1
+      @oc_managers[oc.manager_id] += 1
     end
+
     @towns_list.sort_by!{ |i, n| [-@oc_towns[i], n] }
     @clients_list.sort_by!{ |c| [-@oc_clients[c.id], c.name] }
     @managers_list.sort_by!{ |m| [-@oc_managers[m.id], m.name] }
 
     @orders_count = @orders.size
 
-    @sections_order_sum = {}
-    @deliveries_sum = {}
-    @delivery_list.each{ |d| @deliveries_sum[d.to_sym] = [0, 0] }
+    if @load_orders
+      @sections_order_sum = {}
+      @deliveries_sum = {}
+      @delivery_list.each{ |d| @deliveries_sum[d.to_sym] = [0, 0] }
 
-    @orders.each do |o|
-      @sections_order_sum[o.id] = {}
-      @sections.each do |s|
-        ol_sum = []
-        ol_sum_fact = []
-        @sections_order_sum[o.id][s.ix]
-        o.order_lines.each do |ol|
-          pcat = category_matrix[products_hash[ol.product_id]]
-          csec = all_catagories.detect{ |c| c.id == pcat }&.section_id
-          if csec == s.id
-            ol_sum << ol.price * (ol.amount || 0)
-            ol_sum_fact << ol.price * (ol.done_amount || 0) unless ol.ignored
+      @orders.each do |o|
+        @sections_order_sum[o.id] = {}
+        @sections.each do |s|
+          ol_sum = []
+          ol_sum_fact = []
+          @sections_order_sum[o.id][s.ix]
+          o.order_lines.each do |ol|
+            pcat = category_matrix[products_hash[ol.product_id]]
+            csec = all_catagories.detect{ |c| c.id == pcat }&.section_id
+            if csec == s.id
+              ol_sum << ol.price * (ol.amount || 0)
+              ol_sum_fact << ol.price * (ol.done_amount || 0) unless ol.ignored
+            end
           end
+          sums = [ol_sum, ol_sum_fact].map(&:sum)
+          @sections_order_sum[o.id][s.ix] = sums
+          @deliveries_sum[o.delivery.to_sym][0] += sums[0]
+          @deliveries_sum[o.delivery.to_sym][1] += sums[1]
         end
-        sums = [ol_sum, ol_sum_fact].map(&:sum)
-        @sections_order_sum[o.id][s.ix] = sums
-        @deliveries_sum[o.delivery.to_sym][0] += sums[0]
-        @deliveries_sum[o.delivery.to_sym][1] += sums[1]
       end
-    end
 
-    @section_sums = Hash.new(0)
-    @section_sums_fact = Hash.new(0)
-    @sections_order_sum.each do |id, ord|
-      ord.each do |ix, v|
-        @section_sums[ix] += v[0]
-        @section_sums_fact[ix] += v[1]
+      @section_sums = Hash.new(0)
+      @section_sums_fact = Hash.new(0)
+      @sections_order_sum.each do |id, ord|
+        ord.each do |ix, v|
+          @section_sums[ix] += v[0]
+          @section_sums_fact[ix] += v[1]
+        end
       end
     end
 
@@ -384,10 +408,6 @@ Fenix::App.controllers :reports do
 
     @kc_blinks = CabiePio.all_keys(@orders_in_page.map(&:id), folder: [:orders, :timeline_blink]).flat.trans(:to_i)
 
-    @r = url(:reports, :orders)
-    @ra = [:reports, :orders]
-    @rah = { deli: params[:deli] } if params[:deli]
-
     if params[:export]
       fname = "Заказы #{ @start_date.strftime('%d.%m.%Y') }-#{ @end_date.strftime('%d.%m.%Y') }.csv"
       headers['Content-Disposition'] = "attachment; filename=#{ fname }"
@@ -405,6 +425,7 @@ Fenix::App.controllers :reports do
 
   post :orders do
     redirect url(:reports, :orders) unless params[:reset_button].nil?
+
     usable = [:town, :client, :manager, :section, :delivery, :state, :date_sel, :page_size, :page, :sort, :seq, :pay_type]
     params_hash = Hash.new
     params.each{ |k, v| params[k] = v&.empty? ? :all : v == 'all' ? :all : v }
@@ -416,6 +437,7 @@ Fenix::App.controllers :reports do
       params_hash[:s_date] = params[:start_date]
       params_hash[:e_date] = params[:end_date]
     end
+    params_hash[:load_orders] = 1 if params[:load_orders_button]
 
     params_hash[:seq] = nil if params[:seq] == 'done' && params[:date_sel] != 'done'
 
