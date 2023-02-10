@@ -2,19 +2,28 @@
   .deepdown-wrap.text-center.mbs.cmar-05
     = link_to 'Последние', url(:things, :table), :class => 'btn btn-sm btn-default'
     select.huge name="categories" riot-tag='selectreload' rname='place' loc=url(:things, :table)
+      = content_tag(:option, 'Не выбрано', { :value => :none, selected: @place.nil? })
       - known_cities.each do |k, city|
         = content_tag(:option, city.model, { value: city.code, selected: @place == city.code })
       
     select name="categories" class="huge small mh350" riot-tag='selectreload' rname='cat' loc=url(:things, :table)
-      = content_tag(:option, 'Выберите категорию')
-      = content_tag(:option, 'Без категории', { :value => :nothing })
+      = content_tag(:option, 'Не выбрано', { :value => :none })
+      = content_tag(:option, 'Без категории', { :value => :nothing, selected: @ccat == 'nothing' })
       - @cats.each do |cat|
         optgroup label="#{cat.name}"
           - cat.subs_ordered.each do |sub|
             - html_attributes = { :value => sub.id }
             - html_attributes[:selected] ||= option_is_selected?(sub.id, sub.name, @product&.category_id)
             = content_tag(:option, sub.name, html_attributes)
-    a.fa.fa-upload.btn.btn-sm.btn-default href=url(:things, :transfer, cat: @product&.category_id)
+    .btn-group
+      search loc=url(:things, :table) value=@search
+    / = text_field_tag :search, value: params[:search], placeholder: 'Поиск по имени продукта включающего слова...' , class: 'form-control input-xs height-auto', autocomplete: 'off'
+    a.fa.fa-upload.btn.btn-sm.btn-default href=url(:things, :transfer, params)
+  .page-select
+    - if @pages
+      - (1..@pages).each do |i|
+        a.btn.btn-xs class=(@page == i ? 'btn-success' : 'btn-default') href=url(:things, :table, params.merge(page: i)) = i
+
 
   table class="table table-hover table-condensed" id="list"
     thead
@@ -79,12 +88,13 @@
 
 - content_for :js_assets do
   = javascript_include_tag :appa, :riot
-  rscript type="riot/tag" src="/riot/tags/things/selectreload.tag"  
+  rscript type="riot/tag" src="/riot/tags/things/selectreload.tag"
+  rscript type="riot/tag" src="/riot/tags/things/search.tag"
 
   javascript:
     
     document.addEventListener("DOMContentLoaded", function(event) {
-      riot.mount('selectreload')
+      riot.mount('selectreload, search')
       let confobj = #{{@squadconf.to_json}}
       rsquad.saveConfig(confobj)
 

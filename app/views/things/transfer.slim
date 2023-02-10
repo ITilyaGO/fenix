@@ -1,15 +1,20 @@
 .col-md-6
   .h4.text-center Выгрузка продуктов
   .text-center
-    a.btn.btn-xs.btn-default.btn-embossed href=url(:things, :export, :id => :sample) Сэмпл
+    a.btn.btn-xs.btn-default.btn-embossed href=url(:things, :export, params) Сэмпл
     |&nbsp;
-    a.btn.btn-xs.btn-default.btn-embossed href=url(:things, :export, :id => :sample, win: 1) Сэмпл для Excel
-    - unless pcat = params[:cat]
-    - else
+    a.btn.btn-xs.btn-default.btn-embossed href=url(:things, :export, params.merge(win: 1)) Сэмпл для Excel
+    - if params[:cat]
+      br
+      a.btn.btn-xs.btn-default.btn-embossed href=url(:things, :export, params) Категория
       |&nbsp;
-      a.btn.btn-xs.btn-default.btn-embossed href=url(:things, :export, :id => pcat) Категория
+      a.btn.btn-xs.btn-default.btn-embossed href=url(:things, :export, params.merge(win: 1)) Категория для Excel
+    - if (%w(cat search place) & params.keys).any?
+      br
+      a.btn.btn-xs.btn-default.btn-embossed href=url(:things, :export, params.merge(filtered: 1)) По фильтрам
       |&nbsp;
-      a.btn.btn-xs.btn-default.btn-embossed href=url(:things, :export, :id => pcat, win: 1) Категория для Excel
+      a.btn.btn-xs.btn-default.btn-embossed href=url(:things, :export, params.merge(filtered: 1, win: 1)) По фильтрам для Excel
+    
 
 .col-md-6
   .h4.text-center Загрузка продуктов

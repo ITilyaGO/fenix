@@ -12,24 +12,50 @@ Fenix::App.controllers :things do
 
   get :table do
     @title = "Products"
-    pagesize = PAGESIZE
-    @page = !params[:page].nil? ? params[:page].to_i : 1
+    pagesize = 50
     ids = wonderbox(:things_by_date).reverse
-    @products = Product.find_all(ids).sort_by{|a| ids.index(a.id)}
-    if ccat = params[:cat]
-      ccat = nil if ccat.to_sym.eql? :nothing
-      @products = Product.all.select{ |a| a.category_id == ccat }.sort_by(&:cindex)
-      @product = Product.new({ category_id: ccat })
-      @ccat = ccat
-    end
-    if townfilter = params[:place]
+    @products = Product.find_all(ids).sort_by{ |a| ids.index(a.id) }
+    ccat = params[:cat]
+    townfilter = params[:place]
+    ccat = nil if ccat == 'none'
+    townfilter = nil if townfilter == 'none'
+    @place = townfilter
+    @ccat = ccat
+
+    if townfilter
+      @products = Product.all if townfilter || ccat.nil?
       @products = @products.select{ |a| a.place_id == townfilter }
-      @place = townfilter
+    end
+
+    if ccat
+      ccat = nil if ccat.to_sym.eql? :nothing
+      @products = Product.all if townfilter.nil?
+      @products = @products.select{ |a| a.category_id == ccat }.sort_by(&:cindex)
+      @product = Product.new({ category_id: ccat })
+    end
+
+    if @search = params[:search]
+      @products = Product.all if ccat.nil? && townfilter.nil?
+      search_list = (@search || '').downcase.split(/[\s,.'"()-]/).compact
+      @products.select!{ |p| search_list.all?{ |w| p.displayname.downcase.include?(w) } }
+    end
+
+    @sections = KSM::Section.all.sort_by(&:ix)
+    @category_list = SL::Category.all
+    @products.sort_by! do |p|
+      [(@sections.detect{ |s| @category_list.detect{ |c| c.id == p.category_id }&.section_id }&.ix || 0),
+        p.category_id || '0000',
+        p.displayname.downcase.delete('☠️ ')
+      ]
     end
     codes = @products.map(&:place_id).uniq
     @kc_towns = KatoAPI.batch(codes)
     # Product.all.includes(:category).order(:updated_at => :desc).offset((@page-1)*pagesize).take(pagesize)
-    @pages = 1
+    @pages = (@products.size / pagesize.to_f).ceil
+    @page = !params[:page].nil? ? params[:page].to_i : 1
+    @page = 1 if @page > @pages
+    start_pos = ((@page - 1) * pagesize)
+    @products = @products[start_pos..(start_pos + (pagesize - 1))] || []
 
     @cats = KSM::Category.toplevel.sort_by(&:wfindex)
 
@@ -43,7 +69,7 @@ Fenix::App.controllers :things do
     @xproduct = {}
     @cats = Category.where(category: nil).order(:index => :asc)
     @categories = Category.all.includes(:category)
-    
+
     render 'products/listform'
   end
 
@@ -133,7 +159,7 @@ Fenix::App.controllers :things do
         dim_height: line[:height],
         dim_width: line[:width],
         dim_length: line[:length]
-        
+
         # bbid: line[:bb],
         # barcode: line[:barcode]
 
@@ -150,13 +176,44 @@ Fenix::App.controllers :things do
     render 'things/transfer'
   end
 
-  get :export, :with => :id, :provides => :csv do
-    is_sample = params[:id] == 'sample'
+  get :export, :provides => :csv do
+    is_sample = params[:cat] == 'sample'
     ids = wonderbox(:things_by_date).reverse
-    @products = Product.find_all(ids).sort_by{|a| ids.index(a.id)}
-    if !is_sample && ccat = params[:id]
-      @products = Product.all.select{ |a| a.category_id == ccat }
+    if is_sample
+      @products = Product.find_all(ids).sort_by{ |a| ids.index(a.id) }
+    elsif params[:filtered]
+      ccat = params[:cat]
+      townfilter = params[:place]
+      ccat = nil if ccat == 'none'
+      townfilter = nil if townfilter == 'none'
+
+      @products = Product.all
+      @products = @products.select{ |a| a.place_id == townfilter } if townfilter
+
+      if ccat
+        ccat = nil if ccat.to_sym.eql? :nothing
+        @products = @products.select{ |a| a.category_id == ccat }.sort_by(&:cindex)
+      end
+
+      if @search = params[:search]
+        search_list = (@search || '').downcase.split(/[\s,.'"()-]/).compact
+        @products.select!{ |p| search_list.all?{ |w| p.displayname.downcase.include?(w) } }
+      end
+
+      @sections = KSM::Section.all.sort_by(&:ix)
+      @category_list = SL::Category.all
+      @products.sort_by! do |p|
+        [(@sections.detect{ |s| @category_list.detect{ |c| c.id == p.category_id }&.section_id }&.ix || 0),
+          p.category_id || '0000',
+          p.displayname.downcase.delete('☠️ ')
+        ]
+      end
+    else
+      if ccat = params[:cat]
+        @products = Product.all.select{ |a| a.category_id == ccat }
+      end
     end
+
     codes = @products.map(&:place_id).uniq
     @kc_towns = KatoAPI.batch(codes)
     cats = KSM::Category.all.map{ |c| [c.id, c.idname] }.to_h
