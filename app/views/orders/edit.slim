@@ -191,7 +191,7 @@ ul class="nav nav-tabs non-print"
       /p = "ϰ #{cplx}"
     td style="width:20%;"
       p = order_town_name&.name || "*#{@order.place_name}"
-      p М: #{@manager&.name}
+      p М: #{order.client&.manager&.name}
     td
       .flex-c
         .block.flexie
