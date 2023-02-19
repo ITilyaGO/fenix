@@ -1,4 +1,4 @@
-Fenix::App.controllers :riot, :map => "/riot/tags/" do
+Fenix::App.controllers :riot, :map => "/xriot/tags/" do
 
   get :index, :with => ':name.tag' do
     Slim::Engine.options[:pretty] = true

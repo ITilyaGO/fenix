@@ -22,6 +22,7 @@ ActiveRecord::Base.configurations[:development] = {
 ActiveRecord::Base.configurations[:production] = {
   :adapter => 'sqlite3',
   :database => Padrino.root('db', 'fenix_production.db'),
+  :pool => 12,
   :timeout => 500
 }
 

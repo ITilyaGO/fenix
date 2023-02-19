@@ -58,8 +58,7 @@ class Order < ActiveRecord::Base
   end
 
   def order_lines
-    # oids = order_lines_ar.ids
-    KSM::OrderLine.find_all(KSM::Order.find(id).lines).reject(&:del)
+    @ksm_ol ||= KSM::OrderLine.find_all(KSM::Order.find(id).lines).reject(&:del)
   end
   
   def ksm_apd
@@ -69,17 +68,17 @@ class Order < ActiveRecord::Base
   end
 
   def by_cat(id)
-    order_lines.select{ |ol| Product.find(ol.product_id).category.category_id == id }
-    # order_lines.joins(product: :category)
-    #   .preload(:product)
-    #   .select("order_lines.*")
-    #   .select('"products"."index" as p_index').select('"categories"."index" as c_index')
-    #   .where('"categories"."category_id" = %s', id)
-    #   .order("c_index, p_index")
+    product_ids = order_lines.map(&:product_id)
+    @products ||= Product.find_all product_ids
+    @category_store ||= KSM::Category.all.map { |c| [c.id, c.category_id] }.to_h
+    order_lines.select do |ol|
+      ma = @category_store[@products.detect { |p| p.id == ol.product_id }.category_id]
+      ma == id
+    end
   end
 
   def by_cat?(id)
-    order_lines.select{ |ol| Product.find(ol.product_id).category.category_id == id }.any?
+    by_cat(id).any?
     # order_lines.joins(product: :category)
     #   .where('"categories"."category_id" = %s', id)
     #   .any?

@@ -40,7 +40,7 @@
     - if can_view_stickers?
       - @stickers = CabiePio.all_keys(all_ids, folder: [:sticker, :order]).flat.trans(:to_i, :to_f)
       - @kc_stickers = CabiePio.all_keys(all_ids, folder: [:sticker, :order_progress]).flat.trans(:to_i, :to_f)
-      - @kc_sumstickers = @stickers.map{|k,v|[k, v*@kc_stickers.fetch(k,0)/100]}.to_h
+      - @kc_sumstickers = @stickers.map{|k,v|[k, v*(@kc_stickers[k]||0)/100]}.to_h
       - stickers_done = @kc_sumstickers.values.sum
       - stickers_total = @stickers.values.sum
       .item-sticker.pull-right

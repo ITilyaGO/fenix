@@ -242,7 +242,7 @@ module Fenix::App::ProductsHelper
   end
 
   def product_is_glass? id
-    products_hash.fetch(id, nil) == storebox(:product, :glass_cat)
+    products_hash[id] == storebox(:product, :glass_cat)
   end
 
   def products_hash
@@ -255,6 +255,10 @@ module Fenix::App::ProductsHelper
 
   def section_matrix
     @section_matrix ||= Category.where(category_id: nil).pluck(:id, :section_id).to_h
+  end
+
+  def section_matrix_reloaded
+    @section_matrix2 ||= KSM::Category.all.map{ |c| [c.id, c.section_id] }.to_h
   end
 
   def category_grouped

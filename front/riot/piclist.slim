@@ -7,7 +7,7 @@ piclist
         .fa.fa-file
         .title: a href="{ file_path(pic) }" { pic }
     
-    = form_tag url(:picupload, :remove), if: '{admin}' do
+    /= form_tag url(:picupload, :remove), if: '{admin}' do
       input type="hidden" name="id" value="{ order }"
       input type="hidden" name="image" value="{ pic }"
       = submit_tag 'delete', :class => 'btn btn-danger btn-xs btn-embossed btn-del', :show => "{ show_rem }"
