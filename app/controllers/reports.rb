@@ -104,7 +104,13 @@ Fenix::App.controllers :reports do
       break if pll.size != 1
       @path << [pll.last.id, get_category_childs(pll.last.id)]
     end if @path.size > 0
-    cat_show_list = get_category_all_childs(@path.last[0]) if @path.size > 0
+
+    cat_show_list = []
+    if @path.size > 0
+      cat_show_list = get_category_all_childs(@path.last[0])
+    elsif @load_orders
+      @sections.each { |s| cat_show_list += get_category_all_childs(s.id) }
+    end
 
     no_search = search_list.size == 0
     data_table = []
@@ -115,19 +121,21 @@ Fenix::App.controllers :reports do
           p_cat_id = ol_p.category_id
           p_dn = ol_p.displayname
           name_words = no_search ? [] : p_dn.downcase.split(/[\s,.'"()-]/).compact
-          if (cat_show_list.nil? || cat_show_list.include?(p_cat_id)) && (no_search || search_list.all?{ |w| name_words.include?(w) })
-            data_table << OrderLineData.new(ord, ol, p_dn, p_cat_id)
+          cat_path = cat_show_list.detect{ |cs| cs.first == p_cat_id} || ['']
+          if cat_path.first == p_cat_id && (no_search || search_list.all?{ |w| name_words.include?(w) })
+            data_table << OrderLineData.new(ord, ol, p_dn, p_cat_id, cat_path.last)
           end
         end
       end
 
       @orders = data_table.map(&:ord).uniq.sort_by(&:id)
     elsif @path.size > 1 || !no_search
+      csl_is_empty = cat_show_list.empty?
       @orders.select! do |ord|
         ord.order_lines.any? do |ol|
           ol_p = ol.product
           name_words = no_search ? [] : ol_p.displayname.downcase.split(/[\s,.'"()-]/).compact
-          (cat_show_list.nil? || cat_show_list.include?(ol_p.category_id)) && (no_search || search_list.all?{ |w| name_words.include?(w) })
+          (csl_is_empty || cat_show_list.detect{ |cs| cs.first == ol_p.category_id}) && (no_search || search_list.all?{ |w| name_words.include?(w) })
         end
       end
     end
@@ -173,8 +181,7 @@ Fenix::App.controllers :reports do
       case seq
       when :category
         @data_table_p_id_archs.sort_by! do |arch_id, dtpi| [
-            @sections.detect{ |s|@category_list.detect{ |c|c.id==dtpi.last.last.first.cat_id }&.section_id }.ix,
-            dtpi.last.last.first.cat_id,
+            dtpi.last.last.first.cat_path,
             (@archetypes[arch_id]&.name || 'Не найдено')
           ]
         end
@@ -190,8 +197,7 @@ Fenix::App.controllers :reports do
       case seq
       when :category
         @data_table_p_id.sort_by! do |p_id, dts| [
-            @sections.detect{ |s| @category_list.detect{ |c| c.id==dts.first.cat_id }&.section_id }.ix,
-            dts.first.cat_id,
+            dts.first.cat_path,
             dts.first.p_dn.delete('☠️ ')
           ]
         end

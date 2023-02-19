@@ -18,12 +18,12 @@ module Fenix::App::ReportsHelper
     if c_ch.size > 0
       all_ch = []
       c_ch.each do |ch|
-        all_ch += get_category_all_childs(ch)
+        all_ch += get_category_all_childs(ch).map{ |c| [c.first, [cat_id, c.last].join('_')] }
       end
-      all_ch << cat_id unless endonly
+      all_ch << [cat_id, cat_id] unless endonly
       all_ch
     else
-      [cat_id]
+      [[cat_id, cat_id]]
     end
   end
 
@@ -148,8 +148,8 @@ module Fenix::App::ReportsHelper
 end
 
 class OrderLineData
-  attr_accessor :ord, :ord_id, :ol, :ol_id, :p_id, :p_dn, :cat_id, :price, :amount, :done_amount, :stick_amount, :arch_amount, :multiply, :ignored
-  def initialize(ord, ol, p_dn, cat_id, stick_amount = 0, arch_amount = 0, multiply = 1)
+  attr_accessor :ord, :ord_id, :ol, :ol_id, :p_id, :p_dn, :cat_id, :cat_path, :price, :amount, :done_amount, :stick_amount, :arch_amount, :multiply, :ignored
+  def initialize(ord, ol, p_dn, cat_id, cat_path, stick_amount = 0, arch_amount = 0, multiply = 1)
     @ord = ord
     @ord_id = ord.id
     @ol = ol
@@ -157,6 +157,7 @@ class OrderLineData
     @p_id = ol.product_id
     @p_dn = p_dn
     @cat_id = cat_id
+    @cat_path = cat_path
     @price = ol.price
     @amount = ol.amount
     @done_amount = ol.done_amount || 0
