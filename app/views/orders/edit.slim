@@ -474,7 +474,7 @@ ul class="nav nav-tabs non-print"
       |&nbsp;
       = content_tag :button, type: :submit, class: 'btn btn-sm btn-finished', name: 'next_status', value: @order_part.section.id do
         | Собрать #{@order_part.section.name}
-  - if current_account.is_admin? && @orderstatus.what?([:prepare, :current])
+  - if current_account.is_admin? && @orderstatus.what?([:prepare, :current, :anew])
     |&nbsp;
     = submit_tag "Собрать все части", :class => 'btn btn-sm btn-finished', :name => 'next_status_all'
 
