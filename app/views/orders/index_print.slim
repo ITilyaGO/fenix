@@ -78,7 +78,7 @@ div class="tabs-content"
             div class='list-row-action-wrapper'
               = link_to tag_icon(:edit), :href => url(:orders, :edit, :id => order.id), :class => 'list-row-action-wrapper-link'
               = link_to tag_icon("file-text-o"), :href => url(:orders, :invoice, :id => order.id), :class => 'list-row-action-wrapper-link'
-              - if if can_view?(:order, :modify)
+              - if can_view?(:order, :modify)
                 = link_to tag_icon(:save), :href => url(:c1c, :create, :id => order.id), :class => 'list-row-action-wrapper-link'
               - if can_view?(:order, :modify) && order.finished?
                 = link_to tag_icon(:cube), :href => url(:orders, :boxes, :id => order.id), :class => 'list-row-action-wrapper-link'
