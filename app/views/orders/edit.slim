@@ -466,7 +466,7 @@ ul class="nav nav-tabs non-print"
           = submit_tag "Собрать заказ", :class => 'btn btn-sm btn-finished', :name => 'next_status_all_force'
 
   - if !@order.draft? && !@order.shipped?
-    - if current_account.is_admin? || (@order_part && @order_part.current?)
+    - if can_view?(:order, :modify) || (@order_part && @order_part.current?)
       = submit_tag "Сохранить", :class => 'btn btn-sm btn-prime', :name => 'save'
 
   /- unless role_is?(:stickerman)

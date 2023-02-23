@@ -122,6 +122,10 @@ module Fenix
       end
     end
 
+    access_control.roles_for :sectioner do |role|
+      role.project_module :orders_create, '/orders/fullempty'
+    end
+
     ##
     # You can configure for a specified environment like:
     #
