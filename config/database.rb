@@ -16,6 +16,7 @@
 ActiveRecord::Base.configurations[:development] = {
   :adapter => 'sqlite3',
   :database => Padrino.root('db', 'fenix_development.db'),
+  :pool => 12,
   :timeout => 500
 }
 

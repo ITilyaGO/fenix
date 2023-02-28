@@ -46,6 +46,31 @@ module Fenix::App::ThingsHelper
     al.push(thing.look, and_save: true) if thing.look =~ /w+/
   end
 
+  def otree_rendered place
+    KSM::Render.find(:otree, place).contents || otree_render(place)
+  end
+
+  def otree_render place
+    ren = KSM::Render.find(:otree, place)
+    ren = KSM::Render.nest(:otree, place) unless ren.exist?
+    ren.contents = otree_cats3 pro_olist(place)
+    ren.save
+    ren.contents
+  end
+
+  def otree_compare thing1, thing2
+    aif = thing1.area_should_move thing2
+    tif = thing1.tree_should_move thing2
+    [(thing1.place_id if aif || tif), (thing2.place_id if aif)]
+  end
+
+  def otree_job places
+    $background.in '0s' do
+      places.each do |place|
+        otree_render place
+      end
+    end
+  end
 
   def otree_cats(arr, root = '0000')
     groups = arr.group_by{ |x| x[:parent] }
@@ -118,8 +143,7 @@ module Fenix::App::ThingsHelper
   end
 
   def pro_olist place
-    SL::Section.all + SL::Category.all + SL::Thing.all.select{ |a| a.place_id == place }
-    # + [SL::Category.new(id: '3648', category_id: '1762')]
+    cats_olist + SL::Thing.which(place)
   end
 
   def cats_plainlist

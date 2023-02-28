@@ -81,6 +81,22 @@ class Product < Doppel
     }.merge to_r.slice(*%i[id price category_id place_id price art])
   end
 
+  def area_should_move prev
+    prev.place_id != @place_id
+  end
+
+  def tree_should_move prev
+    (prev.displayname != displayname) ||
+    (prev.cindex != cindex) ||
+    (prev.category_id != category_id)
+  end
+
+  def area_movement prev
+    return unless area_should_move prev
+    KSI::Area.find(prev.place_id).pop id
+    KSI::Area.find(@place_id).push id
+  end
+
   def saved_by account
     @dates ||= []
     @created_at ||= Time.now
@@ -127,6 +143,8 @@ class Product < Doppel
     client.publish("/topic/web:product:lotof", Marshal.dump({ id: @id, min: @lotof }), { "priority" => 2 })
     client.close
   end
+
+  extend AreaMap
 
   class << self
     def nest

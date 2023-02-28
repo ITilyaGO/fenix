@@ -19,13 +19,9 @@ Fenix::App.controllers :things do
     townfilter = params[:place]
     ccat = nil if ccat == 'none'
     townfilter = nil if townfilter == 'none'
+    @products = Product.which(townfilter) if townfilter
     @place = townfilter
     @ccat = ccat
-
-    if townfilter
-      @products = Product.all if townfilter || ccat.nil?
-      @products = @products.select{ |a| a.place_id == townfilter }
-    end
 
     if ccat
       ccat = nil if ccat.to_sym.eql? :nothing
@@ -103,8 +99,10 @@ Fenix::App.controllers :things do
     @product = Product.find tid
     @product = Product.nest if tid == '0000' || params[:clone]
     @product.origin = tid if params[:clone]
+    preduct = @product.dup
     form = params[:product]
     @product.clear_formize(form)
+    @product.area_movement preduct
     @product.sn ||= thing_glob_seed
     @product.saved_by @current_account
     thing_to_top @product.id
@@ -115,6 +113,7 @@ Fenix::App.controllers :things do
     @product.backsync if @product.global?
     known_cities_add @product.place_id
     OrderAssist.reset_products_list
+    ProductAssist.otree_job(otree_compare @product, preduct)
     if @product
       if true
         flash[:success] = pat(:update_success, :model => 'Product', :id =>  "#{@product.id}")
@@ -187,8 +186,7 @@ Fenix::App.controllers :things do
       ccat = nil if ccat == 'none'
       townfilter = nil if townfilter == 'none'
 
-      @products = Product.all
-      @products = @products.select{ |a| a.place_id == townfilter } if townfilter
+      @products = Product.which(townfilter) if townfilter
 
       if ccat
         ccat = nil if ccat.to_sym.eql? :nothing

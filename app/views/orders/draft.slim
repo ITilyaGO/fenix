@@ -87,7 +87,7 @@
             .list-row-action-wrapper
               .list-row-action-wrapper-link &nbsp;
               - if allow_route?(:orders_create)
-                = link_to tag_icon(:paw), :rel => :tooltip, :title => "Edit order", :href => url(:orders, :correct, :id => order.id), :class => 'list-row-action-wrapper-link'
+                = link_to tag_icon(:paw), :rel => :tooltip, :title => "Edit order", :href => url(:orders, :touch, :id => order.id), :class => 'list-row-action-wrapper-link'
               - if order.draft? && can_view?(:order, :modify)
                 = link_to tag_icon(:save), :href => url(:c1c, :create, :id => order.id), :class => 'list-row-action-wrapper-link'
               - if current_account.is_admin?

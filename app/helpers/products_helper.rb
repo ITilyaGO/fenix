@@ -86,8 +86,7 @@ module Fenix::App::ProductsHelper
   end
 
   def json_list place
-    Product.all
-      .select{ |a| a.global? || a.place_id == place }
+    (Product.global + Product.which(place))
       .map{|a| {id: a.id, price: a.price, name: a.displayname, cat: a.category_id}}
 
     # parents = Product.pluck(:parent_id).compact.uniq

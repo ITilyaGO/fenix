@@ -558,7 +558,7 @@ Fenix::App.controllers :orders do
     @place = place
     @form = order
     @cattree = otree_cats3 cats_olist
-    @protree = otree_cats3 pro_olist(place)
+    @protree = otree_rendered place
     @force_timeline = true
     render 'orders/empty'
   end
@@ -587,9 +587,26 @@ Fenix::App.controllers :orders do
     @place = place
     @form = order
     @cattree = otree_cats3 cats_olist
-    @protree = otree_cats3 pro_olist(place)
+    @protree = otree_rendered place
     @force_timeline = true
     render 'orders/empty'
+  end
+
+  get :touch, :with => :id do
+    @title = "Correct order #{params[:id]}"
+    @cats = KSM::Category.all.select{ |c| c.category_id.nil? }.sort_by(&:wfindex)
+    order = Order.find(params[:id])
+    @order_lines = order.order_lines
+    @total = order.total
+    @id = order.id
+    @order_client = order.client
+    place = CabiePio.get([:orders, :towns], order.id).data
+    @order_place = KatoAPI.anything(place) if place
+    @place = place
+    @descr = order.description
+    @form = order
+    @cash = CabiePio.get([:orders, :cash], order.id).data == 't'
+    render 'orders/touch'
   end
 
   get :correct, :with => :id do
@@ -607,7 +624,7 @@ Fenix::App.controllers :orders do
     @form = order
     @cash = CabiePio.get([:orders, :cash], order.id).data == 't'
     @cattree = otree_cats3 cats_olist
-    @protree = otree_cats3 pro_olist(place)
+    @protree = otree_rendered place
     render 'orders/empty'
   end
 

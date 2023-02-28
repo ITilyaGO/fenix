@@ -11,20 +11,20 @@
             == @cattree
           .tmar-1
           wtree.tree name='Продукция'
-            == otree_cats3 pro_olist(@place)
+            == otree_rendered @place
           .tmar-1
 
         wtree.tree name='Категории - Россия' place='RU'
           == @cattree
         .tmar-1
         wtree.tree name='Продукция - Россия'
-          == otree_cats3 pro_olist('RU')
+          == otree_rendered :RU
         .tmar-1
 
   .col-md-12.content00
     = form_for :order, !@id ? url(:orders, :empty) : url(:orders, :save, :id => @id),
       :autocomplete => :off, :class => 'form-std' do |f|
-      - if @id
+      / - if @id
         .form-actions.text-center style='position: absolute;right: 30px;top: 10px;'
           = f.submit :'^ save ^', :class => 'btn btn-sm btn-wide btn-default', :name => :light_edit
         
@@ -198,7 +198,7 @@
     
     / .foot style='height: 20vh;'
 
-page cityload=1
+page cityload=1 productload=1 
 
 - content_for :js_assets do
   = javascript_include_tag :riot

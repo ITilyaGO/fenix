@@ -206,7 +206,7 @@ page
       this.desubmit()
       this.on_copy_btn()
       this.change_del_lsn()
-      this.type_product()
+      if (opts.productload) self.type_product()
       this.type_client()
       if (opts.cityload) self.type_city()
     })

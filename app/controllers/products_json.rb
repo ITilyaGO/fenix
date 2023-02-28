@@ -15,7 +15,7 @@ Fenix::App.controllers :products do
   post :clist, :provides => :json do
     cat = params[:cat]
     place = params[:place]
-    pro = Product.all.select{ |p| p.place_id == place && p.category_id == cat }.sort_by(&:wfindex)
+    pro = Product.which(place).select{ |p| p.category_id == cat }.sort_by(&:wfindex)
     @arp = Stock::Linkage.all.flatless
     @kc_stocks = Stock.free.flatless
 

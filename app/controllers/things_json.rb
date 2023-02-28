@@ -1,4 +1,6 @@
 Fenix::App.controllers :things do
+  
+  # Future obsolete
   post :list, :provides => :json do
     # @archs = KSM::Archetype.all
     cat = params[:cat]

@@ -1,0 +1,83 @@
+.col-md-12
+  = form_for :order, url(:orders, :save, :id => @id), :autocomplete => :off, :class => 'form-std' do |f|
+    
+    .col-md-10
+      fieldset.control-group
+        = f.label 'Тип заказа', :class => 'col-md-3 control-label'
+        .col-md-2.controls.custom-control
+          = f.radio_button :delivery, :value => Order.deliveries[:vernissage], :checked => @form.vernissage?, :class => 'custom-control-input'
+          label.custom-control-label(for = 'order_delivery_3') = t :'delivery.vernissage'
+        .col-md-2.controls.custom-control
+          = f.radio_button :delivery, :value => Order.deliveries[:postage], :checked => @form.postage?, :class => 'custom-control-input'
+          label.custom-control-label(for = 'order_delivery_0') = t :'delivery.postage'
+        .col-md-2.controls.custom-control
+          = f.radio_button :delivery, :value => Order.deliveries[:roundtrip], :checked => @form.roundtrip?, :class => 'custom-control-input'
+          label.custom-control-label(for = 'order_delivery_1') = t :'delivery.roundtrip'
+        .col-md-2.controls.custom-control
+          = f.radio_button :delivery, :value => Order.deliveries[:pickup], :checked => @form.pickup?, :class => 'custom-control-input'
+          label.custom-control-label(for = 'order_delivery_2') = t :'delivery.pickup'
+      
+      fieldset.control-group
+        = f.label 'Приоритетный', :class => 'col-md-3 control-label'
+        .col-md-3.controls.custom-control
+          = f.radio_button :priority, :value => :false, :checked => !@form.priority, :class => 'custom-control-input'
+          label.custom-control-label(for = 'order_priority_false') Нет
+        .col-md-3.controls.custom-control
+          = f.radio_button :priority, :value => :true, :checked => @form.priority, :class => 'custom-control-input'
+          label.custom-control-label(for = 'order_priority_true') Да
+
+      fieldset.control-group
+        = f.label 'Оплата', :class => 'col-md-3 control-label'
+        .col-md-3.controls.custom-control
+          = f.radio_button :cash, :value => :false, :checked => !@cash, :required => true, :class => 'custom-control-input'
+          label.custom-control-label(for = 'order_cash_false') Безнал
+        .col-md-3.controls.custom-control
+          = f.radio_button :cash, :value => :true, :checked => @cash, :required => true, :class => 'custom-control-input'
+          label.custom-control-label(for = 'order_cash_true') Нал
+
+      fieldset.control-group
+        = f.label 'Дата заказа', :class => 'col-md-3 control-label'
+        .col-md-4.controls
+          = f.text_field :created_at, :class => 'form-control', readonly: !@id.nil?,
+            value: @id ? @form.created_at.to_date : Date.today
+
+      fieldset.control-group
+        = f.label "Город", :class => 'col-md-3 control-label'
+        .col-md-9.controls
+          .scrollable-dropdown-menu
+            = hidden_field_tag :'cabie[kato_place]', :value => (@order_place.key.public if @order_place)
+            = text_field_tag :kato_type, :class => 'form-control',
+              :value => (@order_place.model.name if @order_place), :required => true
+
+      fieldset.control-group
+        = f.label "Заказчик", :class => 'col-md-3 control-label'
+        .col-md-9.controls
+          .scrollable-dropdown-menu
+            = f.hidden_field :client_id, :value => (@order_client.id if @order_client)
+            = text_field_tag 'cl', :class => 'form-control ', :id => 'typeahead-client', :value => (@order_client.name if @order_client)
+
+    .f-actions.text-center.col-md-2.hp100
+      .form-actions.whie-sticky style="top: 50vh;"
+        = f.submit :save, :class => 'btn btn-sm btn-wide btn-default', :name => :light_edit
+
+
+.spacer.clearfix.pbl
+hr
+
+.corners.flex-v style='flex-direction: column; justify-content: center; align-items: center; min-height: 40vh;'
+  a.btn.btn-desert-rim.flex-v href=url(:orders, :correct, id: @id)
+    .text-center: .ico.fa.fa-paw
+    ' Полное редактирование
+    
+page cityload=1
+
+- content_for :js_assets do
+  = javascript_include_tag :riot
+  rscript type="riot/tag" src="/riot/tags/collapser.tag"
+  rscript type="riot/tag" src="/riot/tags/switcher.tag"
+  rscript type="riot/tag" src="/riot/tags/empty-order/page.tag"
+
+  javascript:
+    document.addEventListener("DOMContentLoaded", function(event) {
+      riot.mount('page, collapser, switcher')
+    })
