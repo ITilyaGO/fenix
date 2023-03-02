@@ -93,6 +93,7 @@ Fenix::App.controllers :orders do
       @pages = (@orders.count/pagesize).ceil
       @orders = @orders.offset((@page-1)*pagesize).take(pagesize)
       @r = url(:orders, :finished, :old => 1)
+      @ra = [:orders, :finished]
     end
     @sections = KSM::Section.all
     a_towns(@orders.map(&:id), @orders.map(&:client_id))
@@ -239,7 +240,8 @@ Fenix::App.controllers :orders do
     @timeline_date = timeline_unf(@timeline_at) unless @timeline_at.nil?
     @stickday_date = timeline_unf(@stickday_order) unless @stickday_order.nil?
     @orderstatus = KSM::OrderStatus.find(@order.id)
-
+    @order_ship = KSM::OrderShip.find(@order.id)
+    
     calendar_init(Date.today)
     @ps = KSM::OrderImage.all_for(@order.id)
 
@@ -513,6 +515,11 @@ Fenix::App.controllers :orders do
       end
     end
     o_status.save
+
+    o_ship = KSM::OrderShip.find(order.id)
+    o_ship.clear_formize params[:ship]
+    o_ship.save
+
     order.all_parts = order.order_parts.size if order.order_parts.any?
     order.save
     order.actualize
@@ -600,6 +607,7 @@ Fenix::App.controllers :orders do
     @total = order.total
     @id = order.id
     @order_client = order.client
+    @order_ship = KSM::OrderShip.find order.id
     place = CabiePio.get([:orders, :towns], order.id).data
     @order_place = KatoAPI.anything(place) if place
     @place = place
@@ -642,8 +650,11 @@ Fenix::App.controllers :orders do
     cash = params[:order][:cash] == 'true' ? 't' : 'f'
     CabiePio.set [:orders, :cash], order.id, cash
     if params[:light_edit]
+      o_ship = KSM::OrderShip.find(order.id)
+      o_ship.clear_formize params[:ship]
+      o_ship.save
       order.save
-      redirect url(:orders, :draft)
+      redirect url(:orders, :choosie, id: order.id)
     end
 
     order.status = order.draft? ? :draft : :anew

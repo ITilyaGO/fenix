@@ -136,6 +136,19 @@ ul class="nav nav-tabs non-print"
       .order-comment = @order.description
       br
 
+    .order-paperframe
+      .pull-right
+        = partial 'bricks/kc/transport', :locals => { name: @order_ship.transport }
+      fcollapser titler="отправка"
+        .row.cmar-05
+          | #{@order_ship.transport_note}
+        .bloksi class=(:hidden if @order_ship.nocontent?)
+          hr.mas
+          .row.cmar-05
+            .label.label-default = @order_ship.notify_adr
+            | #{@order_ship.notify_note}
+    br
+
     .order-paper: fcollapser titler="файлы: #{@ps.count}"
       .row: div
         /- KSM::OrderImage.all(@order.id).each do |p|

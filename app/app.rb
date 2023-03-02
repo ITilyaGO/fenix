@@ -81,6 +81,7 @@ module Fenix
     access_control.roles_for :manager do |role|
       role.project_module :online, '/online'
       role.project_module :orders_create, '/orders/fullempty'
+      role.project_module :reports, '/reports'
     end
 
     access_control.roles_for :editor do |role|
@@ -110,11 +111,10 @@ module Fenix
       role.project_module :places, '/places'
     end
 
-    [:sectioner, :limsectioner, :director, :manager, :shipper, :supplier].each do |r|
+    [:sectioner, :limsectioner, :director, :manager, :shipper, :logistician, :supplier].each do |r|
       access_control.roles_for r do |role|
         role.project_module :orders, '/orders'
         role.project_module :orders_infact, '/orders/infact'
-        role.project_module :reports, '/reports'
         role.project_module :categories, '/categories'
         role.project_module :products, '/products'
         role.project_module :places, '/places'

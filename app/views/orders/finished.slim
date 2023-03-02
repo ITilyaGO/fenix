@@ -5,6 +5,6 @@
     .btn.next
       = link_to "Старые", url(:orders, :finished, :old => 1), :class => "btn btn-sm btn-inverse"
   - else
-    = paginate
+    = paginate old: 1
     .btn.next
       = link_to "Новые", url(:orders, :finished), :class => "btn btn-sm btn-inverse"

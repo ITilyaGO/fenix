@@ -69,7 +69,7 @@
             .scrollable-dropdown-menu
               = f.text_field :created_at, :class => 'form-control', :placeholder => "2016-07-23 or Y/m/d", :required => true, value: Date.today
 
-        fieldset class='control-group'
+        fieldset.control-group
           = f.label "Город", :class => 'col-md-3 control-label'
           div class='col-md-9 controls'
             div class="scrollable-dropdown-menu"
@@ -78,7 +78,7 @@
                 :value => (@order_place.model.name if @order_place),
                 :required => true, :readonly => true
 
-        fieldset class='control-group'
+        fieldset.control-group
           = f.label "Заказчик", :class => 'col-md-3 control-label'
           div class='col-md-9 controls'
             div class="scrollable-dropdown-menu"
@@ -86,6 +86,22 @@
               = text_field_tag 'cl', :class => 'form-control ', :id => 'typeahead-client',
                 :value => (@order_client.name if @order_client),
                 :required => true
+        
+        fieldset.control-group
+          = f.label :shipping_company, :class => 'col-md-3 control-label'
+          .col-md-9.controls
+            = select_tag :'ship[transport]', class: 'huge wp100', options: transport_dic.unshift(:none)
+        fieldset.control-group
+          label.col-md-3.control-label
+          .col-md-9.controls
+            = text_area_tag :'ship[transport_note]', rows: 1, :class => 'form-control'
+
+        fieldset.control-group
+          = f.label :notify, :class => 'col-md-3 control-label'
+          .col-md-4.controls
+            = text_field_tag :'ship[notify_adr]', :class => 'form-control'
+          .col-md-5.controls
+            = text_area_tag :'ship[notify_note]', rows: 1, :class => 'form-control'
 
       div class="modal" tabindex="-1" role="dialog" 
         div class="modal-dialog"

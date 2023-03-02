@@ -90,7 +90,6 @@
                 = link_to tag_icon(:paw), :rel => :tooltip, :title => "Edit order", :href => url(:orders, :touch, :id => order.id), :class => 'list-row-action-wrapper-link'
               - if order.draft? && can_view?(:order, :modify)
                 = link_to tag_icon(:save), :href => url(:c1c, :create, :id => order.id), :class => 'list-row-action-wrapper-link'
-              - if current_account.is_admin?
                 = link_to tag_icon("trash-o"), :rel => :tooltip, :title => "#{pat(:delete)} order", :class => 'list-row-action-delete-one list-row-action-wrapper-link'
             div class='modal'
               div class="modal-dialog"

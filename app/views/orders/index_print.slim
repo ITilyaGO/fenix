@@ -68,7 +68,7 @@ div class="tabs-content"
             span.label class="label-#{os.state}"
               = t :"status.#{os.state}"
           td class='list-column text-nowrap non-print'
-            = partial 'orders/squares', :locals => { :order => order }
+            = partial 'orders/squares_boxes', :locals => { :order => order }
           td class='list-column non-print'
             - if can_view?(:order, :modify) && order.finished?
               clicker.btn.btn-xs.btn-shipready tie=order.id action="TIEMODAL_OPEN" = t :"status.shipready"
