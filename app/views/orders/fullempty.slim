@@ -88,20 +88,20 @@
                 :required => true
         
         fieldset.control-group
-          = f.label :shipping_company, :class => 'col-md-3 control-label'
+          = f.label :TK, :class => 'col-md-3 control-label'
           .col-md-9.controls
             = select_tag :'ship[transport]', class: 'huge wp100', options: transport_dic.unshift(:none)
         fieldset.control-group
-          label.col-md-3.control-label
+          = f.label 'Комментарий к отправке', :class => 'col-md-3 control-label'
           .col-md-9.controls
             = text_area_tag :'ship[transport_note]', rows: 1, :class => 'form-control'
 
         fieldset.control-group
-          = f.label :notify, :class => 'col-md-3 control-label'
+          = f.label 'Оповещение', :class => 'col-md-3 control-label'
           .col-md-4.controls
-            = text_field_tag :'ship[notify_adr]', :class => 'form-control'
+            = text_field_tag :'ship[notify_adr]', :class => 'form-control', placeholder: 'Номер или емайл'
           .col-md-5.controls
-            = text_area_tag :'ship[notify_note]', rows: 1, :class => 'form-control'
+            = text_area_tag :'ship[notify_note]', rows: 1, :class => 'form-control', placeholder: 'Комментарий'
 
       div class="modal" tabindex="-1" role="dialog" 
         div class="modal-dialog"

@@ -14,8 +14,10 @@ class KSM::OrderShip < Doppel
 
   def save
     is_mail = notify_adr =~ /@/
-    @notify_adr = @notify_adr.gsub /\s/, ''
-    @notifier = is_mail ? :email : :wa
+    if notify_adr
+      @notify_adr = @notify_adr.gsub /\s/, ''
+      @notifier = is_mail ? :email : :wa
+    end
     super
   end
 

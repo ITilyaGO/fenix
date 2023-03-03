@@ -78,7 +78,7 @@ Fenix::App.helpers do
     sections: { list: (1..6).sum{|d|2**d}, complete: (1..6).sum{|d|2**d} },
     btn: { stock: 3, draw: 1 }
   }.freeze
-  AH_ROLE_MNG = { order: 9, list: 31, timeline: 7, sys: 15, sections: (1..6).sum{|d|2**d}, btn: { stock: 7 } }.freeze
+  AH_ROLE_MNG = { order: 9, list: 63, timeline: 7, sys: 15, sections: (1..6).sum{|d|2**d}, btn: { stock: 7 } }.freeze
   AH_ROLE_SHP = { order: 9, list: 43, timeline: 7, sys: 15, sections: (1..6).sum{|d|2**d}, btn: { stock: 7 } }.freeze
   AH_ROLE_LSC = { order: 0, list: 0, timeline: 0, sys: 0, btn: { stock: 3 } }.freeze
   AH_ROLE_FSC = { order: 1, list: 0, timeline: 1, sys: 9, btn: { stock: 7, list: 1 } }.freeze
