@@ -101,7 +101,7 @@ ul class="nav nav-tabs non-print"
         span class=('text-warning' if @timeline_blink) = to_msk(@timeline_date)
     - if @stickday_date
       p Дата клейки: #{to_msk(@stickday_date)}
-    p Менеджер: #{@manager&.name}
+    p Менеджер: #{@order.client&.manager&.name}
 
     - still = CabiePio.get(%i(m sticker days), @order.id).data
 

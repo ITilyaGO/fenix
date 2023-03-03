@@ -230,10 +230,6 @@ Fenix::App.controllers :orders do
     @sticker_progress = sticker_order_progress(@order.id)
     @kc_products = CabiePio.folder(:products, :sticker).flat
 
-    kc_town_managers = CabiePio.folder(:towns, :managers).flat
-    hier = Kato::Hier.for(@kc_client_hometown).codes
-    manager = kc_town_managers.fetch(hier.detect{|c| kc_town_managers[c]}, 0)
-    @manager = Manager.find(manager) rescue nil
     @timeline_at = CabiePio.get([:orders, :timeline], @order.id).data
     @timeline_blink = !CabiePio.get([:orders, :timeline_blink], @order.id).blank?
     @stickday_order = CabiePio.get([:orders, :stickday], @order.id).data
