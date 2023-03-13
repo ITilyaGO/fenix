@@ -53,7 +53,7 @@ module Fenix::App::ProductsHelper
 
   def known_cities
     wonderbox_set(:known_cities, %w[RU RU-YAR-ARO]) unless wonderbox(:known_cities)
-    Padrino.cache[:known_cities] ||= KatoAPI.batch(wonderbox(:known_cities))
+    @mem_known_cities ||= KatoAPI.batch wonderbox(:known_cities)
   end
 
   def known_cities_add city

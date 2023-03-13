@@ -12,41 +12,39 @@ Fenix::App.controllers :things do
 
   get :table do
     @title = "Products"
-    pagesize = 50
     ids = wonderbox(:things_by_date).reverse
     @products = Product.find_all(ids).sort_by{ |a| ids.index(a.id) }
+    pagesize = params.present? ? 50 : ids.size
     ccat = params[:cat]
     townfilter = params[:place]
     ccat = nil if ccat == 'none'
     townfilter = nil if townfilter == 'none'
     @products = Product.which(townfilter) if townfilter
-    @place = townfilter
-    @ccat = ccat
 
     if ccat
-      ccat = nil if ccat.to_sym.eql? :nothing
-      @products = Product.all if townfilter.nil?
       @products = @products.select{ |a| a.category_id == ccat }.sort_by(&:cindex)
       @product = Product.new({ category_id: ccat })
+    elsif ccat || townfilter
+      @notice = true
     end
 
     if @search = params[:search]
       @products = Product.all if ccat.nil? && townfilter.nil?
       search_list = (@search || '').downcase.split(/[\s,.'"()-]/).compact
       @products.select!{ |p| search_list.all?{ |w| p.displayname.downcase.include?(w) } }
-    end
 
-    @sections = KSM::Section.all.sort_by(&:ix)
-    @category_list = SL::Category.all
-    @products.sort_by! do |p|
-      [(@sections.detect{ |s| @category_list.detect{ |c| c.id == p.category_id }&.section_id }&.ix || 0),
-        p.category_id || '0000',
-        p.displayname.downcase.delete('☠️ ')
-      ]
+      sections = KSM::Section.all.sort_by(&:ix)
+      category_list = SL::Category.all
+      @products.sort_by! do |p|
+        [(sections.detect{ |s| category_list.detect{ |c| c.id == p.category_id }&.section_id }&.ix || 0),
+          p.category_id || '0000',
+          p.displayname.downcase.delete('☠️ ')
+        ]
+      end
     end
+    
     codes = @products.map(&:place_id).uniq
     @kc_towns = KatoAPI.batch(codes)
-    # Product.all.includes(:category).order(:updated_at => :desc).offset((@page-1)*pagesize).take(pagesize)
     @pages = (@products.size / pagesize.to_f).ceil
     @page = !params[:page].nil? ? params[:page].to_i : 1
     @page = 1 if @page > @pages
@@ -54,7 +52,8 @@ Fenix::App.controllers :things do
     @products = @products[start_pos..(start_pos + (pagesize - 1))] || []
 
     @cats = KSM::Category.toplevel.sort_by(&:wfindex)
-
+    @place = townfilter
+    @ccat = ccat
     @r = url(:products, :index)
     render 'things/table'
   end
@@ -81,10 +80,11 @@ Fenix::App.controllers :things do
 
     ids = wonderbox(:things_by_date).reverse
     @products = Product.find_all(ids).sort_by{|a| ids.index(a.id)}
-    if ccat = params[:cat]
-      @products = Product.all.select{ |a| a.category_id == ccat }.sort_by(&:cindex)
+    if ccat = params[:cat] and townfilter = params[:place]
+      @products = Product.which(townfilter).select{ |a| a.category_id == ccat }.sort_by(&:cindex)
       @product.category_id = ccat unless @product.exist?
       @ccat = ccat
+      @place = townfilter
     end
     codes = @products.map(&:place_id).uniq
     @kc_towns = KatoAPI.batch(codes)

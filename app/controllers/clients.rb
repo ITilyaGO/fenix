@@ -200,9 +200,10 @@ Fenix::App.controllers :clients do
     end
   end
 
-  get :transport  do
+  get :transport do
+    halt 404 unless can_view? *%i(sys prefs)
     @title = "Transport list"
-    @transport = CabiePio.folder(:m, :dic, :transport).flat
+    @transport = KSM::Transport.all
 
     render 'clients/transport'
   end
@@ -211,9 +212,11 @@ Fenix::App.controllers :clients do
     company = params[:form][:company].downcase
     if company.match? /\A[a-z]{3,10}\z/
       unless params[:clear]
-        CabiePio.set([:m, :dic, :transport], company, {})
+        tk = KSM::Transport.find company
+        tk.name = params[:form][:rus]
+        tk.save
       else
-        CabiePio.unset([:m, :dic, :transport], company)
+        KSM::Transport.find(company).remove
       end
     end
 

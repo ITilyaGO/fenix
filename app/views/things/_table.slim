@@ -8,7 +8,7 @@
       
     select name="categories" class="huge small mh350" riot-tag='selectreload' rname='cat' loc=url(:things, :table)
       = content_tag(:option, 'Не выбрано', { :value => :none })
-      = content_tag(:option, 'Без категории', { :value => :nothing, selected: @ccat == 'nothing' })
+      / = content_tag(:option, 'Без категории', { :value => :nothing, selected: @ccat == 'nothing' })
       - @cats.each do |cat|
         optgroup label="#{cat.name}"
           - cat.subs_ordered.each do |sub|
@@ -20,10 +20,12 @@
     / = text_field_tag :search, value: params[:search], placeholder: 'Поиск по имени продукта включающего слова...' , class: 'form-control input-xs height-auto', autocomplete: 'off'
     a.fa.fa-upload.btn.btn-sm.btn-default href=url(:things, :transfer, params)
   .page-select
-    - if @pages
+    - if @pages && @pages > 1 && !@notice
       - (1..@pages).each do |i|
         a.btn.btn-xs class=(@page == i ? 'btn-success' : 'btn-default') href=url(:things, :table, params.merge(page: i)) = i
 
+  - if @notice
+    .alert.alert-info: .small Выберите город и категорию
 
   table class="table table-hover table-condensed" id="list"
     thead
@@ -83,8 +85,8 @@
           td class='list-column list-row-action'
             div class='list-row-action-wrapper'
               //span class='list-row-action-wrapper-link' 1
-              = link_to tag_icon(:'code-fork'), :href => url(:things, :edit, :id => product.id, clone: 1, cat: @ccat), :rel => :tooltip, :title => "#{pat(:clone)} product", :class => 'list-row-action-wrapper-link'
-              = link_to tag_icon(:edit), :href => url(:things, :edit, :id => product.id, cat: @ccat), :rel => :tooltip, :title => "#{pat(:edit)} product", :class => 'list-row-action-wrapper-link'
+              = link_to tag_icon(:'code-fork'), :href => url(:things, :edit, :id => product.id, clone: 1, cat: @ccat, place: @place), :rel => :tooltip, :title => "#{pat(:clone)} product", :class => 'list-row-action-wrapper-link'
+              = link_to tag_icon(:edit), :href => url(:things, :edit, :id => product.id, cat: @ccat, place: @place), :rel => :tooltip, :title => "#{pat(:edit)} product", :class => 'list-row-action-wrapper-link'
 
 - content_for :js_assets do
   = javascript_include_tag :appa, :riot

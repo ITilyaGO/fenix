@@ -30,7 +30,7 @@ module Fenix::App::ClientsHelper
   end
 
   def transport_dic
-    CabiePio.folder(:m, :dic, :transport).flat.keys.sort_by { |e| transport_list.index(e.to_sym) || 64}
+    KSM::Transport.all.map(&:opttag)
   end
 
   def guess_transport(client, save: false)

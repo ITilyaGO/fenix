@@ -108,9 +108,11 @@ fieldset class='control-group#{error ? ' has-error' : ''}'
     // span class='help-inline' = error ? f.error_message_on(:org, :class => 'text-error') : pat(:example)
 fieldset class='control-group control-new'
   = f.label :shipping_company, :class => 'col-md-3 control-label'
-  div class='col-md-6 controls'
+  div class='col-md-6 controls flex-c'
     = select_tag :'cabie[transport]', class: 'huge', options: transport_dic.unshift(:none), :selected => @kc_transport || :none
-    = link_to tag_icon(:edit), url(:clients, :transport), class: 'btn btn-sm btn-default'
+    .prm
+    - if can_view? *%i(sys prefs)
+      = link_to tag_icon(:edit), url(:clients, :transport), class: 'btn btn-sm btn-default'
 
 br 
 - error = @client.errors.include?(:comment)

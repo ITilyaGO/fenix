@@ -932,8 +932,8 @@ Fenix::App.controllers :orders do
     o_status = KSM::OrderStatus.find(@order.id)
     if @order_part && params[:order_part]
       # @order_part.status = params[:order_part]['done'] ? :finished : :current
-      form_s = @order_part.section_id.to_s
-      opf = params[:order_part][form_s]
+      ks = KSM::Section.all.detect { |s| s.ix == @order_part.section_id }
+      opf = params[:order_part][ks.id]
       if opf
         @order_part.boxes = opf[:boxes] || 0
         @order_part.boxes = 0 if opf[:no_boxes] == '1'
