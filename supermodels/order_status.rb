@@ -5,14 +5,14 @@ class KSM::OrderStatus < Doppel
   attr_accessor *PROPS
 
   BIT_STATES = {
+    draft: 6,
+    anew: 3,
+    prepare: 21,
     current: 1,
     finished: 2,
-    anew: 3,
+    shipready: 22,
     shipped: 4,
-    canceled: 5,
-    draft: 6,
-    prepare: 21,
-    shipready: 22
+    canceled: 5
   }.freeze
 
   BIT_FLAGS = {

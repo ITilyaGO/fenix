@@ -1,0 +1,17 @@
+custom_button onclick='{ send_form }'
+  yield
+
+  javascript:
+    self.autosub = opts.nosub != '1'
+    self.clearing = opts.clr == '1'
+
+    send_form() {
+      var el = document.createElement('input')
+      el.type = 'hidden'
+      el.name = opts.name
+      el.value = opts.value
+
+      console.log(this.root.appendChild(el))
+      if (self.autosub) self.root.closest('form').submit()
+      if (self.clearing) el.remove()
+    }

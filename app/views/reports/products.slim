@@ -1,164 +1,168 @@
 - params_sym = params.map{ |k, v| [k.to_sym, v] }.to_h
-.reports.products-page: .scrolling
-  .non-print.sticky-left.filters-z
-    = partial 'reports/filters_products', locals: { query: params }
+= form_for :supermodel, url(@r) do |f|
+  = hidden_field_tag :filtred_orders, value: @orders.map(&:id).join('_')
+  - [:section, :search, :manager, :town, :client, :delivery, :state, :date_sel, :start_date, :end_date].each do |k|
+    = hidden_field_tag "old[#{k.to_s}]", value: params[k].to_s if params[k]
+  = hidden_field_tag :old_path, value: @old_path_string if @old_path_string
 
-  .table-field
-    table.table.table-hover.table-condensed id='list'
-      thead
-        tr.list-row
+  - @btn_memory.each do |k, v|
+    = hidden_field_tag "btn_memory[#{k.to_s}]", value: v.to_s if v
 
-          th.header.headcol.headrow-color
-            .flex-c.non-print
-              a.toggleable.grouping title='Группировка по складу' href=local(params_toggle(params_sym, :gp, :items)) class=('actived' if params[:gp] == 'items')
-                span.fa.fa-bars
-              a.toggleable.grouping title='Колонны заказов' href=local(params_toggle(params_sym, :col, :orders)) class=('actived' if params[:col] == 'orders')
-                span.fa.fa-table
-              a.toggleable title='Сортировка: Наименование' href=local(params_toggle(params_sym, :seq, :p_dn)) class=('actived' if params[:seq] == 'p_dn') Наименование
-            .only-print Наименование
+  .reports.products-page: .scrolling
+    .non-print.sticky-left.filters-z
+      = partial 'reports/filters_products', locals: { query: params }
 
-          th.header.text-center title='Сортировка: Заказано * Цена'
-            a.toggleable.non-print href=local(params_toggle(params_sym, :seq, :ap_sum)) class=('actived' if params[:seq] == 'ap_sum') Сумма
-            .only-print Сумма
+    .table-field
+      table.table.table-hover.table-condensed id='list'
+        thead
+          tr.list-row
 
-          / - if params[:gp]
-            th.header.text-center title='Осталось сделать'
-              a.toggleable.non-print.fa.fa-archive href=local(params_toggle(params_sym, :seq, :arch_amount)) class=('actived' if params[:seq] == 'arch_amount')
-              .only-print.fa.fa-archive
+            th.header.headcol.headrow-color
+              .flex-c.non-print
+                = partial 'reports/mem_btn', locals: { name: :gp, title: 'Группировка по складу', fa: 'fa-bars', c_list: ['grouping'] }
+                = partial 'reports/mem_btn', locals: { name: :col, title: 'Колонны заказов', fa: 'fa-table', c_list: ['grouping'] }
+                = partial 'reports/mem_btn', locals: { name: :seq, val: 'p_dn', text: 'Наименование', title: 'Сортировка: Наименование' }
+              .only-print Наименование
 
-          - if !params[:gp]
-            th.header.text-center title='Сортировка: Цена'
-              a.toggleable.non-print.fa.fa-money href=local(params_toggle(params_sym, :seq, :price)) class=('actived' if params[:seq] == 'price')
-              .only-print.fa.fa-money
+            th.header.text-center title='Сортировка: Заказано * Цена'
+              = partial 'reports/mem_btn', locals: { name: :seq, val: 'ap_sum', text: 'Сумма', c_list:['non-print'] }
+              .only-print Сумма
 
-          th.header.text-center title='Сортировка: Заказано'
-            a.toggleable.non-print.fa.fa-shopping-cart href=local(params_toggle(params_sym, :seq, :amount)) class=('actived' if params[:seq] == 'amount')
-            .only-print.fa.fa-shopping-cart
+            - if !@btn_memory[:gp]
+              th.header.text-center title='Сортировка: Цена'
+                = partial 'reports/mem_btn', locals: { name: :seq, val: 'price' , fa: 'fa-money' }
+                .only-print.fa.fa-money
 
-          th.header.text-center title='Сортировка: Наклеено'
-            a.toggleable.non-print.fa.fa-ticket href=local(params_toggle(params_sym, :seq, :stick_amount)) class=('actived' if params[:seq] == 'stick_amount')
-            .only-print.fa.fa-ticket
+            th.header.text-center title='Сортировка: Заказано'
 
-          th.header.text-center title='Сортировка: Фактически'
-            a.toggleable.non-print.fa.fa-legal href=local(params_toggle(params_sym, :seq, :done_amount)) class=('actived' if params[:seq] == 'done_amount')
-            .only-print.fa.fa-legal
+              = partial 'reports/mem_btn', locals: { name: :seq, val: 'amount' , fa: 'fa-shopping-cart' }
+              .only-print.fa.fa-shopping-cart
 
-          - if @load_orders && params[:col] == 'orders'
-            - prev_d = Time.now
-            - @orders.each do |ord|
-              - ca = ord.created_at
-              - date_changed = prev_d != ca.to_date.mjd
-              - prev_d = ca.to_date.mjd
-              th.header.text-center class=('date-changed' if date_changed)
-                .cell
-                  .date class=('prev-date' unless date_changed)
-                    span = ca.strftime('%d.%m')
-                    span.year-num = ca.strftime('.%y')
-                  .order-id
-                    a href=url(:orders, :edit, ord.id) = ord.id
+            th.header.text-center title='Сортировка: Наклеено'
+              = partial 'reports/mem_btn', locals: { name: :seq, val: 'stick_amount' , fa: 'fa-ticket' }
+              .only-print.fa.fa-ticket
 
-          th.header.text-center.text-nowrap
-            .non-print
-              ' Всего:
-              - if params[:gp]
-                = @data_table_p_id_archs&.size || 0
-              - else
-                = @data_table_p_id&.size || 0
+            th.header.text-center title='Сортировка: Фактически'
+              = partial 'reports/mem_btn', locals: { name: :seq, val: 'done_amount' , fa: 'fa-legal' }
+              .only-print.fa.fa-legal
 
-      tbody.columns-border
-        - if params[:gp]
-          - @data_table_p_id_archs.each do |arch_id, dtpi|
+            - if @load_orders && @btn_memory[:col]
+              - prev_d = Time.now
+              - @orders.each do |ord|
+                - ca = ord.created_at
+                - date_changed = prev_d != ca.to_date.mjd
+                - prev_d = ca.to_date.mjd
+                th.header.text-center class=('date-changed' if date_changed)
+                  .cell
+                    .date class=('prev-date' unless date_changed)
+                      span = ca.strftime('%d.%m')
+                      span.year-num = ca.strftime('.%y')
+                    .order-id
+                      a href=url(:orders, :edit, ord.id) = ord.id
+
+            th.header.text-center.text-nowrap
+              .non-print
+                ' Всего:
+                - if @btn_memory[:gp]
+                  = @data_table_p_id_archs&.size || 0
+                - else
+                  = @data_table_p_id&.size || 0
+
+        tbody.columns-border
+          - if @btn_memory[:gp]
+            - @data_table_p_id_archs.each do |arch_id, dtpi|
+              tr.list-row
+                td.list-column.cell.headcol = @archetypes[arch_id]&.name || 'Не найдено'
+                td.list-column.cell.num == deli rur dtpi.map{ |p_id, dts| dts.sum(&:ap_sum) }.sum
+
+                td.list-column.cell.num = deli hide_zero_value dtpi.map{ |p_id, dts| dts.sum(&:multi_amount) }.sum
+                td.list-column.cell.num = deli hide_zero_value dtpi.map{ |p_id, dts| dts.sum(&:multi_stick) }.sum
+                td.list-column.cell.num = deli hide_zero_value dtpi.map{ |p_id, dts| dts.sum(&:multi_done) }.sum
+
+                - if @load_orders && @btn_memory[:col]
+                  - @orders.each do |ord|
+                    - o_id = ord.id
+                    - ord_dts = []
+                    - dtpi.each{ |p_id, dts| dts.each{ |dt| ord_dts << dt if dt.ord_id == o_id } }
+                    td.list-column.text-center.cell
+                      - if ord_dts.size > 0
+                        .amount = hide_zero_value ord_dts.sum(&:multi_amount), "\u00a0"
+                        - ord_dts_ignored = ord_dts.select(&:ignored)
+                        - title_ignored = 'Не делаем – ' + ord_dts_ignored.map{ |odi| "#{odi.p_dn}(#{odi.ol.description}): #{odi.amount}" }.join(", ")
+                        - if ord_dts.all?(&:ignored)
+                          .fa.fa-times.any-ignored title=title_ignored
+                        - else
+                          .done_amount title=title_ignored class=('any-ignored' if ord_dts_ignored.size > 0) = hide_zero_value ord_dts.sum(&:multi_done), "\u00a0"
+          - else
+            - @data_table_p_id.each do |p_id, dts|
+              tr.list-row
+                td.list-column.cell.headcol
+                  = dts.first.p_dn
+                  | &nbsp;
+                  a.edit-product title='Редактировать карточку товара' href=url(:things, :edit, dts.first.p_id)
+                    .fa.fa-edit
+                td.list-column.cell.num == deli rur(dts.sum(&:ap_sum))
+                td.list-column.cell.num == deli rur(dts.first.price)
+                td.list-column.cell.num = deli hide_zero_value dts.sum(&:amount)
+                td.list-column.cell.num = deli hide_zero_value dts.sum(&:stick_amount)
+                td.list-column.cell.num = deli hide_zero_value dts.sum(&:done_amount)
+
+                - if @load_orders && @btn_memory[:col]
+                  - @orders.each do |ord|
+                    - o_id = ord.id
+                    - ord_dts = dts.select{ |dt| dt.ord_id == o_id }
+                    td.list-column.text-center.cell
+                      - if ord_dts.size > 0
+                        .amount = hide_zero_value ord_dts.sum(&:amount), "\u00a0"
+                        - ord_dts_ignored = ord_dts.select(&:ignored)
+                        - title_ignored = 'Не делаем – ' + ord_dts_ignored.map{ |odi| "#{odi.ol.description.blank? ? 'Без коммента' : odi.ol.description}: #{odi.amount}" }.join(", ")
+                        - if ord_dts.all?(&:ignored)
+                          .fa.fa-times.any-ignored title=title_ignored
+                        - else
+                          .done_amount title=title_ignored class=('any-ignored' if ord_dts_ignored.size > 0) = hide_zero_value ord_dts.sum(&:done_amount), "\u00a0"
+          - if @load_orders
             tr.list-row
-              td.list-column.cell.headcol = @archetypes[arch_id]&.name || 'Не найдено'
-              td.list-column.cell.num == deli rur dtpi.map{ |p_id, dts| dts.sum(&:ap_sum) }.sum
+              td.list-column.headcol.cell.num.sum-all Общая сумма:
+              td.list-column.cell.num.sum-all == deli rur @data_table_p_id.map{ |p_id, dts| dts.sum(&:ap_sum) }.sum
+              - if !@btn_memory[:gp]
+                td.list-column.cell.num
+              - stick_sum = @data_table_p_id.map{ |p_id, dts| dts.sum(&:stick_sum) }.sum
+              - all_count = @data_table_p_id.map{ |p_id, dts| dts.sum(&:amount) }.sum
+              - done_sum = @data_table_p_id.map{ |p_id, dts| dts.sum(&:done_sum) }.sum
+              td.list-column.cell.num.sum-all = all_count if all_count > 0
+              td.list-column.cell.num.sum-all == deli rur hide_zero_value stick_sum if stick_sum > 0
+              td.list-column.cell.num.sum-all == deli rur hide_zero_value done_sum if done_sum > 0
+              - (((@load_orders && @btn_memory[:col]) ? @orders.size : 0)).times
+                td.list-column.border-right-zero
 
-              / - ar_sum = dtpi.map{ |p_id, dts| dts.sum(&:arch_amount) }.sum
-              / td.list-column.cell.num
-                - if ar_sum > 0 && ar_sum != am_sum
-                .cell.arch-amount
-                  .btn-xs.btn-info = deli ar_sum
-              td.list-column.cell.num = deli hide_zero_value dtpi.map{ |p_id, dts| dts.sum(&:multi_amount) }.sum
-              td.list-column.cell.num = deli hide_zero_value dtpi.map{ |p_id, dts| dts.sum(&:multi_stick) }.sum
-              td.list-column.cell.num = deli hide_zero_value dtpi.map{ |p_id, dts| dts.sum(&:multi_done) }.sum
-
-              - if @load_orders && params[:col] == 'orders'
-                - @orders.each do |ord|
-                  - o_id = ord.id
-                  - ord_dts = []
-                  - dtpi.each{ |p_id, dts| dts.each{ |dt| ord_dts << dt if dt.ord_id == o_id } }
-                  td.list-column.text-center.cell
-                    - if ord_dts.size > 0
-                      .amount = hide_zero_value ord_dts.sum(&:multi_amount), "\u00a0"
-                      - ord_dts_ignored = ord_dts.select(&:ignored)
-                      - title_ignored = 'Не делаем – ' + ord_dts_ignored.map{ |odi| "#{odi.p_dn}(#{odi.ol.description}): #{odi.amount}" }.join(", ")
-                      - if ord_dts.all?(&:ignored)
-                        .fa.fa-times.any-ignored title=title_ignored
-                      - else
-                        .done_amount title=title_ignored class=('any-ignored' if ord_dts_ignored.size > 0) = hide_zero_value ord_dts.sum(&:multi_done), "\u00a0"
-        - else
-          - @data_table_p_id.each do |p_id, dts|
             tr.list-row
-              td.list-column.cell.headcol = dts.first.p_dn
-              td.list-column.cell.num == deli rur(dts.sum(&:ap_sum))
-              td.list-column.cell.num == deli rur(dts.first.price)
-              td.list-column.cell.num = deli hide_zero_value dts.sum(&:amount)
-              td.list-column.cell.num = deli hide_zero_value dts.sum(&:stick_amount)
-              td.list-column.cell.num = deli hide_zero_value dts.sum(&:done_amount)
+              - (5 + (@btn_memory[:gp] ? 0 : 1)).times
+                td.list-column
+          - else
+            tr.list-row
+              td = "Найдено #{@orders.size} нажмите показать, чтобы посмотреть"
 
-              - if @load_orders && params[:col] == 'orders'
-                - @orders.each do |ord|
-                  - o_id = ord.id
-                  - ord_dts = dts.select{ |dt| dt.ord_id == o_id }
-                  td.list-column.text-center.cell
-                    - if ord_dts.size > 0
-                      .amount = hide_zero_value ord_dts.sum(&:amount), "\u00a0"
-                      - ord_dts_ignored = ord_dts.select(&:ignored)
-                      - title_ignored = 'Не делаем – ' + ord_dts_ignored.map{ |odi| "#{odi.ol.description.blank? ? 'Без коммента' : odi.ol.description}: #{odi.amount}" }.join(", ")
-                      - if ord_dts.all?(&:ignored)
-                        .fa.fa-times.any-ignored title=title_ignored
-                      - else
-                        .done_amount title=title_ignored class=('any-ignored' if ord_dts_ignored.size > 0) = hide_zero_value ord_dts.sum(&:done_amount), "\u00a0"
-        - if @load_orders
-          tr.list-row
-            td.list-column.headcol.cell.num.sum-all Общая сумма:
-            td.list-column.cell.num.sum-all == deli rur @data_table_p_id.map{ |p_id, dts| dts.sum(&:ap_sum) }.sum
-            - if !params[:gp]
-              td.list-column.cell.num
-            td.list-column.cell.num
-            - stick_sum = @data_table_p_id.map{ |p_id, dts| dts.sum(&:stick_sum) }.sum
-            - done_sum = @data_table_p_id.map{ |p_id, dts| dts.sum(&:done_sum) }.sum
-            td.list-column.cell.num.sum-all == deli rur hide_zero_value stick_sum if stick_sum > 0
-            td.list-column.cell.num.sum-all == deli rur hide_zero_value done_sum if done_sum > 0
-            - (((@load_orders && params[:col] == 'orders') ? @orders.size : 0)).times
-              td.list-column.border-right-zero
-
-          tr.list-row
-            - (5 + (params[:gp] ? 0 : 1)).times
-              td.list-column
-        - else
-          tr.list-row
-            td = "Найдено #{@orders.size} нажмите показать, чтобы посмотреть"
-
-  .non-print.sticky-left
-    a.p-r-5 href=url(*@ra, params.merge(export: 1))
-      span.label.label-info
-        span.fa.fa-file.menu-icon.p-r-5
-        ' CSV
-    a.p-r-5 href=url(*@ra, params.merge({ export: 1, win: 1 }))
-      span.label.label-success
-        span.fa.fa-file.menu-icon.p-r-5
-        ' Excel
-    a href=url(:reports, :orders, params)
-      span.label.label-border
-        span.fa.fa-share.menu-icon.p-r-5
-        ' Перейти в отчёт по заказам
+    .non-print.sticky-left
+      custom_button.p-r-5 title='Экспорт в CSV' name=:export value=1 clr=1
+        .btn.btn-xs.btn-info
+          .fa.fa-file
+          ' CSV
+      custom_button.p-r-5 title='Экспорт в Excel' name=:export_win value=1 clr=1
+        .btn.btn-xs.btn-success
+          .fa.fa-file
+          ' Excel
+      / a href=url(:reports, :orders, params)
+        span.label.label-border
+          span.fa.fa-share.menu-icon.p-r-5
+          ' Перейти в отчёт по заказам
 
 
   = javascript_include_tag :riot, :flexsearch_min
   rscript type="riot/tag" src="/riot/tags/html/typedown.tag"
   rscript type="riot/tag" src="/riot/tags/html/tdrop.tag"
+  rscript type="riot/tag" src="/riot/tags/custom_button.tag"
 
   javascript:
     document.addEventListener("DOMContentLoaded", function(event) {
-      riot.mount('typedown, tdrop')
+      riot.mount('typedown, tdrop, custom_button')
     })

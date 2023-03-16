@@ -1,0 +1,13 @@
+- cl_list = []
+- cl_list << 'actived' if (defined?(val) ? @btn_memory[name] == val : @btn_memory[name])
+- cl_list += c_list if defined?(c_list)
+
+custom_button.toggleable.non-print [
+  title=(title if defined?(title))
+  class=cl_list.join(' ')
+  name="btn[#{name}]"
+  value=(defined?(val) ? (@btn_memory[name] == val ? '' : val) : (!@btn_memory[name]).to_s)
+  ]
+  = text if defined?(text)
+  - if defined?(fa)
+    .fa class=fa

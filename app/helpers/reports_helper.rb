@@ -37,10 +37,69 @@ module Fenix::App::ReportsHelper
     arr
   end
 
+  def select_orders_by_other_dates(date_sel)
+    if date_sel == :send
+      @kc_timelines = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :timeline]).flat.trans(:to_i).map{ |k, v| [k, timeline_unf(v)] }.to_h
+      @orders.select! do |o|
+        odate = @kc_timelines[o.id]
+        next false if odate.nil?
+        odate > @start_date && odate < @end_date
+      end
+    elsif date_sel == :done
+      @kc_done = CabiePio.all_keys(@orders.map(&:id), folder: [:stock, :order, :done]).flat.trans(:to_i).map{ |k, v| [k, v.to_datetime] }.to_h
+      @orders.select! do |o|
+        odate = @kc_done[o.id]
+        next false if odate.nil?
+        odate > @start_date && odate < @end_date
+      end
+    end
+  end
+
+  def get_manager_accounts
+    @manager_accounts = Account.managers if @account_managers.nil?
+  end
+
+  def managers_list_by_clients_list
+    managers_ids = @clients_list.map{ |c| c.manager_id }.compact.uniq
+    @managers_list = get_manager_accounts.select{ |m| managers_ids.include?(m.id) }
+  end
+
+  def clients_list_by_orders
+    @clients_list = @orders.map{ |o| o.client }.uniq.compact
+  end
+
+  def kc_os_hash_by_orders
+    @kc_os = KSM::OrderStatus.find_all(@orders.map(&:id))
+    @kc_os_hash = @kc_os.map{ |kc| [kc.id.to_i, kc] }.to_h
+  end
+
+  def calculate_orders_count_in_tcmds(sorting = true, tow: true, cli: true, man: true, del: true, sta: true)
+    @oc_towns = Hash.new(0) if tow || @oc_towns.nil?
+    @oc_clients = Hash.new(0) if cli || @oc_clients.nil?
+    @oc_managers = Hash.new(0) if man || @oc_managers.nil?
+    @oc_delivery = Hash.new(0) if del || @oc_delivery.nil?
+    @oc_state = Hash.new(0) if sta || @oc_state.nil?
+
+    @orders.each do |o|
+      oc = o.client
+      @oc_towns[@kc_towns[@kc_orders[o.id.to_s]]&.key&.public] += 1 if tow
+      @oc_clients[oc.id] += 1 if cli && oc
+      @oc_managers[oc.manager_id] += 1 if man && oc
+      @oc_delivery[o.delivery] += 1 if del
+      @oc_state[@kc_os_hash[o.id].state] += 1 if sta
+      # puts o.status + " " + @kc_os_hash[o.id].state.to_s
+    end
+    if sorting
+      @towns_list.sort_by!{ |i, n| [-@oc_towns[i], n] } if tow
+      @clients_list.sort_by!{ |c| [-@oc_clients[c.id], c.name] } if cli
+      @managers_list.sort_by!{ |m| [-@oc_managers[m.id], m.name] } if man
+    end
+  end
+
   def products_print_prepare(gp, col)
     pretty_stat = []
     orders_head = []
-    @orders.each{ |ord| orders_head << ord.id } if col == 'orders'
+    @orders.each{ |ord| orders_head << ord.id } if col
 
     if gp
       pretty_stat << ['Наименование', 'Сумма', 'Заказано', 'Наклеено', 'Фактически'] + orders_head
@@ -53,7 +112,7 @@ module Fenix::App::ReportsHelper
           ord_dts = []
           dtpi.each{ |p_id, dts| dts.each{ |dt| ord_dts << dt if dt.ord_id == o_id } }
           orders_cells << ((ord_dts.size > 0) ? hide_zero_value(ord_dts&.sum(&:multi_amount)) : nil)
-        end if col == 'orders'
+        end if col
 
         pretty_stat << [
           @archetypes[arch_id]&.name || 'Не найдено',
@@ -80,7 +139,7 @@ module Fenix::App::ReportsHelper
           o_id = ord.id
           ord_dts = dts.select{ |dt| dt.ord_id == o_id }
           orders_cells << hide_zero_value(ord_dts&.sum(&:amount))
-        end if col == 'orders'
+        end if col
 
         pretty_stat << [
           dts.first.p_dn,
@@ -148,10 +207,9 @@ module Fenix::App::ReportsHelper
 end
 
 class OrderLineData
-  attr_accessor :ord, :ord_id, :ol, :ol_id, :p_id, :p_dn, :cat_id, :cat_path, :price, :amount, :done_amount, :stick_amount, :arch_amount, :multiply, :ignored
-  def initialize(ord, ol, p_dn, cat_id, cat_path, stick_amount = 0, arch_amount = 0, multiply = 1)
-    @ord = ord
-    @ord_id = ord.id
+  attr_accessor :ord_id, :ol, :ol_id, :p_id, :p_dn, :cat_id, :cat_path, :price, :amount, :done_amount, :stick_amount, :arch_amount, :multiply, :ignored
+  def initialize(ol, p_dn, cat_id, cat_path, stick_amount = 0, arch_amount = 0, multiply = 1)
+    @ord_id = ol.order_id
     @ol = ol
     @ol_id = ol.id
     @p_id = ol.product_id
