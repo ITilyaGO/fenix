@@ -24,7 +24,7 @@ div class="tabs-content"
         th class='header' Куда едет
         th class='header only-print' Тр.ком
         th class='header' Телефон
-        th.header Накладная
+        / th.header Накладная
         // th class='header only-print' Сумма
         th class='header only-print' ИНН (паспорт)
         th.header width='50px'
@@ -60,7 +60,7 @@ div class="tabs-content"
           td class='list-column only-print' = order.client.shipping_company
           // td class='list-column' = to_msk(order.created_at)
           td class='list-column' = order.client.tel
-          td.list-column = order.track
+          / td.list-column = order.track
           // td class='list-column only-print' = "%0.f" % order.done_total
           td class='list-column only-print' = order.client.inn
           td.list-column.minirur.text-nowrap == deli(rur (order.total/1000.0).floor)

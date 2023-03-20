@@ -123,6 +123,7 @@ Fenix::App.controllers :orders do
     @sections = KSM::Section.all
     a_towns(@orders.map(&:id), @orders.map(&:client_id))
     @kc_done = CabiePio.all_keys(@orders.map(&:id), folder: [:stock, :order, :done]).flat.trans(:to_i)
+    @transport = KSM::Transport.all
 
     render 'orders/shipready'
   end

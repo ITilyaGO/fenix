@@ -96,7 +96,7 @@ Fenix::App.controllers :archetypes do
     @archetype = CabiePio.get([:product, :archetype], @product.id).data
     @multi = CabiePio.get([:product, :archetype_multi], @product.id).data
     @archs = KSM::Archetype.all
-    @grouped = @archs.group_by{|a|a.category_id.to_i}
+    @grouped = @archs.group_by(&:category_id)
     @cats = KSM::Category.toplevel
     if @product
       render 'archetypes/assign'

@@ -13,6 +13,10 @@ class KSM::Category < Doppel
     KSM::Section.find @section_id
   end
 
+  def subcategories
+    KSM::Category.all.select{ |a| a.category_id == id }
+  end
+
   def subs_ordered
     KSM::Category.all.select{ |a| a.category_id == id }.sort_by(&:wfindex)
   end

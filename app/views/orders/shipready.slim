@@ -1,4 +1,4 @@
-.pull-right
+.pull-left
   clicker.btn.btn-xs.btn-prepare action='READ_SHIPREADY' Просмотреть
   
 div class="tabs-content"
@@ -14,6 +14,7 @@ div class="tabs-content"
               li class='list-menu-wrapper list-menu-wrapper-disabled' = link_to 'deselect_all', '#', :id => 'deselect-all', :class => 'list-menu-link list-menu-link-disabled'
               li class='list-menu-divider divider'
         th class='header' Номер
+        th.header: .hidden-md.hidden-lg Доставка
         th.header.text-center width='70px' Собран
         // th class='header' = mat(:order, :name)
         // th class='header' = mat(:order, :amount)
@@ -22,7 +23,8 @@ div class="tabs-content"
         th class='header' Куда едет
         th class='header only-print' Тр.ком
         th class='header' Телефон
-        th.header Накладная
+        th.header.text-center Менеджер
+        th class='header' ТK
         th class='header only-print' ИНН (паспорт)
         th.header width='50px'
         th.header.non-print
@@ -43,6 +45,9 @@ div class="tabs-content"
           td class='list-column list-selectable non-print'
             = check_box_tag 'order_ids[]', :autocomplete => "off", :value => order.id, 'riot-tag': 'print_selectable', :class => 'list-selectable-checkbox'
           td class='list-column' = order.id
+          td.list-column
+            = tja :delivery, order.delivery
+            | &nbsp;&nbsp;
           td.list-column.text-center = to_dm(Time.parse @kc_done[order.id]) rescue nil
           // td class='list-column' = order.name
           td class='list-column' = order.client.name
@@ -57,7 +62,13 @@ div class="tabs-content"
           td class='list-column only-print' = order.client.shipping_company
           // td class='list-column' = to_msk(order.created_at)
           td class='list-column' = order.client.tel
-          td.list-column = order.track
+          td.list-column.text-center
+            = order.client&.manager&.name
+            - unless order.client&.manager_id
+              .fa.fa-briefcase.text-danger
+          td class='list-column'
+            - trc = @transport.detect { |t| t.id == KSM::OrderShip.find(order.id).transport.to_s }
+            = partial 'bricks/kc/transport', :locals => { name: trc&.name }
           td class='list-column only-print' = order.client.inn
           td.list-column.minirur.text-nowrap == deli(rur (order.total/1000.0).floor)
           td.list-column.non-print
