@@ -24,6 +24,7 @@ div class="tabs-content"
         th class='header' Куда едет
         th class='header only-print' Тр.ком
         th class='header' Телефон
+        th.header.text-center Менеджер
         / th.header Накладная
         // th class='header only-print' Сумма
         th class='header only-print' ИНН (паспорт)
@@ -60,6 +61,10 @@ div class="tabs-content"
           td class='list-column only-print' = order.client.shipping_company
           // td class='list-column' = to_msk(order.created_at)
           td class='list-column' = order.client.tel
+          td.list-column.text-center
+            = order.client&.manager&.name
+            - unless order.client&.manager_id
+              .fa.fa-briefcase.text-danger
           / td.list-column = order.track
           // td class='list-column only-print' = "%0.f" % order.done_total
           td class='list-column only-print' = order.client.inn
@@ -80,6 +85,7 @@ div class="tabs-content"
               = link_to tag_icon("file-text-o"), :href => url(:orders, :invoice, :id => order.id), :class => 'list-row-action-wrapper-link'
               - if can_view?(:order, :modify)
                 = link_to tag_icon(:save), :href => url(:c1c, :create, :id => order.id), :class => 'list-row-action-wrapper-link'
+                = link_to tag_icon(:paw), :href => url(:orders, :touch, :id => order.id), :class => 'list-row-action-wrapper-link'
               - if can_view?(:order, :modify) && order.finished?
                 = link_to tag_icon(:cube), :href => url(:orders, :boxes, :id => order.id), :class => 'list-row-action-wrapper-link'
                 = link_to tag_icon(:usd), :href => url(:orders, :price, :id => order.id), :class => 'list-row-action-wrapper-link'

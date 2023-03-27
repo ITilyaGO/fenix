@@ -62,10 +62,18 @@ div class="tabs-content"
           td.list-column.list-row-action
             .list-row-action-wrapper.flex-c
               - if current_account.is_admin?
+                - os = KSM::OrderStatus.find(id: order.id)
                 = link_to tag_icon(:building), :rel => :tooltip, :title => "City", :'data-name' => :cityless, :class => 'list-row-action-wrapper-link list-row-modal'
                 = link_to tag_icon(:truck), :rel => :tooltip, :title => "Delivery", :'data-name' => :cityless, :'data-type' => :delivery, :class => 'list-row-action-wrapper-link list-row-modal'
 
                 = link_to tag_icon("files-o"), :rel => :tooltip, :title => "Copy order", :href => url(:orders, :copy, :id => order.id), :class => 'list-row-action-wrapper-link'
+
+                = link_to tag_icon(:'file-text-o'), :href => url(:orders, :txtf, :id => order.id), :class => 'list-row-action-wrapper-link', target: '_blank'
+                - if os.what?(:anew)
+                  = link_to tag_icon(:'exclamation-circle'), :class => 'list-row-action-delete-two list-row-action-wrapper-link'
+                - if can_view?(:order, :modify)
+                  = link_to tag_icon(:save), :href => url(:c1c, :create, :id => order.id), :class => 'list-row-action-wrapper-link'
+                = link_to tag_icon(:paw), :rel => :tooltip, :title => "Edit order", :href => url(:orders, :touch, :id => order.id), :class => 'list-row-action-wrapper-link'
                 = link_to tag_icon(:edit), :href => url(:orders, :edit, :id => order.id), :class => 'list-row-action-wrapper-link'
 
 = partial 'clients/modal_city'

@@ -91,10 +91,16 @@ Fenix::App.controllers :orders do
       pagesize = PAGESIZE
       @page = !params[:page].nil? ? params[:page].to_i : 1
       @pages = (@orders.count/pagesize).ceil
-      @orders = @orders.offset((@page-1)*pagesize).take(pagesize)
       @r = url(:orders, :finished, :old => 1)
       @ra = [:orders, :finished]
     end
+    if role_is? :manager
+      orders_base = @orders.map(&:client_id)
+      search_clients = Client.where(id: orders_base, manager_id: current_account.id).pluck(:id)
+      @orders = @orders.where(client_id: search_clients)
+    end
+    @orders = @orders.offset((@page-1)*pagesize).take(pagesize) if @old
+
     @sections = KSM::Section.all
     a_towns(@orders.map(&:id), @orders.map(&:client_id))
     @kc_done = CabiePio.all_keys(@orders.map(&:id), folder: [:stock, :order, :done]).flat.trans(:to_i)
