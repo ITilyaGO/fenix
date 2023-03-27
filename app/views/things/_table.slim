@@ -6,14 +6,15 @@
       = content_tag(:option, 'Не выбрано', { :value => :none, selected: @place.nil? })
       - known_cities.each do |k, city|
         = content_tag(:option, city.model, { value: city.code, selected: @place == city.code })
-      
+
     select name="categories" class="huge small mh350" riot-tag='selectreload' rname='cat' loc=url(:things, :table)
       = content_tag(:option, 'Не выбрано', { :value => :none })
-      / = content_tag(:option, 'Без категории', { :value => :nothing, selected: @ccat == 'nothing' })
+      = content_tag(:option, 'Без категории', { :value => :nothing, selected: @ccat == 'nothing' })
       - @cats.each do |cat|
         optgroup label="#{cat.name}"
           - cat.subs_ordered.each do |sub|
-            - html_attributes = { :value => sub.id }            - html_attributes[:selected] ||= option_is_selected?(sub.id, sub.name, @product&.category_id)
+            - html_attributes = { :value => sub.id }
+            - html_attributes[:selected] ||= option_is_selected?(sub.id, sub.name, @product&.category_id)
             = content_tag(:option, sub.name, html_attributes)
     .btn-group
       search loc=url(:things, :table) value=@search
@@ -96,7 +97,7 @@
   rscript type="riot/tag" src="/riot/tags/things/search.tag"
 
   javascript:
-    
+
     document.addEventListener("DOMContentLoaded", function(event) {
       riot.mount('selectreload, search')
       let confobj = #{{@squadconf.to_json}}
