@@ -1,3 +1,4 @@
+- @products_dn ||= {}
 .f
   .deepdown-wrap.text-center.mbs.cmar-05
     = link_to 'Последние', url(:things, :table), :class => 'btn btn-sm btn-default'
@@ -12,8 +13,7 @@
       - @cats.each do |cat|
         optgroup label="#{cat.name}"
           - cat.subs_ordered.each do |sub|
-            - html_attributes = { :value => sub.id }
-            - html_attributes[:selected] ||= option_is_selected?(sub.id, sub.name, @product&.category_id)
+            - html_attributes = { :value => sub.id }            - html_attributes[:selected] ||= option_is_selected?(sub.id, sub.name, @product&.category_id)
             = content_tag(:option, sub.name, html_attributes)
     .btn-group
       search loc=url(:things, :table) value=@search
@@ -21,6 +21,8 @@
     a.fa.fa-upload.btn.btn-sm.btn-default href=url(:things, :transfer, params)
   .page-select
     - if @pages && @pages > 1 && !@notice
+      .ss: .flex-wrap.child-m-2.m-b-5
+        a.btn.btn-xs class=(@page == 0 ? 'btn-success' : 'btn-default') href=url(:things, :table, params.merge(page: 0)) Все
       - (1..@pages).each do |i|
         a.btn.btn-xs class=(@page == i ? 'btn-success' : 'btn-default') href=url(:things, :table, params.merge(page: i)) = i
 
@@ -70,7 +72,7 @@
         tr class='list-row'
           td class='list-column list-selectable' = check_box_tag 'product_ids[]', :value => product.id, :class => 'list-selectable-checkbox'
           td class='list-column' = product.id
-          td class='list-column' = product.displayname
+          td class='list-column' = (@products_dn[product.id] || product.displayname)
           td.list-column
             = town_name = @kc_towns[product.place_id]&.model.name
           td class='list-column'

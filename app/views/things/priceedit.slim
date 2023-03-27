@@ -1,0 +1,39 @@
+.ss.things-priceedit
+  - from_url = (params[:from_url] || url(:things, :table, params))
+  = form_for :supermodel, url(@r) do |f|
+    = hidden_field_tag :from_url, value: from_url
+
+    .flex-c.jc-sb
+      .child-m-2
+        a.btn.btn-prime.btn-xs.m-b-5 title='Возврат к странице с продуктами' href=from_url
+          .fa.fa-arrow-left
+          | Список продуктов
+      .m-b-5.flex-c.child-m-2
+        .flex-c.child-m-2 = text_field_tag :name_filter, placeholder: 'Фильтр по названию', title: 'Останутся только товары содержащие частей слов...', value: params[:name_filter], autocomplete: 'off'
+        .price-input.child-m-2
+          = text_field_tag :price_filter, placeholder: 'Фильтр по цене', title: 'Останутся только товары с ценами из этого списка (можно написать одну или несоклько цен через пробел)', value: params[:price_filter], autocomplete: 'off'
+          = text_field_tag :formula, placeholder: 'Введите новую цену', title:'Она применится ко всем отфильтрованным товарам', value: params[:formula], autocomplete: 'off'
+        = submit_tag 'Применить', class: 'btn btn-prime btn-xs', title: 'Применит фильтры и предварительно подсчитает цены по указанной формуле', name: :ok
+        = submit_tag 'Фильтровать', class: 'btn btn-prime btn-xs', title: 'Убирает из списка товары не соответствующие фильтрам', name: :filter
+
+    table.table
+      thead
+        tr
+          th.header
+          th.header ID
+          th.header Имя
+          th.header Цена
+          th.header Новая цена
+
+      tbody
+        - @products.each do |prod|
+          - price_val = @products_values[prod.id]
+          - tr_class = @products_saved[prod.id] ? 'saved-row' : price_val ? 'filtred-row' : nil
+          tr class=tr_class
+            td
+            td = prod.id
+            td = prod.displayname
+            td = prod.price
+            td = text_field_tag "products[#{prod.id}]", value: price_val, autocomplete: 'off'
+
+    = submit_tag 'Сохранить', class: 'btn btn-prime btn-block', title: 'Сохранит установленные значения', name: :save

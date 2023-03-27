@@ -1,46 +1,69 @@
-.col-md-6
+.col-md-4.ss
   .h4.text-center Выгрузка продуктов
   .text-center
-    a.btn.btn-xs.btn-default.btn-embossed href=url(:things, :export, params) Сэмпл
-    |&nbsp;
-    a.btn.btn-xs.btn-default.btn-embossed href=url(:things, :export, params.merge(win: 1)) Сэмпл для Excel
-    - if params[:cat]
-      br
-      a.btn.btn-xs.btn-default.btn-embossed href=url(:things, :export, params) Категория
-      |&nbsp;
-      a.btn.btn-xs.btn-default.btn-embossed href=url(:things, :export, params.merge(win: 1)) Категория для Excel
-    - if (%w(cat search place) & params.keys).any?
-      br
-      a.btn.btn-xs.btn-default.btn-embossed href=url(:things, :export, params.merge(filtered: 1)) По фильтрам
-      |&nbsp;
-      a.btn.btn-xs.btn-default.btn-embossed href=url(:things, :export, params.merge(filtered: 1, win: 1)) По фильтрам для Excel
-    
+    a.btn.btn-xs.btn-default.btn-embossed.m-h-3 href=url(:things, :export, cat: :sample) Последние
+    a.btn.btn-xs.btn-default.btn-embossed.m-h-3 href=url(:things, :export, { cat: :sample, win: 1 }) Последние для Excel
+    br
+    a.btn.btn-xs.btn-default.btn-embossed.m-h-3 href=url(:things, :export, params.merge(filtered: 1)) По фильтрам
+    a.btn.btn-xs.btn-default.btn-embossed.m-h-3 href=url(:things, :export, params.merge(filtered: 1, win: 1)) По фильтрам для Excel
 
-.col-md-6
+.col-md-4.ss
   .h4.text-center Загрузка продуктов
   = form_tag url(:things, :transfer), :method => :post, :enctype => "multipart/form-data" do
     .fileinput.fileinput-new data-provides="fileinput"
       .text-center
-      
+
         .btn.btn-xs.btn-prime.btn-embossed.btn-file.fileinput-new
           .fileinput-new Выбрать
           input type="file" name="file" accept='.csv'
         '
-        button.btn.btn-xs.btn-prime.btn-embossed.fileinput-exists type="submit"
+        button.btn.btn-xs.btn-prime.btn-embossed.fileinput-exists.m-h-3 type="submit"
           .fa.fa-upload
           | Загрузить
+        button.btn.btn-xs.btn-prime.btn-embossed.fileinput-exists.m-h-3 type="submit" name="preview"
+          .fa.fa-eye
+          | Предпросмотр
+
+.col-md-4.ss
+  .h4.text-center Редактирование
+  .text-center
+    a.btn.btn-xs.btn-default.btn-embossed.m-h-3 href=url(:things, :priceedit, params) Редактирование цен
+
 .clearfix
 
-= @counter
-table.table.table-hover
-  - @products&.each do |p|
-    tr
-      td = p.id
-      td = p.displayname
-      td = p.category.hiername
-      / td = p.place_id
-      td = p.price
-      td = p.bbid
+- if @counter
+  .ss: .child-m-2.flex-c
+    .btn.btn-xs.btn-info.cursor-help title='Количество найденных строк'
+      .fa.fa-reorder
+      = @counter
+    .btn.btn-xs.btn-info.cursor-help title='Количество сохраненных товаров'
+      .fa.fa-save
+      = @saved_counter
+    a.btn.btn-xs.btn-info.cursor-help title='Количество строк которые полностью или частично не удалось считать. Нажмите чтобы перейти' href='#errors_list'
+      .fa.fa-warning
+      = @warning_counter
+
+- if @products && @products.size > 0
+  .reports.products-page: .scrolling: table.table.table-hover
+    thead: tr.header.text-nowrap
+      - head_fields = %w(Уин Название Город Вид Цена Артикул Собрание Скидка Склад Стикер Множитель Вес Высота Ширина Длина Индекс Кратность Производство Тег Штрихкод SKU Описание)
+      th title='Показывает какое действие будет произведено с товаром'
+        .fa.fa-database
+      - head_fields.each do |i|
+        th.header = i
+    - @products&.each do |p, xp, is_new|
+      - col_fields = [p.id, p.displayname, p.place_id, p.category.hiername, p.price, p.art, p.corel, p.discount, p.bbid, xp[:sticker], xp[:multi], p.dim_weight, p.dim_height, p.dim_width, p.dim_length, p.windex, p.lotof, p.lotof_mfg, p.tagname, p.autobar, p.autoart, p.desc]
+      tr.text-nowrap
+        td title=(is_new ? 'Создание нового товара' : 'Будет отредактирован существующий товар')
+          .fa class=(is_new ? 'fa-clipboard' : 'fa fa-edit')
+        - col_fields.each do |c|
+          td = c
+
+- if @error_lines
+  .h5 id='errors_list' Cписок ошибок
+  table.table.table-hover
+    - @error_lines.each do |line|
+      tr: td = line.inspect
 
 
 - content_for :js_assets do
