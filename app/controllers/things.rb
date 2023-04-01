@@ -11,49 +11,24 @@ Fenix::App.controllers :things do
   end
 
   get :table do
-    @title = "Products"
-    ids = wonderbox(:things_by_date).reverse
-    @products = Product.find_all(ids).sort_by{ |a| ids.index(a.id) }
-    pagesize = params.present? ? 50 : ids.size
-    ccat = params[:cat]
-    townfilter = params[:place]
-    ccat = nil if ccat == 'none'
-    townfilter = nil if townfilter == 'none'
-    @products = Product.which(townfilter) if townfilter
+    @title = t 'tit.products.list'
+    pagesize = (params[:pagesize] || 100).to_i
 
-    if ccat
-      @products = @products.select{ |a| a.category_id == ccat }.sort_by(&:cindex)
-      @product = Product.new({ category_id: ccat })
-    elsif ccat || townfilter
-      @notice = true
-    end
+    products_by_filters(params)
 
-    if @search = params[:search]
-      @products = Product.all if ccat.nil? && townfilter.nil?
-      search_list = (@search || '').downcase.split(/[\s,.'"()-]/).compact
-      @products.select!{ |p| search_list.all?{ |w| p.displayname.downcase.include?(w) } }
-
-      sections = KSM::Section.all.sort_by(&:ix)
-      category_list = SL::Category.all
-      @products.sort_by! do |p|
-        [(sections.detect{ |s| category_list.detect{ |c| c.id == p.category_id }&.section_id }&.ix || 0),
-          p.category_id || '0000',
-          p.displayname.downcase.delete('☠️ ')
-        ]
-      end
-    end
-    
     codes = @products.map(&:place_id).uniq
     @kc_towns = KatoAPI.batch(codes)
     @pages = (@products.size / pagesize.to_f).ceil
     @page = !params[:page].nil? ? params[:page].to_i : 1
     @page = 1 if @page > @pages
     start_pos = ((@page - 1) * pagesize)
-    @products = @products[start_pos..(start_pos + (pagesize - 1))] || []
+    @products = @products[start_pos..(start_pos + (pagesize - 1))] || [] if @page != 0
 
     @cats = KSM::Category.toplevel.sort_by(&:wfindex)
-    @place = townfilter
-    @ccat = ccat
+
+    @ccat = none_to_nil params[:cat]
+    @place = none_to_nil params[:place]
+
     @r = url(:products, :index)
     render 'things/table'
   end
@@ -78,18 +53,23 @@ Fenix::App.controllers :things do
     @cats = KSM::Category.toplevel.sort_by(&:wfindex)
     # @categories = Category.all.includes(:category)
 
-    ids = wonderbox(:things_by_date).reverse
-    @products = Product.find_all(ids).sort_by{|a| ids.index(a.id)}
-    if ccat = params[:cat] and townfilter = params[:place]
+    townfilter = @product.place_id
+    ccat = @product.category_id
+    @product.category_id = params[:cat] unless @product.exist?
+    if townfilter and ccat
       @products = Product.which(townfilter).select{ |a| a.category_id == ccat }.sort_by(&:cindex)
-      @product.category_id = ccat unless @product.exist?
-      @ccat = ccat
-      @place = townfilter
+    else
+      ids = wonderbox(:things_by_date).reverse
+      @products = Product.find_all(ids).sort_by{ |a| ids.index(a.id) }
+      @notice = 'Город или категория не выбраны - показаны последние изменения'
     end
     codes = @products.map(&:place_id).uniq
     @kc_towns = KatoAPI.batch(codes)
     @squadconf = @product.serializable_hash
     @product.id = '0000' if params[:clone]
+
+    @ccat = ccat
+    @place = townfilter
 
     render 'things/listform'
   end
@@ -195,7 +175,9 @@ Fenix::App.controllers :things do
           tid = line[:id]
           @product = Product.find tid
           @product = Product.nest if is_new_product_id.include?(tid)
+          preduct = @product.dup
           @product.clear_formize(item)
+          @product.area_movement preduct
           @product.sn ||= thing_glob_seed
           @product.saved_by @current_account
           thing_to_top @product.id
@@ -206,6 +188,7 @@ Fenix::App.controllers :things do
           @product.backsync if @product.global?
           known_cities_add @product.place_id
           OrderAssist.reset_products_list
+          ProductAssist.otree_job(otree_compare @product, preduct)
         end
 
         @warning_counter -= 1
@@ -230,43 +213,7 @@ Fenix::App.controllers :things do
 
   get :priceedit do
     @title = 'Редактирование цен продуктов'
-
-    ccat = params[:cat]
-    townfilter = params[:place]
-    ccat = nil if ccat == 'none'
-    townfilter = nil if townfilter == 'none'
-
-    @products_dn = Hash.new('')
-    if ccat.nil? && townfilter.nil? && params[:search].nil?
-      ids = wonderbox(:things_by_date).reverse
-      @products = Product.find_all(ids).sort_by{ |a| ids.index(a.id) }
-      @products.each { |p| @products_dn[p.id] = p.displayname }
-    else
-      @products = Product.all
-      @products = @products.select{ |a| a.place_id == townfilter } if townfilter
-
-      if ccat
-        ccat = nil if ccat.to_sym.eql? :nothing
-        @products = @products.select{ |a| a.category_id == ccat }.sort_by(&:cindex)
-      end
-      @products.each { |p| @products_dn[p.id] = p.displayname }
-      if @search = params[:search]
-        search_list = (@search || '').downcase.split(/[\s,.'"()-]/).compact
-        @products.select! do |p|
-          search_list.all?{ |w| @products_dn[p.id].downcase.include?(w) }
-        end
-      end
-    end
-
-    @sections = KSM::Section.all.sort_by(&:ix)
-    @category_list = SL::Category.all
-    @products.sort_by! do |p|
-      [(@sections.detect{ |s| @category_list.detect{ |c| c.id == p.category_id }&.section_id }&.ix || 0),
-        p.category_id || '0000',
-        @products_dn[p.id].downcase.delete('☠️ ')
-      ]
-    end
-
+    products_by_filters(params)
     @products_values = {}
     @products_saved = {}
     @r = url(:things, :priceedit)
@@ -307,7 +254,7 @@ Fenix::App.controllers :things do
     @products.each do |prod|
       begin
         p_dn = prod.displayname.downcase unless no_search_filter
-        if (no_price_filter || filter_list.include?(prod.price.to_s)) && (no_search_filter || search_list.all?{ |w| p_dn.include?(w)})
+        if (no_price_filter || filter_list.include?(prod.price.to_s)) && (no_search_filter || search_list.all?{ |w| p_dn.include?(w) })
           val = params[:formula]&.gsub(/[^\d]/, '')
         else
           val = nil
@@ -331,40 +278,7 @@ Fenix::App.controllers :things do
   end
 
   get :export, :provides => :csv do
-    if params[:cat] == 'sample'
-      ids = wonderbox(:things_by_date).reverse
-      @products = Product.find_all(ids).sort_by{ |a| ids.index(a.id) }
-    elsif params[:filtered]
-      ccat = params[:cat]
-      townfilter = params[:place]
-      ccat = nil if ccat == 'none'
-      townfilter = nil if townfilter == 'none'
-
-      @products = Product.which(townfilter) if townfilter
-
-      if ccat
-        ccat = nil if ccat.to_sym.eql? :nothing
-        @products = @products.select{ |a| a.category_id == ccat }.sort_by(&:cindex)
-      end
-
-      if @search = params[:search]
-        search_list = (@search || '').downcase.split(/[\s,.'"()-]/).compact
-        @products.select!{ |p| search_list.all?{ |w| p.displayname.downcase.include?(w) } }
-      end
-
-      @sections = KSM::Section.all.sort_by(&:ix)
-      @category_list = SL::Category.all
-      @products.sort_by! do |p|
-        [(@sections.detect{ |s| @category_list.detect{ |c| c.id == p.category_id }&.section_id }&.ix || 0),
-          p.category_id || '0000',
-          p.displayname.downcase.delete('☠️ ')
-        ]
-      end
-    else
-      if ccat = params[:cat]
-        @products = Product.all.select{ |a| a.category_id == ccat }
-      end
-    end
+    products_by_filters(params)
 
     win_export = params.include? :win
     codes = @products.map(&:place_id).uniq

@@ -1,11 +1,8 @@
 .col-md-4.ss
   .h4.text-center Выгрузка продуктов
   .text-center
-    a.btn.btn-xs.btn-default.btn-embossed.m-h-3 href=url(:things, :export, cat: :sample) Последние
-    a.btn.btn-xs.btn-default.btn-embossed.m-h-3 href=url(:things, :export, { cat: :sample, win: 1 }) Последние для Excel
-    br
-    a.btn.btn-xs.btn-default.btn-embossed.m-h-3 href=url(:things, :export, params.merge(filtered: 1)) По фильтрам
-    a.btn.btn-xs.btn-default.btn-embossed.m-h-3 href=url(:things, :export, params.merge(filtered: 1, win: 1)) По фильтрам для Excel
+    a.btn.btn-xs.btn-default.btn-embossed.m-h-3 href=url(:things, :export, params) CSV
+    a.btn.btn-xs.btn-default.btn-embossed.m-h-3 href=url(:things, :export, params.merge(win: 1)) CSV для Excel
 
 .col-md-4.ss
   .h4.text-center Загрузка продуктов

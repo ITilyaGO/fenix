@@ -17,5 +17,7 @@ module Fenix
 
     helpers ThingsHelper
     helpers DrawsHelper
+
+    helpers ThingsPageHelper
   end
 end

@@ -1,14 +1,15 @@
-- @products_dn ||= {}
 .f
   .deepdown-wrap.text-center.mbs.cmar-05
     = link_to 'Последние', url(:things, :table), :class => 'btn btn-sm btn-default'
     select.huge name="categories" riot-tag='selectreload' rname='place' loc=url(:things, :table)
       = content_tag(:option, 'Не выбрано', { :value => :none, selected: @place.nil? })
+      = content_tag(:option, 'Все', { :value => :all, selected: @place == 'all' }) if @ccat != 'all'
       - known_cities.each do |k, city|
         = content_tag(:option, city.model, { value: city.code, selected: @place == city.code })
 
     select name="categories" class="huge small mh350" riot-tag='selectreload' rname='cat' loc=url(:things, :table)
-      = content_tag(:option, 'Не выбрано', { :value => :none })
+      = content_tag(:option, 'Не выбрано', { :value => :none, selected: @ccat.nil? })
+      = content_tag(:option, 'Все', { :value => :all, selected: @ccat == 'all' }) if @place != 'all'
       = content_tag(:option, 'Без категории', { :value => :nothing, selected: @ccat == 'nothing' })
       - @cats.each do |cat|
         optgroup label="#{cat.name}"
@@ -17,18 +18,17 @@
             - html_attributes[:selected] ||= option_is_selected?(sub.id, sub.name, @product&.category_id)
             = content_tag(:option, sub.name, html_attributes)
     .btn-group
-      search loc=url(:things, :table) value=@search
-    / = text_field_tag :search, value: params[:search], placeholder: 'Поиск по имени продукта включающего слова...' , class: 'form-control input-xs height-auto', autocomplete: 'off'
+      search loc=url(:things, :table) value=params[:search]
     a.fa.fa-upload.btn.btn-sm.btn-default href=url(:things, :transfer, params)
   .page-select
     - if @pages && @pages > 1 && !@notice
       .ss: .flex-wrap.child-m-2.m-b-5
         a.btn.btn-xs class=(@page == 0 ? 'btn-success' : 'btn-default') href=url(:things, :table, params.merge(page: 0)) Все
-      - (1..@pages).each do |i|
-        a.btn.btn-xs class=(@page == i ? 'btn-success' : 'btn-default') href=url(:things, :table, params.merge(page: i)) = i
+        - (1..@pages).each do |i|
+          a.btn.btn-xs class=(@page == i ? 'btn-success' : 'btn-default') href=url(:things, :table, params.merge(page: i)) = i
 
   - if @notice
-    .alert.alert-info: .small Выберите город и категорию
+    .alert.alert-info: .small = @notice
 
   table class="table table-hover table-condensed" id="list"
     thead
@@ -51,13 +51,13 @@
                       = hidden_field_tag :product_ids, :'data-delete-many-ids' => true
                       = submit_tag  pat(:delete), :class =>'list-menu-popover-delete-selected-btn btn btn-danger btn-small'
                       div class='btn btn-default btn-small cancel' = pat(:cancel)
-        th class='header' = mat(:product, :id)
-        th class='header' = mat(:product, :name)
-        th class='header' = mat(:product, :place)
-        th class='header' = mat(:product, :price)
-        th class='header' = mat(:product, :category)
-        th class='header' = mat(:product, :updated)
-        th.header bku
+        th class='header' ID
+        th class='header' Имя
+        th class='header' Город
+        th class='header' Цена
+        th class='header' Категория
+        th class='header' Изменен
+        th.header Склад
         th class='header list-row-action-header'
 
     tbody
@@ -73,7 +73,7 @@
         tr class='list-row'
           td class='list-column list-selectable' = check_box_tag 'product_ids[]', :value => product.id, :class => 'list-selectable-checkbox'
           td class='list-column' = product.id
-          td class='list-column' = (@products_dn[product.id] || product.displayname)
+          td class='list-column' = product.displayname
           td.list-column
             = town_name = @kc_towns[product.place_id]&.model.name
           td class='list-column'
@@ -84,7 +84,7 @@
             = to_msk(product.updated_at)
           td.list-column
             - unless KSM::Archetype.find(xprod.arn).exist?
-              .fa.fa-exclamation-triangle.text-warning
+              .fa.fa-exclamation-triangle.text-warning title='Нет склада'
           td class='list-column list-row-action'
             div class='list-row-action-wrapper'
               //span class='list-row-action-wrapper-link' 1
