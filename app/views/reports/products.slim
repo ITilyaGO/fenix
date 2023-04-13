@@ -151,18 +151,15 @@
         .btn.btn-xs.btn-success
           .fa.fa-file
           ' Excel
-      / a href=url(:reports, :orders, params)
-        span.label.label-border
-          span.fa.fa-share.menu-icon.p-r-5
-          ' Перейти в отчёт по заказам
 
 
   = javascript_include_tag :riot, :flexsearch_min
+  rscript type="riot/tag" src="/riot/tags/html/multitypedown.tag"
   rscript type="riot/tag" src="/riot/tags/html/typedown.tag"
   rscript type="riot/tag" src="/riot/tags/html/tdrop.tag"
   rscript type="riot/tag" src="/riot/tags/custom_button.tag"
 
   javascript:
     document.addEventListener("DOMContentLoaded", function(event) {
-      riot.mount('typedown, tdrop, custom_button')
+      riot.mount('multitypedown, typedown, tdrop, custom_button')
     })

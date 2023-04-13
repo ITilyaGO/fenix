@@ -64,6 +64,11 @@ module Fenix::App::ReportsHelper
     @managers_list = get_manager_accounts.select{ |m| managers_ids.include?(m.id) }
   end
 
+  def managers_list_by_orders
+    managers_ids = @orders.map{ |o| o.client }.uniq.compact.map{ |c| c.manager_id }.compact.uniq
+    @managers_list = get_manager_accounts.select{ |m| managers_ids.include?(m.id) }
+  end
+
   def clients_list_by_orders
     @clients_list = @orders.map{ |o| o.client }.uniq.compact
   end
@@ -87,13 +92,16 @@ module Fenix::App::ReportsHelper
       @oc_managers[oc.manager_id] += 1 if man && oc
       @oc_delivery[o.delivery] += 1 if del
       @oc_state[@kc_os_hash[o.id].state] += 1 if sta
-      # puts o.status + " " + @kc_os_hash[o.id].state.to_s
     end
     if sorting
       @towns_list.sort_by!{ |i, n| [-@oc_towns[i], n] } if tow
       @clients_list.sort_by!{ |c| [-@oc_clients[c.id], c.name] } if cli
       @managers_list.sort_by!{ |m| [-@oc_managers[m.id], m.name] } if man
     end
+  end
+
+  def calculate_orders_count_in_tcmds_inv(sorting = true, tow: false, cli: false, man: false, del: false, sta: false)
+    calculate_orders_count_in_tcmds(sorting, tow: tow, cli: cli, man: man, del: del, sta: sta)
   end
 
   def products_print_prepare(gp, col)

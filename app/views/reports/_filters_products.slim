@@ -1,6 +1,6 @@
 .category-filters.flex-c
     .col-md-2.filter
-      typedown.hide data-name='section' showchanges=1 enough=1 display-id=params.fetch(:section, :all)
+      typedown.hide data-name='section' nosub=1 showchanges=1 enough=1 display-id=params.fetch(:section, :all)
         = content_tag(:dv, 'Все', { value: :all, class: 'item' })
         - @sections.each do |sec|
           - html_attributes = { value: sec.ix, class: 'item' }
@@ -10,7 +10,7 @@
       - if childs.size > 0
         - depth += 1
         .col-md-2.filter
-          typedown.hide data-name="category[#{ part }]" showchanges=1 enough=1 display-id=((@path[depth] || [:all])[0])
+          typedown.hide data-name="category[#{ part }]" nosub=1 showchanges=1 enough=1 display-id=((@path[depth] || [:all])[0])
             = content_tag(:dv, 'Все', { value: :all, class: 'item' })
             - childs.each do |cat|
               - html_attributes = { value: cat.id, class: 'item' }
@@ -24,51 +24,53 @@
 
 .col-md-2.filter
   .text-center Менеджер
-  typedown.hide data-name='manager' showchanges=1 enough=1 display-id=params.fetch(:manager, :all)
-    = content_tag(:dv, 'Все', { value: :all, class: 'item' })
+  multitypedown.hide data-name='manager' nosub=1 showchanges=1 enough=1 display-id=params.fetch(:manager, :all)
     - @managers_list.each do |man|
-      - html_attributes = { value: man.id, class: 'item' }
-      = content_tag(:dv, "#{ @oc_managers[man.id] } - #{ man&.name }", html_attributes)
+      - oc_manager = @oc_managers[man.id]
+      - if oc_manager > 0
+        - html_attributes = { value: man.id, class: 'item' }
+        = content_tag(:dv, "#{ oc_manager } - #{ man&.name }", html_attributes)
 
 .col-md-2.filter
   .text-center Город
-  typedown.hide data-name='town' showchanges=1 enough=1 display-id=params.fetch(:town, :all)
-    = content_tag(:dv, 'Все', { value: :all, class: 'item' })
+  multitypedown.hide data-name='town' nosub=1 showchanges=1 enough=1 display-id=params.fetch(:town, :all)
     - @towns_list.each do |id, name|
-      - html_attributes = { value: id, class: 'item' }
-      = content_tag(:dv, "#{ @oc_towns[id] } - #{ name }", html_attributes)
+      - oc_town = @oc_towns[id]
+      - if oc_town > 0
+        - html_attributes = { value: id, class: 'item' }
+        = content_tag(:dv, "#{ oc_town } - #{ name }", html_attributes)
 
 .col-md-2.filter
   .text-center Клиент
-  typedown.hide data-name='client' showchanges=1 enough=1 display-id=params.fetch(:client, :all)
-    = content_tag(:dv, 'Все', { value: :all, class: 'item' })
+  multitypedown.hide data-name='client' nosub=1 showchanges=1 enough=1 display-id=params.fetch(:client, :all)
     - @clients_list.each do |client|
-      - html_attributes = { value: client.id, class: 'item' }
-      = content_tag(:dv, "#{ @oc_clients[client.id] } - #{ client&.name }", html_attributes)
+      - oc_client = @oc_clients[client.id]
+      - if oc_client > 0
+        - html_attributes = { value: client.id, class: 'item' }
+        = content_tag(:dv, "#{ oc_client } - #{ client&.name }", html_attributes)
 
 .col-md-2.filter
   .text-center Доставка
-  typedown.hide data-name='delivery' showchanges=1 enough=1 display-id=params.fetch(:delivery, :all)
-    = content_tag(:dv, 'Все', { value: :all, class: 'item' })
+  multitypedown.hide data-name='delivery' nosub=1 showchanges=1 enough=1 display-id=params.fetch(:delivery, :all)
     - @delivery_list.each do |del|
       - html_attributes = { value: del, class: 'item' }
       = content_tag(:dv, "#{ @oc_delivery[del] } - #{ tj(:delivery, del) }", html_attributes)
 
-- @oc_state[:draft] = '?'
+- @oc_state[:draft] = '?' if params[:state] != 'draft'
 .col-md-2.filter
   .text-center Стадия заказа
-  typedown.hide data-name='state' showchanges=1 enough=1 display-id=params.fetch(:state, :all)
+  typedown.hide data-name='state' nosub=1 showchanges=1 enough=1 display-id=params.fetch(:state, :all)
     = content_tag(:dv, 'Все', { value: :all, class: 'item' })
     - @states_list.each do |state|
       - html_attributes = { value: state, class: 'item' }
-      = content_tag(:dv, "#{ @oc_state[state] } - #{(t :"status.#{ state }")}", html_attributes)
+      = content_tag(:dv, "#{ @oc_state[state] } - #{ (t :"status.#{ state }") }", html_attributes)
 
 .col-md-2.filter
   .text-center &nbsp;
 .clearfix
 
 .col-md-2.filter
-  typedown.flex-c.hide data-name='date_sel' showchanges=1 enough=1 display-id=params.fetch(:date_sel, :created_at)
+  typedown.flex-c.hide data-name='date_sel' nosub=1 showchanges=1 enough=1 display-id=params.fetch(:date_sel, :created_at)
     = content_tag(:dv, 'Создан', { value: :created_at, class: 'item' })
     = content_tag(:dv, 'Отправлен', { value: :send, class: 'item' })
     = content_tag(:dv, 'Собран', { value: :done, class: 'item' })
@@ -79,18 +81,13 @@
 .col-md-2.filter
   = date_field_tag :end_date, class: 'form-control input-large', autocomplete: 'off', value: @end_date
 
-.col-md-2.filter
+.col-md-2.filter.btn-align
   = submit_tag 'Фильтровать', class: 'btn btn-prime btn-block', name: :filtration_button
 
-.col-md-2.filter
+.col-md-2.filter.btn-align
   = submit_tag "Показать #{ @orders.size }", class: 'btn btn-prime btn-block', name: :load_orders_button
 
-.col-md-2.filter
+.col-md-2.filter.btn-align
   = submit_tag 'Сброс', class: 'btn btn-prime btn-block', name: :reset_button
-
-/ - if !@load_orders
-  .col-md-12.filter
-    = submit_tag "Посчитать суммы по #{ @orders.size } заказам", class: 'btn btn-prime btn-block', name: :load_orders_button
-
 
 .clearfix

@@ -1,4 +1,4 @@
-typedown.typedown.detach
+multitypedown.multitypedown.detach
   .bootstrap-sel
   input.type-control.dropdown-toggle.bt.btn-xs[
     onclick='{toggle}' onkeydown='{keycontrol}' oninput='{type_search}'
@@ -11,14 +11,24 @@ typedown.typedown.detach
   .del-btn.fa.fa-times onclick='{del_select}' style='{showChanges && selected_id != idOnLoad ? 'color:blue;' : ''}'
 
   .deepdown-float class='{hide: !opened}'
-    .text-center.tiny-text.wp100.input-hg show='{common.length == 0}'
-      | Ничего не найдено
-    .item each='{ f in common }'
-      .btn.btn-xs.btn-thru.wp100[
-        class='{btn-steel:hovered.id==f.id, btn-info:selected_id==f.id}'
-        onclick='{ w_select }'
-      ]
-        | { f.name }
+    .tools show='{common.length > 0}'
+      .flex-c.vcenter
+          .btn.btn-xs.btn-thru.t-btn.check.fa.fa-minus-square-o onclick='{ w_uncheck_all }' title='Снять выделение со всех 
+            [Если ни один элемент не выбран, то фильтр отключится и будут показаны все позиции по этому фильтру]'
+          .btn.btn-xs.btn-thru.t-btn.check.fa.fa-plus-square-o onclick='{ w_check_all }' title='Выделить все'
+          .flexie
+          .btn.btn-xs.btn-thru.t-btn.check.fa.fa-filter onclick='{ submit_form }' title='Фильтровать'
+    .deepdown-scroll
+      .text-center.tiny-text.wp100.input-hg show='{common.length == 0}'
+        | Ничего не найдено
+      .text-center.tiny-text.wp100.warn-text show='{common.length != 0 && miss_sel_els}'
+        | Некоторые выбранные элементы отсутствуют
+      .item each='{ f in common }'
+        .flex-c.vcenter
+          .btn.btn-xs.btn-thru.check onclick='{ w_checkbox }'
+            .fa class='{f.sel ? "fa-check-square" : "fa-square-o"}'
+          .btn.btn-xs.btn-thru class='{btn-steel:hovered.id==f.id, btn-info:f.sel}' onclick='{ w_select }'
+            | { f.name }
 
   .hidden name='punkts'
     yield
@@ -72,15 +82,21 @@ typedown.typedown.detach
       self.w_select({ item: { f: {} } })
     }
 
+    submit_form() {
+      self.root.closest('form').submit()
+    }
+
     w_select(a) {
       let item = a.item.f
+      self.w_uncheck_all()
+      item.sel = true
       self.selected_id = item.id
       self.display = item.name
       self.search_input.value = ""
       self.common = self.cache
       // self.in_select(a.item.f)
       self.close()
-      if (self.autosub) self.root.closest('form').submit()
+      if (self.autosub) submit_form()
     }
 
     in_select(item) {
@@ -100,6 +116,53 @@ typedown.typedown.detach
       self.refocus()
     }
 
+    display_checkbox_count() {
+      let sel_count = 0
+      let last_el = null
+      let no_sel_count = 0
+      let selected_ids = []
+
+      self.cache.forEach(e => {
+        if (e.sel) {
+          sel_count++
+          last_el = e
+          selected_ids.push(e.id)
+        }
+        else {
+          no_sel_count++
+        }
+      })
+
+      if (sel_count == 0) {
+        self.display = 'Все'
+        self.selected_id = 'all'
+      }
+      else {
+        if (sel_count == 1)
+          self.display = last_el.name
+        else
+          self.display = `Выбрано ${sel_count}`
+        self.selected_id = selected_ids.join('_')
+      }
+    }
+
+    w_checkbox(a) {
+      let item = a.item.f
+      item.sel = !item.sel
+
+      self.display_checkbox_count()
+    }
+
+    w_uncheck_all() {
+      self.common.forEach(e => e.sel = false)
+      self.display_checkbox_count()
+    }
+
+    w_check_all() {
+      self.common.forEach(e => e.sel = true)
+      self.display_checkbox_count()
+    }
+
     reinit() {
       self.backel = document.getElementById(self.back_id)
       self.backinp = self.backel.parentNode.querySelector('input')
@@ -110,8 +173,9 @@ typedown.typedown.detach
     refocus() {
       self.update()
       var al = self.root.querySelector('.item .btn-info')
+      self.root.querySelector('.deepdown-scroll').scrollTo(0,0)
       //if (al && al.nextElementSibling) al = al.nextElementSibling
-      if (al && al.scrollIntoViewIfNeeded) al.scrollIntoViewIfNeeded()
+      // if (al && al.scrollIntoViewIfNeeded) al.scrollIntoViewIfNeeded()
     }
 
     toggle() {
@@ -170,9 +234,10 @@ typedown.typedown.detach
       .then(function(data) {
         self.common = self.cache = data.sort((a, b) => a.name.localeCompare(b.name))
         if (opts.enough != '1') self.common.push({ name: 'Нет'})
-        var fel = self.common.find(el => el.id == self.selected_id)
-        if (!fel) fel = self.common.find(el => el.id == null)
-        self.display = fel.name
+        var selected_ids = self.selected_id.split('_')
+        var selected_elements = self.common.filter(el => selected_ids.includes(el.id))
+        selected_elements.forEach(el => el.sel = true)
+        self.display_checkbox_count()
         self.init_products()
         self.update()
       })
@@ -184,12 +249,11 @@ typedown.typedown.detach
       })
       self.cache = self.common
       if (opts.enough != '1') self.common.push({ name: 'Нет'})
-      var fel = self.common.find(el => el.id == self.selected_id)
-        || self.common.find(el => el.sel)
-      if (!fel)
-        self.display = "Элемент не существует"
-      else
-        self.display = fel.name
+      var selected_ids = self.selected_id.split('_')
+      var selected_elements = self.common.filter(el => selected_ids.includes(el.id))
+      selected_elements.forEach(el => el.sel = true)
+      self.miss_sel_els = (self.selected_id != 'all' && selected_elements.length < selected_ids.length)
+      self.display_checkbox_count()
       self.init_products()
       self.update()
     }
