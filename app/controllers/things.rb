@@ -239,6 +239,7 @@ Fenix::App.controllers :things do
         next if !new_price || prod.price == new_price
         prod.price = new_price
         prod.saved_by @current_account
+        prod.backsync if prod.global?
         @products_saved[prod.id] = 1
       end
       params[:price_filter] = nil
