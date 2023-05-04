@@ -62,6 +62,8 @@ module Xmlfr
 
     products = order.order_lines.map(&:product_id).uniq
     ps = Product.find_all(products)
+    codes = ps.map(&:place_id).uniq
+    kc_towns = KatoAPI.batch(codes)
     cats = ps.map{|p|[p.category_id, p.category.category_id]}.flatten.uniq
     cs = KSM::Category.find_all(cats)
     sects = cs.select(&:top?).map(&:section).uniq(&:id)
@@ -87,6 +89,14 @@ module Xmlfr
       replace_node epro, 'Артикул', product.art.to_s
       replace_node epro, 'Pio', format_product_1c(product.id)
       replace_node epro, 'ParentPio', format_cat_1c(product.category_id)
+
+      replace_node epro, 'Вес', (product.dim_weight || 0).to_s
+      replace_node epro, 'Ширина', (product.dim_width || 0).to_s
+      replace_node epro, 'Высота', (product.dim_height || 0).to_s
+      replace_node epro, 'Длина', (product.dim_length || 0).to_s
+      
+      replace_node epro, 'РасшЯрд_Город', kc_towns[product.place_id]&.model.name
+      replace_node epro, 'Комментарий', product.desc if product.desc
     end
 
     ex << edict = Ox.load(TML_INVOICE)

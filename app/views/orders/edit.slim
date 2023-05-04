@@ -405,16 +405,19 @@ ul class="nav nav-tabs non-print"
                     thead.only-print
                       tr
                         td = tab.name
-                        td colspan=5
+                        td colspan=6
                           - if tab.id == storebox(:product, :ceram_tcat)
                             = sticker.first
                           - if tab.id == storebox(:product, :glass_tcat)
                             = sticker.last
                     tr
-                      th.only-print width='20%' Собрано
-                      th Наименование
-                      th Коммент
-                      th Количество
+                      th.only-print style='width:15em' Упаковано
+                      th style='width:50em' Наименование
+                      th style='width:20em' Коммент
+                      th style='width:5em' Кол-во
+                      th.only-print style='width:5em' Наклеено
+                      th.only-print style='width:5em' Брак
+                      th.only-print style='width:5em' Собрано
                       th.non-print Цена
                       th.non-print Сумма
                       th.non-print Наклеено
@@ -438,6 +441,9 @@ ul class="nav nav-tabs non-print"
                           - rsv = @rese.fetch(ol.id.to_i, 0)
                           - if rsv > 0
                             .non-print.label.label-info = rsv
+                        td.only-print
+                        td.only-print
+                        td.only-print
                         td.col-md-1.non-print
                           == rur(ol.price)
                         td.col-md-1.non-print

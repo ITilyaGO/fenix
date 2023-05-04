@@ -4,7 +4,7 @@
     select.huge name="categories" riot-tag='selectreload' rname='place' loc=url(:things, :table)
       = content_tag(:option, 'Не выбрано', { :value => :none, selected: @place.nil? })
       = content_tag(:option, 'Все', { :value => :all, selected: @place == 'all' }) if @ccat != 'all'
-      - known_cities.each do |k, city|
+      - known_cities.sort_by { |_, x| x.model.to_s }.each do |k, city|
         = content_tag(:option, city.model, { value: city.code, selected: @place == city.code })
 
     select name="categories" class="huge small mh350" riot-tag='selectreload' rname='cat' loc=url(:things, :table)
