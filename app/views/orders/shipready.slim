@@ -68,7 +68,7 @@ div class="tabs-content"
               .fa.fa-briefcase.text-danger
           td class='list-column'
             - trc = @transport.detect { |t| t.id == KSM::OrderShip.find(order.id).transport.to_s }
-            = partial 'bricks/kc/transport', :locals => { name: trc&.name }
+            = partial 'bricks/kc/transport', :locals => { name: trc&.name || trc&.id }
           td class='list-column only-print' = order.client.inn
           td.list-column.minirur.text-nowrap == deli(rur (order.total/1000.0).floor)
           td.list-column.non-print

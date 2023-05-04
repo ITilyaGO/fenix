@@ -61,7 +61,7 @@ div class="tabs-content"
 
           td.list-column.list-row-action
             .list-row-action-wrapper.flex-c
-              - if current_account.is_admin?
+              - if can_view?(:order, :modify)
                 - os = KSM::OrderStatus.find(id: order.id)
                 = link_to tag_icon(:building), :rel => :tooltip, :title => "City", :'data-name' => :cityless, :class => 'list-row-action-wrapper-link list-row-modal'
                 = link_to tag_icon(:truck), :rel => :tooltip, :title => "Delivery", :'data-name' => :cityless, :'data-type' => :delivery, :class => 'list-row-action-wrapper-link list-row-modal'

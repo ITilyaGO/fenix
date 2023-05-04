@@ -274,7 +274,7 @@ ul class="nav nav-tabs non-print"
   = hidden_field_tag :oid, :value => @order.id
   .block
   
-  - if !@order.draft? && current_account.is_admin?
+  - if !@order.draft? && can_view?(:order, :modify)
     hr
     .non-print
       h4 Настройки
@@ -299,7 +299,7 @@ ul class="nav nav-tabs non-print"
           .fa.fa-calendar.fa-btn
           | график
 
-        - if @timeline_blink
+        - if @timeline_blink and current_account.is_admin?
           = submit_tag "Убрать мигание", :class => 'btn btn-sm btn-warning', :name => 'unblink'
 
       .stam.collapse: .flex-c.text-center.center

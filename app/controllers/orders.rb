@@ -43,7 +43,7 @@ Fenix::App.controllers :orders do
     orders_base = Order.in_work.pluck(:client_id)
     search_clients = Client.where(id: orders_base, manager_id: @manager.id).pluck(:id)
     orders_query = Order
-      .where(client_id: search_clients)
+      .where(client_id: [nil] + search_clients)
       .where("status > ?", Order.statuses[:draft])
       .where("status < ?", Order.statuses[:finished])
     orders_query = orders_query.where(delivery: params[:deli].to_i) if params[:deli]
@@ -97,7 +97,7 @@ Fenix::App.controllers :orders do
     if role_is? :manager
       orders_base = @orders.map(&:client_id)
       search_clients = Client.where(id: orders_base, manager_id: current_account.id).pluck(:id)
-      @orders = @orders.where(client_id: search_clients)
+      @orders = @orders.where(client_id: [nil] + search_clients)
     end
     @orders = @orders.offset((@page-1)*pagesize).take(pagesize) if @old
 
@@ -116,16 +116,16 @@ Fenix::App.controllers :orders do
       .includes(:client, :place, :order_parts)
       .preload(:client => :place)
       .where("status = ?", Order.statuses[:shipready]).order(:updated_at => :desc)
-    @old = params[:old].present?
-    if !@old
-      @orders = @orders.where('updated_at > ?', Date.today - 1.month)
-    else
-      pagesize = PAGESIZE
-      @page = !params[:page].nil? ? params[:page].to_i : 1
-      @pages = (@orders.count/pagesize).ceil
-      @orders = @orders.offset((@page-1)*pagesize).take(pagesize)
-      @r = url(:orders, :shipready, :old => 1)
-    end
+    # @old = params[:old].present?
+    # if !@old
+    #   @orders = @orders.where('updated_at > ?', Date.today - 1.month)
+    # else
+    #   pagesize = PAGESIZE
+    #   @page = !params[:page].nil? ? params[:page].to_i : 1
+    #   @pages = (@orders.count/pagesize).ceil
+    #   @orders = @orders.offset((@page-1)*pagesize).take(pagesize)
+    #   @r = url(:orders, :shipready, :old => 1)
+    # end
     @sections = KSM::Section.all
     a_towns(@orders.map(&:id), @orders.map(&:client_id))
     @kc_done = CabiePio.all_keys(@orders.map(&:id), folder: [:stock, :order, :done]).flat.trans(:to_i)
@@ -164,7 +164,7 @@ Fenix::App.controllers :orders do
     # search_orders = @kc_orders.select{|k,v|manager_places.include? v}.keys.map(&:to_i)
     search_clients = @kc_hometowns.select{|k,v|manager_places.include? v}.keys.map(&:to_i)
     @orders = Order.includes(:client, :place, :order_parts, :timeline)
-      .where(client_id:search_clients)
+      .where(client_id: [nil] + search_clients)
       .where("status > ?", Order.statuses[:draft]).where("status < ?", Order.statuses[:finished])
       .order(sort => dir)
     @transport = CabiePio.all_keys(@orders.map(&:client_id).uniq, folder: [:m, :clients, :transport]).flat
@@ -188,7 +188,7 @@ Fenix::App.controllers :orders do
     # search_orders = @kc_orders.select{|k,v|manager_places.include? v}.keys.map(&:to_i)
     search_clients = @kc_hometowns.select{|k,v|manager_places.include? v}.keys.map(&:to_i)
     @orders = Order.includes(:client, :place, :order_parts, :timeline)
-      .where.not(client_id:search_clients)
+      .where.not(client_id: [nil] + search_clients)
       .where("status > ?", Order.statuses[:draft]).where("status < ?", Order.statuses[:finished])
       .order(sort => dir)
     @transport = CabiePio.all_keys(@orders.map(&:client_id).uniq, folder: [:m, :clients, :transport]).flat
