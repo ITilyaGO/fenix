@@ -298,6 +298,7 @@ Fenix::App.controllers :reports do
     orders_query = orders_query.where("#{ :created_at } < ?", @end_date + 1.day).where("#{ :created_at } > ?", @start_date)
     @orders = orders_query.includes(:client).to_a
 
+    @kc_cash = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :cash]).flat.trans(:to_i)
     @kc_orders = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :towns]).flat
     @kc_towns = KatoAPI.batch(@kc_orders.values.uniq)
     @towns_list = @kc_towns.map{ |k, v| [k, v&.model.name] }
