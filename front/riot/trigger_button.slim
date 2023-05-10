@@ -1,0 +1,11 @@
+trigger_button
+  yield
+
+  javascript:
+    self.trig = opts.trigger
+
+    self.on('mount', function() {
+      self.root.onclick = function() {
+        rcontrol.trigger(self.trig)
+      }
+    })

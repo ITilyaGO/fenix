@@ -1,0 +1,17 @@
+loading
+  .cont if='{ !loading }'
+    yield
+  .load style='{ styleWH }' if='{ loading }'
+    .fa.fa-circle-o-notch.fa-spin.fa-fw.load-icon
+
+  javascript:
+
+    self.on('mount', function() {
+      self.cont = self.root.querySelector('.cont')
+      self.styleWH = `width:${ self.cont.clientWidth }px; height:${ self.cont.clientHeight }px;`
+    })
+
+    rcontrol.on(opts.on, function(data) {
+      self.loading = data
+      self.update()
+    })

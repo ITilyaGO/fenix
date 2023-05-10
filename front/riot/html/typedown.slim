@@ -8,7 +8,7 @@ typedown.typedown.detach
   input.form-control[
     type='hidden' value='{selected_id}' id='{opts.dataId}' name='{opts.dataName}'
   ]
-  .del-btn.fa.fa-times onclick='{del_select}' style='{showChanges && selected_id != idOnLoad ? 'color:blue;' : ''}'
+  .del-btn.fa.fa-times onclick='{del_select}' class='{showChanges && selected_id != idOnLoad ? 'changed' : ''}'
 
   .deepdown-float class='{hide: !opened}'
     .text-center.tiny-text.wp100.input-hg show='{common.length == 0}'
@@ -36,6 +36,7 @@ typedown.typedown.detach
     self.showChanges = opts.showchanges == '1'
     self.autosub = opts.nosub != '1'
     self.autocomplete = opts.autocomplete == '1' ? 'on' : 'off'
+    self.group = opts.group
 
     type_search(a) {
       let string = a.target.value
@@ -72,12 +73,15 @@ typedown.typedown.detach
       self.w_select({ item: { f: {} } })
     }
 
-    w_select(a) {
-      let item = a.item.f
+    set_select(item) {
       self.selected_id = item.id
       self.display = item.name
       self.search_input.value = ""
       self.common = self.cache
+    }
+
+    w_select(a) {
+      self.set_select(a.item.f)
       // self.in_select(a.item.f)
       self.close()
       if (self.autosub) self.root.closest('form').submit()
@@ -154,6 +158,23 @@ typedown.typedown.detach
 
     rcontrol.on("DEEPDOWN_CLOSE", function(data) {
       self.close()
+    })
+
+    rcontrol.on(`TYPEDOWN_GROUP_CHANGE_COMPLETE_${self.group}`, function() {
+      self.idOnLoad = self.selected_id
+      self.update()
+    })
+
+    rcontrol.on(`GET_CACHE_${opts.dataName}`, (callback) => {
+      callback(self.cache)
+    })
+
+    rcontrol.on(`SET_CACHE_${opts.dataName}`, function(data) {
+      self.cache = data
+      self.common = self.cache
+      if (self.cache.length > 0 && !self.cache.find(el => el.id == self.selected_id))
+        self.set_select(self.cache[0])
+      self.update()
     })
 
     loadlist() {

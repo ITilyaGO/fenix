@@ -8,7 +8,7 @@ multitypedown.multitypedown.detach
   input.form-control[
     type='hidden' value='{selected_id}' id='{opts.dataId}' name='{opts.dataName}'
   ]
-  .del-btn.fa.fa-times onclick='{del_select}' style='{showChanges && selected_id != idOnLoad ? 'color:blue;' : ''}'
+  .del-btn.fa.fa-times onclick='{del_select}' class='{showChanges && selected_id != idOnLoad ? 'changed' : ''}'
 
   .deepdown-float class='{hide: !opened}'
     .tools show='{common.length > 0}'
@@ -41,11 +41,13 @@ multitypedown.multitypedown.detach
     self.src = opts.src
     self.common = []
     self.hovered = {}
-    self.selected_id = opts.displayId
+    self.selected_id = opts.displayId || 'all'
     self.idOnLoad = opts.displayId
     self.showChanges = opts.showchanges == '1'
     self.autosub = opts.nosub != '1'
     self.autocomplete = opts.autocomplete == '1' ? 'on' : 'off'
+    self.group = opts.group
+    self.trig = opts.trigger
 
     type_search(a) {
       let string = a.target.value
@@ -83,7 +85,12 @@ multitypedown.multitypedown.detach
     }
 
     submit_form() {
-      self.root.closest('form').submit()
+      if (self.trig == null)
+        self.root.closest('form').submit()
+      else {
+        self.close()
+        rcontrol.trigger(self.trig, self.selected_id)
+      }
     }
 
     w_select(a) {
@@ -96,7 +103,7 @@ multitypedown.multitypedown.detach
       self.common = self.cache
       // self.in_select(a.item.f)
       self.close()
-      if (self.autosub) submit_form()
+      if (self.autosub) self.submit_form()
     }
 
     in_select(item) {
@@ -220,6 +227,21 @@ multitypedown.multitypedown.detach
       self.close()
     })
 
+    rcontrol.on(`TYPEDOWN_GROUP_CHANGE_COMPLETE_${self.group}`, function() {
+      self.idOnLoad = self.selected_id
+      self.update()
+    })
+
+    rcontrol.on(`GET_CACHE_${opts.dataName}`, (callback) => {
+      callback(self.cache)
+    })
+
+    rcontrol.on(`SET_CACHE_${opts.dataName}`, function(data) {
+      self.cache = data
+      self.common = self.cache
+      self.update()
+    })
+
     loadlist() {
       var data = {
         authenticity_token: rsquad.token
@@ -233,7 +255,7 @@ multitypedown.multitypedown.detach
       .then(function(response) { return response.json() })
       .then(function(data) {
         self.common = self.cache = data.sort((a, b) => a.name.localeCompare(b.name))
-        if (opts.enough != '1') self.common.push({ name: 'Нет'})
+        if (opts.enough != '1') self.common.push({ name: 'Нет' })
         var selected_ids = self.selected_id.split('_')
         var selected_elements = self.common.filter(el => selected_ids.includes(el.id))
         selected_elements.forEach(el => el.sel = true)
@@ -248,7 +270,7 @@ multitypedown.multitypedown.detach
         self.common.push({ name: el.innerText, id: el.getAttribute('value'), sel: el.getAttribute('selected') })
       })
       self.cache = self.common
-      if (opts.enough != '1') self.common.push({ name: 'Нет'})
+      if (opts.enough != '1') self.common.push({ name: 'Нет' })
       var selected_ids = self.selected_id.split('_')
       var selected_elements = self.common.filter(el => selected_ids.includes(el.id))
       selected_elements.forEach(el => el.sel = true)

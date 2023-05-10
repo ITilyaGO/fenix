@@ -1740,7 +1740,9 @@ deepdown, deepdown-ms {
     color: rgb(92, 106, 93);
     opacity: .4;
     padding: 10px 1em 10px .5em;
-
+    &.changed {
+      color: blue;
+    }
     &:hover {
       opacity: 1;
     }
@@ -2170,10 +2172,96 @@ background: rgba(111, 98, 98, 0.25);
   }
 }
 
+.anyscroll {
+  .scrolling {
+    width: auto;
+    overflow-x: scroll;
+    padding: 0;
+    height: 85vh;
+  }
+  .sticky-left {
+    position: sticky;
+    left: 0;
+  }
+  .headcol {
+    &.headrow-color {
+      background: rgb(225, 227, 234);
+    }
+    position: sticky;
+    left: 0;
+    top: auto;
+    border-top-width: 1px;
+    margin-top: -1px;
+    background: white;
+    z-index: 1;
+  }
+}
+
 // Custom button tag
 custom_button {
   cursor: pointer;
 }
+
+// Loading tag
+loading {
+  .load {
+    opacity: .4;
+    background: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .load-icon {
+    font-size: 20px;
+  }
+}
+ // Products save window tag
+products_save_dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 120;
+
+  .error-list {
+    background: lightgray;
+    padding: 4px;
+    border-radius: 10px;
+    .error {
+      background: white;
+      border-radius: 10px;
+      margin: 5px;
+      padding: 5px;
+    }
+  }
+  .save-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+  .save-dialog {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    max-width: 400px;
+    width: 90%;
+    z-index: 1;
+  }
+  .btn {
+    margin: 10px;
+  }
+  .w100 {
+    width: 100%;
+  }
+}
+
 
 // things/priceedit
 .things-priceedit {
@@ -2183,6 +2271,64 @@ custom_button {
   .saved-row {
     background: honeydew;
   }
+}
+
+// Products multiedit
+.products-multiedit {
+  .anyscroll;
+  products_save_dialog {
+    .scrolling {
+      max-height: 60vh;
+      height: auto;
+    }
+  }
+  .col-min-width {
+    min-width: 25ch;
+  }
+  .unselected {
+    .headcol {
+      color: lightgray;
+    }
+  }
+  textarea {
+    font-size: 15px;
+    padding: 1px 2px;
+    height: 27px;
+  }
+  .textarea-h {
+    height: 27px;
+  }
+  .filter {
+    .btn-align {
+      .btn-xs;
+      font-size: 13px;
+      height: 34px;
+      line-height: 34px;
+    }
+    margin: 5px;
+    .bigfont {
+      font-size: 2em;
+    }
+  }
+  .products-empty {
+    padding: 5px 10px;
+    background: gainsboro;
+    border-radius: 10px;
+    margin: 5px;
+    width: fit-content;
+    margin: 20px auto;
+  }
+  .w100 {
+    width: 100%;
+  }
+
+  .table > thead {
+    z-index: 4;
+  }
+  .table > thead > tr > th {
+    padding: 3px 2px;
+  }
+
 }
 
 // Reports
@@ -2248,7 +2394,7 @@ custom_button {
       color: darkturquoise;
     }
   }
-  
+
   .col-md-2, .col-md-4, .col-md-12 {
     padding: 0px 5px;
   }
@@ -2280,28 +2426,9 @@ custom_button {
 
   // Products page
   &.products-page {
-    .scrolling {
-      width: auto;
-      overflow-x: scroll;
-      padding: 0;
-      height: 85vh;
-    }
-    .sticky-left {
-      position: sticky;
-      left: 0;
-    }
+    .anyscroll;
     .headcol {
-      &.headrow-color {
-        background: rgb(225, 227, 234);
-      }
-      position: sticky;
-      left: 0;
-      top: auto;
-      border-top-width: 1px;
-      margin-top: -1px;
       min-width: 30ch;
-      background: white;
-      z-index: 1;
     }
     .columns-border {
       .list-column {

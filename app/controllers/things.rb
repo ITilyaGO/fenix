@@ -278,6 +278,107 @@ Fenix::App.controllers :things do
     render 'things/priceedit'
   end
 
+  get :multiedit do
+    @title = 'Мультиредактор'
+
+    @cats = KSM::Category.toplevel.sort_by(&:wfindex)
+
+    products_by_filters(params)
+
+    @ccat = none_to_nil params[:cat]
+    @place = none_to_nil params[:place]
+
+    @fields = { name: 'Название', look: 'Вид', category_id: 'ID Категории',
+      place_id: 'ID Город', price: 'Цена', desc: 'Описание', corel: 'Собрание', art: 'Артикул',
+      discount: 'Скидка', dim_weight: 'Вес', dim_height: 'Высота', dim_width: 'Ширина', dim_length: 'Длинна',
+      windex: 'Индекс', lotof: 'Кратность', lotof_mfg: 'Производство', tagname: 'Тег' , arn: 'Склад',
+      sticker: 'Стикер', multi: 'Множитель', pit: 'Скрыть город'
+    }
+
+    @r = url(:things, :multiedit)
+    @ra = [:things, :multiedit]
+    render 'products/multiedit'
+  end
+
+  post :multiedit_save do
+    content_type 'text/event-stream'
+    stream :keep_open do |out|
+      begin
+        data = JSON.parse(params[:data])
+        products = Product.find_all(data.keys)
+
+        other_keys = ['multi', 'arn', 'sticker', 'pit']
+        value_guard = {
+          'name' => :to_s, 'look' => :to_s, 'category_id' => :to_s, 'place_id' => :to_s,
+          'price' => :to_i, 'desc' => :to_s, 'corel' => :to_s, 'art' => :to_s, 'discount' => :to_i,
+          'dim_weight' => :to_f, 'dim_height' => :to_f, 'dim_width' => :to_f, 'dim_length' => :to_f,
+          'windex' => :to_s, 'lotof' => :to_i, 'lotof_mfg' => :to_i, 'tagname' => :to_s
+        }
+
+        products_count = products.size
+        out << "§MPROD:#{ products_count.to_s }"
+
+        prew_time_now = Time.now.to_f
+
+        products.each_with_index do |prod, p_index|
+          begin
+            line = data[prod.id]
+            raw = {
+              arn: line['arn']&.strip&.downcase,
+              sticker: line['sticker']&.to_f,
+              multi: line['multi']&.to_i
+            }.compact
+            pit = empty_to_nil(line['pit'])&.to_i
+            other_keys.each{ |k| line.delete(k) }
+
+            preduct = prod.dup
+            line.each do |k, v|
+              next if v.empty?
+              v = v&.strip.send(value_guard[k])
+              next if prod.send("#{ k }") == v
+              prod.send("#{ k }=", v)
+            end
+            prod.settings[:pi] = pit == 1 ? 1 : 0 if (pit && prod.settings&.fetch(:pi, 0) != pit)
+            prod.area_movement preduct
+            # prod.sn ||= thing_glob_seed
+            prod.saved_by @current_account
+            thing_to_top prod.id
+            update_autodic prod
+
+            if raw[:arn]
+              CabiePio.set([:product, :archetype], prod.id, raw[:arn]) unless raw[:arn].empty?
+              CabiePio.unset([:product, :archetype], prod.id) if raw[:arn].empty?
+            end
+
+            if raw[:multi]
+              CabiePio.set([:product, :archetype_multi], prod.id, raw[:multi]) if raw[:multi] > 1
+              CabiePio.unset([:product, :archetype_multi], prod.id) unless raw[:multi] > 1
+            end
+
+            if raw[:sticker]
+              CabiePio.set([:products, :sticker], prod.id, raw[:sticker]) if raw[:sticker] > 0
+              CabiePio.unset([:products, :sticker], prod.id) unless raw[:sticker] > 0
+            end
+            prod.backsync if prod.global?
+            known_cities_add prod.place_id
+            ProductAssist.otree_job(otree_compare prod, preduct)
+
+            time_now = Time.now.to_f
+            if (time_now - prew_time_now > 2)
+              prew_time_now = time_now
+              out << "§#{ p_index }"
+            end
+          rescue Exception => e
+            out << "§MERRP:ID:[#{ prod.id }] - Error:#{ e }"
+          end
+        end
+        OrderAssist.reset_products_list
+      rescue Exception => e
+        out << "§MERR:#{ e.inspect }"
+      end
+    end
+  end
+
   get :export, :provides => :csv do
     products_by_filters(params)
 
