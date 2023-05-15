@@ -1,0 +1,270 @@
+products_list.anyscroll
+  .scrolling
+    h5.products-empty if='{ products_empty }' Список продуктов пуст
+    table.table if='{ !products_empty }'
+      thead
+        tr
+          th.header.headcol.headrow-color width='10px' ID
+          th.header.headcol.headrow-color Имя
+          th.header each='{ f in fields }'
+            .name title='Внутреннее название: { f.id }'
+              | { f.name }
+            input id='edit' fid='{ f.id }' autocomplete='off' style='width: { width_hash[f.id] }ch;' if='{ f.id != "desc" }'
+            .textarea-h if='{ f.id == "desc" }'
+              textarea id='edit' fid='{ f.id }' autocomplete='off' style='width: { width_hash[f.id] }ch;'
+
+      tbody
+        tr each='{ p in products }' class='{ unselected: !p.sel }'
+          td.headcol
+            a href='{ product_card_url + p.id }'
+              | { p.id }
+          td.headcol.col-min-width
+            | { p.displayname }
+
+          td each='{ f in fields }'
+            .flex-c
+              input id='pf' pid='{ p.id }' fid='{ f.id }' autocomplete='off' placeholder='{ p[f.id] }' style='width: { width_hash[f.id] }ch;' if='{ f.id != "desc" }'
+              textarea id='pf' pid='{ p.id }' fid='{ f.id }' autocomplete='off' placeholder='{ p[f.id] }' style='width: { width_hash[f.id] }ch;' if='{ f.id == "desc" }'
+
+  javascript:
+    self.token = document.querySelector('form [name^="auth"]').value
+    self.fields = []
+    self.products = []
+    self.product_card_url = opts.product_card_url
+    self.products_empty = true
+    self.width_hash = {
+      'name': 30, 'look': 25, 'category_id': 10, 'place_id': 12, 'price': 5, 'desc': 20,
+      'corel': 20, 'art': 12, 'discount': 6, 'dim_weight': 6, 'dim_height': 6, 'dim_width': 6,
+      'dim_length': 6, 'windex': 6, 'lotof': 8, 'lotof_mfg': 10, 'tagname': 10,
+      'arn': 6, 'sticker': 6, 'multi': 8, 'pit': 10
+    }
+
+    self.on('mount', function() {
+      self.inputs = self.get_inputs()
+      rcontrol.trigger('GET_CACHE_fields', (data) => {
+        self.fields_list = data
+      })
+    })
+
+    loading_toggle(load) {
+      self.loading = load
+      self.update()
+    }
+
+    search_products(searching) {
+      if (searching.length == 0) {
+        self.products.forEach(el => el.sel = true)
+        return;
+      }
+      self.products.forEach(el => el.sel = false)
+      self.index.search(searching).forEach(el => {
+        el.sel = true
+      })
+    }
+
+    get_inputs() {
+      return {
+        cat: document.querySelector('input[name=cat]'),
+        place: document.querySelector('input[name=place]'),
+        search: document.querySelector('input[name=search]'),
+        // editable_field: document.querySelector('input[name=editable_field]'),
+        selector_by_name: document.querySelector('input[name=selector_by_name]')
+      }
+    }
+
+    get_table_cache() {
+      let cache = {}
+      let fids = self.fields.map(el => el.id)
+      fids.forEach(id => cache[id] = {})
+
+      let inputs = document.querySelectorAll('#pf')
+      if (inputs)
+        inputs.forEach(el => {
+          let pid = el.getAttribute('pid')
+          let fid = el.getAttribute('fid')
+          cache[fid][pid] = el
+        })
+      return cache
+    }
+
+    get_edit_cache() {
+      let cache = {}
+      let inputs = document.querySelectorAll('#edit')
+      if (inputs)
+        inputs.forEach(el => {
+          let fid = el.getAttribute('fid')
+          cache[fid] = el
+          el.addEventListener('keydown', (e) => {
+            if (e.keyCode == 13)
+              self.set_fields_value(fid, el.value)
+          })
+        })
+      return cache
+    }
+
+    get_editing_fields(cache) {
+      return Object.keys(cache).map(el => {
+        let val = cache[el].value
+        return [el, val]
+      })
+    }
+
+    get_data_to_save() {
+      let data = {}
+      let fids = self.fields.map(el => el.id)
+
+      fids.forEach(fid => {
+        let inputs_hash = self.table_cache[fid]
+        Object.keys(inputs_hash).forEach(pid => {
+          let val = inputs_hash[pid].value
+          if (val.length > 0) {
+            if (!data[pid]) data[pid] = {}
+            data[pid][fid] = inputs_hash[pid].value
+          }
+        })
+      })
+      return data
+    }
+
+    set_fields_value(fid, val) {
+      let inputs_hash = self.table_cache[fid]
+      self.selected_products_ids.forEach(id => {
+        inputs_hash[id].value = val
+      })
+    }
+
+    rcontrol.on('RELOAD_PRODUCTS', function(data) {
+      const inp = self.inputs
+      rcontrol.trigger('LOADING_PRODUCTS_LIST', true)
+      self.loadlist(inp.cat.value, inp.place.value, inp.search.value)
+    })
+
+    rcontrol.on('FIELDS_CHANGED', function(data) {
+      self.fields = self.fields_list.filter(field => field.sel)
+      rcontrol.trigger('TYPEDOWN_GROUP_CHANGE_COMPLETE_fields')
+      self.update()
+      self.table_cache = self.get_table_cache()
+      self.edit_cache = self.get_edit_cache()
+    })
+
+    rcontrol.on('SET_FIELDS_VALUES', function() {
+      let editing_values = self.get_editing_fields(self.edit_cache)
+      editing_values.forEach(function([fid, val]) { self.set_fields_value(fid, val) })
+    })
+
+    rcontrol.on('PRODUCTS_SEARCH_CHANGED', function() {
+      let searching = self.inputs.selector_by_name.value
+      self.search_products(searching)
+      self.selected_products_ids = self.products.filter(el => el.sel).map(el => el.id)
+      self.update()
+    })
+
+    rcontrol.on('SAVE_PRODUCTS_TABLE', function() {
+      const data_to_save = self.get_data_to_save()
+      if (Object.keys(data_to_save).length == 0)
+        rcontrol.trigger('PRODUCTS_LIST_IS_EMPTY')
+      else {
+        self.sendlist(data_to_save)
+      }
+    })
+
+    sendlist(data) {
+      var data = {
+        authenticity_token: self.token,
+        data: JSON.stringify(data)
+      }
+      fetch('/things/multiedit_save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(data).toString()
+      })
+      .then(function(response) {
+        const reader = response.body.getReader()
+        const textDecoder = new TextDecoder('utf-8')
+        let productsCount = 0
+        let saveProgress = 0
+
+        reader.read().then(function processChunk({ done, value }){
+          if (done) {
+            rcontrol.trigger('LOADING_SAVE_PRODUCTS', false)
+            rcontrol.trigger('SAVING_COMPLETE')
+            return;
+          }
+          let messages = textDecoder.decode(value).split('§')
+          messages.forEach(message => {
+            if (message.startsWith('M')) {
+              const ind = message.indexOf(':')
+              const firstPart = message.substring(0, ind)
+              const secondPart = message.substring(ind + 1)
+              switch(firstPart) {
+                case 'MPROD':
+                  productsCount = parseInt(secondPart)
+                  break;
+                case 'MERR':
+                  rcontrol.trigger('LOADING_SAVE_PRODUCTS', false)
+                  rcontrol.trigger('SAVING_ERROR', secondPart)
+                  return;
+                case 'MERRP':
+                  rcontrol.trigger('ADD_SAVING_PRODUCT_ERROR', secondPart)
+                  break;
+              }
+            } else {
+              const parsedProgress = parseInt(message)
+              if (saveProgress < parsedProgress) saveProgress = parsedProgress
+            }
+          })
+          rcontrol.trigger('SET_SAVE_PROGRESS', saveProgress + 1, productsCount)
+          reader.read().then(processChunk)
+        })
+      })
+    }
+
+    loadlist(cat, place, search) {
+      if (cat == 'all' && place == 'all' && (search || '').length > 0) {
+        cat = 'none'
+        place = 'none'
+      }
+      var data = {
+        authenticity_token: self.token,
+        cat: cat,
+        place: place,
+        search: search
+      }
+      try {
+        fetch('/products/list_by_filters.json', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams(data).toString()
+        })
+        .then(function(response) { return response.json() })
+        .then(function(data) {
+          self.products = data
+          self.products.forEach(el => el.sel = true)
+          self.selected_products_ids = self.products.map(el => el.id)
+          rcontrol.trigger('LOADING_PRODUCTS_LIST', false)
+          rcontrol.trigger('TYPEDOWN_GROUP_CHANGE_COMPLETE_products')
+          self.products_empty = self.products.length == 0
+          self.init_products()
+          self.update()
+          self.table_cache = self.get_table_cache()
+          self.edit_cache = self.get_edit_cache()
+          rcontrol.trigger('PRODUCTS_LOADED')
+        })
+      } catch {
+        rcontrol.trigger('LOADING_PRODUCTS_LIST', false)
+        alert("Ошибка! Что то пошло не так...")
+      }
+    }
+
+    init_products() {
+      self.index = new FlexSearch({
+        tokenize: "forward",
+        split: /\s+/,
+        depth: 2,
+        doc: {
+          id: "id",
+          field: [ "displayname" ]
+        }
+      })
+      self.index.add(self.products)
+    }

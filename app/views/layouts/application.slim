@@ -183,6 +183,10 @@ html lang='en'
                 | Продукция
                 .menu-icon.fa.fa-coffee
                   / .label.label-warning new
+            li.sidebar-list
+              = link_to url(:things, :multiedit) do
+                | Мультиредактор
+                .menu-icon.fa.fa-th-list
           - if allow_route?(:editors)
             li.sidebar-list
               = link_to url(:clients, :index) do

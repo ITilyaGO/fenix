@@ -3,6 +3,10 @@ module Fenix::App::ThingsPageHelper
     val == 'none' ? nil : val
   end
 
+  def empty_to_nil(val)
+    val&.empty? ? nil : val
+  end
+
   def filter_products_with_category(cat)
     cat = nil if cat.to_sym.eql? :nothing
     @products = @products.select{ |a| a.category_id == cat }
@@ -17,9 +21,9 @@ module Fenix::App::ThingsPageHelper
   end
 
   def products_by_filters(params)
-    ccat = none_to_nil params[:cat]
-    townfilter = none_to_nil params[:place]
-    search = params[:search]
+    ccat = empty_to_nil none_to_nil params[:cat]
+    townfilter = empty_to_nil none_to_nil params[:place]
+    search = empty_to_nil params[:search]
     if (ccat.nil? || townfilter.nil?) && search.nil?
       @notice = 'Выберите город и категорию' if ccat || townfilter
       last_products_by_filters(townfilter, ccat)
@@ -37,5 +41,6 @@ module Fenix::App::ThingsPageHelper
       end
       @products.sort_by!(&:cindex)
     end
+    @products
   end
 end

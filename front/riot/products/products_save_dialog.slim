@@ -1,0 +1,107 @@
+products_save_dialog.save-dialog if='{ showDialog }'
+  .save-overlay
+  .save-dialog
+    .flex-c.center if='{ savingStage == 0 }'
+      .btn.btn-prime.btn-s onclick='{ start_save }'
+        .fa.fa-save
+        | Сохранить
+
+      .btn.btn-prime.btn-s onclick='{ close_dialog }' Отменить
+
+    div if='{ savingStage == 1 }'
+      .flex-c.center Сохранение...
+      .progress
+        .progress-bar style='width: { percentProgress }%;' role="progressbar" aria-valuemin="0" aria-valuemax="100"
+          | { progress }/{ maxProgress }
+
+    .w100 if='{ savingStage == 2 }'
+      .text-center Сохранено.
+      .text-center Перезагрузка продуктов...
+      .flex-c.center
+        .btn.btn-prime.btn-s onclick='{ close_dialog }' Ок
+
+    .w100 if='{ savingStage == 4 }'
+      .text-center Сохранять нечего
+      .flex-c.center
+        .btn.btn-prime.btn-s onclick='{ close_dialog }' Ок
+
+    .w100 if='{ savingStage == 5 }'
+      .text-center Произошла ошибка
+      .text-center
+        | Сохранено { progress || 0 }/{ maxProgress }
+      .err
+        | { errorMessage }
+      .flex-c.center
+        .btn.btn-prime.btn-s onclick='{ close_dialog }' Ок
+
+    .error-list if='{ productErrors.length > 0 }'
+      .scrolling
+        .error each='{ err in productErrors }'
+          | { err }
+
+  javascript:
+    self.showDialog = false
+    self.savingStage = 0
+    self.progress = 0
+    self.maxProgress = 0
+    self.productErrors = []
+
+    self.on('mount', function() {
+      self.update()
+    });
+
+    close_dialog() {
+      self.showDialog = false
+      self.update()
+    }
+
+    start_save() {
+      self.savingStage = 1
+      self.maxProgress = 0
+      self.progress = 0
+      self.percentProgress = 0
+      rcontrol.trigger('SAVE_PRODUCTS_TABLE')
+      self.update()
+    }
+
+    rcontrol.on('SET_SAVE_PROGRESS', function(val, max) {
+      self.maxProgress = max
+      self.progress = val
+      self.percentProgress = (val / max) * 100
+      self.update()
+    })
+
+    rcontrol.on('SHOW_PRODUCTS_SAVE_DIALOG', function() {
+      self.productErrors = []
+      self.savingStage = 0
+      self.showDialog = true
+      self.update()
+    })
+
+    rcontrol.on('SAVING_COMPLETE', function() {
+      if (self.savingStage < 2) {
+        self.savingStage = 2
+        rcontrol.trigger('RELOAD_PRODUCTS')
+        self.update()
+      }
+    })
+
+    rcontrol.on('PRODUCTS_LOADED', function() {
+      if (self.savingStage == 2 && self.productErrors.length == 0) self.close_dialog()
+    })
+
+    rcontrol.on('PRODUCTS_LIST_IS_EMPTY', function() {
+      self.savingStage = 4
+      self.update()
+    })
+
+    rcontrol.on('SAVING_ERROR', function(errorMessage) {
+      self.errorMessage = errorMessage
+      self.savingStage = 5
+      self.update()
+    })
+
+    rcontrol.on('ADD_SAVING_PRODUCT_ERROR', function(product_id) {
+      self.productErrors.push(product_id)
+      self.update()
+    })

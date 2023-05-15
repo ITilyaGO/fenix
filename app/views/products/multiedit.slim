@@ -1,0 +1,62 @@
+.products-multiedit
+  products_save_dialog
+  .flex-c.center.products-selector
+    .filter.w100
+      typedown.hide data-name='place' group='products' nosub=1 showchanges=1 enough=1 display-id=params.fetch(:place, :none)
+        = content_tag(:dv, 'Не выбрано', { value: :none, class: 'item' })
+        = content_tag(:dv, 'Все', { value: :all, class: 'item' }) if @ccat != 'all'
+        - known_cities.each do |k, city|
+          - html_attributes = { value: city.code, class: 'item' }
+          = content_tag(:dv, city.model, html_attributes)
+    .filter.w100
+      typedown.hide data-name='cat' group='products' nosub=1 showchanges=1 enough=1 display-id=params.fetch(:cat, :none)
+        = content_tag(:dv, 'Не выбрано', { value: :none, class: 'item' })
+        = content_tag(:dv, 'Все', { value: :all, class: 'item' }) if @place != 'all'
+        = content_tag(:dv, 'Без категории', { value: :nothing, class: 'item' })
+        - @cats.each do |cat|
+          - cat.subs_ordered.each do |sub|
+            - html_attributes = { :value => sub.id, class: 'item' }
+            - html_attributes[:selected] ||= option_is_selected?(sub.id, sub.name, @product&.category_id)
+            = content_tag(:dv, "#{ cat.name } - #{ sub.name }", html_attributes)
+    .filter.w100 title='Загрузить продукты включающие слова...'
+      input.w100 name=:search placeholder='Поиск...'
+    .filter title='Загрузить список продуктов по выбранным фильтрам'
+      loading on='LOADING_PRODUCTS_LIST'
+        trigger_button trigger='RELOAD_PRODUCTS'
+         .btn.btn-prime.btn-align Фильтровать
+  .flex-c.edit
+    .filter.w100
+      multitypedown.hide data-name=:fields group=:fields trigger='FIELDS_CHANGED' showchanges=1 enough=1 display-id=:all
+        - @fields.each do |k, v|
+          = content_tag(:dv, v, { value: k, class: 'item' })
+
+    .filter.w100 title='Выбрать продукты для изменения по названию'
+      input.w100 name=:selector_by_name placeholder='Выбор по названию...' onchange='rcontrol.trigger("PRODUCTS_SEARCH_CHANGED")'
+
+    .filter title='Задать значения всем выбранным товарам во всех столбиках'
+      trigger_button trigger='SET_FIELDS_VALUES'
+        .btn.btn-prime.btn-align Задать значения
+
+    .filter title='Открыть диалог сохранения'
+      loading on='LOADING_SAVE_PRODUCTS'
+        trigger_button trigger='SHOW_PRODUCTS_SAVE_DIALOG'
+          .btn.btn-prime.btn-align Сохранить
+
+  products_list product_card_url=url(:things, :edit, '')
+
+
+
+- content_for :js_assets do
+  = javascript_include_tag :riot, :flexsearch_min
+  rscript type="riot/tag" src="/riot/tags/html/tdrop.tag"
+  rscript type="riot/tag" src="/riot/tags/html/typedown.tag"
+  rscript type="riot/tag" src="/riot/tags/html/multitypedown.tag"
+  rscript type="riot/tag" src="/riot/tags/products/products_list.tag"
+  rscript type="riot/tag" src="/riot/tags/products/products_save_dialog.tag"
+  rscript type="riot/tag" src="/riot/tags/loading.tag"
+  rscript type="riot/tag" src="/riot/tags/trigger_button.tag"
+
+  javascript:
+    document.addEventListener("DOMContentLoaded", function(event) {
+      riot.mount('tdrop, typedown, multitypedown, products_list, products_save_dialog, loading, trigger_button')
+    })
