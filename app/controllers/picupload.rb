@@ -41,8 +41,9 @@ Fenix::App.controllers :picupload do
     tempfile = file[:tempfile]
 
     is = ImageSize.path tempfile.path
-    good = is.format && is.size.uniq.one? && is.w === (746..816)
+    good = is.format && is.size.uniq.one? && (746..816) === is.w
     if not good
+      FileUtils.rm tempfile.path
       flash[:error] = t 'error.bad_file'
       flash[:bad_file] = true
       redirect url(:things, :edit, :id => product.id)
