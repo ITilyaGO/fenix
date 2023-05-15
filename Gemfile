@@ -35,6 +35,8 @@ gem 'ox'
 gem 'barby'
 gem 'stomp'
 gem 'rqrcode'
+gem 'mozjpeg'
+gem 'image_size', '~> 3.0'
 #gem 'simple_enum'
 #gem 'classy_enum'
 

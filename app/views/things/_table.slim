@@ -72,8 +72,11 @@
         - xprod = SL::Product.new(product.id)
         tr class='list-row'
           td class='list-column list-selectable' = check_box_tag 'product_ids[]', :value => product.id, :class => 'list-selectable-checkbox'
-          td class='list-column' = product.id
-          td class='list-column' = product.displayname
+          td.list-column: .flex-c.vcenter
+            .wp100 = product.id
+            - if pict = picsrc(product.id, :t)
+              pica picsrc=pict width=100
+          td.list-column = product.displayname
           td.list-column
             = town_name = @kc_towns[product.place_id]&.model.name
           td class='list-column'
@@ -95,11 +98,12 @@
   = javascript_include_tag :appa, :riot
   rscript type="riot/tag" src="/riot/tags/things/selectreload.tag"
   rscript type="riot/tag" src="/riot/tags/things/search.tag"
+  rscript type="riot/tag" src="/riot/tags/things/pica.tag"
 
   javascript:
 
     document.addEventListener("DOMContentLoaded", function(event) {
-      riot.mount('selectreload, search')
+      riot.mount('selectreload, search, pica')
       let confobj = #{{@squadconf.to_json}}
       rsquad.saveConfig(confobj)
 

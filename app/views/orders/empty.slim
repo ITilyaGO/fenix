@@ -106,10 +106,11 @@
       
       table id='sample_table' style="visibility:hidden"
         tr.list-row data-sum="0" data-price="0"
-          td class="col-md-1"
-            span class="num"
-            = hidden_field_tag 'line[][id]', :value => line[:id]
-            = hidden_field_tag 'line[][ol]', :value => ''
+          td class="col-md-1": .flex-c.vcenter
+            .wp100
+              span class="num"
+              = hidden_field_tag 'line[][id]', :value => line[:id]
+              = hidden_field_tag 'line[][ol]', :value => ''
           td class="col-md-4"
             span class="product"
           td class="col-md-3"
@@ -130,7 +131,7 @@
               a.btn-del.list-row-action-wrapper-link title="#{pat(:delete)}"
                 = tag_icon("trash-o")
         
-      .table-responsive.tmar-2
+      .table-responsive-n.tmar-2
         table.table.table-hover.order-table.manual
           tr data-sum="0"
             th Номер
@@ -145,10 +146,13 @@
             / HACK: for empty or broken lines
             - next unless line.product
             tr.list-row data-sum="#{line.amount*line.price}" data-price="#{line.price}"
-              td class="col-md-1"
-                span class="num" = i + 1
-                = hidden_field_tag 'line[][id]', :value => line.product.id
-                = hidden_field_tag 'line[][ol]', :value => line.id
+              td class="col-md-1": .flex-c.vcenter
+                .wp100
+                  span class="num" = i + 1
+                  = hidden_field_tag 'line[][id]', :value => line.product.id
+                  = hidden_field_tag 'line[][ol]', :value => line.id
+                - if pict = picsrc(line.product.id)
+                  pica picsrc=pict tipdesc=line.product.displayname
               td class="col-md-4"
                 span class="product" = line.product.displayname
               td class="col-md-3"
@@ -209,11 +213,12 @@ page cityload=1 productload=1
   rscript type="riot/tag" src="/riot/tags/empty-order/page.tag"
   rscript type="riot/tag" src="/riot/tags/cat-tree/wtree.tag"  
   rscript type="riot/tag" src="/riot/tags/cat-tree/wnode.tag"  
+  rscript type="riot/tag" src="/riot/tags/things/pica.tag"
 
   javascript:
     document.addEventListener("DOMContentLoaded", function(event) {
       riot.mount('page, collapser, switcher, selectreload, catlist, wtree')
-      riot.mount('catlist')
+      riot.mount('catlist, pica')
 
       // setTimeout(function() {
       //   rcontrol.trigger('MASS_LOAD', rsquad.loaded[0])

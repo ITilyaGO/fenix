@@ -46,3 +46,5 @@ en:
     complexity: Сложность дня отправки
     stickday_threshold: Границы дня клейки
     stickday_limit: Цена дня клейки
+  error:
+    bad_file: Этот файл не подходит

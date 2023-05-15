@@ -34,4 +34,30 @@ Fenix::App.controllers :picupload do
 
     redirect url(:orders, :edit, :id => order.id)
   end
+
+  post :things, :with => :id do
+    product = Product.find(params[:id])
+    file = params[:file]
+    tempfile = file[:tempfile]
+
+    is = ImageSize.path tempfile.path
+    good = is.format && is.size.uniq.one? && is.w === (746..816)
+    if not good
+      flash[:error] = t 'error.bad_file'
+      flash[:bad_file] = true
+      redirect url(:things, :edit, :id => product.id)
+    end
+
+    product.picfile = Secure.uuid.gsub(/-/, '')
+
+    make_product_pic_path product.picname
+    FileUtils.cp tempfile.path, product_pic_file(product.picname, :r)
+    FileUtils.cp product_pic_file(product.picname, :r), product_pic_file(product.picname, :m)
+    FileUtils.touch product_pic_file(product.picname, :t)
+    FileUtils.chmod 0777, [product_pic_file(product.picname), product_pic_file(product.picname, :r)]
+    opti_pic(product.picname)
+    product.save
+
+    redirect url(:things, :edit, :id => product.id)
+  end
 end

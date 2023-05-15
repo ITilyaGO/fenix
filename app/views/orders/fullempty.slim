@@ -125,9 +125,10 @@
 
       table id='sample_table' style="visibility:hidden"
         tr.list-row data-sum="0" data-price="0"
-          td class="col-md-1"
-            span class="num"
-            = hidden_field_tag 'line[][id]', :value => line[:id]
+          td class="col-md-1": .flex-c.vcenter
+            .wp100
+              span class="num"
+              = hidden_field_tag 'line[][id]', :value => line[:id]
           td class="col-md-4"
             = hidden_field_tag 'line[][id]', :value => line[:id]
             span class="product"
@@ -150,7 +151,7 @@
                 = tag_icon("trash-o")
 
       / h4 Добавлено
-      .table-responsive.tmar-2
+      .table-responsive-n.tmar-2
         table.table.table-hover.order-table.manual
           tr data-sum="0"
             th Номер
@@ -201,6 +202,7 @@ page productload=1
   rscript type="riot/tag" src="/riot/tags/empty-order/page.tag"
   rscript type="riot/tag" src="/riot/tags/cat-tree/wtree.tag"
   rscript type="riot/tag" src="/riot/tags/cat-tree/wnode.tag"
+  rscript type="riot/tag" src="/riot/tags/things/pica.tag"
 
   javascript:
     document.addEventListener("DOMContentLoaded", function(event) {

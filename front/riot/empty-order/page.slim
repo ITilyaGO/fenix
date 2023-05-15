@@ -28,6 +28,11 @@ page
       var newsum = Math.abs(lp.price * +lp.amount || 0)
       tr.data('sum', newsum)
       tr.data('price', lp.price)
+      var pica = $("<pica></pica>")
+      $(pica).attr('picsrc', lp.pic)
+      $(pica).attr('tipdesc', lp.name)
+      if (lp.pic) $('td:first > div', tr).append(pica)
+
       $(".price", tr).text($(".price", tr).text().replace(/\d+/g, lp.price))
       $(".product", tr).text(lp.name)
       $(":input[name*='id']", tr).val(lp.id)
@@ -40,6 +45,7 @@ page
       tr[0].style.opacity = 0
       if (target.tagName === 'TBODY') tr.appendTo(target)
       else target.after(tr)
+      if (lp.pic) riot.mount('pica')
       Visual.fadeIn(tr[0], 350)
     }
 

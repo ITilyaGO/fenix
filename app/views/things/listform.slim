@@ -18,69 +18,97 @@
                 - html_attributes[:selected] ||= option_is_selected?(a.id, a.name, @archetype)
                 = content_tag(:option, a.name, html_attributes)
       list reload='/things/edit/'
-    = form_for :product, url(:things, :update, :id => @product.id), :method => :put, :autocomplete => 'off', :class => 'form-std flex-c' do |f|
-      .col-md-8.col-md-offset-3.relat
+    
+      
+    .form-std.flex-c
+      .col-md-3 style='padding: 0;'
+
+        .flex-c style='top: 1em;' class=('white-sticky' if @product.picname)
+          img.wp100 style='border-radius: 4px;' src=(@product.picname ? picsrc(@product.id) : '/images/none.png')
         
+        - if allow_route?(:picupload)
+          = form_tag url(:picupload, :things, :id => @product.id), :method => :post, :enctype => "multipart/form-data" do
+            fileupload.fileinput.fileinput-new.text-center data-provides="fileinput"
+              .btn.btn-xs.btn-prime.btn-embossed.btn-file.fileinput-new
+                .fileinput-new Загрузить
+                input type="file" name="file" accept='image/*'
+              '
+              button.btn.btn-xs.btn-info.btn-embossed.fileinput-exists type="submit"
+                .fa.fa-upload
+                | Upload
 
-        fieldset.control-group.emb
-          label.control-label = @product.id
-          .controls.wp100 = f.text_field :displayname, :class => 'form-control input-large input-with-feedback'
-        = partial 'things/sideform', :locals => { :f => f, :cats => @cats }
+        - if flash[:bad_file]
+          .alert.alert-error: .small
+            p Картинка должна быть квадратной.
+            p Длина стороны должна быть 800px
+            p
+              | (от 746px до 816px)
 
-        fieldset.control-group.hame.tmar-3
-          .alabel.label bku
-          label.control-label = @xproduct.arn
-          - a = KSM::Archetype.find @xproduct.arn
-          - if @xproduct.arn and @arch.exist?
-            .controls.wp100 = f.text_field :arnt, value: a.name, :class => 'form-control input-large input-with-feedback'
-            - if @xproduct.multi
-              .controls: .btn = @xproduct.multi
-          - else
-            .controls: .form-control: .fa.fa-exclamation-triangle.text-warning
 
-        fieldset.control-group.hame
-          .alabel.label 1c
-          label.control-label = @product.id
-          .controls.wp100: .form-control
-        
-        fieldset.control-group
-          label.control-label
-          .controls
-            .btn.btn-link riot-tag='shower' data-classy='.plinks' Связи...
-            a.btn.btn-link href=url(:things, :transfer) Excel...
+      .flex-c
+        = form_for :product, url(:things, :update, :id => @product.id), :method => :put, :autocomplete => 'off' do |f|
+          .col-md-9
+          
+          
+            fieldset.control-group.emb
+              label.control-label = @product.id
+              .controls.wp100 = f.text_field :displayname, :class => 'form-control input-large input-with-feedback'
+            = partial 'things/sideform', :locals => { :f => f, :cats => @cats }
 
-        .plinks.hide
-          fieldset.control-group
-            label.control-label bku
-            .controls.wp100 = text_field_tag :'raw[arn]', value: @xproduct.arn, :class => 'form-control input-large'
-            .pll.spacer
-            .controls = text_field_tag :'raw[multi]', value: @xproduct.multi, :class => 'form-control input-large'
-          /fieldset.control-group
-            label.control-label 1c
-            .controls.wp100 = text_field_tag :'raw[k1c]', value: @xproduct.k1c, :class => 'form-control input-large'
-        
-        .foot style='height: 40vh;'
+            fieldset.control-group.hame.tmar-3
+              .alabel.label bku
+              label.control-label = @xproduct.arn
+              - a = KSM::Archetype.find @xproduct.arn
+              - if @xproduct.arn and @arch.exist?
+                .controls.wp100 = f.text_field :arnt, value: a.name, :class => 'form-control input-large input-with-feedback'
+                - if @xproduct.multi
+                  .controls: .btn = @xproduct.multi
+              - else
+                .controls: .form-control: .fa.fa-exclamation-triangle.text-warning
 
-      .f-actions.text-center.col-md-3 style='padding: 0;margin-left: 2em;': .white-sticky.cmar-05 style='top: 50vh;'
-        = f.check_box :archive, value: 1, :class => 'swap-input', checked: false
-        /label.btn.btn-sm.btn-camo.wp100.text-danger.cmar-05.flex-c.vcenter.caps.swap-label(for = 'product_archive')
-          .flexie.text-right архив
-          .fa.fa-toggle-on style='font-size: 1.8em;'
-          .flexie.text-left нет
-        = f.check_box :ignored, value: 1, :class => 'swap-input', checked: @product.ignored == 1
-        label.btn.btn-sm.btn-desert.wp100.text-danger.cmar-05.flex-c.vcenter.caps.swap-label(for = 'product_ignored')
-          .flexie.text-right удалено
-          .fa.fa-toggle-on style='font-size: 1.8em;'
-          .flexie.text-left активно
-        = f.submit pat(:save).downcase, :class => 'btn btn-sm btn-prime btn-wide tmar-1'
-        - if @product.id != '0000'
-          = f.submit pat(:copy).downcase, :class => 'btn btn-sm btn-default tmar-1', name: 'clone'
+            fieldset.control-group.hame
+              .alabel.label 1c
+              label.control-label = @product.id
+              .controls.wp100: .form-control
+            
+            fieldset.control-group
+              label.control-label
+              .controls
+                .btn.btn-link riot-tag='shower' data-classy='.plinks' Связи...
+                a.btn.btn-link href=url(:things, :transfer) Excel...
 
-        .tmar-2.wp100.tiny-text
-          - unless !@product.exist? || @xproduct.arn
-            .li.small
-              .fa.fa-exclamation-triangle.text-warning
-              | Нет склада
+            .plinks.hide
+              fieldset.control-group
+                label.control-label bku
+                .controls.wp100 = text_field_tag :'raw[arn]', value: @xproduct.arn, :class => 'form-control input-large'
+                .pll.spacer
+                .controls = text_field_tag :'raw[multi]', value: @xproduct.multi, :class => 'form-control input-large'
+              /fieldset.control-group
+                label.control-label 1c
+                .controls.wp100 = text_field_tag :'raw[k1c]', value: @xproduct.k1c, :class => 'form-control input-large'
+            
+            .foot style='height: 40vh;'
+
+          .f-actions.text-center.col-md-3.hp100.relat style='padding: 0;': .white-sticky.cmar-05 style='top: 50vh;'
+            = f.check_box :archive, value: 1, :class => 'swap-input', checked: false
+            /label.btn.btn-sm.btn-camo.wp100.text-danger.cmar-05.flex-c.vcenter.caps.swap-label(for = 'product_archive')
+              .flexie.text-right архив
+              .fa.fa-toggle-on style='font-size: 1.8em;'
+              .flexie.text-left нет
+            = f.check_box :ignored, value: 1, :class => 'swap-input', checked: @product.ignored == 1
+            label.btn.btn-sm.btn-desert.wp100.text-danger.cmar-05.flex-c.vcenter.caps.swap-label(for = 'product_ignored')
+              .flexie.text-right удалено
+              .fa.fa-toggle-on style='font-size: 1.8em;'
+              .flexie.text-left активно
+            = f.submit pat(:save).downcase, :class => 'btn btn-sm btn-prime btn-wide tmar-1'
+            - if @product.id != '0000'
+              = f.submit pat(:copy).downcase, :class => 'btn btn-sm btn-default tmar-1', name: 'clone'
+
+            .tmar-2.wp100.tiny-text
+              - unless !@product.exist? || @xproduct.arn
+                .li.small
+                  .fa.fa-exclamation-triangle.text-warning
+                  | Нет склада
  
 
   .table50.col-md-12.hide = partial 'things/table'
@@ -88,7 +116,7 @@
 .clearfix
 
 - content_for :js_assets do
-  = javascript_include_tag :appa, :riot
+  = javascript_include_tag :appa, :riot, :fileinput
   / script type="riot/tag" src="/riot/tags/sticker_line.tag"
   / rscript type="riot/tag" src="/riot/tags/idcollapser.tag"
   / rscript type="riot/tag" src="/riot/tags/subclick.tag"

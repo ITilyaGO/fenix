@@ -412,6 +412,7 @@ ul class="nav nav-tabs non-print"
                             = sticker.last
                     tr
                       th.only-print style='width:15em' Упаковано
+                      th.non-print
                       th style='width:50em' Наименование
                       th style='width:20em' Коммент
                       th style='width:5em' Кол-во
@@ -431,6 +432,9 @@ ul class="nav nav-tabs non-print"
                       tr class="order-line"
                         = hidden_field_tag "line[#{ol.id}][id]", :value => ol.id
                         td.only-print &nbsp;
+                        td.non-print
+                          - if pict = picsrc(ol.product.id)
+                            pica picsrc=pict tipdesc=ol.product.displayname
                         td.col-md-4
                           = ol.product.displayname
                         td.col-md-3
@@ -518,10 +522,11 @@ picmod
   rscript type="riot/tag" src="/riot/tags/piclist.tag"
   rscript type="riot/tag" src="/riot/tags/draft_switches.tag"
   rscript type="riot/tag" src="/riot/tags/timeline/stickamount.tag"
+  rscript type="riot/tag" src="/riot/tags/things/pica.tag"
 
   javascript:
     document.addEventListener("DOMContentLoaded", function(event) {
-      riot.mount('collapser, fcollapser, piclist, picmod, draftswitches, inplace, stickamount')
+      riot.mount('collapser, fcollapser, piclist, picmod, draftswitches, inplace, stickamount, pica')
     })
     let confobj = #{{@squadconf.to_json}}
     rsquad.saveConfig(confobj)

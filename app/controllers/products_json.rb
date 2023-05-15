@@ -20,16 +20,18 @@ Fenix::App.controllers :products do
     @kc_stocks = Stock.free.flatless
 
     products = pro.map(&:to_r).map{|r|r.slice(:id, :name, :art, :price)}
-    products.each do |p|
-      pm = pro.detect{|a|a.id == p[:id]}
-      p[:name] = pm&.displayname
-      p[:arn] = @kc_stocks[@arp[p[:id]]]
+    products.each do |pa|
+      pm = pro.detect{|a|a.id == pa[:id]}
+      pa[:name] = pm&.displayname
+      pa[:arn] = @kc_stocks[@arp[pa[:id]]]
+      pa[:pic] = picsrc(pm&.id) 
     end
     products.to_json
   end
 
   post :one, :provides => :json do
     id = params[:id]
-    Product.find(id).to_jr.to_json
+    pic = { pic: picsrc(id) }
+    Product.find(id).to_jr.merge(pic).to_json
   end
 end

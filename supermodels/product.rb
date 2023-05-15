@@ -5,10 +5,10 @@ class Product < Doppel
     discount lotof lotof_mfg desc dim_weight dim_height dim_length dim_width look corel windex tagname
   ]
   FPROPS = %i[art discount lotof lotof_mfg desc dim_weight dim_height dim_length dim_width look corel]
-  SVSPROPS = %i[created_at updated_at ignored dates users history settings]
+  SVSPROPS = %i[created_at updated_at ignored dates users history settings pic]
   PROPS += SVSPROPS
   attr_accessor *PROPS
-  attr_accessor :xt
+  attr_accessor :xt, :ts
 
   def group?
     @g
@@ -64,6 +64,15 @@ class Product < Doppel
 
   def sketch_ext
     "#{autoart}.jpg"
+  end
+
+  def picfile= file
+    @pic = [picname || file, Time.now]
+  end
+
+  def picname
+    pn, @ts = @pic || []
+    pn
   end
 
   def n1c

@@ -1,0 +1,38 @@
+pica.flex-c.center.relat
+  .items
+    .label.label-default.hand onmouseover='{showtip}' onmouseout='{hidetip}'
+      .fa.fa-picture-o
+
+  .tooltip-block.text-center.absol style='z-index:2000;right: -{w}px;' class='{ hidden: !tipmode }'
+    .label.label-default
+      | { tipdesc } - Картинка
+    .flex-c.pika name="piks" style="width: {w}px; height: {w}px; background-size: cover;
+      background-repeat: no-repeat;background-image: url('{opts.picsrc}');"
+
+  javascript:
+    self.tipmode = false
+    self.tipdesc = opts.tipdesc
+    self.clickmode = opts.allow
+    self.w = +opts.width||400
+
+    showtip(el) {
+      self.tipmode = true
+      window.requestAnimationFrame(function() {})
+      self.update()
+      const rect = self.piks.getBoundingClientRect()
+      const table = self.piks.closest('table').getBoundingClientRect()
+
+      if (window.innerHeight < rect.bottom) {
+        self.piks.closest('.tooltip-block').style.top = (window.innerHeight - rect.bottom - 20) + "px"
+        self.piks.closest('.tooltip-block').style.bottom = (window.innerHeight - 20) + "px"
+      }
+      if (rect.top < 0)
+        self.piks.closest('.tooltip-block').style.top = "20px"
+      
+      self.update()
+    }
+
+    hidetip() {
+      self.tipmode = false
+      self.update()
+    }
