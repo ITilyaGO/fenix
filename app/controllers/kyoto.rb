@@ -56,6 +56,11 @@ Fenix::App.controllers :kyoto do
     partial 'kyoto/recs'
   end
 
+  get :safari do
+    @title = "Kyoto - Safari"
+    render 'kyoto/safari'
+  end
+
   # get 'get/:db/:key' do
   #   @title = "Kyoto - Display"
   #   key = params[:key]

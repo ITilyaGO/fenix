@@ -1,0 +1,34 @@
+h3 Safari
+= form_for '', '', :class => 'form-horizontal flex-c' do |f|
+
+  fieldset.wp100
+    .col-md-12 = text_field_tag :url, :class => "form-control form-amount input-sm"
+  .form-actions
+    a.btn.patch.btn-default.btn-embossed href="javascript:" send
+
+h4 Output
+.output.alert
+  p
+
+javascript:
+  (function() {
+    function no_href() {
+      b = document.querySelector('[name=url]').value
+      o = document.querySelector('.output p')
+      fetch(b, {
+        method: 'PATCH',
+        body: "&authenticity_token=" + encodeURIComponent(document.querySelector("form [name^=auth]").value),
+        headers: { "Content-Type": "application/x-www-form-urlencoded" }
+      })
+      .then(response => response.text())
+      .then(function(result) {
+        o.innerHTML = result
+      })
+      o.innerHTML = 'Loading... ' + b
+      return false
+    }
+
+    document.querySelectorAll('.btn.patch').forEach(function(b) {
+      b.onclick = no_href
+    })
+  })()

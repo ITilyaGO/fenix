@@ -123,23 +123,36 @@ class Product < Doppel
   end
   
   def backsync
-    oc = Online::Category.find_by(pio_id: @category_id)
-    return false unless oc
-    op = Online::Product.find_by(pio_id: @id) || Online::Product.new({ pio_id: @id })
-    op.price = @price
-    op.name = simplename
-    op.active = @ignored != 1
-    op.category_id = oc.id
-    op.height = @dim_height
-    op.tagname = @tagname
-    op.index = @windex
-    op.save
+    # oc = Online::Category.find_by(pio_id: @category_id)
+    # return false unless oc
+    # op = Online::Product.find_by(pio_id: @id) || Online::Product.new({ pio_id: @id })
+    # op.price = @price
+    # op.name = simplename
+    # op.active = @ignored != 1
+    # op.category_id = oc.id
+    # op.height = @dim_height
+    # op.tagname = @tagname
+    # op.index = @windex
+    # op.save
 
     stompsync rescue nil
   end
 
+  def back_attrs
+    {
+      price: @price,
+      name: simplename,
+      active: @ignored != 1,
+      height: @dim_height,
+      tagname: @tagname,
+      index: @windex
+    }
+  end
+
   def stompsync
     client = Stomp::Client.open Stomp::DETAILS
+    wpsb = { id: @id, cat: @category_id, attrs: back_attrs }
+    client.publish("/topic/web:product:sync", Marshal.dump(wpsb), { "priority" => 1 })
     client.publish("/topic/web:product:lotof", Marshal.dump({ id: @id, min: @lotof }), { "priority" => 2 })
     client.close
   end
