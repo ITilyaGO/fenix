@@ -153,6 +153,8 @@ class Product < Doppel
       name: simplename,
       active: @ignored != 1,
       height: @dim_height,
+      length: @dim_length,
+      width:  @dim_width,
       tagname: @tagname,
       index: @windex
     }
