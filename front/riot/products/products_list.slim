@@ -5,7 +5,10 @@ products_list.anyscroll
       thead
         tr
           th.header.headcol.headrow-color width='10px' ID
-          th.header.headcol.headrow-color Имя
+          th.header.headcol.headrow-color
+            input type='checkbox' checked=1 onchange='{ all_items_selected_changed }'
+            | &nbsp;
+            | Имя
           th.header each='{ f in fields }'
             .name title='Внутреннее название: { f.id }'
               | { f.name }
@@ -19,12 +22,14 @@ products_list.anyscroll
             a href='{ product_card_url + p.id }'
               | { p.id }
           td.headcol.col-min-width
+            input type='checkbox' checked='{ p.sel }' onchange='{ item_selected_changed }'
+            | &nbsp;
             | { p.displayname }
 
           td each='{ f in fields }'
             .flex-c
-              input id='pf' pid='{ p.id }' fid='{ f.id }' autocomplete='off' placeholder='{ p[f.id] }' style='width: { width_hash[f.id] }ch;' if='{ f.id != "desc" }'
-              textarea id='pf' pid='{ p.id }' fid='{ f.id }' autocomplete='off' placeholder='{ p[f.id] }' style='width: { width_hash[f.id] }ch;' if='{ f.id == "desc" }'
+              input id='pf' pid='{ p.id }' fid='{ f.id }' autocomplete='off' placeholder='{ p[f.id] }' style='width: { width_hash[f.id] }ch;' ondblclick='{ copy_placeholder_to_value }' if='{ f.id != "desc" }'
+              textarea id='pf' pid='{ p.id }' fid='{ f.id }' autocomplete='off' placeholder='{ p[f.id] }' style='width: { width_hash[f.id] }ch;' ondblclick='{ copy_placeholder_to_value }' if='{ f.id == "desc" }'
 
   javascript:
     self.token = document.querySelector('form [name^="auth"]').value
@@ -46,6 +51,16 @@ products_list.anyscroll
       })
     })
 
+    item_selected_changed(event) {
+      const checked = event.target.checked
+      event.item.p.sel = checked
+      self.selected_products_ids_changed = true
+    }
+
+    set_sel_to_all_products(sel) {
+      self.products.forEach(el => el.sel = sel)
+    }
+
     loading_toggle(load) {
       self.loading = load
       self.update()
@@ -53,10 +68,10 @@ products_list.anyscroll
 
     search_products(searching) {
       if (searching.length == 0) {
-        self.products.forEach(el => el.sel = true)
+        self.set_sel_to_all_products(true)
         return;
       }
-      self.products.forEach(el => el.sel = false)
+      self.set_sel_to_all_products(false)
       self.index.search(searching).forEach(el => {
         el.sel = true
       })
@@ -126,11 +141,33 @@ products_list.anyscroll
       return data
     }
 
+    get_selected_products_ids() {
+      if (self.selected_products_ids_changed) {
+        self.selected_products_ids = self.products.filter(el => el.sel).map(el => el.id)
+        self.selected_products_ids_changed = false
+      }
+      return self.selected_products_ids
+    }
+
     set_fields_value(fid, val) {
       let inputs_hash = self.table_cache[fid]
-      self.selected_products_ids.forEach(id => {
+      self.get_selected_products_ids().forEach(id => {
         inputs_hash[id].value = val
       })
+    }
+
+    copy_placeholder_to_value(event) {
+      const input_element = event.target
+      if (input_element.value === '') {
+        input_element.value = input_element.placeholder
+        input_element.select()
+      }
+    }
+
+    all_items_selected_changed(event) {
+      const checked = event.target.checked
+      self.set_sel_to_all_products(checked)
+      self.selected_products_ids_changed = true
     }
 
     rcontrol.on('RELOAD_PRODUCTS', function(data) {
@@ -155,7 +192,7 @@ products_list.anyscroll
     rcontrol.on('PRODUCTS_SEARCH_CHANGED', function() {
       let searching = self.inputs.selector_by_name.value
       self.search_products(searching)
-      self.selected_products_ids = self.products.filter(el => el.sel).map(el => el.id)
+      self.selected_products_ids_changed = true
       self.update()
     })
 
@@ -239,7 +276,7 @@ products_list.anyscroll
         .then(function(response) { return response.json() })
         .then(function(data) {
           self.products = data
-          self.products.forEach(el => el.sel = true)
+          self.set_sel_to_all_products(true)
           self.selected_products_ids = self.products.map(el => el.id)
           rcontrol.trigger('LOADING_PRODUCTS_LIST', false)
           rcontrol.trigger('TYPEDOWN_GROUP_CHANGE_COMPLETE_products')
