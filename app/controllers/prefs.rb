@@ -114,4 +114,31 @@ Fenix::App.controllers :prefs do
     redirect url(:prefs, :connector)
   end
 
+  get :export_products_1c do
+    @title = 'Выгрузка продуктов 1C'
+    @cats = KSM::Category.toplevel.sort_by(&:wfindex)
+    @r = url(:prefs, :export_products_1c)
+    render 'prefs/export_products_1c'
+  end
+
+  post :export_products_1c do
+    @cats = KSM::Category.toplevel.sort_by(&:wfindex)
+    if params[:cat] == 'all' && params[:place] == 'all' && params[:search].empty?
+      @products = Product.all
+    else
+      products_by_filters(params)
+    end
+
+    if params[:download_button].nil?
+      @title = 'Выгрузка продуктов 1C'
+      @r = url(:prefs, :export_products_1c)
+      render 'prefs/export_products_1c'
+    else
+      headers['Content-Disposition'] = "attachment; filename=pio-to-1c.xml"
+      headers['Content-Type'] = "application/xml"
+      output = "\xEF\xBB\xBF"
+      output << Xmlfr.customer_from_products_list(@products).force_encoding('utf-8')
+    end
+  end
+
 end

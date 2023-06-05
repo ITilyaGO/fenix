@@ -1,0 +1,53 @@
+.prefs-export-products-1c
+  = form_for '', @r, :class => 'form-horizontal' do |f|
+    .flex-c.center.products-selector
+      .filter.wp100
+        typedown.hide data-name='place' group='products' nosub=1 showchanges=1 enough=1 display-id=params.fetch(:place, :none)
+          = content_tag(:dv, 'Не выбрано', { value: :none, class: 'item' })
+          = content_tag(:dv, 'Все', { value: :all, class: 'item' }) if @ccat != 'all'
+          - known_cities.each do |k, city|
+            - html_attributes = { value: city.code, class: 'item' }
+            = content_tag(:dv, city.model, html_attributes)
+      .filter.wp100
+        typedown.hide data-name='cat' group='products' nosub=1 showchanges=1 enough=1 display-id=params.fetch(:cat, :none)
+          = content_tag(:dv, 'Не выбрано', { value: :none, class: 'item' })
+          = content_tag(:dv, 'Все', { value: :all, class: 'item' }) if @place != 'all'
+          = content_tag(:dv, 'Без категории', { value: :nothing, class: 'item' })
+          - @cats.each do |cat|
+            - cat.subs_ordered.each do |sub|
+              - html_attributes = { :value => sub.id, class: 'item' }
+              - html_attributes[:selected] ||= option_is_selected?(sub.id, sub.name, @product&.category_id)
+              = content_tag(:dv, "#{ cat.name } - #{ sub.name }", html_attributes)
+      .filter.wp100 title='Загрузить продукты включающие слова...'
+        input.wp100 name=:search placeholder='Поиск...'
+      .filter title='Загрузить список продуктов по выбранным фильтрам'
+        = submit_tag 'Фильтровать', class: 'btn btn-prime btn-sm', name: :filtration_button
+      .filter title='Скачать xml файл для 1C со списком продукотов по выбранным фильтрам'
+        = submit_tag 'Скачать', class: 'btn btn-prime btn-sm', name: :download_button
+
+  - if @products
+    table.table
+      thead
+        tr
+          th.header ID
+          th.header Имя
+          th.header Цена
+
+      tbody
+        - @products.each do |prod|
+          tr
+            td = prod.id
+            td = prod.displayname
+            td = prod.price
+
+  .clearfix
+
+- content_for :js_assets do
+  = javascript_include_tag :riot, :flexsearch_min
+  rscript type="riot/tag" src="/riot/tags/html/tdrop.tag"
+  rscript type="riot/tag" src="/riot/tags/html/typedown.tag"
+
+  javascript:
+    document.addEventListener("DOMContentLoaded", function(event) {
+      riot.mount('tdrop, typedown')
+    })

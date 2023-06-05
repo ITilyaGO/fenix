@@ -17,5 +17,6 @@ en:
       transport: Транспортные компании
       levels: Уровни
       users: Юзеры
+      export_products_1c: Экспорт продуктов 1C
     products:
       list: Продукция
