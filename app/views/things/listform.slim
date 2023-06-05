@@ -45,7 +45,7 @@
               | (от 746px до 816px)
 
 
-      .flex-c
+      .flex-c.main-form
         = form_for :product, url(:things, :update, :id => @product.id), :method => :put, :autocomplete => 'off' do |f|
           .col-md-9
           
@@ -89,7 +89,9 @@
             
             .foot style='height: 40vh;'
 
-          .f-actions.text-center.col-md-3.hp100.relat style='padding: 0;': .white-sticky.cmar-05 style='top: 50vh;'
+          .f-actions.text-center.col-md-3.hp100.relat[
+            style='padding: 0;margin-left: 40px;margin-right: -40px;'
+            ]: .white-sticky.wp100.cmar-05 style='top: 50vh;margin-left: -30px;'
             = f.check_box :archive, value: 1, :class => 'swap-input', checked: false
             /label.btn.btn-sm.btn-camo.wp100.text-danger.cmar-05.flex-c.vcenter.caps.swap-label(for = 'product_archive')
               .flexie.text-right архив
@@ -175,7 +177,7 @@
       rsquad.saveConfig(confobj)
 
 
-      let order_form = document.querySelector('.main-wrapper-push form')
+      let order_form = document.querySelector('.main-wrapper-push .main-form form')
       DekolFu.init_kato_blood(order_form, 'kato_type', '"product[place_id]"')
 
     })

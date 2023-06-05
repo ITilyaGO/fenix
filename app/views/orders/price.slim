@@ -86,7 +86,7 @@ div class="pull-right col-md-3"
       div class="clearfix"
       h4 class="pull-right"
         | Фактически собрано на: #{"%0.f" % @order.done_total} &#x20B7
-  - if current_account.is_admin?
+  - if can_view?(:order, :modify)
     = submit_tag "Сохранить", :class => 'btn btn-sm btn-prime', :name => 'save'
 
 

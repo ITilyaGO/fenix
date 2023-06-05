@@ -72,7 +72,7 @@ class KSM::Category < Doppel
 
   def backsync
     oc = Online::Category.find_by(pio_id: @category_id)
-    return if !oc
+    # return if !oc
     op = Online::Category.find_by(pio_id: @id) || Online::Category.new({ pio_id: @id })
     op.name = @name
     op.category_id = oc&.id

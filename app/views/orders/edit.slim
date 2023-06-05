@@ -139,7 +139,7 @@ ul class="nav nav-tabs non-print"
     .order-paperframe
       .pull-right
         = partial 'bricks/kc/transport', :locals => { name: @order_ship.transport }
-      fcollapser titler="отправка"
+      fcollapser titler="отправка" open="true"
         .row.cmar-05
           | #{@order_ship.transport_note}
         .bloksi class=(:hidden if @order_ship.nocontent?)
