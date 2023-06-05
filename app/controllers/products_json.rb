@@ -67,4 +67,37 @@ Fenix::App.controllers :products do
     end
     data.to_json
   end
+
+  post :list_by_filters, :provides => :json do
+    products = products_by_filters(params)
+    data = products&.map do |p|
+      xt = SL::Product.new p.id
+      { id: p.id,
+        name: p.name,
+        look: p.look,
+        category_id: p.category_id,
+        place_id: p.place_id,
+        price: p.price,
+        desc: p.desc,
+        corel: p.corel,
+        art: p.art,
+        discount: p.discount,
+        dim_weight: p.dim_weight,
+        dim_height: p.dim_height,
+        dim_width: p.dim_width,
+        dim_length: p.dim_length,
+        windex: p.windex,
+        lotof: p.lotof,
+        lotof_mfg: p.lotof_mfg,
+        tagname: p.tagname,
+        # bbid: p.bbid,
+        displayname: p.displayname,
+        arn: xt.arn,
+        sticker: xt.sticker,
+        multi: xt.multi,
+        pit: p.settings&.fetch(:pi, 0)
+      }
+    end
+    data.to_json
+  end
 end
