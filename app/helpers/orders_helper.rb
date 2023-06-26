@@ -25,6 +25,10 @@ module Fenix::App::OrdersHelper
     "<span class='r'>&#x20B7</span>#{'%0.f' %(value||0)}"
   end
 
+  def rur_sym(value)
+    "#{value}&nbsp;<span class='r'>&#x20B7</span>"
+  end
+
   def rur(value)
     # TODO: rebuild font with ruble sign ₽
     "#{'%0.f' %(value||0)}&nbsp;<span class='r'>&#x20B7</span>"
@@ -33,6 +37,18 @@ module Fenix::App::OrdersHelper
   def rurk(value)
     # TODO: rebuild font with ruble sign ₽
     "#{'%.2f' %(value||0)}&nbsp;<span class='r'>&#x20B7</span>"
+  end
+
+  def hide_zero_value_rur(value)
+    # TODO: rebuild font with ruble sign ₽
+    value ||= 0
+    value.to_f > 0 ? rur_sym('%0.f' %(value)) : nil
+  end
+
+  def hide_zero_value_rurk(value)
+    # TODO: rebuild font with ruble sign ₽
+    value ||= 0
+    value.to_f > 0 ? rur_sym('%.2f' %(value)) : nil
   end
 
   def pic_path(img)

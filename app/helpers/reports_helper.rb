@@ -1,7 +1,15 @@
 module Fenix::App::ReportsHelper
-
   def hide_zero_value(number, symbol = nil, inc = 0)
     number.to_i > inc ? number : symbol
+  end
+
+  def quotation_marks(value, symbol = '"')
+    symbol + value.to_s + symbol
+  end
+
+  def dot_to_comma(value, turn_on = true)
+    return value unless turn_on
+    value.to_s.gsub('.', ',')
   end
 
   def params_toggle(params, parameter, value, setable = {})
@@ -43,14 +51,14 @@ module Fenix::App::ReportsHelper
       @orders.select! do |o|
         odate = @kc_timelines[o.id]
         next false if odate.nil?
-        odate > @start_date && odate < @end_date
+        odate >= @start_date && odate <= @end_date
       end
     elsif date_sel == :done
       @kc_done = CabiePio.all_keys(@orders.map(&:id), folder: [:stock, :order, :done]).flat.trans(:to_i).map{ |k, v| [k, v.to_datetime] }.to_h
       @orders.select! do |o|
         odate = @kc_done[o.id]
         next false if odate.nil?
-        odate > @start_date && odate < @end_date
+        odate >= @start_date && odate <= @end_date
       end
     end
   end
@@ -102,6 +110,32 @@ module Fenix::App::ReportsHelper
 
   def calculate_orders_count_in_tcmds_inv(sorting = true, tow: false, cli: false, man: false, del: false, sta: false)
     calculate_orders_count_in_tcmds(sorting, tow: tow, cli: cli, man: man, del: del, sta: sta)
+  end
+
+def completed_work_print_prepare(excel = false)
+    pretty_stat = []
+
+    pretty_stat << ['Наименование', 'Наклеено', 'Цена клейки', 'Сумма клейки', 'Цена продукции', 'Сумма продукции']
+    @data_table_p_id.each do |p_id, dts|
+      pretty_stat << [
+        dts.first.p_dn,
+        hide_zero_value(dts.sum(&:stick_amount)),
+        dot_to_comma(hide_zero_value(dts.first.stick_price), excel),
+        dot_to_comma(hide_zero_value(dts.sum(&:stick_price_sum).round(2)), excel),
+        hide_zero_value(dts.first.price),
+        dot_to_comma(hide_zero_value(dts.sum(&:stick_sum).round(2)), excel)
+      ]
+    end
+
+    pretty_stat << [
+      'Общая сумма:',
+      hide_zero_value(@data_table_p_id.map{ |p_id, dts| dts.sum(&:stick_amount) }.sum),
+      nil,
+      dot_to_comma(hide_zero_value(@data_table_p_id.map{ |p_id, dts| dts.sum(&:stick_price_sum) }.sum.round(2)), excel),
+      nil,
+      dot_to_comma(hide_zero_value(@data_table_p_id.map{ |p_id, dts| dts.sum(&:stick_sum) }.sum.round(2)), excel)
+    ]
+    pretty_stat
   end
 
   def products_print_prepare(gp, col)
@@ -212,10 +246,18 @@ module Fenix::App::ReportsHelper
     end
     pretty_stat
   end
+
+  def default_date_list
+    {
+      created_at: 'Создан',
+      send: 'Отправлен',
+      done: 'Собран'
+    }
+  end
 end
 
 class OrderLineData
-  attr_accessor :ord_id, :ol, :ol_id, :p_id, :p_dn, :cat_id, :cat_path, :price, :amount, :done_amount, :stick_amount, :arch_amount, :multiply, :ignored
+  attr_accessor :ord_id, :ol, :ol_id, :p_id, :p_dn, :cat_id, :cat_path, :price, :amount, :done_amount, :stick_amount, :stick_price, :arch_amount, :multiply, :ignored
   def initialize(ol, p_dn, cat_id, cat_path, stick_amount = 0, arch_amount = 0, multiply = 1)
     @ord_id = ol.order_id
     @ol = ol
@@ -228,6 +270,7 @@ class OrderLineData
     @amount = ol.amount
     @done_amount = ol.done_amount || 0
     @stick_amount = stick_amount
+    @stick_price = 0
     @arch_amount = arch_amount
     @multiply = multiply
     @ignored = ol.ignored
@@ -243,6 +286,10 @@ class OrderLineData
 
   def stick_sum
     @stick_amount * @price
+  end
+
+  def stick_price_sum
+    @stick_price * @stick_amount
   end
 
   def multi_amount

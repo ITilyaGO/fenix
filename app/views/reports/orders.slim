@@ -8,6 +8,7 @@
   - @btn_memory.each do |k, v|
     = hidden_field_tag "btn_memory[#{ k.to_s }]", value: v.to_s if v
   .reports.orders-page
+    = partial 'reports/hover_export_buttons'
     .non-print
       = partial 'reports/filters', :locals => { :query => params }
     - if @load_orders
@@ -206,15 +207,6 @@
                 - if @load_orders
                   = "#{ (order_sum_f / order_sum.to_f * 100).round }%" if order_sum > 0
 
-      .non-print
-        custom_button.p-r-5 title='Экспорт в CSV' name=:export value=1 clr=1
-          .btn.btn-xs.btn-info
-            .fa.fa-file
-            ' CSV
-        custom_button.p-r-5 title='Экспорт в Excel' name=:export_win value=1 clr=1
-          .btn.btn-xs.btn-success
-            .fa.fa-file
-            ' Excel
 
 
   = javascript_include_tag :riot, :flexsearch_min

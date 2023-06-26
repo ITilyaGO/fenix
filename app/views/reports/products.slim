@@ -9,6 +9,7 @@
     = hidden_field_tag "btn_memory[#{k.to_s}]", value: v.to_s if v
 
   .reports.products-page: .scrolling
+    = partial 'reports/hover_export_buttons'
     .non-print.sticky-left.filters-z
       = partial 'reports/filters_products', locals: { query: params }
 
@@ -57,16 +58,15 @@
                     .date class=('prev-date' unless date_changed)
                       span = ca.strftime('%d.%m')
                       span.year-num = ca.strftime('.%y')
-                    .order-id
+                    .order-id.non-print
                       a href=url(:orders, :edit, ord.id) = ord.id
 
-            th.header.text-center.text-nowrap
-              .non-print
-                ' Всего:
-                - if @btn_memory[:gp]
-                  = @data_table_p_id_archs&.size || 0
-                - else
-                  = @data_table_p_id&.size || 0
+            th.header.text-center.text-nowrap.non-print
+              ' Всего:
+              - if @btn_memory[:gp]
+                = @data_table_p_id_archs&.size || 0
+              - else
+                = @data_table_p_id&.size || 0
 
         tbody.columns-border
           - if @btn_memory[:gp]
@@ -99,7 +99,7 @@
                 td.list-column.cell.headcol
                   = dts.first.p_dn
                   | &nbsp;
-                  a.edit-product title='Редактировать карточку товара' href=url(:things, :edit, dts.first.p_id)
+                  a.edit-product.non-print title='Редактировать карточку товара' href=url(:things, :edit, dts.first.p_id)
                     .fa.fa-edit
                 td.list-column.cell.num == deli rur(dts.sum(&:ap_sum))
                 td.list-column.cell.num == deli rur(dts.first.price)
@@ -142,15 +142,6 @@
             tr.list-row
               td = "Найдено #{@orders.size} нажмите показать, чтобы посмотреть"
 
-    .non-print.sticky-left
-      custom_button.p-r-5 title='Экспорт в CSV' name=:export value=1 clr=1
-        .btn.btn-xs.btn-info
-          .fa.fa-file
-          ' CSV
-      custom_button.p-r-5 title='Экспорт в Excel' name=:export_win value=1 clr=1
-        .btn.btn-xs.btn-success
-          .fa.fa-file
-          ' Excel
 
 
   = javascript_include_tag :riot, :flexsearch_min
