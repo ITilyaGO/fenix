@@ -595,7 +595,7 @@ Fenix::App.controllers :reports do
     @orders = orders_query.includes(:client).order(sort => dir).to_a
     @kc_done = CabiePio.all_keys(@orders.map(&:id), folder: [:stock, :order, :done]).flat.trans(:to_i).map{ |k, v| [k, v.to_datetime] }.to_h
     @orders.select! do |o|
-      o_created_at = o.created_at
+      o_created_at = o.created_at.to_date
       next true if o_created_at >= @start_date && o_created_at <= @end_date
       o_done = @kc_done[o.id]
       !o_done.nil? && (o_done >= @start_date && o_done <= @end_date)
@@ -624,7 +624,7 @@ Fenix::App.controllers :reports do
     have_orders = @orders.size > 0
     @orders_count = @orders.size
 
-    @date_list = {created_at: 'Создан'}
+    @date_list = {created_at: 'Наклеен'}
 
     @sections = KSM::Section.all.sort_by(&:ix)
     @states_list = KSM::OrderStatus::BIT_STATES.keys

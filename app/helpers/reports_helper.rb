@@ -45,21 +45,22 @@ module Fenix::App::ReportsHelper
     arr
   end
 
+  def select_orders_by_date_hash(date_hash)
+    @orders.select! do |o|
+      odate = date_hash[o.id]
+      next false if odate.nil?
+      odate = odate.to_date
+      odate >= @start_date && odate <= @end_date
+    end
+  end
+
   def select_orders_by_other_dates(date_sel)
     if date_sel == :send
       @kc_timelines = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :timeline]).flat.trans(:to_i).map{ |k, v| [k, timeline_unf(v)] }.to_h
-      @orders.select! do |o|
-        odate = @kc_timelines[o.id]
-        next false if odate.nil?
-        odate >= @start_date && odate <= @end_date
-      end
+      select_orders_by_date_hash(@kc_timelines)
     elsif date_sel == :done
       @kc_done = CabiePio.all_keys(@orders.map(&:id), folder: [:stock, :order, :done]).flat.trans(:to_i).map{ |k, v| [k, v.to_datetime] }.to_h
-      @orders.select! do |o|
-        odate = @kc_done[o.id]
-        next false if odate.nil?
-        odate >= @start_date && odate <= @end_date
-      end
+      select_orders_by_date_hash(@kc_done)
     end
   end
 

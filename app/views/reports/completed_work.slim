@@ -31,7 +31,7 @@
               = partial 'reports/mem_btn', locals: { name: :seq, val: 'stick_price', text: 'Цена клейки', fa: 'fa-money' }
               .only-print Цена клейки
 
-            th.header.text-center title='Сортировка: Сумма клейки'
+            th.header.text-center title='Сортировка: Сумма клейки = (Наклеено * Цена клейки)'
               = partial 'reports/mem_btn', locals: { name: :seq, val: 'stick_price_sum', text: 'Сумма клейки', fa: 'fa-money' }
               .only-print Сумма клейки
 
@@ -39,7 +39,7 @@
               = partial 'reports/mem_btn', locals: { name: :seq, val: 'price', text: 'Цена продукции', fa: 'fa-beer' }
               .only-print Цена продукции
 
-            th.header.text-center title='Сортировка: Сумма продукции'
+            th.header.text-center title='Сортировка: Сумма продукции = (Наклеено * Цена продукции)'
               = partial 'reports/mem_btn', locals: { name: :seq, val: 'stick_sum', text: 'Сумма продукции', fa: 'fa-beer' }
               .only-print Сумма продукции
 
