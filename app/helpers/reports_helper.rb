@@ -35,6 +35,15 @@ module Fenix::App::ReportsHelper
     end
   end
 
+  def filter_orders_by_section_state(section, state)
+    if state && section
+      @orders.select!{ |o| @kc_os_hash[o.id]&.state(section) == state }
+    else
+      @orders.select!{ |o| @kc_os_hash[o.id]&.state == state } if state
+      @orders.select!{ |o| @kc_os_hash[o.id]&.state(section) != :none } if section
+    end
+  end
+
   def category_path_parse(path_hash, start = nil)
     arr = [start || path_hash.values.first]
     path_hash.each do
@@ -87,7 +96,7 @@ module Fenix::App::ReportsHelper
     @kc_os_hash = @kc_os.map{ |kc| [kc.id.to_i, kc] }.to_h
   end
 
-  def calculate_orders_count_in_tcmds(sorting = true, tow: true, cli: true, man: true, del: true, sta: true)
+  def calculate_orders_count_in_tcmds(sorting = true, tow: true, cli: true, man: true, del: true, sta: true, section: nil)
     @oc_towns = Hash.new(0) if tow || @oc_towns.nil?
     @oc_clients = Hash.new(0) if cli || @oc_clients.nil?
     @oc_managers = Hash.new(0) if man || @oc_managers.nil?
@@ -100,7 +109,8 @@ module Fenix::App::ReportsHelper
       @oc_clients[oc.id] += 1 if cli && oc
       @oc_managers[oc.manager_id] += 1 if man && oc
       @oc_delivery[o.delivery] += 1 if del
-      @oc_state[@kc_os_hash[o.id].state] += 1 if sta
+      @oc_state[@kc_os_hash[o.id].state] += 1 if sta && !section
+      @oc_state[@kc_os_hash[o.id]&.state(section)] += 1 if sta && section
     end
     if sorting
       @towns_list.sort_by!{ |i, n| [-@oc_towns[i], n] } if tow
@@ -109,8 +119,8 @@ module Fenix::App::ReportsHelper
     end
   end
 
-  def calculate_orders_count_in_tcmds_inv(sorting = true, tow: false, cli: false, man: false, del: false, sta: false)
-    calculate_orders_count_in_tcmds(sorting, tow: tow, cli: cli, man: man, del: del, sta: sta)
+  def calculate_orders_count_in_tcmds_inv(sorting = true, tow: false, cli: false, man: false, del: false, sta: false, section: nil)
+    calculate_orders_count_in_tcmds(sorting, tow: tow, cli: cli, man: man, del: del, sta: sta, section: section)
   end
 
 def completed_work_print_prepare(excel = false)
@@ -251,7 +261,7 @@ def completed_work_print_prepare(excel = false)
   def default_date_list
     {
       created_at: 'Создан',
-      send: 'Отправлен',
+      send: 'План отправки',
       done: 'Собран'
     }
   end

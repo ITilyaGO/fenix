@@ -113,8 +113,8 @@ Fenix::App.controllers :reports do
     @orders.select!{ |o| deliverys.include?(o.delivery) } if deliverys
 
     kc_os_hash_by_orders
-    @orders.select!{ |o| @kc_os_hash[o.id]&.state == state } if state
-    @orders.select!{ |o| @kc_os_hash[o.id]&.state(section) != :none } if section
+    filter_orders_by_section_state(section, state)
+
 
     @kc_orders = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :towns]).flat
     @kc_towns = KatoAPI.batch(@kc_orders.values.uniq)
@@ -122,7 +122,7 @@ Fenix::App.controllers :reports do
 
     clients_list_by_orders
     managers_list_by_clients_list
-    calculate_orders_count_in_tcmds
+    calculate_orders_count_in_tcmds(section: section)
 
     @orders.select!{ |o| clients.include?(o.client_id) } if clients
     @orders.select!{ |o| towns.include?(@kc_towns[@kc_orders[o.id.to_s]]&.key&.public) } if towns
@@ -213,12 +213,12 @@ Fenix::App.controllers :reports do
       @towns_list = @kc_towns.map{ |k, v| [k, v&.model.name] }
       clients_list_by_orders
       managers_list_by_clients_list
-      calculate_orders_count_in_tcmds
+      calculate_orders_count_in_tcmds(section: section)
     else
       @towns_list = @kc_towns.map{ |k, v| [k, v&.model.name] } if managers || clients
       clients_list_by_orders if have_orders && (towns || managers)
       managers_list_by_clients_list if towns || clients
-      calculate_orders_count_in_tcmds(man: (towns || clients), cli: (towns || managers), tow: (clients || managers))
+      calculate_orders_count_in_tcmds(man: (towns || clients), cli: (towns || managers), tow: (clients || managers), section: section)
     end
 
     @olstickers = CabiePio.all_keys(data_table.map(&:ol_id), folder: [:m, :order_lines, :sticker_sum]).flat
@@ -257,8 +257,8 @@ Fenix::App.controllers :reports do
       case seq
       when :category
         @data_table_p_id.sort_by! do |p_id, dts| [
-            dts.first.cat_path,
-            dts.first.p_dn.delete('☠️ ')
+            dts.first.cat_path.downcase,
+            dts.first.p_dn.delete('☠️ ').downcase
           ]
         end
       when :price
@@ -378,8 +378,9 @@ Fenix::App.controllers :reports do
     select_orders_by_other_dates(date_sel)
 
     kc_os_hash_by_orders
-    @orders.select!{ |o| @kc_os_hash[o.id]&.state == state } if state
-    @orders.select!{ |o| @kc_os_hash[o.id]&.state(section) != :none } if section
+    
+    filter_orders_by_section_state(section, state)
+
 
     @kc_orders = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :towns]).flat
     @kc_towns = KatoAPI.batch(@kc_orders.values.uniq)
@@ -388,7 +389,7 @@ Fenix::App.controllers :reports do
     clients_list_by_orders
     managers_list_by_clients_list
 
-    calculate_orders_count_in_tcmds_inv(man: true)
+    calculate_orders_count_in_tcmds_inv(man: true)  
     @orders.select!{ |o| managers.include?(o.client&.manager_id) } if managers
 
     calculate_orders_count_in_tcmds_inv(tow: true)
@@ -400,7 +401,7 @@ Fenix::App.controllers :reports do
     calculate_orders_count_in_tcmds_inv(del: true)
     @orders.select!{ |o| deliverys.include?(o.delivery) } if deliverys
 
-    calculate_orders_count_in_tcmds_inv(sta: true)
+    calculate_orders_count_in_tcmds_inv(sta: true, section: section)
 
     @kc_cash = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :cash]).flat.trans(:to_i)
     @orders.select!{ |o| @kc_cash[o.id] == pay_type } if pay_type
@@ -605,16 +606,16 @@ Fenix::App.controllers :reports do
     @orders.select!{ |o| deliverys.include?(o.delivery) } if deliverys
 
     kc_os_hash_by_orders
-    @orders.select!{ |o| @kc_os_hash[o.id]&.state == state } if state
-    @orders.select!{ |o| @kc_os_hash[o.id]&.state(section) != :none } if section
+    filter_orders_by_section_state(section, state)
 
+  
     @kc_orders = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :towns]).flat
     @kc_towns = KatoAPI.batch(@kc_orders.values.uniq)
     @towns_list = @kc_towns.map{ |k, v| [k, v&.model.name] }
 
     clients_list_by_orders
     managers_list_by_clients_list
-    calculate_orders_count_in_tcmds
+    calculate_orders_count_in_tcmds(section: section)
 
     @orders.select!{ |o| clients.include?(o.client_id) } if clients
     @orders.select!{ |o| towns.include?(@kc_towns[@kc_orders[o.id.to_s]]&.key&.public) } if towns
@@ -725,15 +726,15 @@ Fenix::App.controllers :reports do
       @towns_list = @kc_towns.map{ |k, v| [k, v&.model.name] }
       clients_list_by_orders
       managers_list_by_clients_list
-      calculate_orders_count_in_tcmds
+      calculate_orders_count_in_tcmds(section: section)
     else
       @towns_list = @kc_towns.map{ |k, v| [k, v&.model.name] } if managers || clients
       clients_list_by_orders if have_orders && (towns || managers)
       managers_list_by_clients_list if towns || clients
-      calculate_orders_count_in_tcmds(man: (towns || clients), cli: (towns || managers), tow: (clients || managers))
+      calculate_orders_count_in_tcmds(man: (towns || clients), cli: (towns || managers), tow: (clients || managers), section: section)
     end
 
-    calculate_orders_count_in_tcmds
+    # calculate_orders_count_in_tcmds(section: section)
 
     @kc_sticker = CabiePio.all_keys(data_table.map(&:p_id).uniq, folder: [:products, :sticker]).flat
     @olstickers = CabiePio.all_keys(data_table.map(&:ol_id), folder: [:m, :order_lines, :sticker_sum]).flat if @olstickers.nil?

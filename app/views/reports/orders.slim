@@ -67,7 +67,7 @@
 
             - if @kc_timelines
               th.header.text-center
-                = partial 'reports/mem_btn', locals: { name: :seq, val: 'send', title: 'Сортировка по дате отправки', text: 'Отп.' }
+                = partial 'reports/mem_btn', locals: { name: :seq, val: 'send', title: 'Сортировка по плановой дате отправки', text: 'Отп.' }
                 .only-print Отп.
 
             - if @kc_done && show_done_column
@@ -191,7 +191,7 @@
               - @sections.each do |s|
                 - color = os.state(s.ix)
                 td.list-column.text-nowrap.text-center
-                  button.btn.btn-sm.btn-section.non-print.section-button class=[("btn-#{ color }")]
+                  .btn-sm.btn-section.non-print.section-button class=[("btn-#{ color }")]
                     - if @load_orders
                       - cat_sum = (sections_sums[s.ix][0] || 0)
                       - cat_sum_fact = sections_sums[s.ix][1]
