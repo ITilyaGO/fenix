@@ -97,7 +97,7 @@ module Xmlfr
       
       replace_node epro, 'РасшЯрд_Город', kc_towns[product.place_id]&.model.name
       replace_node epro, 'РасшЯрд_ВидТовара', product.look.to_s
-      replace_node epro, 'КатегорияНоменклатуры', cs.detect { |c| c.id == product.category_id }.name.to_s
+      replace_node epro, 'КатегорияНоменклатуры', cs.detect { |c| c.id == product.category_id }&.name.to_s
       replace_node epro, 'Комментарий', product.desc if product.desc
     end
 
