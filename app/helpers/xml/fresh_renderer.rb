@@ -59,7 +59,7 @@ module Xmlfr
     replace_node epro, 'ДатаИзменения', Datezero
     replace_node epro, 'Pio', Uidone
     replace_node epro, 'ParentPio', Uidzero
-
+    
     products = order.order_lines.map(&:product_id).uniq
     ps = Product.find_all(products)
     codes = ps.map(&:place_id).uniq
@@ -96,6 +96,8 @@ module Xmlfr
       replace_node epro, 'Длина', (product.dim_length || 0).to_s
       
       replace_node epro, 'РасшЯрд_Город', kc_towns[product.place_id]&.model.name
+      replace_node epro, 'РасшЯрд_ВидТовара', product.look.to_s
+      replace_node epro, 'КатегорияНоменклатуры', cs.detect { |c| c.id == product.category_id }&.name.to_s
       replace_node epro, 'Комментарий', product.desc if product.desc
     end
 
@@ -177,6 +179,8 @@ def customer_from_products_list(ps)
       replace_node epro, 'Длина', (product.dim_length || 0).to_s
 
       replace_node epro, 'РасшЯрд_Город', kc_towns[product.place_id]&.model.name || ''
+      replace_node epro, 'РасшЯрд_ВидТовара', product.look.to_s
+      replace_node epro, 'КатегорияНоменклатуры', cs.detect { |c| c.id == product.category_id }&.name.to_s
       replace_node epro, 'Комментарий', product.desc if product.desc
     end
 
