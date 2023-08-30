@@ -1,7 +1,15 @@
 module Fenix::App::ReportsHelper
-
   def hide_zero_value(number, symbol = nil, inc = 0)
     number.to_i > inc ? number : symbol
+  end
+
+  def quotation_marks(value, symbol = '"')
+    symbol + value.to_s + symbol
+  end
+
+  def dot_to_comma(value, turn_on = true)
+    return value unless turn_on
+    value.to_s.gsub('.', ',')
   end
 
   def params_toggle(params, parameter, value, setable = {})
@@ -27,6 +35,15 @@ module Fenix::App::ReportsHelper
     end
   end
 
+  def filter_orders_by_section_state(section, state)
+    if state && section
+      @orders.select!{ |o| @kc_os_hash[o.id]&.state(section) == state }
+    else
+      @orders.select!{ |o| @kc_os_hash[o.id]&.state == state } if state
+      @orders.select!{ |o| @kc_os_hash[o.id]&.state(section) != :none } if section
+    end
+  end
+
   def category_path_parse(path_hash, start = nil)
     arr = [start || path_hash.values.first]
     path_hash.each do
@@ -37,21 +54,22 @@ module Fenix::App::ReportsHelper
     arr
   end
 
+  def select_orders_by_date_hash(date_hash)
+    @orders.select! do |o|
+      odate = date_hash[o.id]
+      next false if odate.nil?
+      odate = odate.to_date
+      odate >= @start_date && odate <= @end_date
+    end
+  end
+
   def select_orders_by_other_dates(date_sel)
     if date_sel == :send
       @kc_timelines = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :timeline]).flat.trans(:to_i).map{ |k, v| [k, timeline_unf(v)] }.to_h
-      @orders.select! do |o|
-        odate = @kc_timelines[o.id]
-        next false if odate.nil?
-        odate > @start_date && odate < @end_date
-      end
+      select_orders_by_date_hash(@kc_timelines)
     elsif date_sel == :done
       @kc_done = CabiePio.all_keys(@orders.map(&:id), folder: [:stock, :order, :done]).flat.trans(:to_i).map{ |k, v| [k, v.to_datetime] }.to_h
-      @orders.select! do |o|
-        odate = @kc_done[o.id]
-        next false if odate.nil?
-        odate > @start_date && odate < @end_date
-      end
+      select_orders_by_date_hash(@kc_done)
     end
   end
 
@@ -78,7 +96,7 @@ module Fenix::App::ReportsHelper
     @kc_os_hash = @kc_os.map{ |kc| [kc.id.to_i, kc] }.to_h
   end
 
-  def calculate_orders_count_in_tcmds(sorting = true, tow: true, cli: true, man: true, del: true, sta: true)
+  def calculate_orders_count_in_tcmds(sorting = true, tow: true, cli: true, man: true, del: true, sta: true, section: nil)
     @oc_towns = Hash.new(0) if tow || @oc_towns.nil?
     @oc_clients = Hash.new(0) if cli || @oc_clients.nil?
     @oc_managers = Hash.new(0) if man || @oc_managers.nil?
@@ -91,7 +109,8 @@ module Fenix::App::ReportsHelper
       @oc_clients[oc.id] += 1 if cli && oc
       @oc_managers[oc.manager_id] += 1 if man && oc
       @oc_delivery[o.delivery] += 1 if del
-      @oc_state[@kc_os_hash[o.id].state] += 1 if sta
+      @oc_state[@kc_os_hash[o.id].state] += 1 if sta && !section
+      @oc_state[@kc_os_hash[o.id]&.state(section)] += 1 if sta && section
     end
     if sorting
       @towns_list.sort_by!{ |i, n| [-@oc_towns[i], n] } if tow
@@ -100,8 +119,34 @@ module Fenix::App::ReportsHelper
     end
   end
 
-  def calculate_orders_count_in_tcmds_inv(sorting = true, tow: false, cli: false, man: false, del: false, sta: false)
-    calculate_orders_count_in_tcmds(sorting, tow: tow, cli: cli, man: man, del: del, sta: sta)
+  def calculate_orders_count_in_tcmds_inv(sorting = true, tow: false, cli: false, man: false, del: false, sta: false, section: nil)
+    calculate_orders_count_in_tcmds(sorting, tow: tow, cli: cli, man: man, del: del, sta: sta, section: section)
+  end
+
+def completed_work_print_prepare(excel = false)
+    pretty_stat = []
+
+    pretty_stat << ['Наименование', 'Наклеено', 'Цена клейки', 'Сумма клейки', 'Цена продукции', 'Сумма продукции']
+    @data_table_p_id.each do |p_id, dts|
+      pretty_stat << [
+        dts.first.p_dn,
+        hide_zero_value(dts.sum(&:stick_amount)),
+        dot_to_comma(hide_zero_value(dts.first.stick_price), excel),
+        dot_to_comma(hide_zero_value(dts.sum(&:stick_price_sum).round(2)), excel),
+        hide_zero_value(dts.first.price),
+        dot_to_comma(hide_zero_value(dts.sum(&:stick_sum).round(2)), excel)
+      ]
+    end
+
+    pretty_stat << [
+      'Общая сумма:',
+      hide_zero_value(@data_table_p_id.map{ |p_id, dts| dts.sum(&:stick_amount) }.sum),
+      nil,
+      dot_to_comma(hide_zero_value(@data_table_p_id.map{ |p_id, dts| dts.sum(&:stick_price_sum) }.sum.round(2)), excel),
+      nil,
+      dot_to_comma(hide_zero_value(@data_table_p_id.map{ |p_id, dts| dts.sum(&:stick_sum) }.sum.round(2)), excel)
+    ]
+    pretty_stat
   end
 
   def products_print_prepare(gp, col)
@@ -212,10 +257,18 @@ module Fenix::App::ReportsHelper
     end
     pretty_stat
   end
+
+  def default_date_list
+    {
+      created_at: 'Создан',
+      send: 'План отправки',
+      done: 'Собран'
+    }
+  end
 end
 
 class OrderLineData
-  attr_accessor :ord_id, :ol, :ol_id, :p_id, :p_dn, :cat_id, :cat_path, :price, :amount, :done_amount, :stick_amount, :arch_amount, :multiply, :ignored
+  attr_accessor :ord_id, :ol, :ol_id, :p_id, :p_dn, :cat_id, :cat_path, :price, :amount, :done_amount, :stick_amount, :stick_price, :arch_amount, :multiply, :ignored
   def initialize(ol, p_dn, cat_id, cat_path, stick_amount = 0, arch_amount = 0, multiply = 1)
     @ord_id = ol.order_id
     @ol = ol
@@ -228,6 +281,7 @@ class OrderLineData
     @amount = ol.amount
     @done_amount = ol.done_amount || 0
     @stick_amount = stick_amount
+    @stick_price = 0
     @arch_amount = arch_amount
     @multiply = multiply
     @ignored = ol.ignored
@@ -243,6 +297,10 @@ class OrderLineData
 
   def stick_sum
     @stick_amount * @price
+  end
+
+  def stick_price_sum
+    @stick_price * @stick_amount
   end
 
   def multi_amount

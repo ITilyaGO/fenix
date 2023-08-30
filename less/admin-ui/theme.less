@@ -2331,6 +2331,54 @@ products_save_dialog {
 
 }
 
+.export-hover-panel {
+  position: absolute;
+  z-index: 70;
+  right: 0px;
+  pointer-events: none;
+  .hp-container {
+    width: max-content;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    width: 100vw;
+  }
+
+  .hp-element {
+    position: relative;
+    background-color: lightgray;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    width: 13px;
+    padding: 8px 2px;
+    cursor: pointer;
+    font-size: 11px;
+    margin-left: auto;
+    pointer-events: auto;
+  }
+
+  .hp-content {
+    position: absolute;
+    top: 0;
+    right: -300px;
+    width: max-content;
+    height: 100%;
+    background-color: currentcolor;
+    padding: inherit;
+    padding: 8px;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+    pointer-events: none;
+    transition: transform 0.3s ease-out;
+  }
+
+  .hp-element:hover .hp-content {
+    transform: translateX(-300px);
+    pointer-events: auto;
+  }
+}
+
 // Reports
 .reports {
   .filters-z {
@@ -2400,6 +2448,9 @@ products_save_dialog {
   }
   .p-r-5 {
     padding-right: 5px;
+  }
+  .p-l-8 {
+    padding-left: 8px;
   }
 
   // Orders page

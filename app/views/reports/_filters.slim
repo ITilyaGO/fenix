@@ -51,10 +51,8 @@
 
 .col-md-2.filter
   typedown.flex-c.hide data-name='date_sel' nosub=1 showchanges=1 enough=1 display-id=params.fetch(:date_sel, :created_at)
-    = content_tag(:dv, 'Создан', { value: :created_at, class: 'item' })
-    / = content_tag(:dv, 'Обновлен', { value: :update, class: 'item' })
-    = content_tag(:dv, 'Отправлен', { value: :send, class: 'item' })
-    = content_tag(:dv, 'Собран', { value: :done, class: 'item' })
+    - @date_list.each do |k, v|
+      = content_tag(:dv, v, { value: k, class: 'item' })
 
 .col-md-2.filter
   = date_field_tag :start_date, class: 'form-control input-large', autocomplete: 'off', value: @start_date

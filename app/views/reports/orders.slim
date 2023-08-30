@@ -8,6 +8,7 @@
   - @btn_memory.each do |k, v|
     = hidden_field_tag "btn_memory[#{ k.to_s }]", value: v.to_s if v
   .reports.orders-page
+    = partial 'reports/hover_export_buttons'
     .non-print
       = partial 'reports/filters', :locals => { :query => params }
     - if @load_orders
@@ -66,7 +67,7 @@
 
             - if @kc_timelines
               th.header.text-center
-                = partial 'reports/mem_btn', locals: { name: :seq, val: 'send', title: 'Сортировка по дате отправки', text: 'Отп.' }
+                = partial 'reports/mem_btn', locals: { name: :seq, val: 'send', title: 'Сортировка по плановой дате отправки', text: 'Отп.' }
                 .only-print Отп.
 
             - if @kc_done && show_done_column
@@ -190,7 +191,7 @@
               - @sections.each do |s|
                 - color = os.state(s.ix)
                 td.list-column.text-nowrap.text-center
-                  button.btn.btn-sm.btn-section.non-print.section-button class=[("btn-#{ color }")]
+                  .btn-sm.btn-section.non-print.section-button class=[("btn-#{ color }")]
                     - if @load_orders
                       - cat_sum = (sections_sums[s.ix][0] || 0)
                       - cat_sum_fact = sections_sums[s.ix][1]
@@ -206,15 +207,6 @@
                 - if @load_orders
                   = "#{ (order_sum_f / order_sum.to_f * 100).round }%" if order_sum > 0
 
-      .non-print
-        custom_button.p-r-5 title='Экспорт в CSV' name=:export value=1 clr=1
-          .btn.btn-xs.btn-info
-            .fa.fa-file
-            ' CSV
-        custom_button.p-r-5 title='Экспорт в Excel' name=:export_win value=1 clr=1
-          .btn.btn-xs.btn-success
-            .fa.fa-file
-            ' Excel
 
 
   = javascript_include_tag :riot, :flexsearch_min

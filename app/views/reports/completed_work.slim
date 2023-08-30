@@ -1,0 +1,96 @@
+- params_sym = params.map{ |k, v| [k.to_sym, v] }.to_h
+= form_for :supermodel, url(@r) do |f|
+  = hidden_field_tag :filtred_orders, value: @orders.map(&:id).join('_')
+  - [:section, :search, :manager, :town, :client, :delivery, :state, :date_sel, :start_date, :end_date].each do |k|
+    = hidden_field_tag "old[#{ k.to_s }]", value: params[k].to_s if params[k]
+  = hidden_field_tag :old_path, value: @old_path_string if @old_path_string
+
+  - @btn_memory.each do |k, v|
+    = hidden_field_tag "btn_memory[#{ k.to_s }]", value: v.to_s if v
+
+  .reports.products-page: .scrolling
+    = partial 'reports/hover_export_buttons'
+    .non-print.sticky-left.filters-z
+      = partial 'reports/filters_products', locals: { query: params }
+
+    .table-field
+      table.table.table-hover.table-condensed id='list'
+        thead
+          tr.list-row
+
+            th.header.headcol.headrow-color
+              .flex-c.non-print
+                = partial 'reports/mem_btn', locals: { name: :seq, val: 'p_dn', text: 'Наименование', title: 'Сортировка: Наименование' }
+              .only-print Наименование
+
+            th.header.text-center title='Сортировка: Наклеено'
+              = partial 'reports/mem_btn', locals: { name: :seq, val: 'stick_amount', text: 'Наклеено', fa: 'fa-ticket' }
+              .only-print Наклеено
+
+            th.header.text-center title='Сортировка: Цена клейки'
+              = partial 'reports/mem_btn', locals: { name: :seq, val: 'stick_price', text: 'Цена клейки', fa: 'fa-money' }
+              .only-print Цена клейки
+
+            th.header.text-center title='Сортировка: Сумма клейки = (Наклеено * Цена клейки)'
+              = partial 'reports/mem_btn', locals: { name: :seq, val: 'stick_price_sum', text: 'Сумма клейки', fa: 'fa-money' }
+              .only-print Сумма клейки
+
+            th.header.text-center title='Сортировка: Цена продукции'
+              = partial 'reports/mem_btn', locals: { name: :seq, val: 'price', text: 'Цена продукции', fa: 'fa-beer' }
+              .only-print Цена продукции
+
+            th.header.text-center title='Сортировка: Сумма продукции = (Наклеено * Цена продукции)'
+              = partial 'reports/mem_btn', locals: { name: :seq, val: 'stick_sum', text: 'Сумма продукции', fa: 'fa-beer' }
+              .only-print Сумма продукции
+
+
+            th.header.text-center.text-nowrap
+              .non-print
+                ' Всего:
+                = @data_table_p_id&.size || 0
+
+        tbody.columns-border
+          - @data_table_p_id.each do |p_id, dts|
+            - stick_amount_sum = dts.sum(&:stick_amount)
+            tr.list-row
+              td.list-column.cell.headcol
+                = dts.first.p_dn
+                | &nbsp;
+                a.edit-product.non-print title='Редактировать карточку товара' href=url(:things, :edit, dts.first.p_id)
+                  .fa.fa-edit
+              td.list-column.cell.num = deli hide_zero_value stick_amount_sum
+              td.list-column.cell.num == hide_zero_value_rurk dts.first.stick_price
+              td.list-column.cell.num == deli hide_zero_value_rurk dts.sum(&:stick_price_sum).to_f
+              td.list-column.cell.num == deli hide_zero_value_rur(dts.first.price)
+              td.list-column.cell.num == deli hide_zero_value_rur dts.sum(&:stick_sum).to_f
+          - if @load_orders
+            - stick_amount = @data_table_p_id.map{ |p_id, dts| dts.sum(&:stick_amount) }.sum
+            - stick_sum = @data_table_p_id.map{ |p_id, dts| dts.sum(&:stick_sum) }.sum
+            - stick_price_sum = @data_table_p_id.map{ |p_id, dts| dts.sum(&:stick_price_sum) }.sum
+            tr.list-row
+              td.list-column.headcol.cell.num.sum-all Общая сумма:
+              td.list-column.cell.num.sum-all == deli stick_amount
+              td.list-column.cell.num
+              td.list-column.cell.num.sum-all == deli hide_zero_value_rurk stick_price_sum
+              td.list-column.cell.num
+              td.list-column.cell.num.sum-all == deli hide_zero_value_rur stick_sum
+
+            tr.list-row
+              - 6.times
+                td.list-column
+          - else
+            tr.list-row
+              td = "Найдено #{ @orders.size } нажмите показать, чтобы посмотреть"
+
+
+
+  = javascript_include_tag :riot, :flexsearch_min
+  rscript type="riot/tag" src="/riot/tags/html/multitypedown.tag"
+  rscript type="riot/tag" src="/riot/tags/html/typedown.tag"
+  rscript type="riot/tag" src="/riot/tags/html/tdrop.tag"
+  rscript type="riot/tag" src="/riot/tags/custom_button.tag"
+
+  javascript:
+    document.addEventListener("DOMContentLoaded", function(event) {
+      riot.mount('multitypedown, typedown, tdrop, custom_button')
+    })
