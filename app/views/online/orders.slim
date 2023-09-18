@@ -5,6 +5,7 @@ div class="tabs-content"
         th class='header' Id
         // th class='header' = mat(:order, :name)
         // th class='header' = mat(:order, :amount)
+        th.header
         th class='header' Name
         th.header
         th class='header' Date
@@ -16,6 +17,7 @@ div class="tabs-content"
         tr class='list-row'
           td class='list-column' = "#{order.id}"
           // td class='list-column' = order.name
+          td.list-column = KatoAPI.anything(order.account.city.gsub('+', '')).model
           td class='list-column' = [order.account.name, order.account.org].reject(&:empty?).join(" / ")
           td.list-column == deli(rur order.total)
           td class='list-column' = to_msk(order.created_at)
