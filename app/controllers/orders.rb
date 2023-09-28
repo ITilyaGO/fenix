@@ -519,6 +519,7 @@ Fenix::App.controllers :orders do
     end
     o_status.save
 
+    params[:ship] ||= {}
     o_ship = KSM::OrderShip.find(order.id)
     o_ship.clear_formize params[:ship]
     o_ship.save
