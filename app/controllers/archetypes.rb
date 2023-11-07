@@ -318,6 +318,35 @@ Fenix::App.controllers :archetypes do
     products.to_json
   end
 
+  post :list_by_filters, :provides => :json do
+    cat = empty_to_nil params[:cat]
+    cat = nil if cat == 'all'
+    search = empty_to_nil params[:search]
+
+    archs = KSM::Archetype.all
+    archs.select!{ |a| a.category_id == cat } if cat
+
+    if search
+      search_list = search.downcase.split(/[\s,.'"()-]/).compact
+      archs.select! do |p|
+        pdn_d = p.name.downcase
+        search_list.all?{ |w| pdn_d.include?(w) }
+      end
+    end
+    archs.sort_by!(&:name)
+    data = archs.map do |a|
+      {
+        id: a.id,
+        name: a.name,
+        c_at: a.created_at.strftime('%d.%m.%y %H:%M'),
+        category_id: a.category_id,
+        g: a.g ? 1 : 0,
+      }
+    end
+
+    data.to_json
+  end
+
   put :bbtie, :provides => :json do
     arch = KSM::Archetype.find params[:left]
     return {}.to_json unless arch.exist?
@@ -357,5 +386,74 @@ Fenix::App.controllers :archetypes do
     # end.flatten
 
     render 'archetypes/reserve'
+  end
+
+  get :multiedit do
+    @title = "Мультиредактор заготовок"
+    @cats = KSM::Category.toplevel.sort_by(&:wfindex)
+    @fields = { name: 'Название', category_id: 'Категория', g: 'Группа' }
+
+    render 'archetypes/multiedit'
+  end
+
+  post :multiedit_save do
+    content_type 'text/event-stream'
+    stream :keep_open do |out|
+      begin
+        data = JSON.parse(params[:data])
+        archs = KSM::Archetype.find_all(data.keys)
+        cats_ids = KSM::Category.toplevel.map(&:subcategories).flatten.map(&:id)
+        prew_time_now = Time.now.to_f
+        
+        other_keys = ['g', 'category_id']
+        value_guard = {
+          'name' => :to_s,
+        }
+
+        archs_count = archs.size
+        out << "§MPROD:#{ archs_count.to_s }"
+
+        archs.each_with_index do |arch, p_index|
+          begin
+            line = data[arch.id]
+
+            group = empty_to_nil(line['g'])&.to_i
+            category_id = empty_to_nil(line['category_id'])&.to_s
+
+            other_keys.each{ |k| line.delete(k) }
+            line.each do |k, v|
+              next if v.empty?
+              v = v&.strip.send(value_guard[k])
+              next if arch.send("#{ k }") == v
+              arch.send("#{ k }=", v)
+            end
+
+            arch.g = group == 1 if group
+
+            if (cats_ids.include?(category_id))
+              arch.category_id = category_id
+            else
+              raise 'Категория с таким ID не найдена'
+            end if category_id
+
+            if arch.save
+              flash[:success] = pat(:create_success, :model => 'archetype')
+            else
+              flash.now[:error] = pat(:create_error, :model => 'archetype')
+            end
+
+            time_now = Time.now.to_f
+            if (time_now - prew_time_now > 2)
+              prew_time_now = time_now
+              out << "§#{ p_index }"
+            end
+          rescue Exception => e
+            out << "§MERRP:ID:[#{ arch.id }] - Error: #{ e }"
+          end
+        end
+      rescue Exception => e
+        out << "§MERR:#{ e.inspect }"
+      end
+    end
   end
 end

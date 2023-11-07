@@ -279,7 +279,7 @@ Fenix::App.controllers :things do
   end
 
   get :multiedit do
-    @title = 'Мультиредактор'
+    @title = 'Мультиредактор продукции'
 
     @cats = KSM::Category.toplevel.sort_by(&:wfindex)
 

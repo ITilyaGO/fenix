@@ -37,6 +37,7 @@ typedown.typedown.detach
     self.autosub = opts.nosub != '1'
     self.autocomplete = opts.autocomplete == '1' ? 'on' : 'off'
     self.group = opts.group
+    self.trig = opts.trigger
 
     type_search(a) {
       let string = a.target.value
@@ -85,6 +86,7 @@ typedown.typedown.detach
       // self.in_select(a.item.f)
       self.close()
       if (self.autosub) self.root.closest('form').submit()
+      if (self.trig) rcontrol.trigger(self.trig, self.selected_id)
     }
 
     in_select(item) {
