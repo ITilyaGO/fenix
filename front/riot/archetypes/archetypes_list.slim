@@ -9,7 +9,7 @@ archetypes_list.anyscroll.ss
             input type='checkbox' checked=1 onchange='{ all_items_selected_changed }'
             | &nbsp;
             | Имя
-          th.header.headrow-color.nowarp
+          th.header.headrow-color.nowrap
             | &nbsp;
             | Создан
 
@@ -27,7 +27,7 @@ archetypes_list.anyscroll.ss
             input type='checkbox' checked='{ p.sel }' onchange='{ item_selected_changed }'
             | &nbsp;
             | { p.name }
-          td
+          td.nowrap
             | { p.c_at }
 
           td each='{ f in fields }'
