@@ -7,14 +7,14 @@
       .trees.white-sticky
         - unless @place == 'RU'
           / .level.tree: h4 = @order_place.model.name
-          wtree.tree name='Категории' place=@place
+          / wtree.tree name='Категории' place=@place
             == @cattree
           .tmar-1
           wtree.tree name='Продукция'
             == otree_rendered @place
           .tmar-1
 
-        wtree.tree name='Категории - Россия' place='RU'
+        / wtree.tree name='Категории - Россия' place='RU'
           == @cattree
         .tmar-1
         wtree.tree name='Продукция - Россия'
