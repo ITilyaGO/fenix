@@ -61,4 +61,53 @@ Fenix::App.controllers :picupload do
 
     redirect url(:things, :edit, :id => product.id)
   end
+
+
+  get :picture_multi_upload do
+    products_by_filters(params)
+    @cats = KSM::Category.toplevel.sort_by(&:wfindex)
+    @r = url(:picupload, :picture_multi_upload)
+    @title = "Массовая загрузка картинок"
+    render 'pictures/picture_multi_upload'
+  end
+
+  post :picture_multi_upload do
+    params.each{ |k, v| params[k] = nil if v.empty? }
+    @cats = KSM::Category.toplevel.sort_by(&:wfindex)
+    if params[:cat] == 'all' && params[:place] == 'all' && params[:search].empty?
+      @products = Product.all
+    else
+      products_by_filters(params)
+    end
+
+    if params[:upload_button]
+      files = params[:files]
+      files&.each do |p_id, val|
+
+        product = Product.find(p_id)
+        tempfile = val[:tempfile]
+        is = ImageSize.path tempfile.path
+        good = is.format && is.size.uniq.one? && (746..816) === is.w
+
+        if good
+          product.picfile = Secure.uuid.gsub(/-/, '')
+          make_product_pic_path product.picname
+          FileUtils.cp tempfile.path, product_pic_file(product.picname, :r)
+          FileUtils.cp product_pic_file(product.picname, :r), product_pic_file(product.picname, :m)
+          FileUtils.touch product_pic_file(product.picname, :t)
+          FileUtils.chmod 0777, [product_pic_file(product.picname), product_pic_file(product.picname, :r)]
+          opti_pic(product.picname)
+          product.save
+        end
+        FileUtils.rm tempfile.path
+      end
+    else
+      files&.each do |p_id, val|
+        FileUtils.rm val[:tempfile].path
+      end
+    end
+    @r = url(:picupload, :picture_multi_upload)
+    @title = "Массовая загрузка картинок"
+    render 'pictures/picture_multi_upload'
+  end
 end
