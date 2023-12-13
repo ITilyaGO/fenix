@@ -430,11 +430,7 @@ Fenix::App.controllers :archetypes do
 
             arch.g = group == 1 if group
 
-            if (cats_ids.include?(category_id))
-              arch.category_id = category_id
-            else
-              raise 'Категория с таким ID не найдена'
-            end if category_id
+            arch.category_id = category_id if category_id && (cats_ids.include?(category_id) || raise("Указана не существующая категория: #{ category_id.inspect }"))
 
             if arch.save
               flash[:success] = pat(:create_success, :model => 'archetype')

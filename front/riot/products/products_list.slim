@@ -1,7 +1,7 @@
 products_list.anyscroll
   .scrolling
     h5.products-empty if='{ products_empty }' Список продуктов пуст
-    table.table if='{ !products_empty }'
+    table.table.table-hover if='{ !products_empty }'
       thead
         tr
           th.header.headcol.headrow-color width='10px' ID
@@ -49,6 +49,7 @@ products_list.anyscroll
       rcontrol.trigger('GET_CACHE_fields', (data) => {
         self.fields_list = data
       })
+      self.init_inputs()
     })
 
     item_selected_changed(event) {
@@ -66,15 +67,47 @@ products_list.anyscroll
       self.update()
     }
 
-    search_products(searching) {
+    search_products(searching, forced = true, inverseSearch = false) {
       if (searching.length == 0) {
-        self.set_sel_to_all_products(true)
+        self.set_sel_to_all_products(!inverseSearch)
+        self.ids_changed_update()
         return;
       }
-      self.set_sel_to_all_products(false)
-      self.index.search(searching).forEach(el => {
-        el.sel = true
+      if (forced)
+        self.set_sel_to_all_products(!!inverseSearch)
+      if (self.index)
+        self.index.search(searching).forEach(el => {
+          el.sel = !inverseSearch
+        })
+
+      self.ids_changed_update()
+    }
+
+    init_inputs() {
+
+      self.add_enter_event_listener(self.inputs.selector_by_name, {
+        Enter: (() => self.search_products(self.inputs.selector_by_name.value, true, false)),
+        Alt: (() => self.search_products(self.inputs.selector_by_name.value, false, false))
       })
+
+      self.add_enter_event_listener(self.inputs.un_selector_by_name, {
+        Enter: (() => self.search_products(self.inputs.un_selector_by_name.value, true, true)),
+        Alt: (() => self.search_products(self.inputs.un_selector_by_name.value, false, true))
+      })
+
+    }
+
+    add_enter_event_listener(element, funcs) {
+      element.addEventListener("keyup", ({key}) => {
+        let func = funcs[key]
+        if (func)
+          func()
+      })
+    }
+
+    ids_changed_update() {
+      self.selected_products_ids_changed = true
+      self.update()
     }
 
     get_inputs() {
@@ -83,7 +116,8 @@ products_list.anyscroll
         place: document.querySelector('input[name=place]'),
         search: document.querySelector('input[name=search]'),
         // editable_field: document.querySelector('input[name=editable_field]'),
-        selector_by_name: document.querySelector('input[name=selector_by_name]')
+        selector_by_name: document.querySelector('input[name=selector_by_name]'),
+        un_selector_by_name: document.querySelector('input[name=un_selector_by_name]')
       }
     }
 
@@ -187,13 +221,6 @@ products_list.anyscroll
     rcontrol.on('SET_FIELDS_VALUES', function() {
       let editing_values = self.get_editing_fields(self.edit_cache)
       editing_values.forEach(function([fid, val]) { self.set_fields_value(fid, val) })
-    })
-
-    rcontrol.on('PRODUCTS_SEARCH_CHANGED', function() {
-      let searching = self.inputs.selector_by_name.value
-      self.search_products(searching)
-      self.selected_products_ids_changed = true
-      self.update()
     })
 
     rcontrol.on('SAVE_PRODUCTS_TABLE', function() {

@@ -21,8 +21,11 @@
         - @fields.each do |k, v|
           = content_tag(:dv, v, { value: k, class: 'item' })
 
-    .filter.w100 title='Выбрать заготовки для изменения по названию'
-      input.w100 name=:selector_by_name placeholder='Выбор по названию...' onchange='rcontrol.trigger("PRODUCTS_SEARCH_CHANGED")'
+    .filter.w100 title='Выбрать заготовки для изменения по названию. Enter - Выделит только найденные элементы. Alt - Дополнит уже выделенные элементы найденными'
+      input.w100 name=:selector_by_name placeholder='Выбор по названию...'
+
+    .filter.w100 title='Убрать выбор с заготовок для изменения по названию. Enter - Выделит только не найденные элементы. Alt - Снимет выделение с найденных элементов'
+      input.w100 name=:un_selector_by_name placeholder='Убрать выбор по названию...'
 
 
     .filter.w100.hide#cat_select title='Выбор ID категории'
