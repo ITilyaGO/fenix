@@ -38,7 +38,7 @@ Fenix::App.controllers :c1c do
     order = Order.find(params[:id])
     headers['Content-Disposition'] = "attachment; filename=pio-order-to-1c_#{order.id}.json"
     headers['Content-Type'] = "application/json"
-    output = Json1CAssist.OrderToJson(order).force_encoding('utf-8')
+    output = Json1CAssist.order_to_json(order).force_encoding('utf-8')
   end
 
   get :absent, :with => :id do

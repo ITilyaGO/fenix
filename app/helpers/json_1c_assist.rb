@@ -1,37 +1,37 @@
 module Json1CAssist
 
-  Uidone = '00000000-2001-c055-fefe-502022b00000'
-  ExportVersion = 1
+  UIDONE = '00000000-2001-c055-fefe-502022b00000'
+  EXPORT_VERSION = 1
 
   extend Fenix::App::C1CHelper
   extend Fenix::App::PictureHelper
   extend self
+  
+  def products_to_json(products)
+    json_data = get_default_json_struct
 
-  def self.ProductsToJson(products)
-    json_data = getDefaultJsonStruct
-
-    json_data['Номенклатура'] = productsToJsonObj(products)
+    json_data['Номенклатура'] = products_to_json_obj(products)
 
     JSON.generate(json_data)
   end
 
-  def self.OrderToJson(order)
-    json_data = getDefaultJsonStruct(order)
+  def order_to_json(order)
+    json_data = get_default_json_struct(order)
 
     product_ids = order.order_lines.map(&:product_id).uniq
     products = Product.find_all(product_ids)
 
-    json_data['Номенклатура'] = productsToJsonObj(products)
-    json_data['ЗаказКлиента']['Товары'] = orderLinesToJsonObj(order)
+    json_data['Номенклатура'] = products_to_json_obj(products)
+    json_data['ЗаказКлиента']['Товары'] = order_lines_to_json_obj(order)
 
     JSON.generate(json_data)
   end
 
 
-  def getDefaultJsonStruct(order = nil)
+  def get_default_json_struct(order = nil)
     json_data = {
-      'Version' => ExportVersion,
-      'ГруппаНоменклатуры' => getCategoriesJsonObj,
+      'Version' => EXPORT_VERSION,
+      'ГруппаНоменклатуры' => get_categories_json_obj,
       'Номенклатура' => []
     }
 
@@ -45,8 +45,7 @@ module Json1CAssist
     json_data
   end
 
-  # ГруппаНоменклатуры
-  def getCategoriesJsonObj
+  def get_categories_json_obj
     json_cats = []
     cs = KSM::Category.all
     sects = cs.select(&:top?).map(&:section).uniq(&:id)
@@ -54,7 +53,7 @@ module Json1CAssist
       json_cats << {
         'Наименование' => sec.name,
         'ProductPioId' => format_cat_1c(sec.id),
-        'CategoryPioId' => Uidone
+        'CategoryPioId' => UIDONE
       }
     end
 
@@ -68,14 +67,13 @@ module Json1CAssist
     json_cats
   end
 
-  # Номенклатура
-  def productsToJsonObj(products)
+  def products_to_json_obj(products)
     codes = products.map(&:place_id).uniq
     kc_towns = KatoAPI.batch(codes)
     json_products = []
 
     products.each do |product|
-      image_base64 = productToBase64Image(product)
+      image_base64 = product_to_base64_image(product)
 
       json_products << {
         'Наименование' => product.displayname(text: true),
@@ -97,8 +95,7 @@ module Json1CAssist
     json_products
   end
 
-  #Товары
-  def orderLinesToJsonObj(order)
+  def order_lines_to_json_obj(order)
     json_orderlines = []
     scs = KSM::Section.all
     scs.sort_by(&:ix).each do |s|
@@ -120,21 +117,21 @@ module Json1CAssist
     json_orderlines
   end
 
-  def productToBase64Image(product)
+  def product_to_base64_image(product)
     if product.picname
-      imagePath = imagePathFromProduct(product)
-      imagePath ? fileToBase64(imagePath) : ''
+      image_path = image_path_from_product(product)
+      image_path ? file_to_base64(image_path) : ''
     else
       ''
     end
   end
 
-  def imagePathFromProduct(product)
-    product_pic_file(product.picname, :r) + '.jpeg'
+  def image_path_from_product(product)
+    product_pic_file(product.picname, :m)
   end
 
-  def fileToBase64(path)
-    fileBin = File.binread(path)
-    Base64.strict_encode64(fileBin)
+  def file_to_base64(path)
+    file_bin = File.binread(path)
+    Base64.strict_encode64(file_bin)
   end
 end

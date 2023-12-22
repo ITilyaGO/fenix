@@ -136,7 +136,7 @@ Fenix::App.controllers :prefs do
     else
       headers['Content-Disposition'] = "attachment; filename=pio-products-to-1c cat_#{params[:cat]} place_#{params[:place]}.json"
       headers['Content-Type'] = "application/json"
-      output = Json1CAssist.ProductsToJson(@products).force_encoding('utf-8')
+      output = Json1CAssist.products_to_json(@products).force_encoding('utf-8')
     end
   end
 
