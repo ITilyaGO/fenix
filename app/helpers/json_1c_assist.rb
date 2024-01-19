@@ -1,7 +1,7 @@
 module Json1CAssist
 
   UIDONE = '00000000-2001-c055-fefe-502022b00000'
-  EXPORT_VERSION = 1
+  EXPORT_VERSION = 2
 
   extend Fenix::App::C1CHelper
   extend Fenix::App::PictureHelper
@@ -81,12 +81,14 @@ module Json1CAssist
         'Город' => kc_towns[product.place_id]&.model.name,
         'Вид' => product.look.to_s,
         'Артикул' => product.art.to_s,
+        'Цена' => product.price,
         'Вес' => (product.dim_weight&.to_f || 0),
         'Высота' => (product.dim_height&.to_f || 0),
         'Ширина' => (product.dim_width&.to_f || 0),
         'Длина' => (product.dim_length&.to_f || 0),
         'Описание' => product.desc || '',
         'Кратность' => product.lotof&.to_i || 1,
+        'Id' => product.id,
         'ProductPioId' => format_product_1c(product.id),
         'CategoryPioId' => format_cat_1c(product.category_id),
         'Image' => image_base64 || ''
@@ -120,7 +122,7 @@ module Json1CAssist
   def product_to_base64_image(product)
     if product.picname
       image_path = image_path_from_product(product)
-      image_path ? file_to_base64(image_path) : ''
+      image_path ? file_to_base64(image_path) || '' : ''
     else
       ''
     end
@@ -131,6 +133,7 @@ module Json1CAssist
   end
 
   def file_to_base64(path)
+    return nil if !File.exists?(path)
     file_bin = File.binread(path)
     Base64.strict_encode64(file_bin)
   end
