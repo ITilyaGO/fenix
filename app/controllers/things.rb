@@ -279,7 +279,7 @@ Fenix::App.controllers :things do
   end
 
   get :multiedit do
-    @title = 'Мультиредактор'
+    @title = 'Мультиредактор продукции'
 
     @cats = KSM::Category.toplevel.sort_by(&:wfindex)
 
@@ -292,7 +292,7 @@ Fenix::App.controllers :things do
       place_id: 'ID Город', price: 'Цена', desc: 'Описание', corel: 'Собрание', art: 'Артикул',
       discount: 'Скидка', dim_weight: 'Вес', dim_height: 'Высота', dim_width: 'Ширина', dim_length: 'Длинна',
       windex: 'Индекс', lotof: 'Кратность', lotof_mfg: 'Производство', tagname: 'Тег' , arn: 'Склад',
-      sticker: 'Стикер', multi: 'Множитель', pit: 'Скрыть город'
+      sticker: 'Стикер', multi: 'Множитель', pit: 'Скрыть город', ignored: 'Удалено'
     }
 
     @r = url(:things, :multiedit)
@@ -306,8 +306,10 @@ Fenix::App.controllers :things do
       begin
         data = JSON.parse(params[:data])
         products = Product.find_all(data.keys)
+        cats_ids = KSM::Category.toplevel.map(&:subcategories).flatten.map(&:id)
+        towns_ids = known_cities.keys
 
-        other_keys = ['multi', 'arn', 'sticker', 'pit']
+        other_keys = ['multi', 'arn', 'sticker', 'pit', 'ignored', 'category_id', 'place_id']
         value_guard = {
           'name' => :to_s, 'look' => :to_s, 'category_id' => :to_s, 'place_id' => :to_s,
           'price' => :to_i, 'desc' => :to_s, 'corel' => :to_s, 'art' => :to_s, 'discount' => :to_i,
@@ -329,6 +331,9 @@ Fenix::App.controllers :things do
               multi: line['multi']&.to_i
             }.compact
             pit = empty_to_nil(line['pit'])&.to_i
+            ignored = empty_to_nil(line['ignored'])&.to_i
+            category_id = empty_to_nil(line['category_id'])&.to_s
+            place_id = empty_to_nil(line['place_id'])&.to_s&.upcase
             other_keys.each{ |k| line.delete(k) }
 
             preduct = prod.dup
@@ -338,7 +343,15 @@ Fenix::App.controllers :things do
               next if prod.send("#{ k }") == v
               prod.send("#{ k }=", v)
             end
+            
             prod.settings[:pi] = pit == 1 ? 1 : 0 if (pit && prod.settings&.fetch(:pi, 0) != pit)
+            prod.ignored = ignored == 1 ? 1 : 0
+
+            prod.category_id = category_id if category_id && (cats_ids.include?(category_id) || raise("Указана не существующая категория: #{category_id.inspect}"))
+            prod.place_id = place_id if place_id && (towns_ids.include?(place_id) || raise("Указан не существующий город: #{place_id.inspect}"))
+
+
+
             prod.area_movement preduct
             # prod.sn ||= thing_glob_seed
             prod.saved_by @current_account

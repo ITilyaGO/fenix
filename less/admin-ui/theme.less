@@ -2286,8 +2286,9 @@ products_save_dialog {
     min-width: 25ch;
   }
   .unselected {
-    .headcol {
-      color: lightgray;
+    color: lightgray;
+    input::placeholder, textarea::placeholder {
+      color: gainsboro;
     }
   }
   textarea {
@@ -2328,7 +2329,15 @@ products_save_dialog {
   .table > thead > tr > th {
     padding: 3px 2px;
   }
-
+  
+  input#pf  {
+    color: forestgreen;
+  }
+  input[type=checkbox] {
+    transform: scale(1.8);
+    margin: 6px;
+    accent-color: gainsboro;
+  }
 }
 
 .export-hover-panel {
@@ -2548,6 +2557,7 @@ products_save_dialog {
     }
   }
 }
+
 .ss {
   .child-m-2 > * {
     margin: 2px;
@@ -2560,5 +2570,8 @@ products_save_dialog {
   }
   .jc-sb {
     justify-content: space-between;
+  }
+  .nowrap {
+    white-space: nowrap;
   }
 }

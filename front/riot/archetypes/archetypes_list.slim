@@ -1,6 +1,6 @@
-products_list.anyscroll
+archetypes_list.anyscroll.ss
   .scrolling
-    h5.products-empty if='{ products_empty }' Список продуктов пуст
+    h5.products-empty if='{ products_empty }' Список заготовок пуст
     table.table.table-hover if='{ !products_empty }'
       thead
         tr
@@ -9,39 +9,42 @@ products_list.anyscroll
             input type='checkbox' checked=1 onchange='{ all_items_selected_changed }'
             | &nbsp;
             | Имя
+          th.header.headrow-color.nowrap
+            | &nbsp;
+            | Создан
+
           th.header each='{ f in fields }'
             .name title='Внутреннее название: { f.id }'
               | { f.name }
-            input id='edit' fid='{ f.id }' autocomplete='off' style='width: { width_hash[f.id] }ch;' if='{ f.id != "desc" }'
-            .textarea-h if='{ f.id == "desc" }'
-              textarea id='edit' fid='{ f.id }' autocomplete='off' style='width: { width_hash[f.id] }ch;'
+            input id='edit' fid='{ f.id }' autocomplete='off' style='width: { width_hash[f.id] }ch;'
 
       tbody
         tr each='{ p in products }' class='{ unselected: !p.sel }'
           td.headcol
-            a href='{ product_card_url + p.id }'
+            a href='{ archetype_card_url + p.id }'
               | { p.id }
           td.headcol.col-min-width
             input type='checkbox' checked='{ p.sel }' onchange='{ item_selected_changed }'
             | &nbsp;
-            | { p.displayname }
+            | { p.name }
+          td.nowrap
+            | { p.c_at }
 
           td each='{ f in fields }'
             .flex-c
-              input id='pf' pid='{ p.id }' fid='{ f.id }' autocomplete='off' placeholder='{ p[f.id] }' style='width: { width_hash[f.id] }ch;' ondblclick='{ copy_placeholder_to_value }' if='{ f.id != "desc" }'
-              textarea id='pf' pid='{ p.id }' fid='{ f.id }' autocomplete='off' placeholder='{ p[f.id] }' style='width: { width_hash[f.id] }ch;' ondblclick='{ copy_placeholder_to_value }' if='{ f.id == "desc" }'
+              input id='pf' pid='{ p.id }' fid='{ f.id }' autocomplete='off' placeholder='{ p[f.id] }' style='width: { width_hash[f.id] }ch;' ondblclick='{ copy_placeholder_to_value }'
 
   javascript:
     self.token = document.querySelector('form [name^="auth"]').value
     self.fields = []
     self.products = []
-    self.product_card_url = opts.product_card_url
+    self.edit_cache = {}
+    self.archetype_card_url = opts.archetype_card_url
     self.products_empty = true
     self.width_hash = {
-      'name': 30, 'look': 25, 'category_id': 10, 'place_id': 12, 'price': 5, 'desc': 20,
-      'corel': 20, 'art': 12, 'discount': 6, 'dim_weight': 6, 'dim_height': 6, 'dim_width': 6,
-      'dim_length': 6, 'windex': 6, 'lotof': 8, 'lotof_mfg': 10, 'tagname': 10,
-      'arn': 6, 'sticker': 6, 'multi': 8, 'pit': 10, 'ignored': 6
+      'name': 40,
+      'category_id': 5,
+      'g': 5,
     }
 
     self.on('mount', function() {
@@ -49,6 +52,7 @@ products_list.anyscroll
       rcontrol.trigger('GET_CACHE_fields', (data) => {
         self.fields_list = data
       })
+      self.cat_select = document.querySelector('#cat_select')
       self.init_inputs()
     })
 
@@ -60,11 +64,6 @@ products_list.anyscroll
 
     set_sel_to_all_products(sel) {
       self.products.forEach(el => el.sel = sel)
-    }
-
-    loading_toggle(load) {
-      self.loading = load
-      self.update()
     }
 
     search_products(searching, forced = true, inverseSearch = false) {
@@ -113,7 +112,7 @@ products_list.anyscroll
     get_inputs() {
       return {
         cat: document.querySelector('input[name=cat]'),
-        place: document.querySelector('input[name=place]'),
+        // place: document.querySelector('input[name=place]'),
         search: document.querySelector('input[name=search]'),
         // editable_field: document.querySelector('input[name=editable_field]'),
         selector_by_name: document.querySelector('input[name=selector_by_name]'),
@@ -204,18 +203,23 @@ products_list.anyscroll
       self.selected_products_ids_changed = true
     }
 
+    reinitiolize_caches() {
+      self.table_cache = self.get_table_cache()
+      self.edit_cache = self.get_edit_cache()
+      cat_select.classList.toggle('hide', !self.edit_cache.category_id)
+    }
+
     rcontrol.on('RELOAD_PRODUCTS', function(data) {
       const inp = self.inputs
       rcontrol.trigger('LOADING_PRODUCTS_LIST', true)
-      self.loadlist(inp.cat.value, inp.place.value, inp.search.value)
+      self.loadlist(inp.cat.value, inp.search.value)
     })
 
     rcontrol.on('FIELDS_CHANGED', function(data) {
       self.fields = self.fields_list.filter(field => field.sel)
       rcontrol.trigger('TYPEDOWN_GROUP_CHANGE_COMPLETE_fields')
       self.update()
-      self.table_cache = self.get_table_cache()
-      self.edit_cache = self.get_edit_cache()
+      self.reinitiolize_caches()
     })
 
     rcontrol.on('SET_FIELDS_VALUES', function() {
@@ -232,12 +236,18 @@ products_list.anyscroll
       }
     })
 
+    rcontrol.on('CAT_SELECT_SELECTED', function(data) {
+      let catField = self.edit_cache.category_id
+      if (catField)
+        catField.value = data || ''
+    })
+
     sendlist(data) {
       var data = {
         authenticity_token: self.token,
         data: JSON.stringify(data)
       }
-      fetch('/things/multiedit_save', {
+      fetch('/archetypes/multiedit_save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams(data).toString()
@@ -283,19 +293,14 @@ products_list.anyscroll
       })
     }
 
-    loadlist(cat, place, search) {
-      if (cat == 'all' && place == 'all' && (search || '').length > 0) {
-        cat = 'none'
-        place = 'none'
-      }
+    loadlist(cat, search) {
       var data = {
         authenticity_token: self.token,
         cat: cat,
-        place: place,
         search: search
       }
       try {
-        fetch('/products/list_by_filters.json', {
+        fetch('/archetypes/list_by_filters.json', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: new URLSearchParams(data).toString()
@@ -310,13 +315,13 @@ products_list.anyscroll
           self.products_empty = self.products.length == 0
           self.init_products()
           self.update()
-          self.table_cache = self.get_table_cache()
-          self.edit_cache = self.get_edit_cache()
-          rcontrol.trigger('PRODUCTS_LOADED')
+          self.reinitiolize_caches()
         })
       } catch {
         rcontrol.trigger('LOADING_PRODUCTS_LIST', false)
         alert("Ошибка! Что то пошло не так...")
+      } finally {
+          rcontrol.trigger('PRODUCTS_LOADED')
       }
     }
 
@@ -327,7 +332,7 @@ products_list.anyscroll
         depth: 2,
         doc: {
           id: "id",
-          field: [ "displayname" ]
+          field: [ "name" ]
         }
       })
       self.index.add(self.products)

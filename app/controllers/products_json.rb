@@ -62,7 +62,8 @@ Fenix::App.controllers :products do
         arn: xt.arn,
         sticker: xt.sticker,
         multi: xt.multi,
-        pit: p.settings&.fetch(:pi, 0)
+        pit: p.settings&.fetch(:pi, 0),
+        ignored: p.ignored
       }
     end
     data.to_json
