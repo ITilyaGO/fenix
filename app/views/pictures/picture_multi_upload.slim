@@ -1,0 +1,94 @@
+.prefs-export-products-1c.ss
+  = form_tag @r, :method => :post, :enctype => "multipart/form-data" do
+    .flex-c.center.products-selector
+      .filter.wp100
+        typedown.hide data-name='place' group='products' nosub=1 showchanges=1 enough=1 display-id=(params[:place] || :none)
+          = content_tag(:dv, 'Не выбрано', { value: :none, class: 'item' })
+          = content_tag(:dv, 'Все', { value: :all, class: 'item' }) if @ccat != 'all'
+          - known_cities.each do |k, city|
+            - html_attributes = { value: city.code, class: 'item' }
+            = content_tag(:dv, city.model, html_attributes)
+      .filter.wp100
+        typedown.hide data-name='cat' group='products' nosub=1 showchanges=1 enough=1 display-id=(params[:cat] || :none)
+          = content_tag(:dv, 'Не выбрано', { value: :none, class: 'item' })
+          = content_tag(:dv, 'Все', { value: :all, class: 'item' }) if @place != 'all'
+          = content_tag(:dv, 'Без категории', { value: :nothing, class: 'item' })
+          - @cats.each do |cat|
+            - cat.subs_ordered.each do |sub|
+              - html_attributes = { :value => sub.id, class: 'item' }
+              - html_attributes[:selected] ||= option_is_selected?(sub.id, sub.name, @product&.category_id)
+              = content_tag(:dv, "#{ cat.name } - #{ sub.name }", html_attributes)
+      .filter.wp100 title='Загрузить продукты включающие слова...'
+        input.wp100 name=:search placeholder='Поиск...' value=(params[:search] || '')
+      .filter title='Загрузить список продуктов по выбранным фильтрам'
+        = submit_tag 'Фильтровать', class: 'btn btn-prime btn-sm submitbutton', name: :filtration_button
+      .filter title='Загрузить картинки'
+        = submit_tag 'Загрузить', class: 'btn btn-prime btn-sm submitbutton', name: :upload_button
+
+    - if @notice
+      .alert.alert-info: .small = @notice
+    - if @products
+        table.table.table-hover
+          thead
+            tr
+              th.header ID
+              th.header
+              th.header Имя
+              th.header Цена
+              th.header
+
+          tbody
+            - @products.each do |prod|
+              tr
+                td
+                  a href=url(:things, :edit, prod.id) = prod.id
+                td
+                  - if pict = picsrc(prod.id)
+                    pica picsrc=pict tipdesc=prod.displayname
+                td = prod.displayname
+                td = prod.price
+                td
+                  - if allow_route?(:picupload)
+                    fileupload.fileinput-new.text-center data-provides="fileinput"
+                      .btn.btn-xs.btn-prime.btn-embossed.btn-file.fileinput-new
+                        .fileinput-new Загрузить
+                        input type="file" name="files[#{prod.id}]" accept='image/*'
+                      '
+                      .btn.btn-xs.btn-info.btn-embossed.fileinput-exists.cursor-default Выбрано
+                  - else 
+                      .btn.btn-xs.btn-default.btn-embossed.fileinput-exists.cursor-default Загрузка вам недоступна
+
+  .clearfix
+
+- content_for :js_assets do
+  = javascript_include_tag :riot, :flexsearch_min, :fileinput
+  rscript type="riot/tag" src="/riot/tags/html/tdrop.tag"
+  rscript type="riot/tag" src="/riot/tags/html/typedown.tag"
+  rscript type="riot/tag" src="/riot/tags/things/pica.tag"
+
+
+  javascript:
+    document.addEventListener("DOMContentLoaded", function(event) {
+      riot.mount('tdrop, typedown, pica')
+    })
+
+    document.addEventListener('DOMContentLoaded', function() {
+      var submitButtons = document.querySelectorAll('.submitbutton');
+
+      submitButtons.forEach(function(submitButton) {
+        submitButton.addEventListener('click', function(event) {
+          const form = submitButton.closest('form')
+          const is_upload = submitButton.name == 'upload_button'
+          const fileInputs = form.querySelectorAll('input[type="file"]')
+          fileInputs.forEach(function(input) {
+            const file = input.files[0]
+            if (!file || !is_upload) {
+              input.parentNode.removeChild(input)
+            }
+          });
+
+          form.submit();
+        });
+      });
+    });
+
