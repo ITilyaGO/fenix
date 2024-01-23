@@ -41,7 +41,7 @@ Fenix::App.controllers :picupload do
     tempfile = file[:tempfile]
 
     is = ImageSize.path tempfile.path
-    good = is.format && is.size.uniq.one? && (746..816) === is.w
+    good = is.format && is.size.uniq.one? && (600..816) === is.w
     if not good
       FileUtils.rm tempfile.path
       flash[:error] = t 'error.bad_file'
