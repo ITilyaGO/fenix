@@ -12,6 +12,10 @@ module Fenix::App::ReportsHelper
     value.to_s.gsub('.', ',')
   end
 
+  def split_for_search(str)
+    str.downcase.split(/[\s,.'"()-]/).compact
+  end
+
   def params_toggle(params, parameter, value, setable = {})
     params.merge({ parameter.to_sym => params[parameter.to_sym].to_s == value.to_s ? nil : value.to_sym }).merge(setable)
   end
@@ -64,12 +68,16 @@ module Fenix::App::ReportsHelper
   end
 
   def select_orders_by_other_dates(date_sel)
-    if date_sel == :send
+    case date_sel
+    when :send
       @kc_timelines = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :timeline]).flat.trans(:to_i).map{ |k, v| [k, timeline_unf(v)] }.to_h
       select_orders_by_date_hash(@kc_timelines)
-    elsif date_sel == :done
+    when :done
       @kc_done = CabiePio.all_keys(@orders.map(&:id), folder: [:stock, :order, :done]).flat.trans(:to_i).map{ |k, v| [k, v.to_datetime] }.to_h
       select_orders_by_date_hash(@kc_done)
+    when :anew
+      @kc_anew = CabiePio.all_keys(@orders.map(&:id), folder: [:orders, :anewdate]).flat.trans(:to_i).map{ |k, v| [k, timeline_unf(v)] }.to_h
+      select_orders_by_date_hash(@kc_anew)
     end
   end
 
@@ -223,7 +231,7 @@ def completed_work_print_prepare(excel = false)
       secs_cols_head << "#{ s.name[0..2] } С."
       secs_cols_head << "#{ s.name[0..2] } Ф."
     end
-    pretty_stat << ['Номер', 'Д.', 'Соз.', 'Отп.', 'Соб.', 'Разн.', 'Город', 'Заказчик', 'Менеджер', 'Статус', 'Сумма', 'Сумма факт.', 'Вып.'] + secs_cols_head
+    pretty_stat << ['Номер', 'Д.', 'Создан', 'В работу', 'Отправка', 'Собран', 'Разница', 'Город', 'Заказчик', 'Менеджер', 'Статус', 'Сумма', 'Сумма факт.', 'Вып.'] + secs_cols_head
     @orders.each do |order|
       os = @kc_os.detect{ |kc| kc.id.to_i == order.id } || KSM::OrderStatus.new(id: order.id)
       sections_sums = @sections_order_sum[order.id]
@@ -240,19 +248,20 @@ def completed_work_print_prepare(excel = false)
         secs_cols << sections_sums[s.ix][1]
       end
       pretty_stat << [
-        order.id,
-        tja(:delivery, order.delivery),
-        order.created_at&.strftime(date_format),
-        @kc_timelines[order.id]&.strftime(date_format),
-        @kc_done[order.id]&.strftime(date_format),
-        diff,
-        @kc_towns[@kc_orders[order.id.to_s]]&.model,
-        order.client&.name,
-        order.client&.manager&.name,
-        t(:"status.#{ os.state }"),
-        order_sum,
-        order_sum_f,
-        (order_sum > 0 ? "#{ (order_sum_f / order_sum.to_f * 100).round }%" : "")
+        order.id, #Номер
+        tja(:delivery, order.delivery), #Д.
+        order.created_at&.strftime(date_format), #Соз.
+        @kc_anew[order.id]&.strftime(date_format), #В работу
+        @kc_timelines[order.id]&.strftime(date_format), #Отп.
+        @kc_done[order.id]&.strftime(date_format), #Соб.
+        diff, #Разн.
+        @kc_towns[@kc_orders[order.id.to_s]]&.model, #Город
+        order.client&.name, #Заказчик
+        order.client&.manager&.name, #Менеджер
+        t(:"status.#{ os.state }"), #Статус
+        order_sum, #Сумма
+        order_sum_f, #Сумма факт.
+        (order_sum > 0 ? "#{ (order_sum_f / order_sum.to_f * 100).round }%" : "") #Вып.
       ] + secs_cols
     end
     pretty_stat
@@ -261,6 +270,7 @@ def completed_work_print_prepare(excel = false)
   def default_date_list
     {
       created_at: 'Создан',
+      anew: 'Отдан в работу',
       send: 'План отправки',
       done: 'Собран'
     }

@@ -11,7 +11,7 @@ custom_button onclick='{ send_form }'
       el.name = opts.name
       el.value = opts.value
 
-      console.log(this.root.appendChild(el))
+      this.root.appendChild(el)
       if (self.autosub) self.root.closest('form').submit()
       if (self.clearing) el.remove()
     }

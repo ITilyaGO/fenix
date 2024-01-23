@@ -13,6 +13,7 @@ Fenix::App.controllers :reports do
     @btn_memory = {}
     params[:start_date] = @start_date
     params[:end_date] = @end_date
+    params[:date_sel] = :created_at
 
     orders_query = Order.where('status > ?', Order.statuses[:draft])
     orders_query = orders_query.where("#{ :created_at } <= ?", @end_date + 1.day).where("#{ :created_at } >= ?", @start_date)
@@ -68,13 +69,13 @@ Fenix::App.controllers :reports do
     seq = (@btn_memory[:seq] || :category).to_sym
     seq = [:ap_sum, :arch_amount, :amount, :stick_amount, :done_amount, :price, :p_dn].include?(seq) ? seq : :category
 
-    search_list = (params[:search] || '').downcase.split(/[\s,.'"()-]/).compact
+    search_list = split_for_search(params[:search] || '')
     no_search = search_list.size == 0
 
     dir = !params[:sort] && !params[:dir] ? 'desc' : params[:dir] || 'asc'
 
     date_sel = (params[:date_sel] || :created_at).to_sym
-    date_sel = [:created_at, :send, :done].include?(date_sel) ? date_sel : :created_at
+    date_sel = default_date_list.keys.include?(date_sel) ? date_sel : :created_at
 
     page_size = (params[:page_size] || 50).to_i
     @page = (params[:page] || 1).to_i
@@ -186,7 +187,7 @@ Fenix::App.controllers :reports do
         ol_p = products_h[ol.product_id]
         p_cat_id = ol_p.category_id
         p_dn = products_dn[ol.product_id]
-        name_words = p_dn.downcase.split(/[\s,.'"()-]/).compact unless no_search
+        name_words = split_for_search(p_dn) unless no_search
         cat_path = cat_show_list[p_cat_id]
         if (cat_show_list_empty || !cat_path.nil?) && (no_search || search_list.all?{ |w| name_words.include?(w) })
           data_table << OrderLineData.new(ol, p_dn, p_cat_id, cat_path || '')
@@ -201,7 +202,7 @@ Fenix::App.controllers :reports do
         ols = grouped_orders_lines[ord.id]
         ols&.any? do |ol|
           ol_p = products_h[ol.product_id]
-          name_words = products_dn[ol.product_id].downcase.split(/[\s,.'"()-]/).compact unless no_search
+          name_words = split_for_search(products_dn[ol.product_id]) unless no_search
           (cat_show_list_empty || cat_show_list[ol_p.category_id]) && (no_search || search_list.all?{ |w| name_words.include?(w) })
         end
       end
@@ -356,10 +357,10 @@ Fenix::App.controllers :reports do
     params[:pay_type] = pay_type
 
     seq = (@btn_memory[:seq] || :category).to_sym
-    seq = [:created_at, :send, :done, :diff, :city].include?(seq) ? seq : :none
+    seq = (default_date_list.keys + [:diff, :city]).include?(seq) ? seq : :none
     dir = seq == :created_at ? 'asc' : 'desc'
     date_sel = (params[:date_sel] || :created_at).to_sym
-    date_sel = [:created_at, :send, :done].include?(date_sel) ? date_sel : :created_at
+    date_sel = default_date_list.keys.include?(date_sel) ? date_sel : :created_at
 
     page_size = (params[:page_size] || 50).to_i
     @page = (params[:page] || 1).to_i
@@ -456,10 +457,12 @@ Fenix::App.controllers :reports do
     oipmi = @orders.map(&:id)
     @kc_timelines = CabiePio.all_keys(oipmi, folder: [:orders, :timeline]).flat.trans(:to_i).map{ |k, v| [k, timeline_unf(v)] }.to_h if @kc_timelines.nil?
     @kc_done = CabiePio.all_keys(oipmi, folder: [:stock, :order, :done]).flat.trans(:to_i).map{ |k, v| [k, v.to_datetime] }.to_h if @kc_done.nil?
+    @kc_anew = CabiePio.all_keys(oipmi, folder: [:orders, :anewdate]).flat.trans(:to_i).map{ |k, v| [k, timeline_unf(v)] }.to_h if @kc_anew.nil?
 
     @orders.sort_by!{ |o| @kc_towns[@kc_orders[o.id.to_s]]&.model&.name || '' } if seq == :city
     @orders.sort_by!{ |o| @kc_timelines[o.id] || Time.now } if seq == :send
     @orders.sort_by!{ |o| @kc_done[o.id] || Time.now } if seq == :done
+    @orders.sort_by!{ |o| @kc_anew[o.id] || Time.now } if seq == :anew
     @orders.sort_by! do |o|
       odate = @kc_timelines[o.id]
       done_date = @kc_done[o.id]
@@ -501,6 +504,7 @@ Fenix::App.controllers :reports do
     @btn_memory = {}
     params[:start_date] = @start_date
     params[:end_date] = @end_date
+    params[:date_sel] = :created_at
 
     orders_query = Order.where('status > ?', Order.statuses[:draft])
     orders_query = orders_query.where("#{ :created_at } <= ?", @end_date + 1.day).where("#{ :created_at } >= ?", @start_date)
@@ -555,13 +559,13 @@ Fenix::App.controllers :reports do
     sort = params[:sort] || 'created_at'
     seq = (@btn_memory[:seq] || :category).to_sym
     seq = [:ap_sum, :arch_amount, :amount, :stick_price, :stick_amount, :stick_sum, :stick_price_sum, :done_amount, :price, :p_dn].include?(seq) ? seq : :category
-    search_list = (params[:search] || '').downcase.split(/[\s,.'"()-]/).compact
+    search_list = split_for_search(params[:search] || '')
     no_search = search_list.size == 0
 
     dir = !params[:sort] && !params[:dir] ? 'desc' : params[:dir] || 'asc'
 
     date_sel = (params[:date_sel] || :created_at).to_sym
-    date_sel = [:created_at, :send, :done].include?(date_sel) ? date_sel : :created_at
+    date_sel = default_date_list.keys.include?(date_sel) ? date_sel : :created_at
 
     page_size = (params[:page_size] || 50).to_i
     @page = (params[:page] || 1).to_i
@@ -625,7 +629,7 @@ Fenix::App.controllers :reports do
     have_orders = @orders.size > 0
     @orders_count = @orders.size
 
-    @date_list = {created_at: 'Наклеен'}
+    @date_list = { created_at: 'Наклеен' }
 
     @sections = KSM::Section.all.sort_by(&:ix)
     @states_list = KSM::OrderStatus::BIT_STATES.keys
@@ -681,7 +685,7 @@ Fenix::App.controllers :reports do
         ol_p = products_h[ol.product_id]
         p_cat_id = ol_p.category_id
         p_dn = products_dn[ol.product_id]
-        name_words = p_dn.downcase.split(/[\s,.'"()-]/).compact unless no_search
+        name_words = split_for_search(p_dn) unless no_search
         cat_path = cat_show_list[p_cat_id]
         olsticker_t_val = @olstickers.fetch(ol.id, nil)&.fetch(:t, nil)
         olsticker_date = olsticker_t_val.nil? ? nil : timeline_unf(olsticker_t_val)
@@ -713,7 +717,7 @@ Fenix::App.controllers :reports do
           ols = grouped_orders_lines[ord.id]
           ols&.any? do |ol|
             ol_p = products_h[ol.product_id]
-            name_words = products_dn[ol.product_id].downcase.split(/[\s,.'"()-]/).compact unless no_search
+            name_words = split_for_search(products_dn[ol.product_id]) unless no_search
             (cat_show_list_empty || cat_show_list[ol_p.category_id]) && (no_search || search_list.all?{ |w| name_words.include?(w) })
           end
         end
@@ -756,6 +760,8 @@ Fenix::App.controllers :reports do
       @data_table_p_id.sort_by!{ |p_id, dts| dts.first.price }.reverse!
     when :p_dn
       @data_table_p_id.sort_by!{ |p_id, dts| dts.first.p_dn.delete('☠️ ') }
+    when :stick_price
+      @data_table_p_id.sort_by!{ |p_id, dts| dts.first.stick_price }.reverse!
     else
       @data_table_p_id.sort_by!{ |p_id, dts| dts.sum(&seq) }.reverse!
     end

@@ -1,5 +1,6 @@
 - params_sym = params.map{ |k, v| [k.to_sym, v] }.to_h
 - show_done_column = params[:date_sel] == 'done'
+- show_anew_column = params[:date_sel] == 'anew'
 = form_for :supermodel, url(@r) do |f|
   / = hidden_field_tag :filtred_orders, value: @orders.map(&:id).join('_') if @use_olo
   - [:section, :search, :manager, :town, :client, :delivery, :state, :date_sel, :start_date, :end_date, :pay_type].each do |k|
@@ -62,17 +63,22 @@
             th.header
 
             th.header.text-center
-              = partial 'reports/mem_btn', locals: { name: :seq, val: 'created_at', title: 'Сортировка по дате создания', text: 'Соз.' }
+              = partial 'reports/mem_btn', locals: { name: :seq, val: 'created_at', title: 'Сортировка по дате создания (Создан)', text: 'Соз.' }
               .only-print Соз.
+
+            - if @kc_anew && show_anew_column
+              th.header.text-center
+                = partial 'reports/mem_btn', locals: { name: :seq, val: 'anew', title: 'Сортировка по дате перехода заказа из Непроверенно в Новый (Отдан в работу)', text: 'Враб.' }
+                .only-print Враб.
 
             - if @kc_timelines
               th.header.text-center
-                = partial 'reports/mem_btn', locals: { name: :seq, val: 'send', title: 'Сортировка по плановой дате отправки', text: 'Отп.' }
+                = partial 'reports/mem_btn', locals: { name: :seq, val: 'send', title: 'Сортировка по плановой дате отправки (План отправки)', text: 'Отп.' }
                 .only-print Отп.
 
             - if @kc_done && show_done_column
               th.header.text-center
-                = partial 'reports/mem_btn', locals: { name: :seq, val: 'done', title: 'Сортировка по дате сборки', text: 'Соб.' }
+                = partial 'reports/mem_btn', locals: { name: :seq, val: 'done', title: 'Сортировка по дате сборки (Собран)', text: 'Соб.' }
                 .only-print Соб.
 
             - if @kc_done && @kc_timelines
@@ -136,6 +142,15 @@
               /     span.year-num = order.updated_at.strftime('.%y')
               - odate = @kc_timelines[order.id] if @kc_timelines
               - done_date = @kc_done[order.id] if @kc_done
+              - anew_date = @kc_anew[order.id] if @kc_anew
+
+              - if @kc_anew && show_anew_column
+                td.list-column.text-center.text-nowrap
+                  - if anew_date
+                    .cell: .date
+                      span = anew_date.strftime('%d.%m')
+                      span.year-num = anew_date.strftime('.%y')
+
               - if @kc_timelines
                 td.list-column.text-center.text-nowrap class=('date-warning' if @kc_blinks.fetch(order.id, nil))
                   - if odate
@@ -149,6 +164,7 @@
                     .cell: .date
                       span = done_date.strftime('%d.%m')
                       span.year-num = done_date.strftime('.%y')
+
               - if @kc_timelines && @kc_done
                 td.list-column
                   - if done_date && odate
