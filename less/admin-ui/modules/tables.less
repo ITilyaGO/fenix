@@ -136,6 +136,19 @@
   }
 }
 
+.table-hover-bright {
+  .table-hover;
+  > tbody {
+    > tr:hover {
+      > td,
+      > th {
+        background-color: lemonchiffon;
+        transition: 0.3s linear;
+      }
+    }
+  }
+}
+
 // Table backgrounds
 //
 // Exact selectors below required to override `.table-striped` and prevent

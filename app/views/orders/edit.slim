@@ -401,7 +401,7 @@ ul class="nav nav-tabs non-print"
               - if cat_visible
                 .table-res4ponsive
                   h4.non-print = tab.name
-                  table.table
+                  table.table.table-hover-bright
                     thead.only-print
                       tr
                         td = tab.name
@@ -437,6 +437,8 @@ ul class="nav nav-tabs non-print"
                             pica picsrc=pict tipdesc=ol.product.displayname
                         td.col-md-4
                           = ol.product.displayname
+                          a.visible-on-hover.non-print title='Редактировать карточку товара' href=url(:things, :edit, ol.product.id)
+                            .fa.fa-edit
                         td.col-md-3
                           - if !ol.description.blank?
                             div = ol.description

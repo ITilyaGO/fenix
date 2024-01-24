@@ -134,10 +134,9 @@ Fenix::App.controllers :prefs do
       @r = url(:prefs, :export_products_1c)
       render 'prefs/export_products_1c'
     else
-      headers['Content-Disposition'] = "attachment; filename=pio-to-1c.xml"
-      headers['Content-Type'] = "application/xml"
-      output = "\xEF\xBB\xBF"
-      output << Xmlfr.customer_from_products_list(@products).force_encoding('utf-8')
+      headers['Content-Disposition'] = "attachment; filename=pio-products-to-1c cat_#{params[:cat]} place_#{params[:place]}.json"
+      headers['Content-Type'] = "application/json"
+      output = Json1CAssist.products_to_json(@products).force_encoding('utf-8')
     end
   end
 

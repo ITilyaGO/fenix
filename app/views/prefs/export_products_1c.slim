@@ -19,7 +19,7 @@
               - html_attributes[:selected] ||= option_is_selected?(sub.id, sub.name, @product&.category_id)
               = content_tag(:dv, "#{ cat.name } - #{ sub.name }", html_attributes)
       .filter.wp100 title='Загрузить продукты включающие слова...'
-        input.wp100 name=:search placeholder='Поиск...'
+        input.wp100 name=:search placeholder='Поиск...' value=params.fetch(:search, "") autocomplete='off'
       .filter title='Загрузить список продуктов по выбранным фильтрам'
         = submit_tag 'Фильтровать', class: 'btn btn-prime btn-sm', name: :filtration_button
       .filter title='Скачать xml файл для 1C со списком продукотов по выбранным фильтрам'

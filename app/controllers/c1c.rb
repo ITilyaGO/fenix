@@ -34,16 +34,11 @@ Fenix::App.controllers :c1c do
     render 'c1c/display'
   end
 
-  get :create, :with => :id, :provides => :xml do
-    headers['Content-Disposition'] = "attachment; filename=pio-to-1c.xml"
-    headers['Content-Type'] = "application/xml"
+  get :create, :with => :id, :provides => :json do
     order = Order.find(params[:id])
-    # unless params[:force]
-    #   redirect_to url(:c1c, :absent, id: order.id) if check_absent_1c(order).any?
-    # end
-    output = "\xEF\xBB\xBF"
-    # output = []
-    output << Xmlfr.customer_order2(order).force_encoding('utf-8')
+    headers['Content-Disposition'] = "attachment; filename=pio-order-to-1c_#{order.id}.json"
+    headers['Content-Type'] = "application/json"
+    output = Json1CAssist.order_to_json(order).force_encoding('utf-8')
   end
 
   get :absent, :with => :id do
