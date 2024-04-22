@@ -137,12 +137,17 @@
                         td.text-center data-day=day
                           - hamount = @holders[p.id].fetch(day, 0)
                           - damount = @destocks[p.id].fetch(day, 0)
+                          - tamount = @tweaks[p.id].fetch(day, nil)
                           - if hamount > 0 or damount > 0
-                            .label.label-default.vp
+                            clicker.label.label-default.vp.hand.relat[
+                              tie=p.id day=day holder=stock tweak=tamount||0 action="TWIMODAL_OPEN"
+                            ]
                               span = hamount
                               elhide th='DESTOCK_HIDE' ts='DESTOCK_SHOW' hide='true'
                                 |&nbsp;/&nbsp;
                                 strong = damount
+                              - if tamount
+                                .absol.fa.fa-paw style='top: 0px; right: 0;'
                             /- if @destocks[p.id].fetch(day, nil)
                             /| &nbsp;
                           /.text-center
@@ -154,6 +159,7 @@
 
                       - 2.times do |i|
                         - day = @day - 1 + i
+                        - tamount = @tweaks[p.id].fetch(day, nil)
                         td.text-center.col-md-1 data-day=day
                           .vp.hidden: span = @holders[p.id].fetch(day, 0)
                           .col.flex-c.vcenter
@@ -162,7 +168,9 @@
                             - if @destocks[p.id].fetch(day, nil)
                               .text-center
                             elhide th='DESTOCK_HIDE' ts='DESTOCK_SHOW' hide='true'
-                              .label.label-default.vp
+                              clicker.label.label-default.vp.hand.relat[
+                                tie=p.id day=day holder=stock tweak=tamount||0 action="TWIMODAL_OPEN"
+                              ]
                                 |/&nbsp;
                                 strong = @destocks[p.id][day]
 
@@ -200,12 +208,39 @@
       - if params[:cat]
         .form-actions = f.submit pat(:save), :class => 'btn btn-prime'
 
+twimodal.modal day='today'
+  .modal-dialog
+    .modal-content
+      .modal-header.flex-c
+        h4.modal-title = t :'tit.archetypes.stock'
+        .flexie
+      .modal-body.form-std
+        = hidden_field_tag :oid
+        fieldset.col-md-8
+          label.control-label Коррекция
+          = text_field_tag :deltafield, class: 'form-control input-sm wp100 mrm', onchange: '{preview}'
+          .extra.label.label-default.plm show='{+bag.tweak != 0}'
+            | { bag.tweak }
+        .clearfix
+        fieldset.col-md-10
+          label.control-label = t :'tit.archetypes.stock'
+          .controls.mrm
+            .form-control.input-sm.col-md-5.mrm
+              | { bag.holder }
+          .extra.controls  
+            .extra.label.label-warning.plm
+              | { result }
+        .clearfix
+      .modal-footer
+        button.btn.btn-shipped.btn-wide onclick='{save}' Сохранить
+        clicker.btn.btn-default.btn-wide.cancel action='TWIMODAL_CLOSE' = pat(:cancel)
+
 page
 
 datemodal data-title='Резерв за даты' data-url=url(:archetypes, :stock, :cat => params[:cat])
   = partial 'archetypes/calendar'
 
-.modal-backdrop.hide
+.modal-backdrop.in.hide
 
 - content_for :js_assets do
   = javascript_include_tag :riot
@@ -215,6 +250,7 @@ datemodal data-title='Резерв за даты' data-url=url(:archetypes, :sto
   rscript type="riot/tag" src="/riot/tags/switcher.tag"
   rscript type="riot/tag" src="/riot/tags/elhide.tag"
   rscript type="riot/tag" src="/riot/tags/clicker.tag"
+  rscript type="riot/tag" src="/riot/tags/archetypes/twimodal.tag"
   rscript type="riot/tag" src="/riot/tags/archetypes/sumline.tag"
   rscript type="riot/tag" src="/riot/tags/archetypes/page.tag"
   rscript type="riot/tag" src="/riot/tags/archetypes/datemodal.tag"
@@ -226,7 +262,7 @@ datemodal data-title='Резерв за даты' data-url=url(:archetypes, :sto
   javascript:
     
     document.addEventListener("DOMContentLoaded", function(event) {
-      riot.mount('idcollapser, subclick, clicker, switcher, elhide, sumline, wtree, page, datemodal')
+      riot.mount('idcollapser, subclick, clicker, switcher, elhide, sumline, wtree, page, datemodal, twimodal')
       let confobj = #{{@squadconf.to_json}}
       rsquad.saveConfig(confobj)
     })

@@ -1,0 +1,75 @@
+twimodal.modal class='{open_class}'
+  
+  yield
+
+  javascript:
+    this.title = opts.dataTitle
+
+    rcontrol.on("TWIMODAL_OPEN", function(data) {
+      self.open(data)
+      self.update()
+    })
+
+    rcontrol.on("TWIMODAL_CLOSE", function(data) {
+      self.close()
+      self.update()
+    })
+
+    this.preventer = function(e) {
+      e.preventDefault()
+    }
+
+    close_drop(a) {
+      if (a.target !== a.currentTarget) return true;
+      self.close()
+    }
+
+    close() {
+      document.querySelector('.modal-backdrop').classList.add('hide')
+      document.body.classList.remove('modal-open')
+      self.open_class = ''
+      document.removeEventListener('touchmove', self.preventer)
+    }
+
+    preview() {
+      let amount = +self.bag.holder - (+self.bag.tweak) + (+self.deltafield.value)
+      self.result = amount
+      self.update()
+    }
+
+    open(data) {
+      self.bag = data
+      self.title = data.title
+      self.oid.value = data.tie
+      self.num = data.tie
+      self.day = data.day
+      self.deltafield.value = ''
+      self.result = null
+      self.update()
+
+      document.body.classList.add('modal-open')
+      document.querySelector('.modal-backdrop').classList.remove('hide')
+      self.open_class = 'modal flex-c in'
+      document.addEventListener('touchmove', self.preventer)
+    }
+
+    save() {
+      var data = {
+        id: self.num,
+        date: self.day,
+        delta: +self.deltafield.value,
+        authenticity_token: rsquad.token
+      }
+      fetch('/archetypes/stock_tweak', {
+        method: "PUT",
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(data).toString()
+      })
+      .then(function(response) { return response.json() })
+      .then(function(data) {
+        self.loaded = true
+        self.deltafield.value = ''
+        self.close()
+        self.update()
+      })
+    }

@@ -152,6 +152,7 @@ Fenix::App.controllers :archetypes do
     @arch = KSM::Archetype.find(params[:id])
     @holders = {}
     @destocks = {}
+    @tweaks = {}
     @dayeq = {}
 
     @day = Date.parse(params[:day]) rescue Date.today - 1.month
@@ -163,16 +164,19 @@ Fenix::App.controllers :archetypes do
     dids = tdays.each_with_index.map{|_, i| archetype_daystock(@arch.id, @day+i) }
     stockdays = Stock::In.find_all(dids).flatless
     destockdays = Stock::Out.find_all(dids).flatless
+    tweakdays = Stock::Tweak.find_all(dids).flatless
 
     tdays.each_with_index do |_, i|
       cday = @day+i
       @holders[cday] = stockdays.fetch(archetype_daystock(@arch.id, cday), nil)
       @destocks[cday] = destockdays.fetch(archetype_daystock(@arch.id, cday), nil)
+      @tweaks[cday] = tweakdays.fetch(archetype_daystock(@arch.id, cday), nil)
       @dayeq[cday] = (@holders[cday]||0) - (@destocks[cday]||0)
       days << to_dm(cday)
     end
     @holders = @holders.compact
     @destocks = @destocks.compact
+    @tweaks = @tweaks.compact
 
     @prev = @day.day == 1 ? @day - 1.month : Date.new(@day.year, @day.month, 1) + 1.month
     @next = @day + 1.month
@@ -181,8 +185,9 @@ Fenix::App.controllers :archetypes do
     polines = tdays.map{|d|-(@destocks[d]||0)}
     nelines = lines.each_with_index.map{|_,i|lines[0..i].compact.sum}
     alines = tdays.map{|d|@holders[d]||0}
+    twilines = tdays.map{|d|@tweaks[d]||0}
 
-    @chart = { days: days, adds: alines, rems: polines, neus: nelines, difdays: lines }
+    @chart = { days: days, adds: alines, rems: polines, tweaks: twilines, neus: nelines, difdays: lines }
 
     render 'archetypes/historic'
   end
@@ -193,6 +198,7 @@ Fenix::App.controllers :archetypes do
     @day = Date.parse params[:segment].split(',').last rescue Date.today
     @holders = {}
     @destocks = {}
+    @tweaks = {}
     @olneed = {}
     ksm_arch = KSM::Archetype.all.select { |a| a.category_id == params[:cat] }
     ksm_arch = KSM::Archetype.all if params[:all] or !params[:cat]
@@ -208,6 +214,7 @@ Fenix::App.controllers :archetypes do
     ar_hash.each do |sk|
       @holders[sk] ||= {}
       @destocks[sk] ||= {}
+      @tweaks[sk] ||= {}
       @olneed[sk] = KSM::OrderNeed.query("#{sk}_", type: :prefix).flatless.values.sum
     end
     7.times do |i|
@@ -224,6 +231,12 @@ Fenix::App.controllers :archetypes do
         ap = sk.split('_').first
         @destocks[ap] ||= {}
         @destocks[ap][@day-i] = sv
+      end
+      tweakday = Stock::Tweak.find_all(all_ids).flatless
+      tweakday.each do |sk, sv|
+        ap = sk.split('_').first
+        @tweaks[ap] ||= {}
+        @tweaks[ap][@day-i] = sv
       end
     end
 
@@ -287,6 +300,21 @@ Fenix::App.controllers :archetypes do
     end
 
     redirect url(:archetypes, :stock, cat: params[:cat], segment: params[:segment])
+  end
+
+  put :stock_tweak do
+    id = params[:id]
+    day = Time.parse params[:date]
+    delta = params[:delta]
+    next if delta.size == 0
+
+    prev_day = Stock::Tweak.find id, day
+    prev_day.save delta.to_i
+
+    stock = Stock::Free.find id
+    stock.diff prev_day.gap
+
+    { free: stock.amount }.to_json
   end
   
   # Obsolete

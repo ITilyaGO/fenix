@@ -4,6 +4,7 @@ en:
       arch: Заготовка
       link: Связи
       list: Заготовки
+      stock: Склад
     stickers:
       timeline: График клейки
       pastline: Реальная клейка

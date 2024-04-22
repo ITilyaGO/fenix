@@ -37,7 +37,7 @@ class Stock::In < Stock::CommonMove
   ENT_FOLDER = :'common/a'
 end
 
-class Stock::Cor < Stock::CommonMove
+class Stock::Tweak < Stock::CommonMove
   ENT_FOLDER = :'common/c'
 
   def validate
