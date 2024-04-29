@@ -30,6 +30,8 @@ products_list.anyscroll
             .flex-c
               input id='pf' pid='{ p.id }' fid='{ f.id }' autocomplete='off' placeholder='{ p[f.id] }' style='width: { width_hash[f.id] }ch;' ondblclick='{ copy_placeholder_to_value }' if='{ f.id != "desc" }'
               textarea id='pf' pid='{ p.id }' fid='{ f.id }' autocomplete='off' placeholder='{ p[f.id] }' style='width: { width_hash[f.id] }ch;' ondblclick='{ copy_placeholder_to_value }' if='{ f.id == "desc" }'
+    h6.products-empty if='{ hidden_ignored != 0 }' title='Количество скрытых удаленных продуктов. Так же, это число можно посмотреть в подсказке, при наведении на галочку скрытия/загрузки удаленных продуктов'
+      | Скрыто удаленных продуктов - { hidden_ignored }
 
   javascript:
     self.token = document.querySelector('form [name^="auth"]').value
@@ -37,6 +39,7 @@ products_list.anyscroll
     self.products = []
     self.product_card_url = opts.product_card_url
     self.products_empty = true
+    self.hidden_ignored = 0
     self.width_hash = {
       'name': 30, 'look': 25, 'category_id': 10, 'place_id': 12, 'price': 5, 'desc': 20,
       'corel': 20, 'art': 12, 'discount': 6, 'dim_weight': 6, 'dim_height': 6, 'dim_width': 6,
@@ -50,6 +53,7 @@ products_list.anyscroll
         self.fields_list = data
       })
       self.init_inputs()
+      self.user_settings_load()
     })
 
     item_selected_changed(event) {
@@ -115,6 +119,7 @@ products_list.anyscroll
         cat: document.querySelector('input[name=cat]'),
         place: document.querySelector('input[name=place]'),
         search: document.querySelector('input[name=search]'),
+        load_ignored: document.querySelector('input[name=load_ignored]'),
         // editable_field: document.querySelector('input[name=editable_field]'),
         selector_by_name: document.querySelector('input[name=selector_by_name]'),
         un_selector_by_name: document.querySelector('input[name=un_selector_by_name]')
@@ -204,10 +209,46 @@ products_list.anyscroll
       self.selected_products_ids_changed = true
     }
 
+    filter_ignored_products() {
+      const load_ignored = self.inputs.load_ignored.checked
+      if (!load_ignored) {
+        self.hidden_ignored = self.products.filter(p => p.ignored).length
+        self.inputs.load_ignored.title = 'Загружать удаленные продукты? Сейчас скрыто - ' + self.hidden_ignored
+        self.products = self.products.filter(p => !p.ignored)
+      }else{
+        self.hidden_ignored = 0
+        self.inputs.load_ignored.title = 'Загружать удаленные продукты?'
+      }
+    }
+
+    user_settings_save() {
+      const inp = self.inputs
+      const settings = {
+        // cat: inp.cat.value,
+        // place: inp.place.value,
+        // search: inp.search.value,
+        load_ignored: inp.load_ignored.checked
+      }
+      localStorage.setItem('products_multiedit_settings', JSON.stringify(settings));
+    }
+
+    user_settings_load() {
+      const inp = self.inputs
+      const settings = JSON.parse(localStorage.getItem('products_multiedit_settings'));
+      if (!settings)
+        return;
+      // inp.cat.value = settings.cat ?? 'none'
+      // inp.place.value = settings.place ?? 'none'
+      // inp.search.value = settings.search ?? ''
+      inp.load_ignored.checked = settings.load_ignored ?? false
+      rcontrol.trigger('TYPEDOWN_GROUP_CHANGE_COMPLETE_products')
+    }
+
     rcontrol.on('RELOAD_PRODUCTS', function(data) {
       const inp = self.inputs
       rcontrol.trigger('LOADING_PRODUCTS_LIST', true)
       self.loadlist(inp.cat.value, inp.place.value, inp.search.value)
+      self.user_settings_save()
     })
 
     rcontrol.on('FIELDS_CHANGED', function(data) {
@@ -284,7 +325,7 @@ products_list.anyscroll
     }
 
     loadlist(cat, place, search) {
-      if (cat == 'all' && place == 'all' && (search || '').length > 0) {
+      if (cat == 'all' && place == 'all' && (search ?? '').length > 0) {
         cat = 'none'
         place = 'none'
       }
@@ -303,6 +344,7 @@ products_list.anyscroll
         .then(function(response) { return response.json() })
         .then(function(data) {
           self.products = data
+          self.filter_ignored_products()
           self.set_sel_to_all_products(true)
           self.selected_products_ids = self.products.map(el => el.id)
           rcontrol.trigger('LOADING_PRODUCTS_LIST', false)
