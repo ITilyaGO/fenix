@@ -1,0 +1,35 @@
+filler.flex-v.ss
+  button.fa.fa-upload.btn.btn-sm.btn-default onclick='{ load_file }' title="Загрузка позиций из CSV файла."
+
+  javascript:
+
+    load_file() {
+      var input = document.createElement('input')
+      input.type = 'file'
+      input.accept = '.csv'
+      input.style.display = 'none'
+
+      input.addEventListener('change', function(event) {
+          var file = event.target.files[0]
+          var reader = new FileReader()
+
+          reader.onload = function(event) {
+              var contents = event.target.result
+              self.file_process(contents)
+          }
+
+          reader.readAsText(file)
+      })
+
+      input.click()
+    }
+
+    file_process(content) {
+      rcontrol.trigger('RESET_INVALID_PRODUCTS')
+      const lines = content.trim().split('\n')
+      const data = {}
+      lines.forEach(line => {
+        const [id, ammount] = line.trim().split(';')
+        rcontrol.trigger('ORDER_ADD_PRODUCT_BY_ID', id, ammount)
+      })
+    }

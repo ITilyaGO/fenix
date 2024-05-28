@@ -53,6 +53,18 @@ page
       self.copy_product(data, self.tbody)
     })
 
+    rcontrol.on('ORDER_ADD_PRODUCT_BY_ID', function(productId, amount) {
+      const foundProduct = self.products.find(p => p.id == productId)
+      if (foundProduct == undefined)
+      {
+        rcontrol.trigger('ERR_TRY_ADDING_INVELID_PRODUCT', productId, amount)
+        return;
+      }
+      let data = {...foundProduct}
+      data.amount = amount
+      self.copy_product(data, self.tbody)
+    })
+
     type_refocus() {
       $("#typeahead-product").focus()
       $("#typeahead-product").select()

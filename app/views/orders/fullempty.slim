@@ -169,6 +169,8 @@
             = text_field_tag 'pr', :class => 'form-control', :value => '', :id => 'typeahead-product'
         .col-md-1.controls.hidden
           .btn.btn-sm.btn-default id='add-product' Добавить
+        filler
+      filler_trigger_table.cmar-04a product_card_url=url(:things, :edit, '')
       hr
       .pull-right.col-md-3.flex-v.vcenter
         fieldset.control-group.cmar-05
@@ -200,13 +202,15 @@ page productload=1
   rscript type="riot/tag" src="/riot/tags/things/selectreload.tag"
   rscript type="riot/tag" src="/riot/tags/empty-order/catlist.tag"
   rscript type="riot/tag" src="/riot/tags/empty-order/page.tag"
+  rscript type="riot/tag" src="/riot/tags/empty-order/filler.tag"
+  rscript type="riot/tag" src="/riot/tags/empty-order/filler_trigger_table.tag"
   rscript type="riot/tag" src="/riot/tags/cat-tree/wtree.tag"
   rscript type="riot/tag" src="/riot/tags/cat-tree/wnode.tag"
   rscript type="riot/tag" src="/riot/tags/things/pica.tag"
 
   javascript:
     document.addEventListener("DOMContentLoaded", function(event) {
-      riot.mount('page, collapser, switcher, selectreload, catlist, wtree')
+      riot.mount('page, filler, filler_trigger_table, collapser, switcher, selectreload, catlist, wtree')
       riot.mount('catlist')
 
       // setTimeout(function() {
