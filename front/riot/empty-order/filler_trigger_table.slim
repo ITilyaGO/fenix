@@ -1,0 +1,26 @@
+filler_trigger_table
+  table.table.w-auto if='{ invaliProducts.length > 0 }'
+    thead
+      th.header Пропущены
+      th.header Количество
+    tbody
+      tr each='{ p in invaliProducts }'
+        td
+          a href='{ product_card_url + p.id }'
+            | { p.id }
+        td
+            | { p.amount }
+
+  javascript:
+    self.product_card_url = opts.product_card_url
+    self.invaliProducts = []
+
+    rcontrol.on('ERR_TRY_ADDING_INVELID_PRODUCT', function(productId, amount) {
+      self.invaliProducts.push({id: productId, amount: amount})
+      self.update()
+    })
+
+    rcontrol.on('RESET_INVALID_PRODUCTS', function() {
+      self.invaliProducts = []
+      self.update()
+    })
