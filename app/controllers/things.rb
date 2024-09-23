@@ -67,6 +67,7 @@ Fenix::App.controllers :things do
     @kc_towns = KatoAPI.batch(codes)
     @squadconf = @product.serializable_hash
     @product.id = '0000' if params[:clone]
+    @product.ignored = 1 if params[:clone]
 
     @ccat = ccat
     @place = townfilter

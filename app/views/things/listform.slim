@@ -36,6 +36,12 @@
               button.btn.btn-xs.btn-info.btn-embossed.fileinput-exists type="submit"
                 .fa.fa-upload
                 | Upload
+                
+              - if @product.picname
+                .space.btn
+                clicker.btn.btn-xs.btn-default tie=@product.id action="TIEMODAL_OPEN"
+                  .remfile = t :"action.remove"
+              
 
         - if flash[:bad_file]
           .alert.alert-error: .small
@@ -117,6 +123,24 @@
 
 .clearfix
 
+tiemodal.modal
+  .modal-dialog
+    .modal-content
+      = form_tag url(:picupload, :clearthings), :method => :put do
+        .modal-header.flex-c
+          h4.modal-title = t :'action.remove'
+          .flexie
+        .modal-body
+          = hidden_field_tag :oid
+          span
+            | Картинки будут удалены
+        .modal-footer
+          button.btn.btn-shipped.btn-wide type='submit' Подтвердить
+          clicker.btn.btn-default.btn-wide.cancel action='TIEMODAL_CLOSE' = pat(:cancel)
+
+.modal-backdrop.in.hide
+page
+
 - content_for :js_assets do
   = javascript_include_tag :appa, :riot, :fileinput
   / script type="riot/tag" src="/riot/tags/sticker_line.tag"
@@ -128,6 +152,8 @@
   rscript type="riot/tag" src="/riot/tags/elhide.tag"
   rscript type="riot/tag" src="/riot/tags/shower.tag"
   rscript type="riot/tag" src="/riot/tags/prefs/bottom_works.tag"
+  rscript type="riot/tag" src="/riot/tags/clicker.tag"
+  rscript type="riot/tag" src="/riot/tags/tiemodal.tag"
   rscript type="riot/tag" src="/riot/tags/things/list.tag"
   rscript type="riot/tag" src="/riot/tags/prefs/dualpane.tag"
   rscript type="riot/tag" src="/riot/tags/prefs/selectload.tag"  
@@ -172,7 +198,7 @@
   javascript:
     
     document.addEventListener("DOMContentLoaded", function(event) {
-      riot.mount('switcher, shower, bottomworks, elhide, list, dualpane, selectload, deepdown-ms')
+      riot.mount('switcher, shower, bottomworks, elhide, list, dualpane, clicker, tiemodal, selectload, deepdown-ms')
       let confobj = #{{@squadconf.to_json}}
       rsquad.saveConfig(confobj)
 

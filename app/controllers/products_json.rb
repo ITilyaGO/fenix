@@ -31,8 +31,20 @@ Fenix::App.controllers :products do
 
   post :one, :provides => :json do
     id = params[:id]
-    pic = { pic: picsrc(id) }
-    Product.find(id).to_jr.merge(pic).to_json
+    pic_n_stock = { pic: picsrc(id) }
+    arp = Stock::Linkage.find(id).body
+    stock = Stock.free(arp).amount
+    pic_n_stock = pic_n_stock.merge({ stock: stock })
+    Product.find(id).to_jr.merge(pic_n_stock).to_json
+  end
+  
+  post :onestock, :provides => :json do
+    id = params[:product]
+    arp = Stock::Linkage.find(id).body
+    stocky = Stock.free(arp) if arp
+    stock = stocky&.amount || :'ORPH'
+    pic_n_stock = { stock: stock }
+    Product.find(id).to_jr.merge(pic_n_stock).to_json
   end
 
   post :list_by_filters, :provides => :json do

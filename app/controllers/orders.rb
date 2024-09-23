@@ -758,6 +758,8 @@ Fenix::App.controllers :orders do
         o_status = KSM::OrderStatus.find(order.id)
         o_status.setg(:anew)
         o_status.save
+
+        arbal_need_order_start order
       else
         return { error: true }.to_json
       end
@@ -875,8 +877,6 @@ Fenix::App.controllers :orders do
       o_life = KSM::OrderLife.find(order.id)
       o_life.ts_prepare(my_section)
       o_life.save
-
-      arbal_need_order_start order
     end
     true.to_json
     # redirect url(:orders, :edit, :id => order.id)

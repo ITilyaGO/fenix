@@ -62,6 +62,16 @@ Fenix::App.controllers :picupload do
     redirect url(:things, :edit, :id => product.id)
   end
 
+  put :clearthings do
+    product = Product.find(params[:oid])
+    
+    CabiePio.set %i[things pictures], product.id, product.pic
+    product.pic = nil
+    product.save
+  
+    redirect url(:things, :edit, :id => product.id)
+  end
+
 
   get :picture_multi_upload do
     products_by_filters(params)

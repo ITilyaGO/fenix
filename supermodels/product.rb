@@ -3,6 +3,7 @@ class Product < Doppel
 
   PROPS = %i[name sn category_id place_id sketch_id company_id origin barcode price sku art g bbid
     discount lotof lotof_mfg desc dim_weight dim_height dim_length dim_width look corel windex tagname
+    amount_trs amount_req
   ]
   FPROPS = %i[art discount lotof lotof_mfg desc dim_weight dim_height dim_length dim_width look corel]
   SVSPROPS = %i[created_at updated_at ignored dates users history settings pic]

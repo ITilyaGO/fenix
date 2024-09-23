@@ -19,6 +19,7 @@ en:
   action:
     ship: Отправить
     confirm: Подтвердить
+    remove: Удалить
   duration:
     day: Точная дата
     halfweek: Полнедели
