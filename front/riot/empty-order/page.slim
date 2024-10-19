@@ -46,6 +46,20 @@ page
       if (target.tagName === 'TBODY') tr.appendTo(target)
       else target.after(tr)
       if (lp.pic) riot.mount('pica')
+      
+      var data = {
+        authenticity_token: rsquad.token,
+        product: lp.id 
+      }
+      $.ajax({
+        type: "POST",
+        data: data,
+        url: "/products/onestock"
+      }).done(function(response) {
+        let class_color = response.stock > 0 ? 'label-success' : 'label-lightdanger'
+        $(".stock", tr).text(response.stock || 0)
+        $(".stock", tr).addClass(class_color)
+      })
       Visual.fadeIn(tr[0], 350)
     }
 

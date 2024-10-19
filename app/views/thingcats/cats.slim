@@ -47,7 +47,7 @@
       fieldset.control-group
         = f.label :index, :class => 'control-label'
         .controls
-          = f.text_field :windex, :class => 'form-control input-large input-with-feedback'
+          = f.text_field :windex, :class => 'form-control input-large', required: true, pattern: '[0-9]'
       fieldset.control-group
         = f.label 'кратность', :class => 'control-label'
         .controls
